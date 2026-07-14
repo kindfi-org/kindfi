@@ -22,6 +22,7 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 			kinder_count,
 			project_location,
 			social_links,
+			status,
 			foundation_id,
 			category:category_id ( * ),
 			project_tag_relationships (
@@ -93,6 +94,7 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 		investors: project.kinder_count,
 		minInvestment: project.min_investment,
 		createdAt: project.created_at,
+		status: project.status,
 		category: project.category,
 		location: project.project_location,
 		socialLinks:

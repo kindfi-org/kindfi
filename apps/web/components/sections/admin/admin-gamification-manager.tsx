@@ -1,23 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { IoPeopleOutline, IoStatsChartOutline, IoTrophyOutline } from 'react-icons/io5'
+import {
+	IoFlashOutline,
+	IoPeopleOutline,
+	IoStatsChartOutline,
+	IoTrophyOutline,
+} from 'react-icons/io5'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+import { AdminGamificationTriggers } from '~/components/sections/admin/admin-gamification-triggers'
 import { AdminQuestManager } from '~/components/sections/admin/admin-quest-manager'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 
 export function AdminGamificationManager() {
-	const [activeTab, setActiveTab] = useState('quests')
+	const [activeTab, setActiveTab] = useState('triggers')
 
 	return (
 		<div className="space-y-6">
 			<AdminSectionHeader
 				title="Gamification Management"
-				description="Manage quests, streaks, and referral systems"
+				description="Manage quests and manually trigger on-chain gamification contracts for verification"
 			/>
 
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-				<TabsList className="grid w-full grid-cols-3">
+				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+					<TabsTrigger value="triggers" className="flex items-center gap-2">
+						<IoFlashOutline className="h-4 w-4" />
+						Triggers
+					</TabsTrigger>
 					<TabsTrigger value="quests" className="flex items-center gap-2">
 						<IoTrophyOutline className="h-4 w-4" />
 						Quests
@@ -32,29 +42,32 @@ export function AdminGamificationManager() {
 					</TabsTrigger>
 				</TabsList>
 
+				<TabsContent value="triggers" className="mt-6">
+					<AdminGamificationTriggers />
+				</TabsContent>
+
 				<TabsContent value="quests" className="mt-6">
 					<AdminQuestManager />
 				</TabsContent>
 
 				<TabsContent value="streaks" className="mt-6">
 					<div className="rounded-lg border border-border bg-card p-6">
-						<h2 className="text-lg font-semibold mb-4">Streak Management</h2>
+						<h2 className="mb-4 text-lg font-semibold">Streak Management</h2>
 						<p className="text-sm text-muted-foreground">
-							Streak tracking is automatically managed by the system. View streak statistics and
-							settings here.
+							Streak tracking is automatically managed by the system. Use the Triggers tab to
+							manually call <code className="text-xs">record_donation</code> on the streak contract
+							for mainnet verification.
 						</p>
-						{/* TODO: Add streak statistics and management */}
 					</div>
 				</TabsContent>
 
 				<TabsContent value="referrals" className="mt-6">
 					<div className="rounded-lg border border-border bg-card p-6">
-						<h2 className="text-lg font-semibold mb-4">Referral Management</h2>
+						<h2 className="mb-4 text-lg font-semibold">Referral Management</h2>
 						<p className="text-sm text-muted-foreground">
-							Referral tracking is automatically managed by the system. View referral statistics and
-							manage referral settings here.
+							Referral tracking is automatically managed by the system. Use the Triggers tab to
+							manually call create, onboard, and donation methods on the referral contract.
 						</p>
-						{/* TODO: Add referral statistics and management */}
 					</div>
 				</TabsContent>
 			</Tabs>

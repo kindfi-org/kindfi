@@ -22,13 +22,15 @@ export type ProjectManageNavSection = {
 	/** How to match the active tab against pathname */
 	match: 'exact' | 'prefix'
 	cta: string
+	/** Escrow sections are platform-admin only */
+	adminOnly?: boolean
 }
 
 export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection> = [
 	{
 		key: 'overview',
 		title: 'Dashboard',
-		description: 'Quick links and progress across content, team, and escrow.',
+		description: 'Quick links and progress across content and team.',
 		href: (slug) => `/projects/${slug}/manage`,
 		path: '',
 		match: 'exact',
@@ -88,6 +90,7 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 		path: '/settings',
 		match: 'exact',
 		cta: 'Create escrow',
+		adminOnly: true,
 	},
 	{
 		key: 'escrow-manage',
@@ -97,8 +100,16 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 		path: '/settings/manage',
 		match: 'prefix',
 		cta: 'Manage escrow',
+		adminOnly: true,
 	},
 ] as const
+
+export const getProjectManageNavSections = (
+	isPlatformAdmin: boolean,
+): ReadonlyArray<ProjectManageNavSection> => {
+	if (isPlatformAdmin) return PROJECT_MANAGE_NAV_SECTIONS
+	return PROJECT_MANAGE_NAV_SECTIONS.filter((section) => !section.adminOnly)
+}
 
 export const isProjectManageNavActive = (
 	pathname: string,

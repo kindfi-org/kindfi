@@ -121,6 +121,9 @@ export const profile = {
 	copyAddress: 'Copy address',
 	disconnect: 'Disconnect',
 	connectExternalWallet: 'Connect external wallet',
+	connectingExternalWallet: 'Connecting…',
+	disconnectExternalWallet: 'Disconnect external wallet',
+	walletConnected: 'External wallet connected',
 	trustlessWalletRequired: 'Remember to connect your wallet',
 	trustlessWalletRequiredDescription:
 		'Link an external Stellar wallet to donate and sign escrow actions.',

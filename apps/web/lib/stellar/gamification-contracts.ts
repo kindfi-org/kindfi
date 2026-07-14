@@ -86,6 +86,20 @@ interface UpdateNFTMetadataParams {
 	}
 }
 
+interface RecordReputationEventParams {
+	userAddress: string
+	/** EventType enum: 0=Donation … 7=OutstandingBooster */
+	eventType: number
+	/** When set, calls record_event_with_points instead of record_event */
+	points?: number
+}
+
+export type GamificationTxResult<T extends Record<string, unknown> = Record<string, never>> = {
+	success: boolean
+	txHash?: string
+	error?: string
+} & T
+
 /**
  * Global transaction queue to prevent txBadSeq errors.
  *
@@ -139,7 +153,7 @@ export class GamificationContractService {
 	async recordStreakDonation(
 		streakContractAddress: string,
 		params: RecordStreakDonationParams,
-	): Promise<{ success: boolean; streak?: number; error?: string }> {
+	): Promise<GamificationTxResult<{ streak?: number }>> {
 		return enqueue(async () => {
 			try {
 				const { userAddress, period, donationTimestamp } = params
@@ -216,6 +230,7 @@ export class GamificationContractService {
 				// For now, we'll return success if the transaction was submitted
 				return {
 					success: true,
+					txHash: result.hash,
 					streak: 1,
 				}
 			} catch (error) {
@@ -234,7 +249,7 @@ export class GamificationContractService {
 	async recordReferralDonation(
 		referralContractAddress: string,
 		params: RecordReferralDonationParams,
-	): Promise<{ success: boolean; rewardPoints?: number; error?: string }> {
+	): Promise<GamificationTxResult<{ rewardPoints?: number }>> {
 		return enqueue(async () => {
 			try {
 				const { referredAddress } = params
@@ -317,6 +332,7 @@ export class GamificationContractService {
 				// Transaction submitted successfully
 				return {
 					success: true,
+					txHash: result.hash,
 					rewardPoints,
 				}
 			} catch (error) {
@@ -336,7 +352,7 @@ export class GamificationContractService {
 	async createReferral(
 		referralContractAddress: string,
 		params: CreateReferralParams,
-	): Promise<{ success: boolean; error?: string }> {
+	): Promise<GamificationTxResult> {
 		return enqueue(async () => {
 			try {
 				const { referrerAddress, referredAddress } = params
@@ -396,7 +412,7 @@ export class GamificationContractService {
 					}
 				}
 
-				return { success: true }
+				return { success: true, txHash: result.hash }
 			} catch (error) {
 				logger.error('[GamificationContractService] Error creating referral:', error)
 				return {
@@ -414,7 +430,7 @@ export class GamificationContractService {
 	async markOnboarded(
 		referralContractAddress: string,
 		params: MarkOnboardedParams,
-	): Promise<{ success: boolean; rewardPoints?: number; error?: string }> {
+	): Promise<GamificationTxResult<{ rewardPoints?: number }>> {
 		return enqueue(async () => {
 			try {
 				const { referredAddress } = params
@@ -481,7 +497,7 @@ export class GamificationContractService {
 					}
 				}
 
-				return { success: true, rewardPoints }
+				return { success: true, txHash: result.hash, rewardPoints }
 			} catch (error) {
 				logger.error('[GamificationContractService] Error marking onboarded:', error)
 				return {
@@ -498,7 +514,7 @@ export class GamificationContractService {
 	async updateQuestProgress(
 		questContractAddress: string,
 		params: UpdateQuestProgressParams,
-	): Promise<{ success: boolean; completed?: boolean; error?: string }> {
+	): Promise<GamificationTxResult<{ completed?: boolean }>> {
 		return enqueue(async () => {
 			try {
 				const { userAddress, questId, progressValue } = params
@@ -570,6 +586,7 @@ export class GamificationContractService {
 				// Transaction submitted successfully
 				return {
 					success: true,
+					txHash: result.hash,
 					completed: false,
 				}
 			} catch (error) {
@@ -590,7 +607,7 @@ export class GamificationContractService {
 		questContractAddress: string,
 		params: CreateQuestParams,
 		adminKeypair: Keypair,
-	): Promise<{ success: boolean; questId?: number; error?: string }> {
+	): Promise<GamificationTxResult<{ questId?: number }>> {
 		return enqueue(async () => {
 			try {
 				const { questType, name, description, targetValue, rewardPoints, expiresAt } = params
@@ -681,6 +698,7 @@ export class GamificationContractService {
 
 				return {
 					success: true,
+					txHash: result.hash,
 					questId,
 				}
 			} catch (error) {
@@ -784,7 +802,7 @@ export class GamificationContractService {
 	async mintNFT(
 		nftContractAddress: string,
 		params: MintNFTParams,
-	): Promise<{ success: boolean; tokenId?: number; error?: string }> {
+	): Promise<GamificationTxResult<{ tokenId?: number }>> {
 		return enqueue(async () => {
 			try {
 				const { toAddress, metadata } = params
@@ -850,7 +868,7 @@ export class GamificationContractService {
 					}
 				}
 
-				return { success: true, tokenId }
+				return { success: true, txHash: result.hash, tokenId }
 			} catch (error) {
 				logger.error('[GamificationContractService] Error minting NFT:', error)
 				return {
@@ -870,7 +888,7 @@ export class GamificationContractService {
 	async updateNFTMetadata(
 		nftContractAddress: string,
 		params: UpdateNFTMetadataParams,
-	): Promise<{ success: boolean; error?: string }> {
+	): Promise<GamificationTxResult> {
 		return enqueue(async () => {
 			try {
 				const { tokenId, metadata } = params
@@ -928,7 +946,7 @@ export class GamificationContractService {
 					}
 				}
 
-				return { success: true }
+				return { success: true, txHash: result.hash }
 			} catch (error) {
 				logger.error('[GamificationContractService] Error updating NFT metadata:', error)
 				return {
@@ -948,7 +966,7 @@ export class GamificationContractService {
 		accountAddress: string,
 		role: string,
 		adminKeypair: Keypair,
-	): Promise<{ success: boolean; error?: string }> {
+	): Promise<GamificationTxResult> {
 		return enqueue(async () => {
 			try {
 				const adminAccount = await this.server
@@ -1013,16 +1031,16 @@ export class GamificationContractService {
 							await new Promise((r) => setTimeout(r, 2000))
 							const check = await this.server.getTransaction(result.hash)
 							if (check.status === 'SUCCESS') {
-								return { success: true }
+								return { success: true, txHash: result.hash }
 							}
 							if (check.status === 'FAILED') {
-								return { success: false, error: 'Transaction failed on-chain' }
+								return { success: false, error: 'Transaction failed on-chain', txHash: result.hash }
 							}
 						}
 					}
 				}
 
-				return { success: true }
+				return { success: true, txHash: result.hash }
 			} catch (error) {
 				logger.error('[GamificationContractService] Error granting role:', error)
 				return {
@@ -1031,6 +1049,104 @@ export class GamificationContractService {
 				}
 			}
 		}) // end enqueue – grantRole
+	}
+
+	/**
+	 * Record a reputation event for a user (direct call, same as CPI targets).
+	 * Requires the "recorder" role.
+	 *
+	 * Signature: record_event(caller, user, event_type) -> u32
+	 *            record_event_with_points(caller, user, event_type, points) -> u32
+	 */
+	async recordReputationEvent(
+		reputationContractAddress: string,
+		params: RecordReputationEventParams,
+	): Promise<GamificationTxResult<{ totalPoints?: number }>> {
+		return enqueue(async () => {
+			try {
+				const { userAddress, eventType, points } = params
+
+				const recorderAccount = await this.server
+					.getAccount(this.recorderKeypair.publicKey())
+					.then((res) => new Account(res.accountId(), res.sequenceNumber()))
+
+				const recorderAddress = Address.fromString(this.recorderKeypair.publicKey())
+				const userAddr = Address.fromString(userAddress)
+
+				const useCustomPoints = points != null && points > 0
+				const args = useCustomPoints
+					? [
+							nativeToScVal(recorderAddress, { type: 'address' }),
+							nativeToScVal(userAddr, { type: 'address' }),
+							nativeToScVal(eventType, { type: 'u32' }),
+							nativeToScVal(points, { type: 'u32' }),
+						]
+					: [
+							nativeToScVal(recorderAddress, { type: 'address' }),
+							nativeToScVal(userAddr, { type: 'address' }),
+							nativeToScVal(eventType, { type: 'u32' }),
+						]
+
+				const operation = Operation.invokeContractFunction({
+					contract: reputationContractAddress,
+					function: useCustomPoints ? 'record_event_with_points' : 'record_event',
+					args,
+				})
+
+				const transaction = new TransactionBuilder(recorderAccount, {
+					fee: '1000000',
+					networkPassphrase: this.networkPassphrase,
+				})
+					.addOperation(operation)
+					.setTimeout(60)
+					.build()
+
+				const simulation = await this.server.simulateTransaction(transaction)
+
+				if (Api.isSimulationError(simulation)) {
+					logger.error(
+						'[GamificationContractService] recordReputationEvent simulation failed:',
+						simulation,
+					)
+					return {
+						success: false,
+						error: `Simulation failed: ${JSON.stringify(simulation)}`,
+					}
+				}
+
+				let totalPoints: number | undefined
+				if (simulation.result?.retval) {
+					try {
+						const { scValToNative } = await import('@stellar/stellar-sdk')
+						totalPoints = scValToNative(simulation.result.retval) as number
+					} catch {
+						logger.warn(
+							'[GamificationContractService] Could not parse total points from recordReputationEvent',
+						)
+					}
+				}
+
+				const assembledTx = assembleTransaction(transaction, simulation).build()
+				assembledTx.sign(this.recorderKeypair)
+
+				const result = await this.server.sendTransaction(assembledTx)
+
+				if (result.status === 'ERROR') {
+					return {
+						success: false,
+						error: `Transaction failed: ${JSON.stringify(result)}`,
+					}
+				}
+
+				return { success: true, txHash: result.hash, totalPoints }
+			} catch (error) {
+				logger.error('[GamificationContractService] Error recording reputation event:', error)
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				}
+			}
+		})
 	}
 
 	/**

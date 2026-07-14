@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 import {
 	IoCreateOutline,
 	IoLockClosedOutline,
@@ -16,11 +17,12 @@ import {
 } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
+import { PROJECT_STATUS_COLORS, PROJECT_STATUS_LABELS } from '~/lib/projects/project-status'
 import type { ProjectManageMeta } from '~/lib/queries/projects/get-project-manage-meta'
 import { cn } from '~/lib/utils'
 import {
+	getProjectManageNavSections,
 	isProjectManageNavActive,
-	PROJECT_MANAGE_NAV_SECTIONS,
 	type ProjectManageSectionKey,
 } from './constants'
 
@@ -42,16 +44,22 @@ type ProjectManageCommandCenterProps = {
 	slug: string
 	project: Pick<
 		ProjectManageMeta,
-		'title' | 'imageUrl' | 'categoryName' | 'hasEscrow' | 'foundation'
+		'title' | 'imageUrl' | 'categoryName' | 'hasEscrow' | 'foundation' | 'status'
 	>
+	isPlatformAdmin: boolean
 }
 
 /**
  * Sticky command-center header with project identity and horizontal section tabs.
  */
-export function ProjectManageCommandCenter({ slug, project }: ProjectManageCommandCenterProps) {
+export function ProjectManageCommandCenter({
+	slug,
+	project,
+	isPlatformAdmin,
+}: ProjectManageCommandCenterProps) {
 	const pathname = usePathname()
 	const basePath = `/projects/${slug}/manage`
+	const navSections = useMemo(() => getProjectManageNavSections(isPlatformAdmin), [isPlatformAdmin])
 
 	return (
 		<header className="sticky top-0 z-20 -mx-4 bg-background/95 px-4 py-4 shadow-[0_1px_0_0_hsl(var(--border))] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
@@ -99,15 +107,23 @@ export function ProjectManageCommandCenter({ slug, project }: ProjectManageComma
 							) : null}
 							<Badge
 								variant="outline"
-								className={cn(
-									'text-xs font-medium',
-									project.hasEscrow
-										? 'border-emerald-200 text-emerald-700 dark:border-emerald-900 dark:text-emerald-400'
-										: 'border-amber-200 text-amber-700 dark:border-amber-900 dark:text-amber-400',
-								)}
+								className={cn('text-xs font-medium', PROJECT_STATUS_COLORS[project.status])}
 							>
-								{project.hasEscrow ? 'Escrow active' : 'Escrow not set up'}
+								{PROJECT_STATUS_LABELS[project.status]}
 							</Badge>
+							{isPlatformAdmin ? (
+								<Badge
+									variant="outline"
+									className={cn(
+										'text-xs font-medium',
+										project.hasEscrow
+											? 'border-emerald-200 text-emerald-700 dark:border-emerald-900 dark:text-emerald-400'
+											: 'border-amber-200 text-amber-700 dark:border-amber-900 dark:text-amber-400',
+									)}
+								>
+									{project.hasEscrow ? 'Escrow active' : 'Escrow not set up'}
+								</Badge>
+							) : null}
 						</div>
 					</div>
 				</div>
@@ -130,7 +146,7 @@ export function ProjectManageCommandCenter({ slug, project }: ProjectManageComma
 				aria-label="Project manage sections"
 			>
 				<div className="flex min-w-max gap-0 border-b border-border">
-					{PROJECT_MANAGE_NAV_SECTIONS.map((section) => {
+					{navSections.map((section) => {
 						const url = section.href(slug)
 						const isActive = isProjectManageNavActive(pathname, basePath, section)
 						const Icon = SECTION_ICONS[section.key]

@@ -25,12 +25,14 @@ import {
 	createManageSectionVariants,
 } from '~/lib/constants/animations/manage-page.animations'
 import { manageCategoryConfig } from '~/lib/constants/projects'
+import type { ProjectStatus } from '~/lib/projects/project-status'
 import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import {
-	PROJECT_MANAGE_NAV_SECTIONS,
+	getProjectManageNavSections,
 	type ProjectManageNavSection,
 	type ProjectManageSectionKey,
 } from './constants'
+import { ProjectStatusPanel } from './project-status-panel'
 
 const SECTION_CARD_ICONS: Record<
 	Exclude<ProjectManageSectionKey, 'overview'>,
@@ -67,9 +69,10 @@ const OVERVIEW_CATEGORY_LABELS = {
 
 type ProjectManageOverviewProps = {
 	slug: string
+	isPlatformAdmin: boolean
 }
 
-export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
+export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOverviewProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const { data: project, isLoading } = useManagedProjectQuery<
 		Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>
@@ -105,12 +108,14 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 		[prefersReducedMotion],
 	)
 
+	const navSections = useMemo(() => getProjectManageNavSections(isPlatformAdmin), [isPlatformAdmin])
+
 	const sectionsByCategory = useMemo(() => {
 		const content: ProjectManageNavSection[] = []
 		const team: ProjectManageNavSection[] = []
 		const escrow: ProjectManageNavSection[] = []
 
-		for (const section of PROJECT_MANAGE_NAV_SECTIONS) {
+		for (const section of navSections) {
 			if (section.key === 'overview') continue
 			const category = OVERVIEW_SECTION_KEYS[section.key]
 			if (category === 'content') content.push(section)
@@ -119,7 +124,7 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 		}
 
 		return { content, team, escrow }
-	}, [])
+	}, [navSections])
 
 	const formattedRaised = displayRaised === null ? '…' : formatCurrency(displayRaised)
 	const formattedGoal = project
@@ -128,6 +133,7 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 	const formattedSupporters =
 		isLoadingStats && displaySupporters === 0 ? '…' : String(displaySupporters)
 	const formattedProgress = progressPercent === null ? '…' : `${progressPercent}%`
+	const projectStatus = (project?.status ?? 'draft') as ProjectStatus
 
 	if (isLoading) {
 		return (
@@ -154,8 +160,9 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 					<h1 className="text-2xl font-bold tracking-tight md:text-3xl">Dashboard</h1>
 					<p className="mt-1 max-w-2xl text-muted-foreground">
 						Everything you need to run{' '}
-						<span className="font-medium text-foreground">{project?.title ?? 'this project'}</span>—
-						content, team, and escrow in one place.
+						<span className="font-medium text-foreground">{project?.title ?? 'this project'}</span>
+						—content, team
+						{isPlatformAdmin ? ', and escrow' : ''} in one place.
 					</p>
 				</div>
 
@@ -163,12 +170,16 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 					<StatCard
 						label={raisedLabel}
 						value={formattedRaised}
-						hint={hasEscrow ? 'Live from Trustless Work escrow' : undefined}
+						hint={isPlatformAdmin && hasEscrow ? 'Live from Trustless Work escrow' : undefined}
 					/>
 					<StatCard label="Goal" value={formattedGoal} />
 					<StatCard label="Supporters" value={formattedSupporters} />
 					<StatCard label="Progress" value={formattedProgress} />
 				</div>
+			</motion.section>
+
+			<motion.section variants={sectionVariants}>
+				<ProjectStatusPanel slug={slug} status={projectStatus} isPlatformAdmin={isPlatformAdmin} />
 			</motion.section>
 
 			<OverviewCategorySection
@@ -193,16 +204,18 @@ export function ProjectManageOverview({ slug }: ProjectManageOverviewProps) {
 				sectionVariants={sectionVariants}
 			/>
 
-			<OverviewCategorySection
-				label={OVERVIEW_CATEGORY_LABELS.escrow.label}
-				colorClass={OVERVIEW_CATEGORY_LABELS.escrow.color}
-				gradientClass="from-green-200 via-emerald-200 to-transparent dark:from-green-900 dark:via-emerald-900"
-				sections={sectionsByCategory.escrow}
-				slug={slug}
-				categoryConfig={manageCategoryConfig.escrow}
-				cardVariants={cardVariants}
-				sectionVariants={sectionVariants}
-			/>
+			{isPlatformAdmin && sectionsByCategory.escrow.length > 0 ? (
+				<OverviewCategorySection
+					label={OVERVIEW_CATEGORY_LABELS.escrow.label}
+					colorClass={OVERVIEW_CATEGORY_LABELS.escrow.color}
+					gradientClass="from-green-200 via-emerald-200 to-transparent dark:from-green-900 dark:via-emerald-900"
+					sections={sectionsByCategory.escrow}
+					slug={slug}
+					categoryConfig={manageCategoryConfig.escrow}
+					cardVariants={cardVariants}
+					sectionVariants={sectionVariants}
+				/>
+			) : null}
 		</motion.div>
 	)
 }
