@@ -5,6 +5,7 @@ import parse from 'html-react-parser'
 import { Download } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '~/components/base/button'
+import { ProjectVideoEmbed } from '~/components/sections/projects/detail/project-video-embed'
 import { FileIcon } from '~/components/sections/projects/shared'
 import type { ProjectPitch } from '~/lib/types/project/project-detail.types'
 
@@ -54,16 +55,8 @@ export function OverviewTab({ pitch }: OverviewTabProps) {
 			{pitch.videoUrl && (
 				<div className="mb-8">
 					<h2 className="text-2xl font-bold mb-4">Project Video</h2>
-					<div className="aspect-video rounded-lg overflow-hidden">
-						<iframe
-							src={pitch.videoUrl}
-							title="Project Video"
-							className="w-full h-full"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-							allowFullScreen
-							// Keep sandbox to further reduce risk when embedding
-							sandbox="allow-same-origin allow-scripts allow-presentation"
-						/>
+					<div className="aspect-video rounded-lg overflow-hidden bg-muted">
+						<ProjectVideoEmbed url={pitch.videoUrl} />
 					</div>
 				</div>
 			)}

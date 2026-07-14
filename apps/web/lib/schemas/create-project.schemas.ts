@@ -1,6 +1,7 @@
 import * as z from 'zod'
 
 import { isAllowedSocialUrl, isFile } from '~/lib/utils/project-utils'
+import { isSupportedVideoUrl, SUPPORTED_VIDEO_PROVIDERS_LABEL } from '~/lib/utils/video-embed'
 
 export const stepOneSchema = z
 	.object({
@@ -52,13 +53,6 @@ export const stepThreeSchema = z.object({
 		.optional(),
 })
 
-// YouTube URL regex pattern
-const youtubeRegex =
-	/^(https:\/\/)(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)[a-zA-Z0-9_-]{11}(&.*)?$/
-
-// Vimeo URL regex pattern
-const vimeoRegex = /^(https:\/\/)(www\.)?(vimeo\.com\/)[0-9]+(\?.*)?$/
-
 export const projectPitchSchema = z.object({
 	title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
 	story: z
@@ -81,13 +75,7 @@ export const projectPitchSchema = z.object({
 		.string()
 		.transform((v) => v.trim())
 		.transform((v) => (v === '' ? null : v))
-		.refine(
-			(url) => {
-				if (url === null) return true
-				return youtubeRegex.test(url) || vimeoRegex.test(url)
-			},
-			{
-				message: 'Please enter a valid HTTPS YouTube or Vimeo URL',
-			},
-		),
+		.refine((url) => url === null || isSupportedVideoUrl(url), {
+			message: `Please enter a valid HTTPS ${SUPPORTED_VIDEO_PROVIDERS_LABEL} URL`,
+		}),
 })

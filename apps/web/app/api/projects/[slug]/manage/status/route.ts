@@ -1,5 +1,4 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
-import { projectStatusSchema } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { z } from 'zod'
@@ -12,8 +11,9 @@ import {
 	type ProjectStatus,
 } from '~/lib/projects/project-status'
 
+// Local Zod 4 enum — do not reuse @services/supabase projectStatusSchema (Zod 3).
 const updateStatusBodySchema = z.object({
-	status: projectStatusSchema,
+	status: z.enum(['draft', 'review', 'active', 'paused', 'funded', 'rejected']),
 })
 
 export async function PATCH(request: Request, context: { params: Promise<{ slug: string }> }) {

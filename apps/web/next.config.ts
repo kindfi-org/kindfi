@@ -83,7 +83,7 @@ const nextConfig: NextConfig = {
                 img-src 'self' data: blob: https://flagcdn.com https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech https://*.mypinata.cloud;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
-								frame-src 'self' https://www.youtube.com;
+								frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://loom.com;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),
@@ -118,7 +118,7 @@ const nextConfig: NextConfig = {
                 img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321 https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech https://*.mypinata.cloud;
                 font-src 'self' data:;
                 connect-src ${connectSrc};
-								frame-src 'self' https://www.youtube.com;
+								frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://loom.com;
                 frame-ancestors 'self';
               `.replace(/\s{2,}/g, ' '),
 					},
