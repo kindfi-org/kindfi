@@ -174,7 +174,7 @@ export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitch
 											<div className="relative">
 												<Video className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 												<Input
-													placeholder="Enter YouTube or Vimeo URL"
+													placeholder="YouTube, Vimeo, or Loom URL"
 													className="pl-10"
 													value={field.value ?? ''}
 													onChange={field.onChange}
@@ -185,7 +185,7 @@ export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitch
 											</div>
 										</FormControl>
 										<FormDescription>
-											Add a YouTube or Vimeo video to make your pitch more engaging
+											Add a YouTube, Vimeo, or Loom video to make your pitch more engaging
 										</FormDescription>
 										<FormMessage />
 									</FormItem>

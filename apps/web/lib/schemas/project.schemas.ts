@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isSupportedVideoUrl, SUPPORTED_VIDEO_PROVIDERS_LABEL } from '~/lib/utils/video-embed'
 
 const tagSchema = z.object({
 	name: z.string(),
@@ -51,7 +52,13 @@ export const projectPitchFormSchema = z.object({
 	projectSlug: z.string().min(1, 'Project slug is required'),
 	title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
 	story: z.string().min(50, 'Story must be at least 50 characters'),
-	videoUrl: z.string().nullable().optional(),
+	videoUrl: z
+		.string()
+		.nullable()
+		.optional()
+		.refine((url) => url == null || url === '' || isSupportedVideoUrl(url), {
+			message: `Please enter a valid HTTPS ${SUPPORTED_VIDEO_PROVIDERS_LABEL} URL`,
+		}),
 	pitchDeck: z.instanceof(File).nullable().optional(),
 	removePitchDeck: z.boolean().optional(),
 })

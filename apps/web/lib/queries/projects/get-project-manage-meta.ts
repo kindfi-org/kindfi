@@ -1,5 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { logger } from '@/lib/logger'
+import type { ProjectStatus } from '~/lib/projects/project-status'
 
 export interface ProjectManageMeta {
 	id: string
@@ -9,6 +10,7 @@ export interface ProjectManageMeta {
 	kindlerId: string | null
 	categoryName: string | null
 	hasEscrow: boolean
+	status: ProjectStatus
 	foundation: { name: string; slug: string } | null
 }
 
@@ -28,6 +30,7 @@ export async function getProjectManageMeta(
 			slug,
 			image_url,
 			kindler_id,
+			status,
 			foundation_id,
 			category:category_id ( name ),
 			project_escrows:project_escrows!left ( escrow_id )
@@ -78,6 +81,7 @@ export async function getProjectManageMeta(
 		kindlerId: (data as { kindler_id?: string | null }).kindler_id ?? null,
 		categoryName: category?.name ?? null,
 		hasEscrow,
+		status: (data.status ?? 'draft') as ProjectStatus,
 		foundation,
 	}
 }

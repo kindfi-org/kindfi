@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { listLegalDocPaths } from '~/lib/legal-docs'
 import { readAllPosts } from '~/lib/mdx'
 import { SITE_URL } from '~/lib/seo/structured-data'
 
@@ -18,6 +19,11 @@ const STATIC_ROUTES: {
 	{ path: '/foundations', priority: 0.8, changeFrequency: 'weekly' },
 	{ path: '/impact', priority: 0.7, changeFrequency: 'weekly' },
 	{ path: '/featured', priority: 0.7, changeFrequency: 'weekly' },
+	...listLegalDocPaths().map((path) => ({
+		path,
+		priority: 0.5,
+		changeFrequency: 'monthly' as const,
+	})),
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

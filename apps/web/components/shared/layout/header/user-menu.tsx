@@ -5,8 +5,10 @@ import {
 	Check,
 	Copy,
 	ExternalLink,
+	Link2,
 	LogOut,
 	Shield,
+	Unlink,
 	User as UserIcon,
 	Vote,
 	Wallet,
@@ -30,12 +32,20 @@ import {
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { getAvatarFallback } from '~/lib/utils'
-import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { getStellarExplorerAddressUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
-const WalletAddressSection = ({ address, className }: { address: string; className?: string }) => {
+const WalletAddressSection = ({
+	address,
+	label,
+	className,
+}: {
+	address: string
+	label: string
+	className?: string
+}) => {
 	const [copied, setCopied] = useState(false)
-	const explorerUrl = getStellarExplorerUrl(address)
+	const explorerUrl = getStellarExplorerAddressUrl(address)
 
 	const start = address.substring(0, 8)
 	const end = address.substring(address.length - 8)
@@ -55,16 +65,16 @@ const WalletAddressSection = ({ address, className }: { address: string; classNa
 	return (
 		<div className={['space-y-2', className].filter(Boolean).join(' ')}>
 			<div className="px-2">
-				<p className="text-xs font-medium text-muted-foreground mb-1.5">Wallet Address</p>
-				<div className="flex items-center gap-1.5 p-2.5 rounded-lg border bg-muted/30">
-					<Wallet className="size-4 text-muted-foreground shrink-0" />
-					<span className="text-xs font-mono text-foreground flex-1 min-w-0 truncate">
+				<p className="mb-1.5 text-xs font-medium text-muted-foreground">{label}</p>
+				<div className="flex items-center gap-1.5 rounded-lg border bg-muted/30 p-2.5">
+					<Wallet className="size-4 shrink-0 text-muted-foreground" />
+					<span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">
 						{start}...{end}
 					</span>
 					<Button
 						variant="ghost"
 						size="sm"
-						className="h-7 w-7 p-0 shrink-0"
+						className="h-7 w-7 shrink-0 p-0"
 						onClick={handleCopy}
 						title="Copy address"
 					>
@@ -77,7 +87,7 @@ const WalletAddressSection = ({ address, className }: { address: string; classNa
 					<Button
 						variant="ghost"
 						size="sm"
-						className="h-7 w-7 p-0 shrink-0"
+						className="h-7 w-7 shrink-0 p-0"
 						asChild
 						title="View on explorer"
 					>
@@ -94,8 +104,41 @@ const WalletAddressSection = ({ address, className }: { address: string; classNa
 export const UserMenu = ({ user }: { user: User }) => {
 	const router = useRouter()
 	const { t } = useI18n()
-	const { disconnect } = useWallet()
+	const {
+		address: externalWalletAddress,
+		isConnected: isExternalConnected,
+		connect,
+		disconnect,
+	} = useWallet()
 	const [isSigningOut, setIsSigningOut] = useState(false)
+	const [isConnectingExternal, setIsConnectingExternal] = useState(false)
+
+	const smartAccountAddress = resolveSmartAccountAddress(user.device?.address)
+
+	const handleConnectExternalWallet = async () => {
+		if (isConnectingExternal) return
+
+		try {
+			setIsConnectingExternal(true)
+			await connect()
+			toast.success(t('profile.walletConnected'))
+		} catch (error) {
+			logger.error('Error connecting external wallet:', error)
+			toast.error(error instanceof Error ? error.message : 'Failed to connect wallet')
+		} finally {
+			setIsConnectingExternal(false)
+		}
+	}
+
+	const handleDisconnectExternalWallet = () => {
+		try {
+			disconnect()
+			toast.success(t('profile.walletDisconnected'))
+		} catch (error) {
+			logger.error('Error disconnecting external wallet:', error)
+			toast.error(error instanceof Error ? error.message : 'Failed to disconnect wallet')
+		}
+	}
 
 	const handleSignOutAction = async () => {
 		if (isSigningOut) return
@@ -145,7 +188,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 						</AvatarFallback>
 					</Avatar>
 					{user.email?.split('@')[0] && (
-						<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-green-500 ring-2 ring-background shadow-sm">
+						<span className="absolute right-0 top-0 h-3 w-3 rounded-full bg-green-500 shadow-sm ring-2 ring-background">
 							<span className="sr-only">{t('user.online')}</span>
 						</span>
 					)}
@@ -153,32 +196,63 @@ export const UserMenu = ({ user }: { user: User }) => {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-72 p-2">
 				{/* User Info Section */}
-				<div className="px-2 py-3 space-y-3">
+				<div className="space-y-3 px-2 py-3">
 					<div className="flex items-center gap-3">
 						<Avatar className="h-12 w-12 border-2 border-border shadow-sm">
 							<AvatarFallback
 								suppressHydrationWarning
-								className="bg-gradient-to-br from-green-50 to-green-100 text-green-700 text-base"
+								className="bg-gradient-to-br from-green-50 to-green-100 text-base text-green-700"
 							>
 								{getAvatarFallback(user.email || '')}
 							</AvatarFallback>
 						</Avatar>
-						<div className="flex flex-col min-w-0 flex-1">
-							<p className="text-sm font-semibold leading-tight truncate">
+						<div className="min-w-0 flex-1 flex-col">
+							<p className="truncate text-sm font-semibold leading-tight">
 								{user.name || user.email}
 							</p>
-							<p className="text-xs text-muted-foreground leading-tight truncate mt-0.5">
+							<p className="mt-0.5 truncate text-xs leading-tight text-muted-foreground">
 								{user.email}
 							</p>
 						</div>
 						{user.email?.split('@')[0] && (
-							<span className="h-2.5 w-2.5 rounded-full bg-green-500 shrink-0">
+							<span className="h-2.5 w-2.5 shrink-0 rounded-full bg-green-500">
 								<span className="sr-only">{t('user.online')}</span>
 							</span>
 						)}
 					</div>
-					{resolveSmartAccountAddress(user.device?.address) && (
-						<WalletAddressSection address={resolveSmartAccountAddress(user.device?.address)!} />
+					{smartAccountAddress ? (
+						<WalletAddressSection address={smartAccountAddress} label={t('profile.smartAccount')} />
+					) : null}
+					{isExternalConnected && externalWalletAddress ? (
+						<WalletAddressSection
+							address={externalWalletAddress}
+							label={t('profile.externalWallet')}
+						/>
+					) : null}
+				</div>
+
+				<DropdownMenuSeparator />
+
+				{/* External Stellar wallet (Wallets Kit) — separate from smart account */}
+				<div className="py-1">
+					{isExternalConnected && externalWalletAddress ? (
+						<DropdownMenuItem className="cursor-pointer" onSelect={handleDisconnectExternalWallet}>
+							<Unlink className="h-4 w-4 text-muted-foreground" />
+							<span className="font-medium">{t('profile.disconnectExternalWallet')}</span>
+						</DropdownMenuItem>
+					) : (
+						<DropdownMenuItem
+							className="cursor-pointer"
+							disabled={isConnectingExternal}
+							onSelect={handleConnectExternalWallet}
+						>
+							<Link2 className="h-4 w-4 text-emerald-600" />
+							<span className="font-medium">
+								{isConnectingExternal
+									? t('profile.connectingExternalWallet')
+									: t('profile.connectExternalWallet')}
+							</span>
+						</DropdownMenuItem>
 					)}
 				</div>
 
@@ -189,7 +263,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 					<DropdownMenuItem asChild className="cursor-pointer">
 						<Link
 							href="/profile"
-							className="flex items-center gap-2 px-2 py-2 rounded-md transition-colors hover:bg-accent"
+							className="flex items-center gap-2 rounded-md px-2 py-2 transition-colors hover:bg-accent"
 						>
 							<UserIcon className="h-4 w-4 text-muted-foreground" />
 							<span className="font-medium">{t('nav.dashboard')}</span>
@@ -198,7 +272,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 					<DropdownMenuItem asChild className="cursor-pointer">
 						<Link
 							href="/governance"
-							className="flex items-center gap-2 px-2 py-2 rounded-md transition-colors hover:bg-accent"
+							className="flex items-center gap-2 rounded-md px-2 py-2 transition-colors hover:bg-accent"
 						>
 							<Vote className="h-4 w-4 text-emerald-600" />
 							<span className="font-medium">{t('nav.governance')}</span>
@@ -208,7 +282,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 						<DropdownMenuItem asChild className="cursor-pointer">
 							<Link
 								href="/admin"
-								className="flex items-center gap-2 px-2 py-2 rounded-md transition-colors hover:bg-accent"
+								className="flex items-center gap-2 rounded-md px-2 py-2 transition-colors hover:bg-accent"
 							>
 								<Shield className="h-4 w-4 text-purple-600" />
 								<span className="font-medium">Admin Dashboard</span>
@@ -225,7 +299,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 							type="button"
 							onClick={handleSignOutAction}
 							disabled={isSigningOut}
-							className="flex w-full items-center gap-2 px-2 py-2 rounded-md transition-colors cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed"
+							className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							<LogOut className="h-4 w-4" />
 							<span className="font-medium">

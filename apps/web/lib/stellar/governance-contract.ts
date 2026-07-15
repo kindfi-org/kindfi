@@ -47,6 +47,13 @@ async function stellarInvoke(
 	functionName: string,
 	fnArgs: string[],
 ): Promise<{ success: boolean; output?: string; error?: string }> {
+	const passphrase =
+		process.env.STELLAR_NETWORK_PASSPHRASE ||
+		process.env.NETWORK_PASSPHRASE ||
+		'Test SDF Network ; September 2015'
+	const isMainnet = passphrase.includes('Public Global Stellar Network')
+	const network = isMainnet ? 'mainnet' : 'testnet'
+
 	const cliArgs = [
 		'contract',
 		'invoke',
@@ -55,7 +62,7 @@ async function stellarInvoke(
 		'--id',
 		contractAddress,
 		'--network',
-		'testnet',
+		network,
 		'--fee',
 		'10000000',
 		'--',

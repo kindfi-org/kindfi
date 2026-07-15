@@ -365,43 +365,11 @@ export async function uploadPitchDeck(
 	})
 }
 
-/**
- * Converts a YouTube or Vimeo URL into an embeddable format.
- * Supports typical watch/share links and transforms them to iframe-compatible embed URLs.
- *
- * Examples:
- * - https://www.youtube.com/watch?v=abc123 → https://www.youtube.com/embed/abc123
- * - https://vimeo.com/123456 → https://player.vimeo.com/video/123456
- *
- * @param url - The original video URL provided by the user
- * @returns The embed-compatible URL if matched, or the original URL if no transformation applies
- */
-export function transformToEmbedUrl(url: string): string {
-	try {
-		const parsedUrl = new URL(url)
-		const hostname = parsedUrl.hostname
-		const pathname = parsedUrl.pathname
-
-		if (hostname.includes('youtube.com')) {
-			const videoId = parsedUrl.searchParams.get('v')
-			if (videoId) return `https://www.youtube.com/embed/${videoId}`
-		}
-
-		if (hostname === 'youtu.be') {
-			const videoId = pathname.split('/')[1]
-			if (videoId) return `https://www.youtube.com/embed/${videoId}`
-		}
-
-		if (hostname.includes('vimeo.com')) {
-			const videoId = pathname.split('/')[1]
-			if (videoId) return `https://player.vimeo.com/video/${videoId}`
-		}
-
-		return url // fallback (leave unchanged)
-	} catch {
-		return url // invalid URL, return as is
-	}
-}
+export {
+	getVideoProvider,
+	isSupportedVideoUrl,
+	transformToEmbedUrl,
+} from '~/lib/utils/video-embed'
 
 /**
  * Convenience helper to delete all files from a bucket/folder with Supabase.

@@ -17,33 +17,18 @@ export async function assertCanManageProjectEscrow(
 		.eq('id', userId)
 		.single()
 
+	// Escrow is a platform-admin-only feature.
 	if (profileData?.role === 'admin') {
-		return { allowed: true }
-	}
+		const { data: project, error: projectError } = await supabaseServiceRole
+			.from('projects')
+			.select('id')
+			.eq('id', projectId)
+			.single()
 
-	const { data: project, error: projectError } = await supabaseServiceRole
-		.from('projects')
-		.select('id, kindler_id')
-		.eq('id', projectId)
-		.single()
+		if (projectError || !project) {
+			return { allowed: false, error: 'Project not found' }
+		}
 
-	if (projectError || !project) {
-		return { allowed: false, error: 'Project not found' }
-	}
-
-	if (project.kindler_id === userId) {
-		return { allowed: true }
-	}
-
-	const { data: memberData } = await supabaseServiceRole
-		.from('project_members')
-		.select('role')
-		.eq('project_id', projectId)
-		.eq('user_id', userId)
-		.in('role', ['core', 'admin', 'editor'])
-		.single()
-
-	if (memberData) {
 		return { allowed: true }
 	}
 
@@ -55,7 +40,7 @@ export async function assertCanManageProjectEscrow(
 
 	return {
 		allowed: false,
-		error: 'Forbidden: You do not have permission to update escrow for this project',
+		error: 'Forbidden: Only platform admins can manage escrow for this project',
 	}
 }
 

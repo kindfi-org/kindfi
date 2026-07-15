@@ -1,7 +1,7 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import { ExternalLink, LogOut, User as UserIcon, Vote, Wallet } from 'lucide-react'
+import { ExternalLink, Link2, LogOut, Unlink, User as UserIcon, Vote, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import type { User } from 'next-auth'
@@ -14,11 +14,11 @@ import { Button } from '~/components/base/button'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
 import { cn, getAvatarFallback } from '~/lib/utils'
-import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
+import { getStellarExplorerAddressUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
 const WalletCopyButton = ({ address, className }: { address: string; className?: string }) => {
-	const explorerUrl = getStellarExplorerUrl(address)
+	const explorerUrl = getStellarExplorerAddressUrl(address)
 
 	const start = address.substring(0, 6)
 	const end = address.substring(address.length - 6)
@@ -134,8 +134,40 @@ export const MobileNavigation = () => {
 export const MobileUserMenu = ({ user }: { user: User }) => {
 	const router = useRouter()
 	const { t } = useI18n()
-	const { disconnect } = useWallet()
+	const {
+		address: externalWalletAddress,
+		isConnected: isExternalConnected,
+		connect,
+		disconnect,
+	} = useWallet()
 	const [isSigningOut, setIsSigningOut] = useState(false)
+	const [isConnectingExternal, setIsConnectingExternal] = useState(false)
+
+	const smartAccountAddress = resolveSmartAccountAddress(user.device?.address)
+
+	const handleConnectExternalWallet = async () => {
+		if (isConnectingExternal) return
+		try {
+			setIsConnectingExternal(true)
+			await connect()
+			toast.success(t('profile.walletConnected'))
+		} catch (error) {
+			logger.error('Error connecting external wallet:', error)
+			toast.error(error instanceof Error ? error.message : 'Failed to connect wallet')
+		} finally {
+			setIsConnectingExternal(false)
+		}
+	}
+
+	const handleDisconnectExternalWallet = () => {
+		try {
+			disconnect()
+			toast.success(t('profile.walletDisconnected'))
+		} catch (error) {
+			logger.error('Error disconnecting external wallet:', error)
+			toast.error(error instanceof Error ? error.message : 'Failed to disconnect wallet')
+		}
+	}
 
 	const handleSignOutAction = async () => {
 		if (isSigningOut) return
@@ -168,32 +200,60 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 	}
 
 	return (
-		<div className="flex flex-col space-y-4 pt-4 border-t">
+		<div className="flex flex-col space-y-4 border-t pt-4">
 			<div className="flex items-center space-x-3 px-2">
 				<Avatar className="h-10 w-10 border-2 border-border">
 					<AvatarFallback suppressHydrationWarning>
 						{getAvatarFallback(user.email || '')}
 					</AvatarFallback>
 				</Avatar>
-				<div className="flex flex-col space-y-0.5 min-w-0 flex-1">
-					<p className="text-sm font-semibold leading-none truncate">{user.name || user.email}</p>
-					<p className="text-xs text-muted-foreground leading-none truncate">{user.email}</p>
+				<div className="min-w-0 flex-1 flex-col space-y-0.5">
+					<p className="truncate text-sm font-semibold leading-none">{user.name || user.email}</p>
+					<p className="truncate text-xs leading-none text-muted-foreground">{user.email}</p>
 				</div>
 				{user.email?.split('@')[0] && (
-					<span className="h-2.5 w-2.5 rounded-full bg-green-500 shrink-0">
+					<span className="h-2.5 w-2.5 shrink-0 rounded-full bg-green-500">
 						<span className="sr-only">{t('user.online')}</span>
 					</span>
 				)}
 			</div>
-			{resolveSmartAccountAddress(user.device?.address) && (
-				<div className="px-2">
-					<WalletCopyButton
-						address={resolveSmartAccountAddress(user.device?.address)!}
-						className="w-full"
-					/>
+			{smartAccountAddress ? (
+				<div className="space-y-1 px-2">
+					<p className="text-xs font-medium text-muted-foreground">{t('profile.smartAccount')}</p>
+					<WalletCopyButton address={smartAccountAddress} className="w-full" />
 				</div>
-			)}
+			) : null}
+			{isExternalConnected && externalWalletAddress ? (
+				<div className="space-y-1 px-2">
+					<p className="text-xs font-medium text-muted-foreground">{t('profile.externalWallet')}</p>
+					<WalletCopyButton address={externalWalletAddress} className="w-full" />
+				</div>
+			) : null}
 			<div className="flex flex-col space-y-1">
+				{isExternalConnected && externalWalletAddress ? (
+					<Button
+						variant="ghost"
+						className="w-full justify-start font-medium"
+						type="button"
+						onClick={handleDisconnectExternalWallet}
+					>
+						<Unlink className="mr-2 h-4 w-4 text-muted-foreground" />
+						{t('profile.disconnectExternalWallet')}
+					</Button>
+				) : (
+					<Button
+						variant="ghost"
+						className="w-full justify-start font-medium"
+						type="button"
+						onClick={handleConnectExternalWallet}
+						disabled={isConnectingExternal}
+					>
+						<Link2 className="mr-2 h-4 w-4 text-emerald-600" />
+						{isConnectingExternal
+							? t('profile.connectingExternalWallet')
+							: t('profile.connectExternalWallet')}
+					</Button>
+				)}
 				<Link href="/profile">
 					<Button variant="ghost" className="w-full justify-start font-medium">
 						<UserIcon className="mr-2 h-4 w-4" />
@@ -208,7 +268,7 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 				</Link>
 				<Button
 					variant="ghost"
-					className="w-full justify-start text-destructive hover:text-destructive font-medium"
+					className="w-full justify-start font-medium text-destructive hover:text-destructive"
 					type="button"
 					onClick={handleSignOutAction}
 					disabled={isSigningOut}

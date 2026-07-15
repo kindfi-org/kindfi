@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { ProjectManageCommandCenter } from '~/components/sections/projects/manage/project-manage-command-center'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { canUserManageProject } from '~/lib/queries/projects/can-user-manage-project'
+import { isPlatformAdmin } from '~/lib/queries/projects/development-only-access'
 import { getProjectManageMeta } from '~/lib/queries/projects/get-project-manage-meta'
 
 export default async function ManageLayout({
@@ -33,12 +34,14 @@ export default async function ManageLayout({
 		redirect(`/projects/${slug}`)
 	}
 
+	const admin = session?.user?.id ? await isPlatformAdmin(session.user.id) : false
+
 	return (
 		<section
 			className="container mx-auto max-w-6xl px-4 py-6 md:py-8"
 			aria-label="Project management"
 		>
-			<ProjectManageCommandCenter slug={slug} project={projectMeta} />
+			<ProjectManageCommandCenter slug={slug} project={projectMeta} isPlatformAdmin={admin} />
 			<main className="min-w-0 pt-6">{children}</main>
 		</section>
 	)
