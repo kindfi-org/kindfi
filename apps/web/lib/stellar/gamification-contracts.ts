@@ -122,6 +122,8 @@ export class GamificationContractService {
 	private server: SorobanRpc.Server
 	private networkPassphrase: string
 	private recorderKeypair: Keypair
+	/** Max fee in stroops — mainnet inclusion often rejects low fees (txInsufficientFee). */
+	private readonly txFee = process.env.SOROBAN_TX_FEE || '10000000'
 
 	constructor(rpcUrl?: string, networkPassphrase?: string, recorderSecretKey?: string) {
 		const rpc = rpcUrl || process.env.STELLAR_RPC_URL || process.env.RPC_URL
@@ -191,7 +193,7 @@ export class GamificationContractService {
 
 				// Build transaction
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '100',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -282,7 +284,7 @@ export class GamificationContractService {
 
 				// Build transaction
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '100',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -380,7 +382,7 @@ export class GamificationContractService {
 				})
 
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '100',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -455,7 +457,7 @@ export class GamificationContractService {
 				})
 
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '100',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -549,7 +551,7 @@ export class GamificationContractService {
 
 				// Build transaction
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '100',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -646,7 +648,7 @@ export class GamificationContractService {
 
 				// Build transaction
 				const transaction = new TransactionBuilder(adminAccount, {
-					fee: '100',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -828,7 +830,7 @@ export class GamificationContractService {
 				})
 
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '1000000',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -914,7 +916,7 @@ export class GamificationContractService {
 				})
 
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '1000000',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -990,7 +992,7 @@ export class GamificationContractService {
 				})
 
 				const transaction = new TransactionBuilder(adminAccount, {
-					fee: '1000000',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -1094,7 +1096,7 @@ export class GamificationContractService {
 				})
 
 				const transaction = new TransactionBuilder(recorderAccount, {
-					fee: '1000000',
+					fee: this.txFee,
 					networkPassphrase: this.networkPassphrase,
 				})
 					.addOperation(operation)
@@ -1174,7 +1176,7 @@ export class GamificationContractService {
 				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
 
 			const transaction = new TransactionBuilder(account, {
-				fee: '100',
+				fee: this.txFee,
 				networkPassphrase: this.networkPassphrase,
 			})
 				.addOperation(operation)
