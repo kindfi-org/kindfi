@@ -56,6 +56,7 @@ export function MilestonesTab({
 	const [editingMilestoneIndex, setEditingMilestoneIndex] = useState<number | null>(null)
 
 	const {
+		processingOperation,
 		isProcessing,
 		handleApproveMilestone,
 		handleChangeMilestoneStatus,
@@ -122,7 +123,9 @@ export function MilestonesTab({
 					onOpenChange={setIsAddDialogOpen}
 					escrowType={escrowType}
 					isSubmitting={isProcessing}
-					onSubmit={(newRelease) => handleAddRelease(newRelease, () => setIsAddDialogOpen(false))}
+					onSubmit={(release) =>
+						handleAddRelease({ release, onComplete: () => setIsAddDialogOpen(false) })
+					}
 				/>
 			</div>
 		)
@@ -198,18 +201,20 @@ export function MilestonesTab({
 				escrowType={escrowType}
 				milestoneStatus={milestoneStatus}
 				milestoneEvidence={milestoneEvidence}
-				isProcessing={isProcessing}
+				processingOperation={processingOperation}
 				onMilestoneStatusChange={setMilestoneStatus}
 				onMilestoneEvidenceChange={setMilestoneEvidence}
 				onChangeMilestoneStatus={() =>
-					handleChangeMilestoneStatus(
-						selectedMilestoneIndex,
-						milestoneStatus,
-						milestoneEvidence,
-						() => setMilestoneEvidence(''),
-					)
+					handleChangeMilestoneStatus({
+						milestoneIndex: selectedMilestoneIndex,
+						status: milestoneStatus,
+						evidence: milestoneEvidence,
+						onComplete: () => setMilestoneEvidence(''),
+					})
 				}
-				onApproveMilestone={() => handleApproveMilestone(selectedMilestoneIndex)}
+				onApproveMilestone={() =>
+					handleApproveMilestone({ milestoneIndex: selectedMilestoneIndex })
+				}
 				onGoToRelease={onGoToRelease}
 			/>
 
@@ -218,7 +223,9 @@ export function MilestonesTab({
 				onOpenChange={setIsAddDialogOpen}
 				escrowType={escrowType}
 				isSubmitting={isProcessing}
-				onSubmit={(newRelease) => handleAddRelease(newRelease, () => setIsAddDialogOpen(false))}
+				onSubmit={(release) =>
+					handleAddRelease({ release, onComplete: () => setIsAddDialogOpen(false) })
+				}
 			/>
 
 			{editingMilestone ? (
@@ -234,10 +241,12 @@ export function MilestonesTab({
 					mode="edit"
 					releaseLabel={`Release ${(editingMilestoneIndex ?? 0) + 1}`}
 					initialValues={getReleaseFormValues(editingMilestone)}
-					onSubmit={(editedRelease) =>
-						handleEditRelease(editingMilestoneIndex, editedRelease, () =>
-							setEditingMilestoneIndex(null),
-						)
+					onSubmit={(release) =>
+						handleEditRelease({
+							milestoneIndex: editingMilestoneIndex,
+							release,
+							onComplete: () => setEditingMilestoneIndex(null),
+						})
 					}
 				/>
 			) : null}

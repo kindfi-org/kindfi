@@ -4,6 +4,7 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
+import type { JSX } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
@@ -12,12 +13,14 @@ import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import {
 	buildEditReleasePayload,
 	buildUpdateEscrowPayload,
+	type EditRelease,
 	type NewRelease,
 } from '~/lib/utils/escrow/build-update-escrow-payload'
 import { isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
 import { resolveValidatedEscrowData } from '~/lib/utils/escrow/resolve-validated-escrow-data'
 import { getTrustlessWorkApiErrorMessage } from '~/lib/utils/escrow/trustless-work-api-error'
-import type { ReleaseFormValues } from '../components/add-release-dialog'
+
+export type ProcessingOperation = 'approve' | 'status' | 'add' | 'edit' | null
 
 interface UseMilestonePatchParams {
 	escrowContractAddress: string
@@ -29,12 +32,44 @@ interface UseMilestonePatchParams {
 	) => void
 }
 
+interface ApproveMilestoneParams {
+	milestoneIndex: string
+}
+
+interface ChangeMilestoneStatusParams {
+	milestoneIndex: string
+	status: string
+	evidence: string
+	onComplete?: () => void
+}
+
+interface AddReleaseParams {
+	release: NewRelease
+	onComplete?: () => void
+}
+
+interface EditReleaseParams {
+	milestoneIndex: number | null
+	release: EditRelease
+	onComplete?: () => void
+}
+
+interface UseMilestonePatchResult {
+	processingOperation: ProcessingOperation
+	isProcessing: boolean
+	handleApproveMilestone: (params: ApproveMilestoneParams) => Promise<void>
+	handleChangeMilestoneStatus: (params: ChangeMilestoneStatusParams) => Promise<void>
+	handleAddRelease: (params: AddReleaseParams) => Promise<void>
+	handleEditRelease: (params: EditReleaseParams) => Promise<void>
+	getReleaseFormValues: (milestone: SingleReleaseMilestone | MultiReleaseMilestone) => NewRelease
+}
+
 export const useMilestonePatch = ({
 	escrowContractAddress,
 	escrowType,
 	onSuccess,
 	onPatchMilestone,
-}: UseMilestonePatchParams) => {
+}: UseMilestonePatchParams): UseMilestonePatchResult => {
 	const {
 		approveMilestone,
 		changeMilestoneStatus,
@@ -43,7 +78,8 @@ export const useMilestonePatch = ({
 		getEscrowByContractIds,
 	} = useEscrow()
 	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
-	const [isProcessing, setIsProcessing] = useState(false)
+	const [processingOperation, setProcessingOperation] = useState<ProcessingOperation>(null)
+	const isProcessing = processingOperation !== null
 
 	const fetchValidatedEscrowData = async (): Promise<GetEscrowsFromIndexerResponse> => {
 		const response = await getEscrowByContractIds({
@@ -56,7 +92,6 @@ export const useMilestonePatch = ({
 	const submitEscrowUpdate = async (
 		payload: ReturnType<typeof buildUpdateEscrowPayload>,
 		successMessage: string,
-		onComplete?: () => void,
 	): Promise<void> => {
 		const updateResponse = await updateEscrow(payload, escrowType)
 		if (updateResponse.status !== 'SUCCESS' || !updateResponse.unsignedTransaction) {
@@ -73,19 +108,19 @@ export const useMilestonePatch = ({
 		}
 
 		toast.success(successMessage)
-		onComplete?.()
-		onSuccess()
 	}
 
-	const handleApproveMilestone = async (selectedMilestoneIndex: string): Promise<void> => {
+	const handleApproveMilestone = async ({
+		milestoneIndex,
+	}: ApproveMilestoneParams): Promise<void> => {
+		setProcessingOperation('approve')
 		try {
-			setIsProcessing(true)
 			const signer = await ensureTrustlessSigner()
 
 			const approveResponse = await approveMilestone(
 				{
 					contractId: escrowContractAddress,
-					milestoneIndex: selectedMilestoneIndex,
+					milestoneIndex,
 					approver: signer,
 				},
 				escrowType,
@@ -102,33 +137,39 @@ export const useMilestonePatch = ({
 			}
 
 			toast.success('Release approved successfully')
-			onPatchMilestone?.(Number(selectedMilestoneIndex), { kind: 'approve' })
-			onSuccess()
 		} catch (error) {
 			logger.error(error)
 			const errorMessage = error instanceof Error ? error.message : 'Failed to approve release'
 			toast.error(errorMessage)
+			return
 		} finally {
-			setIsProcessing(false)
+			setProcessingOperation(null)
+		}
+
+		try {
+			onPatchMilestone?.(Number(milestoneIndex), { kind: 'approve' })
+			onSuccess()
+		} catch (callbackError) {
+			logger.error(callbackError)
 		}
 	}
 
-	const handleChangeMilestoneStatus = async (
-		selectedMilestoneIndex: string,
-		milestoneStatus: string,
-		milestoneEvidence: string,
-		onComplete?: () => void,
-	): Promise<void> => {
+	const handleChangeMilestoneStatus = async ({
+		milestoneIndex,
+		status,
+		evidence,
+		onComplete,
+	}: ChangeMilestoneStatusParams): Promise<void> => {
+		setProcessingOperation('status')
 		try {
-			setIsProcessing(true)
 			const signer = await ensureTrustlessSigner()
 
 			const changeResponse = await changeMilestoneStatus(
 				{
 					contractId: escrowContractAddress,
-					milestoneIndex: selectedMilestoneIndex,
-					newStatus: milestoneStatus,
-					newEvidence: milestoneEvidence || undefined,
+					milestoneIndex,
+					newStatus: status,
+					newEvidence: evidence || undefined,
 					serviceProvider: signer,
 				},
 				escrowType,
@@ -145,57 +186,68 @@ export const useMilestonePatch = ({
 			}
 
 			toast.success('Release status updated successfully')
-			const evidence = milestoneEvidence || undefined
-			onComplete?.()
-			onPatchMilestone?.(Number(selectedMilestoneIndex), {
-				kind: 'status',
-				status: milestoneStatus,
-				evidence,
-			})
-			onSuccess()
 		} catch (error) {
 			logger.error(error)
 			const errorMessage =
 				error instanceof Error ? error.message : 'Failed to update release status'
 			toast.error(errorMessage)
+			return
 		} finally {
-			setIsProcessing(false)
+			setProcessingOperation(null)
+		}
+
+		try {
+			const resolvedEvidence = evidence || undefined
+			onComplete?.()
+			onPatchMilestone?.(Number(milestoneIndex), {
+				kind: 'status',
+				status,
+				evidence: resolvedEvidence,
+			})
+			onSuccess()
+		} catch (callbackError) {
+			logger.error(callbackError)
 		}
 	}
 
-	const handleAddRelease = async (
-		newRelease: NewRelease,
-		onComplete?: () => void,
-	): Promise<void> => {
+	const handleAddRelease = async ({ release, onComplete }: AddReleaseParams): Promise<void> => {
+		setProcessingOperation('add')
 		try {
-			setIsProcessing(true)
 			const [signer, validatedEscrowData] = await Promise.all([
 				ensureTrustlessSigner(),
 				fetchValidatedEscrowData(),
 			])
-			const payload = buildUpdateEscrowPayload(validatedEscrowData, escrowType, signer, newRelease)
-			await submitEscrowUpdate(payload, 'Release added successfully', onComplete)
+			const payload = buildUpdateEscrowPayload(validatedEscrowData, escrowType, signer, release)
+			await submitEscrowUpdate(payload, 'Release added successfully')
 		} catch (error) {
 			logger.error(error)
 			const errorMessage = getTrustlessWorkApiErrorMessage(error, 'Failed to add release')
 			toast.error(errorMessage)
+			return
 		} finally {
-			setIsProcessing(false)
+			setProcessingOperation(null)
+		}
+
+		try {
+			onComplete?.()
+			onSuccess()
+		} catch (callbackError) {
+			logger.error(callbackError)
 		}
 	}
 
-	const handleEditRelease = async (
-		editingMilestoneIndex: number | null,
-		editedRelease: ReleaseFormValues,
-		onComplete?: () => void,
-	): Promise<void> => {
-		if (editingMilestoneIndex === null) {
+	const handleEditRelease = async ({
+		milestoneIndex,
+		release,
+		onComplete,
+	}: EditReleaseParams): Promise<void> => {
+		if (milestoneIndex === null) {
 			toast.error('Select a release to edit.')
 			return
 		}
 
+		setProcessingOperation('edit')
 		try {
-			setIsProcessing(true)
 			const [signer, validatedEscrowData] = await Promise.all([
 				ensureTrustlessSigner(),
 				fetchValidatedEscrowData(),
@@ -204,22 +256,30 @@ export const useMilestonePatch = ({
 				validatedEscrowData,
 				escrowType,
 				signer,
-				editingMilestoneIndex,
-				editedRelease,
+				milestoneIndex,
+				release,
 			)
-			await submitEscrowUpdate(payload, 'Release updated successfully', onComplete)
+			await submitEscrowUpdate(payload, 'Release updated successfully')
 		} catch (error) {
 			logger.error(error)
 			const errorMessage = getTrustlessWorkApiErrorMessage(error, 'Failed to update release')
 			toast.error(errorMessage)
+			return
 		} finally {
-			setIsProcessing(false)
+			setProcessingOperation(null)
+		}
+
+		try {
+			onComplete?.()
+			onSuccess()
+		} catch (callbackError) {
+			logger.error(callbackError)
 		}
 	}
 
 	const getReleaseFormValues = (
 		milestone: SingleReleaseMilestone | MultiReleaseMilestone,
-	): ReleaseFormValues => {
+	): NewRelease => {
 		if (isSingleReleaseMilestone(milestone)) {
 			return { description: milestone.description }
 		}
@@ -232,6 +292,7 @@ export const useMilestonePatch = ({
 	}
 
 	return {
+		processingOperation,
 		isProcessing,
 		handleApproveMilestone,
 		handleChangeMilestoneStatus,

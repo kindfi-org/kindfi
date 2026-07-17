@@ -2,6 +2,7 @@
 
 import type { MultiReleaseMilestone, SingleReleaseMilestone } from '@trustless-work/escrow'
 import { CheckCircle2, Pencil } from 'lucide-react'
+import type { JSX } from 'react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/base/tooltip'
@@ -28,6 +29,21 @@ interface MilestoneListItemProps {
 	onEdit: (index: number) => void
 }
 
+const getEditDisabledReason = ({
+	isProcessing,
+	hasEscrowData,
+	milestone,
+}: {
+	isProcessing: boolean
+	hasEscrowData: boolean
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone
+}): string | null => {
+	if (isProcessing) return 'A transaction is being processed'
+	if (!hasEscrowData) return 'Escrow data is not available'
+	if (!isMilestoneEditable(milestone)) return getMilestoneEditBlockReason(milestone)
+	return null
+}
+
 export const MilestoneListItem = ({
 	milestone,
 	index,
@@ -36,12 +52,11 @@ export const MilestoneListItem = ({
 	hasEscrowData,
 	onSelect,
 	onEdit,
-}: MilestoneListItemProps) => {
+}: MilestoneListItemProps): JSX.Element => {
 	const phase = getMilestoneReleasePhase(milestone)
 	const isSingle = isSingleReleaseMilestone(milestone)
 	const multiMilestone = milestone as MultiReleaseMilestone
-	const canEdit = isMilestoneEditable(milestone)
-	const editBlockReason = getMilestoneEditBlockReason(milestone)
+	const disabledReason = getEditDisabledReason({ isProcessing, hasEscrowData, milestone })
 
 	return (
 		<div
@@ -99,20 +114,16 @@ export const MilestoneListItem = ({
 								variant="ghost"
 								size="icon"
 								onClick={() => onEdit(index)}
-								disabled={isProcessing || !hasEscrowData || !canEdit}
+								disabled={disabledReason !== null}
 								aria-label={`Edit release ${index + 1}`}
 							>
 								<Pencil className="h-4 w-4" aria-hidden="true" />
 							</Button>
 						</span>
 					</TooltipTrigger>
-					{editBlockReason ? (
-						<TooltipContent side="left" className="max-w-xs text-left">
-							{editBlockReason}
-						</TooltipContent>
-					) : (
-						<TooltipContent side="left">Edit release details</TooltipContent>
-					)}
+					<TooltipContent side="left" className="max-w-xs text-left">
+						{disabledReason ?? 'Edit release details'}
+					</TooltipContent>
 				</Tooltip>
 			</div>
 		</div>

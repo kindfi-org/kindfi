@@ -2,6 +2,7 @@
 
 import type { EscrowType } from '@trustless-work/escrow'
 import { ArrowRight, CheckCircle2, Loader2, TrendingUp } from 'lucide-react'
+import type { JSX } from 'react'
 import { Alert, AlertDescription } from '~/components/base/alert'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
@@ -14,6 +15,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import type { ProcessingOperation } from '../hooks/use-milestone-patch'
 
 interface MilestoneEditFormProps {
 	selectedIndex: number
@@ -22,7 +24,7 @@ interface MilestoneEditFormProps {
 	escrowType: EscrowType
 	milestoneStatus: string
 	milestoneEvidence: string
-	isProcessing: boolean
+	processingOperation: ProcessingOperation
 	onMilestoneStatusChange: (value: string) => void
 	onMilestoneEvidenceChange: (value: string) => void
 	onChangeMilestoneStatus: () => void
@@ -37,13 +39,15 @@ export const MilestoneEditForm = ({
 	escrowType,
 	milestoneStatus,
 	milestoneEvidence,
-	isProcessing,
+	processingOperation,
 	onMilestoneStatusChange,
 	onMilestoneEvidenceChange,
 	onChangeMilestoneStatus,
 	onApproveMilestone,
 	onGoToRelease,
-}: MilestoneEditFormProps) => {
+}: MilestoneEditFormProps): JSX.Element => {
+	const isProcessing = processingOperation !== null
+
 	return (
 		<div className="grid gap-6 lg:grid-cols-2">
 			<Card>
@@ -94,7 +98,7 @@ export const MilestoneEditForm = ({
 						disabled={isProcessing}
 						className="w-full"
 					>
-						{isProcessing ? (
+						{processingOperation === 'status' ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
 								Updating…
@@ -146,7 +150,7 @@ export const MilestoneEditForm = ({
 						className="w-full"
 						size="lg"
 					>
-						{isProcessing ? (
+						{processingOperation === 'approve' ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
 								Approving…
