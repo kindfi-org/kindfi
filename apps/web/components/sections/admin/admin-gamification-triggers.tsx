@@ -1,7 +1,5 @@
 'use client'
 
-import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
 import {
 	IoCheckmarkCircleOutline,
 	IoCloseCircleOutline,
@@ -9,7 +7,6 @@ import {
 	IoOpenOutline,
 	IoWalletOutline,
 } from 'react-icons/io5'
-import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -25,52 +22,11 @@ import {
 } from '~/components/base/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
-import type { AdminGamificationTriggerInput } from '~/lib/schemas/admin-gamification-trigger.schemas'
-
-type TriggerResponse = {
-	success: boolean
-	module?: string
-	action?: string
-	txHash?: string
-	explorerUrl?: string
-	error?: string
-	data?: Record<string, unknown>
-}
-
-const REPUTATION_EVENTS = [
-	{ value: '0', label: 'Donation (10 pts)' },
-	{ value: '1', label: 'Streak Donation (25 pts)' },
-	{ value: '2', label: 'Successful Referral (50 pts)' },
-	{ value: '3', label: 'New Category Donation (15 pts)' },
-	{ value: '4', label: 'New Campaign Donation (5 pts)' },
-	{ value: '5', label: 'Quest Completion (30 pts)' },
-	{ value: '6', label: 'Boosted Project (20 pts)' },
-	{ value: '7', label: 'Outstanding Booster (100 pts)' },
-] as const
-
-const MODULES = [
-	{ id: 'streak', label: 'Streak' },
-	{ id: 'referral', label: 'Referral' },
-	{ id: 'quest', label: 'Quest' },
-	{ id: 'nft', label: 'NFT' },
-	{ id: 'reputation', label: 'Reputation' },
-	{ id: 'governance', label: 'Governance' },
-] as const
+import { MODULES, REPUTATION_EVENTS } from './admin-gamification-triggers/constants'
+import { useAdminGamificationTriggerForm } from './admin-gamification-triggers/hooks/use-admin-gamification-trigger-form'
+import type { TriggerResponse } from './admin-gamification-triggers/types'
 
 const truncateAddress = (value: string) => `${value.slice(0, 6)}…${value.slice(-6)}`
-
-async function triggerContract(payload: AdminGamificationTriggerInput): Promise<TriggerResponse> {
-	const response = await fetch('/api/admin/gamification/trigger', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(payload),
-	})
-	const json = (await response.json()) as TriggerResponse
-	if (!response.ok && !json.error) {
-		throw new Error(`Request failed (${response.status})`)
-	}
-	return json
-}
 
 function TriggerResultBanner({ result }: { result: TriggerResponse | null }) {
 	if (!result) return null
@@ -195,58 +151,7 @@ function ConnectedWalletBanner({
 
 export function AdminGamificationTriggers() {
 	const { address, walletName, isConnected, isInitialized, connect, disconnect } = useWallet()
-	const [activeModule, setActiveModule] = useState<string>('streak')
-	const [lastResult, setLastResult] = useState<TriggerResponse | null>(null)
-
-	const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly')
-	const [referralAction, setReferralAction] = useState<
-		'create_referral' | 'mark_onboarded' | 'record_donation'
-	>('create_referral')
-	const [questId, setQuestId] = useState('0')
-	const [progressValue, setProgressValue] = useState('1')
-	const [nftAction, setNftAction] = useState<'mint' | 'update_metadata'>('mint')
-	const [tokenId, setTokenId] = useState('0')
-	const [nftName, setNftName] = useState('KindFi Impact NFT (Admin Test)')
-	const [eventType, setEventType] = useState('0')
-	const [customPoints, setCustomPoints] = useState('')
-	const [roundId, setRoundId] = useState('0')
-	const [optionId, setOptionId] = useState('0')
-	const [voteType, setVoteType] = useState<'up' | 'down'>('up')
-	const [tier, setTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze')
-
-	const mutation = useMutation({
-		mutationFn: triggerContract,
-		onSuccess: (data) => {
-			setLastResult(data)
-			if (data.success) {
-				toast.success('On-chain trigger submitted', {
-					description: data.txHash
-						? `Hash: ${data.txHash.slice(0, 12)}…`
-						: 'Check the result panel for details.',
-				})
-			} else {
-				toast.error('On-chain trigger failed', {
-					description: data.error || 'Unknown error',
-				})
-			}
-		},
-		onError: (error) => {
-			const message = error instanceof Error ? error.message : 'Request failed'
-			setLastResult({ success: false, error: message })
-			toast.error('Request failed', { description: message })
-		},
-	})
-
-	const handleSubmit = (payload: AdminGamificationTriggerInput) => {
-		if (!address) {
-			toast.error('Connect a Stellar wallet first')
-			return
-		}
-		setLastResult(null)
-		mutation.mutate(payload)
-	}
-
-	const canSubmit = Boolean(address) && !mutation.isPending
+	const form = useAdminGamificationTriggerForm(address)
 
 	return (
 		<div className="space-y-4">
@@ -276,7 +181,7 @@ export function AdminGamificationTriggers() {
 						onDisconnect={disconnect}
 					/>
 
-					<Tabs value={activeModule} onValueChange={setActiveModule}>
+					<Tabs value={form.activeModule} onValueChange={form.setActiveModule}>
 						<TabsList className="mb-4 flex h-auto flex-wrap gap-1">
 							{MODULES.map((m) => (
 								<TabsTrigger key={m.id} value={m.id} className="text-xs sm:text-sm">
@@ -291,7 +196,10 @@ export function AdminGamificationTriggers() {
 								wallet (awards reputation via CPI when the streak continues).
 							</p>
 							<Field label="Period">
-								<Select value={period} onValueChange={(v) => setPeriod(v as 'weekly' | 'monthly')}>
+								<Select
+									value={form.period}
+									onValueChange={(v) => form.setPeriod(v as 'weekly' | 'monthly')}
+								>
 									<SelectTrigger>
 										<SelectValue />
 									</SelectTrigger>
@@ -302,18 +210,18 @@ export function AdminGamificationTriggers() {
 								</Select>
 							</Field>
 							<Button
-								disabled={!canSubmit}
+								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									handleSubmit({
+									form.handleSubmit({
 										module: 'streak',
 										action: 'record_donation',
 										userAddress: address,
-										period,
+										period: form.period,
 									})
 								}}
 							>
-								{mutation.isPending ? 'Submitting…' : 'Record streak donation'}
+								{form.isPending ? 'Submitting…' : 'Record streak donation'}
 							</Button>
 						</TabsContent>
 
@@ -325,9 +233,11 @@ export function AdminGamificationTriggers() {
 							</p>
 							<Field label="Action">
 								<Select
-									value={referralAction}
+									value={form.referralAction}
 									onValueChange={(v) =>
-										setReferralAction(v as 'create_referral' | 'mark_onboarded' | 'record_donation')
+										form.setReferralAction(
+											v as 'create_referral' | 'mark_onboarded' | 'record_donation',
+										)
 									}
 								>
 									<SelectTrigger>
@@ -341,17 +251,17 @@ export function AdminGamificationTriggers() {
 								</Select>
 							</Field>
 							<Button
-								disabled={!canSubmit}
+								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									handleSubmit({
+									form.handleSubmit({
 										module: 'referral',
-										action: referralAction,
+										action: form.referralAction,
 										referredAddress: address,
 									})
 								}}
 							>
-								{mutation.isPending ? 'Submitting…' : `Run ${referralAction}`}
+								{form.isPending ? 'Submitting…' : `Run ${form.referralAction}`}
 							</Button>
 						</TabsContent>
 
@@ -365,33 +275,33 @@ export function AdminGamificationTriggers() {
 									<Input
 										type="number"
 										min={0}
-										value={questId}
-										onChange={(e) => setQuestId(e.target.value)}
+										value={form.questId}
+										onChange={(e) => form.setQuestId(e.target.value)}
 									/>
 								</Field>
 								<Field label="Progress value">
 									<Input
 										type="number"
 										min={0}
-										value={progressValue}
-										onChange={(e) => setProgressValue(e.target.value)}
+										value={form.progressValue}
+										onChange={(e) => form.setProgressValue(e.target.value)}
 									/>
 								</Field>
 							</div>
 							<Button
-								disabled={!canSubmit}
+								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									handleSubmit({
+									form.handleSubmit({
 										module: 'quest',
 										action: 'update_progress',
 										userAddress: address,
-										questId: Number(questId),
-										progressValue: Number(progressValue),
+										questId: Number(form.questId),
+										progressValue: Number(form.progressValue),
 									})
 								}}
 							>
-								{mutation.isPending ? 'Submitting…' : 'Update quest progress'}
+								{form.isPending ? 'Submitting…' : 'Update quest progress'}
 							</Button>
 						</TabsContent>
 
@@ -401,8 +311,8 @@ export function AdminGamificationTriggers() {
 							</p>
 							<Field label="Action">
 								<Select
-									value={nftAction}
-									onValueChange={(v) => setNftAction(v as 'mint' | 'update_metadata')}
+									value={form.nftAction}
+									onValueChange={(v) => form.setNftAction(v as 'mint' | 'update_metadata')}
 								>
 									<SelectTrigger>
 										<SelectValue />
@@ -414,31 +324,32 @@ export function AdminGamificationTriggers() {
 								</Select>
 							</Field>
 							<div className="grid gap-4 sm:grid-cols-2">
-								{nftAction === 'update_metadata' ? (
+								{form.nftAction === 'update_metadata' ? (
 									<Field label="Token ID">
 										<Input
 											type="number"
 											min={0}
-											value={tokenId}
-											onChange={(e) => setTokenId(e.target.value)}
+											value={form.tokenId}
+											onChange={(e) => form.setTokenId(e.target.value)}
 										/>
 									</Field>
 								) : null}
 								<Field label="Metadata name">
-									<Input value={nftName} onChange={(e) => setNftName(e.target.value)} />
+									<Input value={form.nftName} onChange={(e) => form.setNftName(e.target.value)} />
 								</Field>
 							</div>
 							<Button
-								disabled={!canSubmit}
+								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									handleSubmit({
+									form.handleSubmit({
 										module: 'nft',
-										action: nftAction,
-										toAddress: nftAction === 'mint' ? address : undefined,
-										tokenId: nftAction === 'update_metadata' ? Number(tokenId) : undefined,
+										action: form.nftAction,
+										toAddress: form.nftAction === 'mint' ? address : undefined,
+										tokenId:
+											form.nftAction === 'update_metadata' ? Number(form.tokenId) : undefined,
 										metadata: {
-											name: nftName,
+											name: form.nftName,
 											description: 'Manually triggered for contract verification',
 											imageUri: 'https://kindfi.org/images/nft-placeholder.png',
 											externalUrl: 'https://kindfi.org/profile?section=gamification',
@@ -450,7 +361,7 @@ export function AdminGamificationTriggers() {
 									})
 								}}
 							>
-								{mutation.isPending ? 'Submitting…' : `Run NFT ${nftAction}`}
+								{form.isPending ? 'Submitting…' : `Run NFT ${form.nftAction}`}
 							</Button>
 						</TabsContent>
 
@@ -461,7 +372,7 @@ export function AdminGamificationTriggers() {
 							</p>
 							<div className="grid gap-4 sm:grid-cols-2">
 								<Field label="Event type">
-									<Select value={eventType} onValueChange={setEventType}>
+									<Select value={form.eventType} onValueChange={form.setEventType}>
 										<SelectTrigger>
 											<SelectValue />
 										</SelectTrigger>
@@ -479,25 +390,25 @@ export function AdminGamificationTriggers() {
 										type="number"
 										min={1}
 										placeholder="Default for event"
-										value={customPoints}
-										onChange={(e) => setCustomPoints(e.target.value)}
+										value={form.customPoints}
+										onChange={(e) => form.setCustomPoints(e.target.value)}
 									/>
 								</Field>
 							</div>
 							<Button
-								disabled={!canSubmit}
+								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									handleSubmit({
+									form.handleSubmit({
 										module: 'reputation',
 										action: 'record_event',
 										userAddress: address,
-										eventType: Number(eventType),
-										points: customPoints ? Number(customPoints) : undefined,
+										eventType: Number(form.eventType),
+										points: form.customPoints ? Number(form.customPoints) : undefined,
 									})
 								}}
 							>
-								{mutation.isPending ? 'Submitting…' : 'Record reputation event'}
+								{form.isPending ? 'Submitting…' : 'Record reputation event'}
 							</Button>
 						</TabsContent>
 
@@ -511,20 +422,23 @@ export function AdminGamificationTriggers() {
 									<Input
 										type="number"
 										min={0}
-										value={roundId}
-										onChange={(e) => setRoundId(e.target.value)}
+										value={form.roundId}
+										onChange={(e) => form.setRoundId(e.target.value)}
 									/>
 								</Field>
 								<Field label="Option ID (on-chain)">
 									<Input
 										type="number"
 										min={0}
-										value={optionId}
-										onChange={(e) => setOptionId(e.target.value)}
+										value={form.optionId}
+										onChange={(e) => form.setOptionId(e.target.value)}
 									/>
 								</Field>
 								<Field label="Vote type">
-									<Select value={voteType} onValueChange={(v) => setVoteType(v as 'up' | 'down')}>
+									<Select
+										value={form.voteType}
+										onValueChange={(v) => form.setVoteType(v as 'up' | 'down')}
+									>
 										<SelectTrigger>
 											<SelectValue />
 										</SelectTrigger>
@@ -536,8 +450,10 @@ export function AdminGamificationTriggers() {
 								</Field>
 								<Field label="NFT tier (weight)">
 									<Select
-										value={tier}
-										onValueChange={(v) => setTier(v as 'bronze' | 'silver' | 'gold' | 'diamond')}
+										value={form.tier}
+										onValueChange={(v) =>
+											form.setTier(v as 'bronze' | 'silver' | 'gold' | 'diamond')
+										}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -552,26 +468,26 @@ export function AdminGamificationTriggers() {
 								</Field>
 							</div>
 							<Button
-								disabled={!canSubmit}
+								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									handleSubmit({
+									form.handleSubmit({
 										module: 'governance',
 										action: 'record_vote',
 										voterAddress: address,
-										roundId: Number(roundId),
-										optionId: Number(optionId),
-										voteType,
-										tier,
+										roundId: Number(form.roundId),
+										optionId: Number(form.optionId),
+										voteType: form.voteType,
+										tier: form.tier,
 									})
 								}}
 							>
-								{mutation.isPending ? 'Submitting…' : 'Record governance vote'}
+								{form.isPending ? 'Submitting…' : 'Record governance vote'}
 							</Button>
 						</TabsContent>
 					</Tabs>
 
-					<TriggerResultBanner result={lastResult} />
+					<TriggerResultBanner result={form.lastResult} />
 				</CardContent>
 			</Card>
 		</div>
