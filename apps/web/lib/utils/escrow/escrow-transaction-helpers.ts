@@ -38,7 +38,7 @@ export interface TransactionHelperParams {
 	router: ReturnType<typeof useRouter>
 }
 
-export async function deployAndSign({
+export const deployAndSign = async ({
 	payload,
 	type,
 	deployEscrow,
@@ -50,7 +50,7 @@ export async function deployAndSign({
 	deployEscrow: TransactionHelperParams['deployEscrow']
 	signTransaction: TransactionHelperParams['signTransaction']
 	sendTransaction: TransactionHelperParams['sendTransaction']
-}) {
+}): Promise<Record<string, unknown>> => {
 	let deployResponse: EscrowRequestResponse
 	try {
 		deployResponse = await deployEscrow(payload, type)
@@ -107,7 +107,35 @@ export async function deployAndSign({
 	return sendResult as Record<string, unknown>
 }
 
-export function extractContractData(responseAny: Record<string, unknown>) {
+interface ExtractedContractData {
+	contractId: string | undefined
+	escrowData:
+		| {
+				engagementId: string | undefined
+				title: string | undefined
+				description: string | undefined
+				roles:
+					| {
+							approver?: string
+							serviceProvider?: string
+							disputeResolver?: string
+							platformAddress?: string
+							releaseSigner?: string
+							receiver?: string
+					  }
+					| undefined
+				platformFee: number | undefined
+				milestones: Array<{ amount: number; receiver: string; description?: string }> | undefined
+				amount: number | undefined
+				receiver: string | undefined
+				receiverMemo: number | undefined
+		  }
+		| undefined
+}
+
+export const extractContractData = (
+	responseAny: Record<string, unknown>,
+): ExtractedContractData => {
 	const contractId =
 		(responseAny.contractId as string | undefined) ||
 		(responseAny.contract_id as string | undefined)
@@ -143,7 +171,7 @@ export function extractContractData(responseAny: Record<string, unknown>) {
 	return { contractId, escrowData }
 }
 
-export async function saveAndRedirect({
+export const saveAndRedirect = async ({
 	contractId,
 	escrowData,
 	formData,
@@ -153,13 +181,13 @@ export async function saveAndRedirect({
 	router,
 }: {
 	contractId: string | undefined
-	escrowData: ReturnType<typeof extractContractData>['escrowData']
+	escrowData: ExtractedContractData['escrowData']
 	formData: EscrowFormData
 	effectiveEngagementId: string
 	projectId: string
 	projectSlug: string
 	router: TransactionHelperParams['router']
-}) {
+}): Promise<void> => {
 	if (!contractId) {
 		toast.error('Escrow deployed but contract ID not found', {
 			description: 'Please check the transaction result manually',
@@ -195,7 +223,12 @@ export async function saveAndRedirect({
 									.filter((m) => m.description.trim().length > 0)
 									.flatMap((m) => {
 										if ('amount' in m && 'receiver' in m) {
-											return [{ amount: m.amount as number, receiver: m.receiver.trim() }]
+											return [
+												{
+													amount: m.amount as number,
+													receiver: m.receiver.trim(),
+												},
+											]
 										}
 										return []
 									}),
@@ -220,7 +253,10 @@ export async function saveAndRedirect({
 	})
 
 	if (!saveResult.success) {
-		const syncResult = await syncEscrowToDatabaseAction({ projectId, contractId })
+		const syncResult = await syncEscrowToDatabaseAction({
+			projectId,
+			contractId,
+		})
 		if (syncResult.success) {
 			toast.success('Escrow linked to project', {
 				description: syncResult.alreadySynced
@@ -248,7 +284,7 @@ export async function saveAndRedirect({
 	}, 1500)
 }
 
-export async function handleSingleRelease({
+export const handleSingleRelease = async ({
 	formData,
 	signer,
 	effectiveEngagementId,
@@ -259,9 +295,11 @@ export async function handleSingleRelease({
 	signTransaction,
 	sendTransaction,
 	router,
-}: TransactionHelperParams) {
+}: TransactionHelperParams): Promise<void> => {
 	if (!formData.amount || (formData.amount as number) <= 0) {
-		toast.error('Invalid amount', { description: 'Amount must be greater than 0' })
+		toast.error('Invalid amount', {
+			description: 'Amount must be greater than 0',
+		})
 		throw new Error('Invalid amount')
 	}
 
@@ -285,7 +323,10 @@ export async function handleSingleRelease({
 		description: composedDescription,
 		amount: formData.amount as number,
 		platformFee: getKindfiDeployPlatformFee(),
-		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
+		trustline: {
+			address: formData.trustlineAddress.trim(),
+			symbol: 'USDC',
+		},
 		milestones: sanitizedMilestones,
 	}
 
@@ -309,7 +350,7 @@ export async function handleSingleRelease({
 	})
 }
 
-export async function handleMultiRelease({
+export const handleMultiRelease = async ({
 	formData,
 	signer,
 	effectiveEngagementId,
@@ -320,7 +361,7 @@ export async function handleMultiRelease({
 	signTransaction,
 	sendTransaction,
 	router,
-}: TransactionHelperParams) {
+}: TransactionHelperParams): Promise<void> => {
 	const milestoneRows = formData.milestones
 		.filter((m) => m.description.trim().length > 0)
 		.map((m) => {
@@ -367,7 +408,10 @@ export async function handleMultiRelease({
 		},
 		description: composedDescription,
 		platformFee: getKindfiDeployPlatformFee(),
-		trustline: { address: formData.trustlineAddress.trim(), symbol: 'USDC' },
+		trustline: {
+			address: formData.trustlineAddress.trim(),
+			symbol: 'USDC',
+		},
 		milestones: sanitizedMilestones,
 	}
 

@@ -1,6 +1,5 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { Logger } from '~/lib/logger'
@@ -65,7 +64,6 @@ export function useEscrowTransaction({ projectId, projectSlug }: UseEscrowTransa
 				eventType: 'escrow.create.error',
 				error: e instanceof Error ? e.message : String(e),
 			})
-			toast.error(e instanceof Error ? e.message : 'Failed to create escrow')
 		} finally {
 			setIsSubmitting(false)
 		}
