@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import {
 	IoChevronForwardOutline,
 	IoCreateOutline,
+	IoFlagOutline,
 	IoLockClosedOutline,
 	IoMegaphoneOutline,
 	IoNewspaperOutline,
@@ -43,6 +44,7 @@ const SECTION_CARD_ICONS: Record<
 	highlights: IoStarOutline,
 	updates: IoNewspaperOutline,
 	members: IoPeopleOutline,
+	milestones: IoFlagOutline,
 	'escrow-setup': IoSettingsOutline,
 	'escrow-manage': IoLockClosedOutline,
 }
@@ -57,6 +59,7 @@ const OVERVIEW_SECTION_KEYS: Record<
 	highlights: 'content',
 	updates: 'content',
 	members: 'team',
+	milestones: 'escrow',
 	'escrow-setup': 'escrow',
 	'escrow-manage': 'escrow',
 }
@@ -108,7 +111,10 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 		[prefersReducedMotion],
 	)
 
-	const navSections = useMemo(() => getProjectManageNavSections(isPlatformAdmin), [isPlatformAdmin])
+	const navSections = useMemo(
+		() => getProjectManageNavSections(isPlatformAdmin, hasEscrow),
+		[isPlatformAdmin, hasEscrow],
+	)
 
 	const sectionsByCategory = useMemo(() => {
 		const content: ProjectManageNavSection[] = []

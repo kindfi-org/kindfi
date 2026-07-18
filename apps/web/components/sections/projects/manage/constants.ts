@@ -10,6 +10,7 @@ export type ProjectManageSectionKey =
 	| 'highlights'
 	| 'updates'
 	| 'members'
+	| 'milestones'
 	| 'escrow-setup'
 	| 'escrow-manage'
 
@@ -24,6 +25,8 @@ export type ProjectManageNavSection = {
 	cta: string
 	/** Escrow sections are platform-admin only */
 	adminOnly?: boolean
+	/** Only shown when the project has an active escrow contract */
+	requiresEscrow?: boolean
 }
 
 export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection> = [
@@ -82,6 +85,16 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 		cta: 'Manage team',
 	},
 	{
+		key: 'milestones',
+		title: 'Milestones',
+		description: 'Request admin review when a release is ready.',
+		href: (slug) => `/projects/${slug}/manage/milestones`,
+		path: '/milestones',
+		match: 'prefix',
+		cta: 'Request review',
+		requiresEscrow: true,
+	},
+	{
 		key: 'escrow-setup',
 		title: 'Escrow setup',
 		description:
@@ -106,9 +119,13 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 
 export const getProjectManageNavSections = (
 	isPlatformAdmin: boolean,
+	hasEscrow = false,
 ): ReadonlyArray<ProjectManageNavSection> => {
-	if (isPlatformAdmin) return PROJECT_MANAGE_NAV_SECTIONS
-	return PROJECT_MANAGE_NAV_SECTIONS.filter((section) => !section.adminOnly)
+	return PROJECT_MANAGE_NAV_SECTIONS.filter((section) => {
+		if (section.adminOnly && !isPlatformAdmin) return false
+		if (section.requiresEscrow && !hasEscrow) return false
+		return true
+	})
 }
 
 export const isProjectManageNavActive = (

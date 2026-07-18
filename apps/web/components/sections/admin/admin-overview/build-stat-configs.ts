@@ -5,6 +5,7 @@ import {
 	IoCloseCircleOutline,
 	IoCreateOutline,
 	IoEyeOutline,
+	IoFlagOutline,
 	IoFolderOutline,
 	IoPauseCircleOutline,
 	IoPeopleOutline,
@@ -93,6 +94,13 @@ export const buildProjectStats = (stats: AdminStats): ProjectStatConfig[] => [
 		icon: IoEyeOutline,
 		color: 'text-yellow-600',
 		bgColor: 'bg-yellow-100',
+	},
+	{
+		label: 'Milestone Reviews',
+		value: stats.pendingMilestoneReviews,
+		icon: IoFlagOutline,
+		color: 'text-amber-700',
+		bgColor: 'bg-amber-100',
 	},
 	{
 		label: 'Funded Projects',

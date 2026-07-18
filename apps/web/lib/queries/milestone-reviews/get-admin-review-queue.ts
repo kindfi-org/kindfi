@@ -1,0 +1,56 @@
+import type { TypedSupabaseClient } from '@packages/lib/types'
+import type {
+	AdminMilestoneReviewRequest,
+	MilestoneReviewStatus,
+} from '~/lib/types/milestone-review-request'
+import { mapMilestoneReviewRequestRow } from './map-milestone-review-request'
+
+export async function getAdminReviewQueue(
+	client: TypedSupabaseClient,
+	status: MilestoneReviewStatus | 'all' = 'pending',
+): Promise<AdminMilestoneReviewRequest[]> {
+	let query = client
+		.from('milestone_review_requests')
+		.select(
+			`
+			id,
+			project_id,
+			escrow_contract_id,
+			milestone_index,
+			milestone_title,
+			status,
+			requester_id,
+			reviewer_id,
+			request_notes,
+			review_notes,
+			created_at,
+			reviewed_at,
+			requester:requester_id ( display_name ),
+			reviewer:reviewer_id ( display_name ),
+			project:project_id ( title, slug )
+		`,
+		)
+		.order('created_at', { ascending: false })
+
+	if (status !== 'all') {
+		query = query.eq('status', status)
+	}
+
+	const { data, error } = await query
+
+	if (error) throw error
+
+	return (data ?? []).map((row) => {
+		const requester = row.requester as { display_name: string | null } | null
+		const reviewer = row.reviewer as { display_name: string | null } | null
+		const project = row.project as { title: string; slug: string } | null
+
+		return {
+			...mapMilestoneReviewRequestRow(row),
+			projectTitle: project?.title ?? 'Unknown project',
+			projectSlug: project?.slug ?? '',
+			requesterDisplayName: requester?.display_name ?? null,
+			reviewerDisplayName: reviewer?.display_name ?? null,
+		}
+	})
+}

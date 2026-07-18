@@ -1014,6 +1014,73 @@ export type Database = {
           },
         ]
       }
+      milestone_review_requests: {
+        Row: {
+          created_at: string
+          escrow_contract_id: string
+          id: string
+          milestone_index: number
+          milestone_title: string | null
+          project_id: string
+          request_notes: string | null
+          requester_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          escrow_contract_id: string
+          id?: string
+          milestone_index: number
+          milestone_title?: string | null
+          project_id: string
+          request_notes?: string | null
+          requester_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          escrow_contract_id?: string
+          id?: string
+          milestone_index?: number
+          milestone_title?: string | null
+          project_id?: string
+          request_notes?: string | null
+          requester_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_review_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_review_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_review_requests_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_logs: {
         Row: {
           created_at: string | null

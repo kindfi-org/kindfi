@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 import {
 	IoCreateOutline,
+	IoFlagOutline,
 	IoLockClosedOutline,
 	IoMegaphoneOutline,
 	IoNewspaperOutline,
@@ -36,6 +37,7 @@ const SECTION_ICONS: Record<
 	highlights: IoStarOutline,
 	updates: IoNewspaperOutline,
 	members: IoPeopleOutline,
+	milestones: IoFlagOutline,
 	'escrow-setup': IoSettingsOutline,
 	'escrow-manage': IoLockClosedOutline,
 }
@@ -59,7 +61,10 @@ export function ProjectManageCommandCenter({
 }: ProjectManageCommandCenterProps) {
 	const pathname = usePathname()
 	const basePath = `/projects/${slug}/manage`
-	const navSections = useMemo(() => getProjectManageNavSections(isPlatformAdmin), [isPlatformAdmin])
+	const navSections = useMemo(
+		() => getProjectManageNavSections(isPlatformAdmin, project.hasEscrow),
+		[isPlatformAdmin, project.hasEscrow],
+	)
 
 	return (
 		<header className="sticky top-0 z-20 -mx-4 bg-background/95 px-4 py-4 shadow-[0_1px_0_0_hsl(var(--border))] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">

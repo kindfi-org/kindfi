@@ -246,4 +246,46 @@ export const profile = {
 	matchingFunded: 'Funded',
 	matchingCategories: 'Your categories',
 	matchingRegions: 'Your regions',
+	matchingStepProfile: 'Your profile & history',
+	matchingStepAnalyze: 'AI analysis',
+	matchingStepRecommend: 'Personalized picks',
+	matchingPrivacyNote: 'Runs only when you tap — nothing is shared or stored beyond this session.',
+	matchingRefresh: 'Refresh recommendations',
+	matchingTopPick: 'Top pick',
+	matchingWhyMatch: 'Why this matches you',
+	matchingBrowseProjects: 'Browse all projects',
+	matchingNotEnoughProjects:
+		'Not enough active campaigns for matching right now. Browse projects and check back soon!',
+	matchingInsightsTitle: 'Based on your interests',
+	matchingMatchesLabel: 'matches found',
+	manageMilestones: {
+		title: 'Milestone reviews',
+		description:
+			'Submit a release for admin review when your milestone work is ready. KindFi admins will be notified and can proceed with escrow approval.',
+		noEscrowDescription:
+			'Milestone reviews require an active escrow contract. Contact KindFi if you need escrow setup for this project.',
+		noMilestones: 'No releases found for this escrow contract.',
+		releaseLabel: 'Release {n}',
+		requestReview: 'Request milestone review',
+		requestSubmitted: 'Review request submitted. Admins have been notified.',
+		requestDialogTitle: 'Request milestone review',
+		requestDialogDescription:
+			'Notify KindFi admins that Release {release} ({title}) is ready for review.',
+		requestNotesLabel: 'Notes for admins (optional)',
+		requestNotesPlaceholder: 'Share context, evidence links, or completion details…',
+		cancel: 'Cancel',
+		submitting: 'Submitting…',
+		submitRequest: 'Submit request',
+		pendingMessage: 'Your review request is pending. An admin will respond soon.',
+		approvedMessage:
+			'Your review request was approved. An admin will proceed with on-chain escrow steps.',
+		onChainCompleteMessage: 'This release has already been approved or released on-chain.',
+		yourNotes: 'Your notes',
+		adminNotes: 'Admin notes',
+		requestStatus: {
+			pending: 'Review pending',
+			approved: 'Approved',
+			rejected: 'Rejected',
+		},
+	},
 }
