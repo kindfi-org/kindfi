@@ -13,6 +13,7 @@ import { nav } from './nav'
 import { news } from './news'
 import { profile } from './profile'
 import { projects } from './projects'
+import { tutorials } from './tutorials'
 import { user } from './user'
 import { waitlist } from './waitlist'
 
@@ -32,6 +33,7 @@ export const en = {
 	profile,
 	about,
 	news,
+	tutorials,
 	waitlist,
 	footer,
 }
