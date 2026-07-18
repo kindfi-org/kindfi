@@ -255,3 +255,26 @@ export const progressBarAnimation = {
 		transition: { duration: 1, ease: 'easeOut' as const },
 	}),
 }
+
+const EASE_OUT = [0.22, 1, 0.36, 1] as const
+
+export const getFadeInAnimateProps = (reducedMotion: boolean | null) => ({
+	initial: reducedMotion ? false : { opacity: 0, y: 16 },
+	animate: reducedMotion ? false : { opacity: 1, y: 0 },
+	transition: reducedMotion ? { duration: 0 } : { duration: 0.45, ease: EASE_OUT },
+})
+
+export const getFadeInViewProps = (
+	reducedMotion: boolean | null,
+	options?: { delay?: number; y?: number },
+) => {
+	const delay = options?.delay ?? 0
+	const y = options?.y ?? 20
+
+	return {
+		initial: reducedMotion ? false : { opacity: 0, y },
+		whileInView: reducedMotion ? undefined : { opacity: 1, y: 0 },
+		transition: reducedMotion ? { duration: 0 } : { duration: 0.4, delay, ease: EASE_OUT },
+		viewport: { once: true },
+	}
+}

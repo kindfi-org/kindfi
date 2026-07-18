@@ -9,6 +9,20 @@ export const tutorials = {
 		campaigns: 'Campaigns',
 		donations: 'Donations & Milestones',
 	},
+	sectionDescriptions: {
+		gettingStarted:
+			'Create your account and set up your profile to start exploring or launching campaigns.',
+		campaigns:
+			'Everything you need to launch, manage, and complete milestone-based campaigns on KindFi.',
+		donations:
+			'Understand how donations flow through trustless escrow and how milestones unlock funds.',
+	},
+	nav: {
+		label: 'Tutorial sections',
+	},
+	stepsLabel: 'steps',
+	viewSteps: 'View step-by-step guide',
+	getStarted: 'Get started',
 	cards: {
 		register: {
 			title: 'Register & Create an Account',

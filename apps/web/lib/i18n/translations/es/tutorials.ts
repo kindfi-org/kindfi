@@ -9,6 +9,20 @@ export const tutorials = {
 		campaigns: 'Campañas',
 		donations: 'Donaciones y Hitos',
 	},
+	sectionDescriptions: {
+		gettingStarted:
+			'Crea tu cuenta y configura tu perfil para comenzar a explorar o lanzar campañas.',
+		campaigns:
+			'Todo lo que necesitas para lanzar, gestionar y completar campañas basadas en hitos en KindFi.',
+		donations:
+			'Entiende cómo fluyen las donaciones a través del escrow sin confianza y cómo los hitos liberan fondos.',
+	},
+	nav: {
+		label: 'Secciones de tutoriales',
+	},
+	stepsLabel: 'pasos',
+	viewSteps: 'Ver guía paso a paso',
+	getStarted: 'Comenzar',
 	cards: {
 		register: {
 			title: 'Regístrate y Crea una Cuenta',

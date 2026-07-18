@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { BookOpen } from 'lucide-react'
 import { SectionContainer } from '~/components/shared/section-container'
+import { getFadeInAnimateProps } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 
 export function TutorialsHero() {
@@ -23,11 +24,7 @@ export function TutorialsHero() {
 			<SectionContainer maxWidth="6xl" className="relative">
 				<motion.div
 					className="mx-auto max-w-4xl text-center"
-					initial={reducedMotion ? false : { opacity: 0, y: 16 }}
-					animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-					transition={
-						reducedMotion ? { duration: 0 } : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
-					}
+					{...getFadeInAnimateProps(reducedMotion)}
 				>
 					<p className="mb-4 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-emerald-700/80">
 						<BookOpen className="h-3.5 w-3.5" aria-hidden="true" />

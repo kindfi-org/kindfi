@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '~/components/base/button'
 import { SectionContainer } from '~/components/shared/section-container'
+import { getFadeInViewProps } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 
 export function TutorialsCta() {
@@ -24,38 +25,22 @@ export function TutorialsCta() {
 				<motion.h2
 					id="tutorials-cta-heading"
 					className="text-balance text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"
-					initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-					whileInView={reducedMotion ? false : { opacity: 1, y: 0 }}
+					{...getFadeInViewProps(reducedMotion, { y: 20 })}
 					transition={reducedMotion ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-					viewport={{ once: true }}
 				>
 					<span className="gradient-text">{t('tutorials.cta.title')}</span>
 				</motion.h2>
 
 				<motion.p
 					className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg"
-					initial={reducedMotion ? false : { opacity: 0, y: 12 }}
-					whileInView={reducedMotion ? false : { opacity: 1, y: 0 }}
-					transition={
-						reducedMotion
-							? { duration: 0 }
-							: { duration: 0.45, delay: 0.1, ease: [0.22, 1, 0.36, 1] }
-					}
-					viewport={{ once: true }}
+					{...getFadeInViewProps(reducedMotion, { delay: 0.1, y: 12 })}
 				>
 					{t('tutorials.cta.subtitle')}
 				</motion.p>
 
 				<motion.div
 					className="mt-8 flex flex-col justify-center gap-4 sm:flex-row"
-					initial={reducedMotion ? false : { opacity: 0, y: 12 }}
-					whileInView={reducedMotion ? false : { opacity: 1, y: 0 }}
-					transition={
-						reducedMotion
-							? { duration: 0 }
-							: { duration: 0.45, delay: 0.15, ease: [0.22, 1, 0.36, 1] }
-					}
-					viewport={{ once: true }}
+					{...getFadeInViewProps(reducedMotion, { delay: 0.15, y: 12 })}
 				>
 					<Link href="/faqs">
 						<Button size="lg" className="gradient-btn text-white shadow-sm hover:shadow-md">
