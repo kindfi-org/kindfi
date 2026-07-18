@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
-import { resetPasswordAction } from '~/app/actions/auth'
+import { resetPasswordAction } from '~/app/actions/auth/password-reset-actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { FormMessage, type Message } from '~/components/form-message'

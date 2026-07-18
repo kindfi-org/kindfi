@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { requestResetAccountAction } from '~/app/actions/auth'
+import { requestResetAccountAction } from '~/app/actions/auth/password-reset-actions'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { FormMessage, type Message } from '~/components/form-message'
