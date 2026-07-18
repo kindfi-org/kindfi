@@ -1,5 +1,3 @@
-import { ContributionConfirmedEmail } from '../templates/contribution-confirmed-email'
-import { ContributionReceivedEmail } from '../templates/contribution-received-email'
 import {
 	appUrl,
 	createInAppNotification,
@@ -7,6 +5,8 @@ import {
 	getUserEmailPref,
 	sendEmail,
 } from '../notification-helpers'
+import { ContributionConfirmedEmail } from '../templates/contribution-confirmed-email'
+import { ContributionReceivedEmail } from '../templates/contribution-received-email'
 
 export async function sendContributionNotifications({
 	contributorId,

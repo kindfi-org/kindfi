@@ -1,9 +1,5 @@
+import { createInAppNotification, getUserEmailAndName, sendEmail } from '../notification-helpers'
 import { WelcomeNewUserEmail } from '../templates/welcome-new-user-email'
-import {
-	createInAppNotification,
-	getUserEmailAndName,
-	sendEmail,
-} from '../notification-helpers'
 
 export async function sendWelcomeEmail({
 	userId,

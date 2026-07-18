@@ -1,5 +1,4 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
-import { CampaignGoalReachedEmail } from '../templates/campaign-goal-reached-email'
 import {
 	appUrl,
 	createInAppNotification,
@@ -7,6 +6,7 @@ import {
 	getUserEmailPref,
 	sendEmail,
 } from '../notification-helpers'
+import { CampaignGoalReachedEmail } from '../templates/campaign-goal-reached-email'
 
 export async function sendCampaignGoalReachedNotifications({
 	creatorId,
