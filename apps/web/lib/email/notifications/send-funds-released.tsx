@@ -1,4 +1,3 @@
-import { FundsReleasedEmail } from '../templates/funds-released-email'
 import {
 	appUrl,
 	createInAppNotification,
@@ -6,6 +5,7 @@ import {
 	getUserEmailPref,
 	sendEmail,
 } from '../notification-helpers'
+import { FundsReleasedEmail } from '../templates/funds-released-email'
 
 export async function sendFundsReleasedNotification({
 	userId,

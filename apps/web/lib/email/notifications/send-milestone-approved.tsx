@@ -1,4 +1,3 @@
-import { MilestoneApprovedEmail } from '../templates/milestone-approved-email'
 import {
 	appUrl,
 	createInAppNotification,
@@ -6,6 +5,7 @@ import {
 	getUserEmailPref,
 	sendEmail,
 } from '../notification-helpers'
+import { MilestoneApprovedEmail } from '../templates/milestone-approved-email'
 
 export async function sendMilestoneApprovedNotification({
 	userId,
