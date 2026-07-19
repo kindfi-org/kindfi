@@ -5,6 +5,7 @@ import {
 	resolveProjectEscrowContracts,
 } from '~/lib/queries/projects/resolve-project-escrow-contracts'
 import type { Project } from '~/lib/types/project'
+import { calculateReleasedAmount } from '~/lib/utils/projects/milestone-funding'
 
 export type ProjectListItem = Project & {
 	status?: string
@@ -39,6 +40,10 @@ export async function getAllProjects(
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
+      ),
+      milestones (
+        amount,
+        status
       ),
       project_escrows:project_escrows!left (
         escrow_id
@@ -112,6 +117,13 @@ export async function getAllProjects(
 				tags: project.project_tag_relationships.map((r) => r.tag),
 				escrowContractAddress: escrow?.escrowContractAddress,
 				escrowType: escrow?.escrowType,
+				releasedAmount: calculateReleasedAmount(
+					(
+						project as unknown as {
+							milestones?: Array<{ amount: number | string | null; status: string | null }>
+						}
+					).milestones,
+				),
 			} satisfies ProjectListItem
 		}) ?? []
 	)
