@@ -246,6 +246,15 @@
 	@apply from-[#5e5e5e] to-[#7CC635];
 }
 
+.gradient-released {
+	@apply bg-gradient-to-r from-[#0f766e] to-[#2dd4bf];
+	@apply transition duration-300;
+}
+
+.gradient-released:hover {
+	@apply from-[#115e59] to-[#5eead4];
+}
+
 /* Component Styles */
 .radix-navigation-menu {
 	position: relative;
