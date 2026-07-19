@@ -39,7 +39,11 @@ export async function POST(req: NextRequest) {
 				overrideAddress: referred_address,
 			}),
 			// Get referral record
-			supabase.from('referral_records').select('*').eq('referred_id', referred_id).single(),
+			supabase
+				.from('referral_records')
+				.select('*')
+				.eq('referred_id', referred_id)
+				.single(),
 		])
 
 		const { data: referral, error: refError } = referralResult

@@ -82,12 +82,14 @@ self.addEventListener('install', (event) => {
 	event.waitUntil(
 		Promise.all([
 			// Cache static assets
-			caches.open('notification-assets-v1').then((cache) => {
-				return cache.addAll([
-					// '/icons/notification-icon.png',
-					// '/icons/notification-badge.png',
-				])
-			}),
+			caches
+				.open('notification-assets-v1')
+				.then((cache) => {
+					return cache.addAll([
+						// '/icons/notification-icon.png',
+						// '/icons/notification-badge.png',
+					])
+				}),
 			// Skip waiting to activate immediately
 			self.skipWaiting(),
 		]),
@@ -99,20 +101,22 @@ self.addEventListener('activate', (event) => {
 	event.waitUntil(
 		Promise.all([
 			// Clean up old caches
-			caches.keys().then((cacheNames) => {
-				return Promise.all(
-					cacheNames
-						.filter((cacheName) => {
-							return (
-								cacheName.startsWith('notification-assets-') &&
-								cacheName !== 'notification-assets-v1'
-							)
-						})
-						.map((cacheName) => {
-							return caches.delete(cacheName)
-						}),
-				)
-			}),
+			caches
+				.keys()
+				.then((cacheNames) => {
+					return Promise.all(
+						cacheNames
+							.filter((cacheName) => {
+								return (
+									cacheName.startsWith('notification-assets-') &&
+									cacheName !== 'notification-assets-v1'
+								)
+							})
+							.map((cacheName) => {
+								return caches.delete(cacheName)
+							}),
+					)
+				}),
 			// Claim clients to ensure the service worker is in control
 			self.clients.claim(),
 		]),

@@ -49,7 +49,11 @@ export async function POST(req: NextRequest) {
 				overrideAddress: user_address,
 			}),
 			// Get quest definition
-			supabase.from('quest_definitions').select('*').eq('quest_id', quest_id).single(),
+			supabase
+				.from('quest_definitions')
+				.select('*')
+				.eq('quest_id', quest_id)
+				.single(),
 		])
 
 		const { data: quest, error: questError } = questResult
