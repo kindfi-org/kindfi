@@ -6,12 +6,20 @@ import Image from 'next/image'
 import { useMemo } from 'react'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
-import { CategoryBadge, CountryFlag } from '~/components/sections/projects/shared'
+import {
+	CategoryBadge,
+	CountryFlag,
+	ReleasedProgressBar,
+} from '~/components/sections/projects/shared'
 import { ShareButtons } from '~/components/shared/share-buttons'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { getProjectPageUrl } from '~/lib/seo/project-metadata'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
+import {
+	calculateReleasedAmount,
+	calculateReleasedProgressPercent,
+} from '~/lib/utils/projects/milestone-funding'
 
 interface ProjectHeroProps {
 	project: ProjectDetail
@@ -34,6 +42,12 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 		() => getProjectPageUrl(project.slug, projectSlug),
 		[project.slug, projectSlug],
 	)
+
+	const releasedAmount = useMemo(
+		() => calculateReleasedAmount(project.milestones),
+		[project.milestones],
+	)
+	const releasedPercentage = calculateReleasedProgressPercent(releasedAmount, project.goal) ?? 0
 
 	return (
 		<motion.section
@@ -101,6 +115,12 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
+						<p className="mb-1 text-sm text-muted-foreground">Released</p>
+						<p className="text-xl font-bold tabular-nums">
+							$<AnimatedCounter value={releasedAmount} />
+						</p>
+					</div>
+					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Goal</p>
 						<p className="text-xl font-bold tabular-nums">
 							$<AnimatedCounter value={project.goal} />
@@ -119,6 +139,13 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 						</p>
 					</div>
 				</section>
+
+				<div className="mb-6">
+					<ReleasedProgressBar
+						releasedAmount={releasedAmount}
+						progressPercentage={releasedPercentage}
+					/>
+				</div>
 
 				<section className="border-t border-slate-100 pt-6" aria-label="Share this project">
 					<div className="mb-3 flex items-center gap-2">
