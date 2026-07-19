@@ -99,7 +99,7 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 				)}
 
 				<section
-					className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4"
+					className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-3 lg:grid-cols-5"
 					aria-label="Project funding stats"
 				>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
