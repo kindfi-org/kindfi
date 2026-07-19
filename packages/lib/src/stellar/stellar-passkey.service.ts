@@ -1,19 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { createHash, createPublicKey, createVerify } from 'node:crypto'
-import { db, devices } from '@packages/drizzle'
-import {
-	Account,
-	Address,
-	Contract,
-	hash,
-	Keypair,
-	Operation,
-	type Transaction,
-	TransactionBuilder,
-	xdr,
-} from '@stellar/stellar-sdk'
+import { Address, Contract, hash, Keypair, TransactionBuilder, xdr } from '@stellar/stellar-sdk'
 import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
-import { eq } from 'drizzle-orm'
 import { appEnvConfig } from '../config'
 import { logger } from '../logger'
 import {
@@ -21,6 +8,14 @@ import {
 	convertCoseToUncompressedPublicKey,
 } from '../passkey/webauthn-keys'
 import type { AppEnvInterface } from '../types'
+import { getPublicKeyForContract, verifySECP256R1Signature } from './passkey-signature.utils'
+import {
+	executeAddDevice,
+	executeContractInvocation,
+	executeRemoveDevice,
+	type PasskeyOperation,
+	type PasskeyTxContext,
+} from './passkey-transaction.utils'
 import { type RateLimitConfig, SignatureRateLimiter } from './rate-limiter'
 
 /**
@@ -339,13 +334,13 @@ export class StellarPasskeyService {
 			// Verify origin (optional but recommended)
 
 			// Get the public key for this address
-			const publicKey = await this.getPublicKeyForContract(address)
+			const publicKey = await getPublicKeyForContract(address)
 			if (!publicKey) {
 				throw new Error('Public key not found for address')
 			}
 
 			// Verify the signature using secp256r1
-			const isValid = await this.verifySECP256R1Signature(
+			const isValid = await verifySECP256R1Signature(
 				authenticatorData,
 				clientDataJSON,
 				rawSignature,
@@ -368,141 +363,6 @@ export class StellarPasskeyService {
 	}
 
 	/**
-	 * Verifies SECP256R1 signature using Node.js crypto
-	 */
-	private async verifySECP256R1Signature(
-		authenticatorData: string,
-		clientDataJSON: string,
-		signature: string,
-		publicKey: Buffer,
-	): Promise<boolean> {
-		try {
-			// Create the signed data (authenticator data + client data hash)
-			const authDataBuffer = Buffer.from(authenticatorData, 'base64')
-			const clientDataBuffer = Buffer.from(clientDataJSON, 'base64')
-			const clientDataHash = createHash('sha256').update(clientDataBuffer).digest()
-
-			const signedData = Buffer.concat([authDataBuffer, clientDataHash])
-			const signatureBuffer = Buffer.from(signature, 'base64')
-
-			// Convert uncompressed public key to DER format for verification
-			const publicKeyDER = this.convertUncompressedToDER(publicKey)
-
-			// Create public key object
-			const publicKeyObj = createPublicKey({
-				key: publicKeyDER,
-				format: 'der',
-				type: 'spki',
-			})
-
-			// Verify signature
-			const verify = createVerify('SHA256')
-			verify.update(signedData)
-			const isValid = verify.verify(publicKeyObj, signatureBuffer)
-
-			return isValid
-		} catch (error) {
-			logger.error(
-				'SECP256R1 verification failed',
-				error instanceof Error ? error : new Error(String(error)),
-			)
-			return false
-		}
-	}
-
-	/**
-	 * Converts uncompressed public key to DER format for crypto verification
-	 */
-	private convertUncompressedToDER(uncompressedKey: Buffer): Buffer {
-		// DER format for SECP256R1 public key
-		// This is the standard ASN.1 DER encoding for P-256 public keys
-		const derPrefix = Buffer.from([
-			0x30,
-			0x59, // SEQUENCE, length
-			0x30,
-			0x13, // SEQUENCE, length
-			0x06,
-			0x07,
-			0x2a,
-			0x86,
-			0x48,
-			0xce,
-			0x3d,
-			0x02,
-			0x01, // OID for EC public key
-			0x06,
-			0x08,
-			0x2a,
-			0x86,
-			0x48,
-			0xce,
-			0x3d,
-			0x03,
-			0x01,
-			0x07, // OID for P-256 curve
-			0x03,
-			0x42,
-			0x00, // BIT STRING, length, unused bits
-		])
-
-		return Buffer.concat([derPrefix, uncompressedKey])
-	}
-
-	/**
-	 * Gets the public key for a contract
-	 */
-	private async getPublicKeyForContract(contractId: string): Promise<Buffer | null> {
-		try {
-			// Query database for device record with this contract address
-			const deviceRecord = await db
-				.select({
-					publicKey: devices.publicKey,
-					deviceName: devices.deviceName,
-					credentialId: devices.credentialId,
-				})
-				.from(devices)
-				.where(eq(devices.address, contractId))
-				.limit(1)
-
-			if (deviceRecord.length === 0) {
-				return null
-			}
-
-			const device = deviceRecord[0]
-
-			// The publicKey field should contain the CBOR-encoded public key
-			// Convert from base64 string to Buffer for processing
-			if (!device.publicKey) {
-				return null
-			}
-
-			// Check if the public key is already a hex string or base64
-			let publicKeyBuffer: Buffer
-			try {
-				// Try to decode as base64 first (most common format)
-				publicKeyBuffer = Buffer.from(device.publicKey, 'base64')
-			} catch {
-				try {
-					// Try as hex string
-					publicKeyBuffer = Buffer.from(device.publicKey, 'hex')
-				} catch {
-					// Assume it's already a raw string
-					publicKeyBuffer = Buffer.from(device.publicKey, 'utf8')
-				}
-			}
-
-			return publicKeyBuffer
-		} catch (error) {
-			logger.error(
-				'Error retrieving public key from database',
-				error instanceof Error ? error : new Error(String(error)),
-				{ contractId },
-			)
-			return null
-		}
-	}
-
-	/**
 	 * Executes a passkey transaction on the smart contract
 	 * This handles operations after signature verification
 	 */
@@ -514,6 +374,7 @@ export class StellarPasskeyService {
 		if (!this.fundingKeypair) {
 			throw new Error('Funding keypair required for transaction execution')
 		}
+		const fundingKeypair = this.fundingKeypair
 
 		try {
 			// Parse operation details
@@ -530,14 +391,21 @@ export class StellarPasskeyService {
 				throw new Error('Invalid signature for transaction')
 			}
 
+			const ctx: PasskeyTxContext = {
+				server: this.server,
+				fundingKeypair,
+				networkPassphrase: this.networkPassphrase,
+				fee: this.STANDARD_FEE,
+			}
+
 			// Execute the specific operation
 			switch (operationData.type) {
 				case 'add_device':
-					return await this.executeAddDevice(address, operationData)
+					return await executeAddDevice(ctx, address, operationData)
 				case 'remove_device':
-					return await this.executeRemoveDevice(address, operationData)
+					return await executeRemoveDevice(ctx, address, operationData)
 				case 'invoke_contract':
-					return await this.executeContractInvocation(address, address, operationData)
+					return await executeContractInvocation(ctx, address, operationData)
 				default:
 					throw new Error('Unsupported operation type')
 			}
@@ -549,201 +417,6 @@ export class StellarPasskeyService {
 			)
 			throw new Error(`Transaction execution failed: ${error}`)
 		}
-	}
-
-	/**
-	 * Executes add device operation on the passkey contract
-	 */
-	private async executeAddDevice(
-		address: string,
-		operationData: AddDeviceOperation,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for add device operation')
-		}
-
-		const { deviceId, publicKey, isAdmin = false } = operationData
-
-		// Get funding account
-		const fundingAccount = await this.server
-			.getAccount(this.fundingKeypair.publicKey())
-			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-		// Build transaction for adding device
-		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: this.STANDARD_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: address,
-					function: 'add',
-					args: [
-						xdr.ScVal.scvBytes(Buffer.from(deviceId, 'utf-8')),
-						xdr.ScVal.scvBytes(Buffer.from(publicKey, 'base64')),
-						xdr.ScVal.scvBool(isAdmin),
-					],
-				}),
-			)
-			.setTimeout(60)
-			.build()
-
-		return await this.submitTransaction(transaction)
-	}
-
-	/**
-	 * Executes remove device operation on the passkey contract
-	 */
-	private async executeRemoveDevice(
-		address: string,
-		operationData: RemoveDeviceOperation,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for remove device operation')
-		}
-
-		const { deviceId } = operationData
-
-		// Get funding account
-		const fundingAccount = await this.server
-			.getAccount(this.fundingKeypair.publicKey())
-			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-		// Build transaction for removing device
-		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: this.STANDARD_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: address,
-					function: 'remove',
-					args: [xdr.ScVal.scvBytes(Buffer.from(deviceId, 'utf-8'))],
-				}),
-			)
-			.setTimeout(60)
-			.build()
-
-		return await this.submitTransaction(transaction)
-	}
-
-	/**
-	 * Executes general contract invocation
-	 */
-	private async executeContractInvocation(
-		_address: string,
-		contractId: string,
-		operationData: ContractInvocationOperation,
-	): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for contract invocation')
-		}
-
-		const { contractAddress, functionName, args = [] } = operationData
-
-		// Get funding account
-		const fundingAccount = await this.server
-			.getAccount(this.fundingKeypair.publicKey())
-			.then((res) => new Account(res.accountId(), res.sequenceNumber()))
-
-		// Convert arguments to ScVal format
-		const scArgs = args.map((arg: unknown) => {
-			if (typeof arg === 'string') {
-				return xdr.ScVal.scvString(arg)
-			}
-			if (typeof arg === 'number') {
-				return xdr.ScVal.scvU64(xdr.Uint64.fromString(arg.toString()))
-			}
-			if (typeof arg === 'boolean') {
-				return xdr.ScVal.scvBool(arg)
-			}
-			// Default to bytes for complex types
-			return xdr.ScVal.scvBytes(Buffer.from(JSON.stringify(arg), 'utf-8'))
-		})
-
-		// Build transaction for contract invocation
-		const transaction = new TransactionBuilder(fundingAccount, {
-			fee: this.STANDARD_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-			.addOperation(
-				Operation.invokeContractFunction({
-					contract: contractAddress || contractId,
-					function: functionName,
-					args: scArgs,
-				}),
-			)
-			.setTimeout(60)
-			.build()
-
-		return await this.submitTransaction(transaction)
-	}
-
-	/**
-	 * Helper to submit transactions with proper error handling and authorization
-	 */
-	private async submitTransaction(builtTransaction: Transaction): Promise<string> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for transaction submission')
-		}
-
-		// Simulate transaction to get authorization requirements
-		const simulation = await this.server.simulateTransaction(builtTransaction)
-
-		if (Api.isSimulationError(simulation)) {
-			throw new Error(`Simulation failed: ${simulation.error || 'unknown error'}`)
-		}
-
-		if (Api.isSimulationRestore(simulation)) {
-			throw new Error('Transaction requires restore operation')
-		}
-
-		// Assemble transaction with authorization entries from simulation
-		const assembledTransaction = assembleTransaction(builtTransaction, simulation).build()
-
-		// Sign the transaction with our funding account
-		// The assembleTransaction function handles authorization entries automatically
-		assembledTransaction.sign(this.fundingKeypair)
-
-		// Submit transaction to Soroban RPC (NOT Horizon - this was the bug!)
-		// Soroban transactions with authorization entries must use sendTransaction
-		const sendResult = await this.server.sendTransaction(assembledTransaction)
-
-		if (sendResult.status === 'ERROR') {
-			throw new Error('Transaction submission failed')
-		}
-
-		if (sendResult.status === 'PENDING') {
-			// Wait for transaction to be included in a ledger
-			let attempts = 0
-			const maxAttempts = 120 // 2 minutes for complex auth transactions
-
-			while (attempts < maxAttempts) {
-				await new Promise((resolve) => setTimeout(resolve, 10000)) // Wait 1 second
-				attempts++
-
-				try {
-					const txResult = await this.server.getTransaction(sendResult.hash)
-
-					if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
-						return sendResult.hash
-					}
-
-					if (txResult.status === Api.GetTransactionStatus.FAILED) {
-						throw new Error('Transaction failed')
-					}
-
-					if (txResult.status === Api.GetTransactionStatus.NOT_FOUND) {
-					}
-
-					// Still pending, continue waiting
-				} catch (_error) {}
-			}
-
-			throw new Error('Transaction timed out waiting for confirmation')
-		}
-
-		return sendResult.hash
 	}
 
 	/**
@@ -843,29 +516,9 @@ export interface PasskeyAccountInfo {
 	status: 'active' | 'not_found' | 'inactive'
 }
 
-export interface AddDeviceOperation {
-	type: 'add_device'
-	deviceId: string
-	publicKey: string
-	isAdmin?: boolean
-	challenge?: string
-}
-
-export interface RemoveDeviceOperation {
-	type: 'remove_device'
-	deviceId: string
-	challenge?: string
-}
-
-export interface ContractInvocationOperation {
-	type: 'invoke_contract'
-	contractAddress?: string
-	functionName: string
-	args?: unknown[]
-	challenge?: string
-}
-
-export type PasskeyOperation =
-	| AddDeviceOperation
-	| RemoveDeviceOperation
-	| ContractInvocationOperation
+export type {
+	AddDeviceOperation,
+	ContractInvocationOperation,
+	PasskeyOperation,
+	RemoveDeviceOperation,
+} from './passkey-transaction.utils'
