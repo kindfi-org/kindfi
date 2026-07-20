@@ -1,6 +1,5 @@
 import { Buffer } from 'node:buffer'
 import { appEnvConfig } from '@packages/lib/config'
-import { deriveSignaturePayload } from '@packages/lib/passkey'
 import type { WebAuthnSignatureData } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
 import {
@@ -16,8 +15,18 @@ import {
 	TransactionBuilder,
 	xdr,
 } from '@stellar/stellar-sdk'
-import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
+import { Api, Server } from '@stellar/stellar-sdk/rpc'
 import { logger } from '@/lib/logger'
+import { submitTransaction, submitTransactionWithWebAuthn } from './smart-wallet-submission.utils'
+import {
+	buildTransaction,
+	getFundingAccount,
+	type SmartWalletTxContext,
+	simulateTransaction,
+	type TransactionChallenge,
+} from './smart-wallet-transaction-builder.utils'
+
+export type { TransactionChallenge } from './smart-wallet-transaction-builder.utils'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
@@ -48,6 +57,15 @@ export class SmartWalletTransactionService {
 		}
 	}
 
+	private ctx(): SmartWalletTxContext {
+		return {
+			server: this.server,
+			networkPassphrase: this.networkPassphrase,
+			fundingKeypair: this.fundingKeypair,
+			fee: this.STANDARD_FEE,
+		}
+	}
+
 	/**
 	 * Transfer XLM (native lumens) from smart wallet to another address
 	 *
@@ -66,7 +84,7 @@ export class SmartWalletTransactionService {
 		)
 
 		// Build and return transaction for signing
-		return await this.buildTransaction({
+		return await buildTransaction(this.ctx(), {
 			smartWalletAddress: from,
 			operations: [transferOp],
 			sponsorFees,
@@ -91,7 +109,7 @@ export class SmartWalletTransactionService {
 			nativeToScVal(amount, { type: 'i128' }),
 		)
 
-		return await this.buildTransaction({
+		return await buildTransaction(this.ctx(), {
 			smartWalletAddress: from,
 			operations: [transferOp],
 			sponsorFees,
@@ -140,7 +158,7 @@ export class SmartWalletTransactionService {
 			xdr.ScVal.scvVec(scArgs),
 		)
 
-		return await this.buildTransaction({
+		return await buildTransaction(this.ctx(), {
 			smartWalletAddress: from,
 			operations: [invokeOp],
 			sponsorFees,
@@ -162,7 +180,7 @@ export class SmartWalletTransactionService {
 
 			// Use funding account for simulation (required for read operations)
 			const sourceAccount = this.fundingKeypair
-				? await this.getFundingAccount()
+				? await getFundingAccount(this.ctx())
 				: new Account(smartWalletAddress, '0')
 
 			// Query balance from Native XLM SAC
@@ -212,14 +230,14 @@ export class SmartWalletTransactionService {
 	 * Simulate a transaction (for read-only operations like NFT balance/metadata queries)
 	 */
 	async simulateTransaction(transaction: Transaction) {
-		return this.server.simulateTransaction(transaction)
+		return simulateTransaction(this.server, transaction)
 	}
 
 	/**
 	 * Get funding account for simulation (required when simulating read operations)
 	 */
 	async getFundingAccountForSimulation(): Promise<Account> {
-		return this.getFundingAccount()
+		return getFundingAccount(this.ctx())
 	}
 
 	/**
@@ -232,23 +250,13 @@ export class SmartWalletTransactionService {
 	 * @param params Transaction submission parameters with WebAuthn signature
 	 * @returns Transaction hash and status
 	 */
-	async submitTransactionWithWebAuthn(_params: {
+	async submitTransactionWithWebAuthn(params: {
 		smartWalletAddress: string
 		operation: Operation
 		webAuthnSignature: WebAuthnSignatureData
 		publicKey: Uint8Array
 	}): Promise<{ transactionHash: string; status: string }> {
-		logger.warn(
-			'⚠️ submitTransactionWithWebAuthn requires Smart Account Kit SDK. ' +
-				'Use SmartAccountKitService.signAndSubmit() instead, or use legacy submitTransaction() method.',
-		)
-
-		// This would require Smart Account Kit SDK integration
-		// For now, throw helpful error
-		throw new Error(
-			'WebAuthn transaction submission via Channels requires Smart Account Kit SDK. ' +
-				'Install smart-account-kit and use SmartAccountKitService.signAndSubmit() instead.',
-		)
+		return submitTransactionWithWebAuthn(params)
 	}
 
 	/**
@@ -259,201 +267,7 @@ export class SmartWalletTransactionService {
 	 * @returns Transaction hash
 	 */
 	async submitTransaction(signedTransaction: Transaction): Promise<string> {
-		const result = await this.server.sendTransaction(signedTransaction)
-
-		if (result.status === 'ERROR') {
-			throw new Error(`Transaction failed: ${JSON.stringify(result)}`)
-		}
-
-		let attempts = 0
-		const maxAttempts = 120
-
-		while (attempts < maxAttempts) {
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-			attempts++
-
-			try {
-				const txResult = await this.server.getTransaction(result.hash)
-
-				if (txResult.status === Api.GetTransactionStatus.SUCCESS) {
-					return result.hash
-				}
-
-				if (txResult.status === Api.GetTransactionStatus.FAILED) {
-					throw new Error(`Transaction failed: ${JSON.stringify(txResult)}`)
-				}
-			} catch (error) {
-				if (attempts === maxAttempts) {
-					throw error
-				}
-			}
-		}
-
-		throw new Error('Transaction timeout')
-	}
-
-	/**
-	 * Builds a transaction for WebAuthn signing
-	 * @returns the transaction envelope and challenge hash
-	 */
-	private async buildTransaction(params: BuildTransactionParams): Promise<TransactionChallenge> {
-		const { smartWalletAddress, operations, sponsorFees } = params
-
-		// Determine source account (funding account if sponsoring fees, otherwise smart wallet)
-		const sourceAccount = sponsorFees
-			? await this.getFundingAccount()
-			: await this.getSmartWalletAccount(smartWalletAddress)
-		// Build transaction
-		let txBuilder = new TransactionBuilder(sourceAccount, {
-			fee: this.STANDARD_FEE,
-			networkPassphrase: this.networkPassphrase,
-		})
-
-		// Add operations
-		for (const op of operations) {
-			txBuilder = txBuilder.addOperation(op)
-		}
-
-		const transaction = txBuilder.setTimeout(300).build()
-
-		// If sponsoring fees, sign with funding account before simulation
-		if (sponsorFees && this.fundingKeypair) {
-			transaction.sign(this.fundingKeypair)
-		}
-
-		// Simulate to get auth entry with signature_payload
-		const simulation = await this.server.simulateTransaction(transaction, {
-			cpuInstructions: 3_500_000,
-		})
-
-		if (Api.isSimulationError(simulation)) {
-			logger.error('❌ Simulation error:', simulation.error)
-			throw new Error(`Transaction simulation failed: ${simulation.error || 'Unknown error'}`)
-		}
-		// Get current ledger to set valid signature expiration
-		const latestLedger = await this.server.getLatestLedger()
-		const validityWindow = 300 // ~25 minutes (300 ledgers × 5 seconds)
-		const signatureExpirationLedger = latestLedger.sequence + validityWindow
-
-		// CRITICAL FIX: Modify the simulation result BEFORE assembling
-		// The simulation.result.auth contains the auth entries that will be used
-		// We need to update the signatureExpirationLedger in the simulation BEFORE calling assembleTransaction
-		if (
-			!Api.isSimulationError(simulation) &&
-			simulation.result?.auth &&
-			simulation.result.auth.length > 0
-		) {
-			// Get the first auth entry from simulation
-			const simAuthEntry = simulation.result.auth[0]
-
-			// Check if it's an address credentials type
-			if (
-				simAuthEntry.credentials().switch() ===
-				xdr.SorobanCredentialsType.sorobanCredentialsAddress()
-			) {
-				const addressCredentials = simAuthEntry.credentials().address()
-
-				// Create NEW credentials with valid expiration
-				const newCredentials = new xdr.SorobanAddressCredentials({
-					address: addressCredentials.address(),
-					nonce: addressCredentials.nonce(),
-					signatureExpirationLedger: signatureExpirationLedger,
-					signature: addressCredentials.signature(),
-				})
-
-				// Create new auth entry with updated credentials
-				const newAuthEntry = new xdr.SorobanAuthorizationEntry({
-					credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
-					rootInvocation: simAuthEntry.rootInvocation(),
-				})
-
-				// Replace the auth entry in the simulation result
-				simulation.result.auth[0] = newAuthEntry
-
-				// VERIFY: Check that modification worked
-				const _verifyCredentials = simulation.result.auth[0].credentials().address()
-			}
-		}
-
-		// NOW assemble the transaction with our modified simulation
-		// This will bake in the correct signatureExpirationLedger
-		const assembledTx = assembleTransaction(transaction, simulation)
-			// .setSorobanData(sorobanData)
-			.build()
-
-		// IMPORTANT: Extract signature_payload from the SIMULATION transaction
-		// The assembly process will have the definitive auth entry values, so we must use the values linked to the transaction (simulation)
-		const signaturePayloadResult = deriveSignaturePayload({
-			transactionResult:
-				simulation?.result as unknown as DeriveSignaturePayloadParams['transactionResult'],
-			networkPassphrase: this.networkPassphrase,
-		})
-
-		if (!signaturePayloadResult) {
-			// Fallback to transaction hash if we can't extract signature_payload
-			logger.warn('⚠️  Could not extract signature_payload, falling back to tx hash')
-			throw new Error('⚠️  Could not extract signature_payload')
-		}
-
-		// Use signature_payload as the WebAuthn challenge
-		const challenge = Buffer.from(signaturePayloadResult.payloadHex, 'hex').toString('base64url')
-		const txHash = assembledTx.hash()
-
-		// DIAGNOSTIC: Verify XDR encoding contains correct values
-		const transactionXDR = assembledTx.toXDR()
-		try {
-			const xdrCheck = TransactionBuilder.fromXDR(
-				transactionXDR,
-				this.networkPassphrase,
-			) as Transaction
-			const checkOp = xdrCheck.operations[0] as unknown as Api.SimulateHostFunctionResult
-			const checkAuthEntries = checkOp?.auth || []
-			if (checkAuthEntries.length > 0) {
-				const checkAuthEntry = checkAuthEntries[0]
-				if (
-					checkAuthEntry.credentials().switch() ===
-					xdr.SorobanCredentialsType.sorobanCredentialsAddress()
-				) {
-					const checkCredentials = checkAuthEntry.credentials().address()
-
-					if (
-						checkCredentials.signatureExpirationLedger().toString() !==
-						signatureExpirationLedger.toString()
-					) {
-						logger.error('❌ CRITICAL: XDR bytes do NOT contain correct expiration!')
-					}
-				}
-			}
-		} catch (error) {
-			logger.error('❌ Error verifying XDR:', error)
-		}
-
-		return {
-			transactionXDR,
-			challenge,
-			hash: txHash.toString('hex'),
-		}
-	}
-
-	/**
-	 * Get funding account for fee sponsorship
-	 */
-	private async getFundingAccount(): Promise<Account> {
-		if (!this.fundingKeypair) {
-			throw new Error('Funding keypair required for fee sponsorship')
-		}
-
-		const accountResponse = await this.server.getAccount(this.fundingKeypair.publicKey())
-
-		return new Account(accountResponse.accountId(), accountResponse.sequenceNumber())
-	}
-
-	/**
-	 * Get smart wallet account (for self-paying transactions)
-	 */
-	private async getSmartWalletAccount(address: string): Promise<Account> {
-		// Smart wallets use sequence number 0 for contract invocations
-		return new Account(address, '0')
+		return submitTransaction(this.server, signedTransaction)
 	}
 }
 
@@ -496,15 +310,6 @@ export interface InvokeContractParams {
 	sponsorFees?: boolean
 }
 
-export interface TransactionChallenge {
-	/** Transaction envelope in XDR format */
-	transactionXDR: string
-	/** Base64URL-encoded challenge hash for WebAuthn */
-	challenge: string
-	/** Transaction hash (hex) */
-	hash: string
-}
-
 export interface SmartWalletBalances {
 	/** XLM balance in stroops */
 	xlm: string
@@ -516,11 +321,3 @@ export interface SmartWalletBalances {
 		decimals?: number
 	}>
 }
-
-interface BuildTransactionParams {
-	smartWalletAddress: string
-	operations: xdr.Operation[]
-	sponsorFees: boolean
-}
-
-type DeriveSignaturePayloadParams = Parameters<typeof deriveSignaturePayload>[0]
