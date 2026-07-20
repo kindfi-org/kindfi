@@ -29,6 +29,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		isFetchingBalance,
 		progressPercentage,
 		isGoalReached,
+		displayReleased,
+		releasedProgressPercent,
 		fetchEscrowBalance,
 		resolveEscrowTypeForFunding,
 	} = useProjectSidebarEscrowState(project)
@@ -128,6 +130,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		isDonationReady,
 		isEscrowDataLoading,
 		progressPercentage,
+		displayReleased,
+		releasedProgressPercent,
 		onChainRaised,
 		isFetchingBalance,
 		isMounted,

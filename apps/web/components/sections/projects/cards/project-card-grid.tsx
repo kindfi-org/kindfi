@@ -7,12 +7,12 @@ import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
 import { CategoryBadge, ReleasedProgressBar } from '~/components/sections/projects/shared'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
+import { useProjectReleasedDisplay } from '~/hooks/projects/use-project-released-display'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
-import { calculateReleasedProgressPercent } from '~/lib/utils/projects/milestone-funding'
 
 interface ProjectCardGridProps {
 	project: Project
@@ -29,9 +29,15 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 		raised: project.raised,
 	})
 
+	const { displayReleased, releasedProgressPercent } = useProjectReleasedDisplay({
+		escrowContractAddress: project.escrowContractAddress,
+		escrowType: project.escrowType,
+		goal: project.goal,
+	})
+
 	const progressPercentage = progressPercent ?? 0
-	const releasedAmount = project.releasedAmount ?? 0
-	const releasedPercentage = calculateReleasedProgressPercent(releasedAmount, project.goal) ?? 0
+	const releasedAmount = displayReleased ?? 0
+	const releasedPercentage = releasedProgressPercent ?? 0
 
 	const imageSrc = project.image || '/images/placeholder.png'
 

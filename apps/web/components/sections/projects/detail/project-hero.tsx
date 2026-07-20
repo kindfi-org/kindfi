@@ -13,13 +13,10 @@ import {
 } from '~/components/sections/projects/shared'
 import { ShareButtons } from '~/components/shared/share-buttons'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
+import { useProjectReleasedDisplay } from '~/hooks/projects/use-project-released-display'
 import { getProjectPageUrl } from '~/lib/seo/project-metadata'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { getCountryNameFromAlpha3 } from '~/lib/utils/project-utils'
-import {
-	calculateReleasedAmount,
-	calculateReleasedProgressPercent,
-} from '~/lib/utils/projects/milestone-funding'
 
 interface ProjectHeroProps {
 	project: ProjectDetail
@@ -43,11 +40,15 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 		[project.slug, projectSlug],
 	)
 
-	const releasedAmount = useMemo(
-		() => calculateReleasedAmount(project.milestones),
-		[project.milestones],
-	)
-	const releasedPercentage = calculateReleasedProgressPercent(releasedAmount, project.goal) ?? 0
+	const { displayReleased, releasedProgressPercent } = useProjectReleasedDisplay({
+		escrowContractAddress: project.escrowContractAddress,
+		escrowType: project.escrowType,
+		goal: project.goal,
+		dbMilestones: project.milestones,
+	})
+
+	const releasedAmount = displayReleased ?? 0
+	const releasedPercentage = releasedProgressPercent ?? 0
 
 	return (
 		<motion.section
@@ -117,7 +118,13 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
 						<p className="mb-1 text-sm text-muted-foreground">Released</p>
 						<p className="text-xl font-bold tabular-nums">
-							$<AnimatedCounter value={releasedAmount} />
+							{displayReleased === null ? (
+								'…'
+							) : (
+								<>
+									$<AnimatedCounter value={releasedAmount} />
+								</>
+							)}
 						</p>
 					</div>
 					<div className="p-4 text-center bg-gray-50 rounded-lg">
