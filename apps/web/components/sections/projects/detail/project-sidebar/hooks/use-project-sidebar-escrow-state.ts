@@ -5,6 +5,11 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
+import {
+	calculateReleasedAmountFromEscrow,
+	calculateReleasedProgressPercent,
+	resolveDisplayReleasedAmount,
+} from '~/lib/utils/projects/milestone-funding'
 
 export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	const { getMultipleBalances, getEscrowByContractIds } = useEscrow()
@@ -35,6 +40,25 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	const isGoalReached = useMemo(
 		() => hasEscrow && project.goal > 0 && effectiveRaised >= project.goal,
 		[hasEscrow, project.goal, effectiveRaised],
+	)
+
+	const displayReleased = useMemo(
+		() =>
+			resolveDisplayReleasedAmount({
+				dbMilestones: project.milestones,
+				escrowContractAddress: project.escrowContractAddress,
+				onChainReleasedAmount: escrowData ? calculateReleasedAmountFromEscrow(escrowData) : null,
+				isLoadingOnChain: hasEscrow && isEscrowDataLoading,
+			}),
+		[escrowData, hasEscrow, isEscrowDataLoading, project.escrowContractAddress, project.milestones],
+	)
+
+	const releasedProgressPercent = useMemo(
+		() =>
+			displayReleased === null
+				? null
+				: calculateReleasedProgressPercent(displayReleased, project.goal),
+		[displayReleased, project.goal],
 	)
 
 	const resolveEscrowTypeForFunding = useCallback(async (): Promise<EscrowType> => {
@@ -90,6 +114,8 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 		effectiveRaised,
 		progressPercentage,
 		isGoalReached,
+		displayReleased,
+		releasedProgressPercent,
 		fetchEscrowBalance,
 		resolveEscrowTypeForFunding,
 	}
