@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { loadSmartAccountKit } from '../lib/stellar/smart-account-kit-loader'
+import { loadSmartAccountKit } from '../lib/smart-account/kit/smart-account-kit-loader'
 
 describe('loadSmartAccountKit', () => {
 	test('resolves the smart-account-kit module members', async () => {

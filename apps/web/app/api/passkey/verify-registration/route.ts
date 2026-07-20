@@ -1,6 +1,7 @@
 import { appEnvConfig } from '@packages/lib/config'
 import { deleteChallenge, getChallenge, getUser, saveUser } from '@packages/lib/db'
-import { StellarPasskeyService } from '@packages/lib/stellar'
+import { isSmartAccountEnabled } from '@packages/lib/smart-account'
+import { createSmartAccountDeployer } from '@packages/lib/smart-account/server'
 import { type RegistrationResponseJSON, verifyRegistrationResponse } from '@simplewebauthn/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
 			const existingCredential = credentials.find((cred) => cred.id === credential.id)
 
 			if (!existingCredential) {
-				if (config.features.enableSmartAccountCreation) {
+				if (isSmartAccountEnabled()) {
 					// Create Smart Account
 					// NOTE: Smart Account Kit SDK requires browser WebAuthn APIs and cannot be used server-side
 					// We use custom contracts (StellarPasskeyService) for server-side deployment
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
 							throw new Error(errorMsg)
 						}
 
-						const stellarService = new StellarPasskeyService(
+						const deployer = createSmartAccountDeployer(
 							config.stellar.networkPassphrase,
 							config.stellar.rpcUrl,
 							config.stellar.fundingAccount,
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
 						// Convert Uint8Array publicKey to base64 (same as verify-auth route)
 						const publicKeyBase64 = Buffer.from(credential.publicKey).toString('base64')
 
-						const deploymentResult = await stellarService.deployPasskeyAccount({
+						const deploymentResult = await deployer.deployPasskeyAccount({
 							credentialId: credential.id,
 							publicKey: publicKeyBase64,
 							userId,
@@ -161,7 +162,7 @@ export async function POST(req: NextRequest) {
 
 		if (smartAccountAddress) {
 			response.smartAccountAddress = smartAccountAddress
-		} else if (verification.verified && config.features.enableSmartAccountCreation) {
+		} else if (verification.verified && isSmartAccountEnabled()) {
 			// Registration verified but Smart Account creation failed
 			const warningMessage =
 				'Passkey registered successfully, but Smart Account creation failed. ' +

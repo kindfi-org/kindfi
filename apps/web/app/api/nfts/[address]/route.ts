@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
+import { isSmartAccountContractAddress } from '@packages/lib/utils/wallet-address'
 import {
 	Account,
 	Address,
@@ -11,8 +12,9 @@ import { Api } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { SmartWalletTransactionBuilderAdapter } from '@/lib/smart-account/adapters/transaction-builder.adapter'
+import { requireSmartAccountFeature } from '@/lib/smart-account/guards/require-smart-account-feature'
 import { addressParamSchema } from '~/lib/schemas/stellar.schemas'
-import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -23,10 +25,20 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ address: string }> }) {
 	try {
+		const featureGuard = requireSmartAccountFeature()
+		if (featureGuard) return featureGuard
+
 		const { address } = await params
 		const validation = validateRequest(addressParamSchema, { address })
 		if (!validation.success) return validation.response
 		const { address: validatedAddress } = validation.data
+
+		if (!isSmartAccountContractAddress(validatedAddress)) {
+			return NextResponse.json(
+				{ error: 'NFT endpoint requires a Smart Account C-address' },
+				{ status: 400 },
+			)
+		}
 
 		const nftContractAddress =
 			process.env.NFT_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_NFT_CONTRACT_ADDRESS
@@ -43,8 +55,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 		// Get configuration
 		const config = appEnvConfig('web')
 
-		// Initialize service for simulation
-		const txService = new SmartWalletTransactionService(
+		const txService = new SmartWalletTransactionBuilderAdapter(
 			config.stellar.networkPassphrase,
 			config.stellar.rpcUrl,
 			config.stellar.fundingAccount,
@@ -52,7 +63,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 
 		// Use funding account for simulation (required for read operations)
 		const sourceAccount = config.stellar.fundingAccount
-			? await txService.getFundingAccountForSimulation()
+			? await txService.getService().getFundingAccountForSimulation()
 			: new Account(validatedAddress, '0')
 
 		const nftContract = new Contract(nftContractAddress)
@@ -71,7 +82,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 			.setTimeout(30)
 			.build()
 
-		const balanceSim = await txService.simulateTransaction(balanceTx)
+		const balanceSim = await txService.getService().simulateTransaction(balanceTx)
 
 		let balance = 0
 		if (!Api.isSimulationError(balanceSim) && balanceSim.result?.retval) {
@@ -99,7 +110,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 			.setTimeout(30)
 			.build()
 
-		const totalSupplySim = await txService.simulateTransaction(totalSupplyTx)
+		const totalSupplySim = await txService.getService().simulateTransaction(totalSupplyTx)
 
 		let totalSupply = 0
 		if (!Api.isSimulationError(totalSupplySim) && totalSupplySim.result?.retval) {
@@ -123,7 +134,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 					.setTimeout(30)
 					.build()
 
-				const ownerSim = await txService.simulateTransaction(ownerTx)
+				const ownerSim = await txService.getService().simulateTransaction(ownerTx)
 
 				if (!Api.isSimulationError(ownerSim) && ownerSim.result?.retval) {
 					const ownerAddress = scValToNative(ownerSim.result.retval)
@@ -145,7 +156,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ add
 							.setTimeout(30)
 							.build()
 
-						const metadataSim = await txService.simulateTransaction(metadataTx)
+						const metadataSim = await txService.getService().simulateTransaction(metadataTx)
 
 						if (!Api.isSimulationError(metadataSim) && metadataSim.result?.retval) {
 							const metadata = scValToNative(metadataSim.result.retval) as {

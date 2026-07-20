@@ -10,7 +10,7 @@ import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
-import { useSmartAccountAuth } from '~/hooks/passkey/use-smart-account-auth'
+import { usePasskeyAuth } from '~/hooks/passkey/use-passkey-auth'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { formLayoutClasses } from '~/lib/form/form-styles'
 import { useI18n } from '~/lib/i18n'
@@ -24,7 +24,7 @@ export function LoginComponent() {
 	})
 
 	const { isAuthenticating, authSuccess, authError, handleAuth, isNotRegistered, reset } =
-		useSmartAccountAuth(email)
+		usePasskeyAuth(email)
 
 	const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
 		handleValidation(e as ChangeEvent<HTMLInputElement & { name: 'email' }>)

@@ -77,21 +77,23 @@ Env examples: `apps/web/.env.example`, `packages/drizzle/.env.example`, `apps/co
 
 ## Stellar & Passkey Stack (Canonical)
 
-**Use these for all new wallet/smart-account work:**
+**Production (Mainnet):** Passkey auth + Stellar Wallet Kit (G-address) + Trustless Work escrow. Smart Account C-address flows are **disabled** by default.
 
 | Layer | Package / path | Notes |
 |-------|----------------|-------|
+| Production auth | `apps/web/hooks/passkey/use-passkey-auth.ts` | WebAuthn + NextAuth (not Smart Account-specific) |
+| Production escrow signing | `@creit-tech/stellar-wallets-kit` | G-address only; required for Trustless Work |
+| Smart Account module | `apps/web/lib/smart-account/` | Isolated C-address logic; see README in that folder |
+| Shared Smart Account types | `@packages/lib/smart-account` | Feature flag, deployer, hooks |
 | Blockchain SDK | `@stellar/stellar-sdk` | Transactions, contracts, RPC |
-| Smart accounts | `smart-account-kit` | **Canonical** passkey/smart-wallet SDK |
-| Service wrapper | `apps/web/lib/stellar/smart-account-kit.service.ts` | App-specific `SmartAccountKitService` |
+| Smart Account SDK | `smart-account-kit` | Client SDK; wrapped by `SmartAccountKitClientAdapter` |
 | WebAuthn primitives | `@simplewebauthn/server`, `@simplewebauthn/browser` | Challenge/verification via `@packages/lib/passkey` |
-| Wallet connectivity | `@creit-tech/stellar-wallets-kit` | External G-address wallets |
-| Escrow | `@trustless-work/escrow` | Milestone-based funding |
+| Escrow | `@trustless-work/escrow` | Milestone-based funding (G-address signing only) |
 | Relayer | `@openzeppelin/relayer-sdk` | Fee-sponsored txs |
 
-**Do not use `passkey-kit` for new code.** It is a legacy dependency still listed in `apps/web/package.json` but superseded by `smart-account-kit`. Existing references in `smart-wallet-transactions.ts` throw with a migration message.
+**Do not wire Smart Account C-addresses into production escrow** until Trustless Work supports C-address signing. Do not use `passkey-kit` for new code.
 
-Smart Account Kit API reference is also in `.cursor/rules/smart-account-kit.mdc` (Cursor-only); agents outside Cursor should read `apps/web/lib/stellar/smart-account-kit.service.ts` and the [smart-account-kit repo](https://github.com/kalepail/smart-account-kit).
+Smart Account architecture and re-enable checklist: `apps/web/lib/smart-account/README.md`. Product context (why suspended, Mainnet replacement): `docs/smart-account-suspension.md`. Smart Account Kit API reference: `.cursor/rules/smart-account-kit.mdc`.
 
 Contract development: `apps/contract` (Rust/Soroban). See `.agents/skills/soroban/SKILL.md`.
 
@@ -175,7 +177,7 @@ Specialized skills live in `.agents/skills/`. Read the relevant `SKILL.md` befor
 | Service-role client | `packages/lib/src/supabase/shared/service-role-client.ts` |
 | Browser Supabase client | `packages/lib/src/supabase/client/browser-client.ts` |
 | Server Supabase client | `packages/lib/src/supabase/server/server-client.ts` |
-| Smart Account service | `apps/web/lib/stellar/smart-account-kit.service.ts` |
+| Smart Account service | `apps/web/lib/smart-account/` | Isolated C-address module (feature-flagged) |
 | Drizzle schema | `packages/drizzle/src/data/schema/` |
 | Supabase migrations | `services/supabase/` |
 | Taskfile | `Taskfile.yml` |

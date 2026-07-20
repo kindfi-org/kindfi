@@ -22,7 +22,7 @@ export async function getProjectReviewRequests(
 			review_notes,
 			created_at,
 			reviewed_at,
-			requester:requester_id ( display_name )
+			requester:profiles!milestone_review_requests_requester_id_fkey ( display_name )
 		`,
 		)
 		.eq('project_id', projectId)

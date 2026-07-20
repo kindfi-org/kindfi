@@ -8,6 +8,7 @@ import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
 	getTrustlessSignerError,
 	isExternalStellarWalletAddress,
+	TRUSTLESS_WORK_SMART_ACCOUNT_BLOCKER,
 } from '~/lib/utils/escrow/trustless-signer'
 import {
 	isLocalStorageAvailable,
@@ -255,10 +256,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
 			const { address: newAddress } = await StellarWalletsKit.authModal()
 			if (newAddress) {
+				// @smart-account-integration-point — Trustless Work requires G-address signing
 				if (!isExternalStellarWalletAddress(newAddress)) {
-					throw new Error(
-						'Trustless Work requires an external Stellar wallet (G-address). Smart accounts are not supported yet.',
-					)
+					throw new Error(TRUSTLESS_WORK_SMART_ACCOUNT_BLOCKER)
 				}
 				setAddress(newAddress)
 				safeLocalStorageSet('stellar_wallet_address', newAddress)

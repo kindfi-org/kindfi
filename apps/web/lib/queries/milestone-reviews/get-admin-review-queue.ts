@@ -25,8 +25,8 @@ export async function getAdminReviewQueue(
 			review_notes,
 			created_at,
 			reviewed_at,
-			requester:requester_id ( display_name ),
-			reviewer:reviewer_id ( display_name ),
+			requester:profiles!milestone_review_requests_requester_id_fkey ( display_name ),
+			reviewer:profiles!milestone_review_requests_reviewer_id_fkey ( display_name ),
 			project:project_id ( title, slug )
 		`,
 		)

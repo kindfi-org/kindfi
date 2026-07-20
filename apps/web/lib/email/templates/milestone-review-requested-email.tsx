@@ -37,9 +37,7 @@ export function MilestoneReviewRequestedEmail({
 	return (
 		<Html lang="en">
 			<Head />
-			<Preview>
-				{projectTitle} — Release {milestoneIndex + 1} is ready for review
-			</Preview>
+			<Preview>{`${projectTitle} — Release ${milestoneIndex + 1} is ready for review`}</Preview>
 			<Tailwind>
 				<Body className="bg-gray-50 text-gray-900">
 					<Container className="mx-auto my-8 w-full max-w-[560px]">

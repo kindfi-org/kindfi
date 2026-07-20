@@ -2,11 +2,10 @@ import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { createSmartAccountTransactionBuilder } from '@/lib/smart-account/adapters/transaction-builder.adapter'
+import { requireSmartAccountFeature } from '@/lib/smart-account/guards/require-smart-account-feature'
 import { transferPrepareSchema } from '~/lib/schemas/stellar.schemas'
-import {
-	SmartWalletTransactionService,
-	type TransactionChallenge,
-} from '~/lib/stellar/smart-wallet-transactions'
+import type { TransactionChallenge } from '~/lib/smart-account/transactions/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -16,6 +15,9 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function POST(req: NextRequest) {
 	try {
+		const featureGuard = requireSmartAccountFeature()
+		if (featureGuard) return featureGuard
+
 		const body = await req.json()
 		const validation = validateRequest(transferPrepareSchema, body)
 		if (!validation.success) {
@@ -26,8 +28,7 @@ export async function POST(req: NextRequest) {
 		// Get configuration
 		const config = appEnvConfig('web')
 
-		// Initialize service with proper config
-		const txService = new SmartWalletTransactionService(
+		const txService = createSmartAccountTransactionBuilder(
 			config.stellar.networkPassphrase,
 			config.stellar.rpcUrl,
 			config.stellar.fundingAccount,
