@@ -1,3 +1,9 @@
+import type {
+	GetEscrowsFromIndexerResponse,
+	MultiReleaseMilestone,
+	SingleReleaseMilestone,
+} from '@trustless-work/escrow'
+import { isMilestoneReleased, isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
 import { coerceNumericAmount } from '~/lib/utils/format-currency'
 import { calculateFundingProgressPercent } from '~/lib/utils/projects/project-funding'
 
@@ -33,4 +39,69 @@ export function calculateReleasedProgressPercent(
 	goal?: number | null,
 ): number | null {
 	return calculateFundingProgressPercent(releasedAmount, goal)
+}
+
+/** Sum of amounts for milestones released on-chain in a Trustless Work escrow. */
+export function calculateReleasedAmountFromEscrow(
+	escrow: GetEscrowsFromIndexerResponse | null | undefined,
+): number {
+	if (!escrow) {
+		return 0
+	}
+
+	const escrowReleased = escrow.flags?.released ?? false
+
+	if (escrow.type === 'single-release') {
+		return escrowReleased ? (coerceNumericAmount(escrow.amount) ?? 0) : 0
+	}
+
+	const milestones =
+		(escrow.milestones as (SingleReleaseMilestone | MultiReleaseMilestone)[] | undefined) ?? []
+
+	return milestones.reduce((total, milestone) => {
+		if (!isMilestoneReleased(milestone, escrowReleased)) {
+			return total
+		}
+
+		if (isSingleReleaseMilestone(milestone)) {
+			return total
+		}
+
+		return total + (coerceNumericAmount(milestone.amount) ?? 0)
+	}, 0)
+}
+
+export type ResolveDisplayReleasedParams = {
+	dbMilestones?: ReadonlyArray<ReleasableMilestone> | null
+	escrowContractAddress?: string | null
+	onChainReleasedAmount?: number | null
+	isLoadingOnChain?: boolean
+}
+
+/**
+ * Canonical released amount: on-chain escrow milestone totals when available,
+ * otherwise DB milestone status sum. Returns null while on-chain data is loading.
+ */
+export function resolveDisplayReleasedAmount({
+	dbMilestones,
+	escrowContractAddress,
+	onChainReleasedAmount,
+	isLoadingOnChain = false,
+}: ResolveDisplayReleasedParams): number | null {
+	const hasEscrow = Boolean(escrowContractAddress)
+	const dbReleased = calculateReleasedAmount(dbMilestones)
+
+	if (!hasEscrow) {
+		return dbReleased
+	}
+
+	if (onChainReleasedAmount !== undefined && onChainReleasedAmount !== null) {
+		return onChainReleasedAmount
+	}
+
+	if (isLoadingOnChain) {
+		return null
+	}
+
+	return dbReleased
 }

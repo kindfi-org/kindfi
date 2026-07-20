@@ -1,14 +1,9 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { useMemo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { ReleasedProgressBar } from '~/components/sections/projects/shared'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
-import {
-	calculateReleasedAmount,
-	calculateReleasedProgressPercent,
-} from '~/lib/utils/projects/milestone-funding'
 import { DonationForm, DonationNotices } from './components/donation-form'
 import { EscrowContractInfo } from './components/escrow-contract-info'
 import { FoundationLink } from './components/foundation-link'
@@ -32,6 +27,8 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 		isDonationReady,
 		isEscrowDataLoading,
 		progressPercentage,
+		displayReleased,
+		releasedProgressPercent,
 		onChainRaised,
 		isFetchingBalance,
 		isMounted,
@@ -48,11 +45,8 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 		signInHref,
 	} = useProjectSidebar(project, projectSlug)
 
-	const releasedAmount = useMemo(
-		() => calculateReleasedAmount(project.milestones),
-		[project.milestones],
-	)
-	const releasedPercentage = calculateReleasedProgressPercent(releasedAmount, project.goal) ?? 0
+	const releasedAmount = displayReleased ?? 0
+	const releasedPercentage = releasedProgressPercent ?? 0
 
 	return (
 		<motion.div
