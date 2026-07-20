@@ -1,5 +1,6 @@
 'use client'
 
+import { isSmartAccountEnabled } from '@packages/lib/smart-account'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { ExternalLink, Link2, LogOut, Unlink, User as UserIcon, Vote, Wallet } from 'lucide-react'
 import Link from 'next/link'
@@ -143,7 +144,9 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 	const [isSigningOut, setIsSigningOut] = useState(false)
 	const [isConnectingExternal, setIsConnectingExternal] = useState(false)
 
-	const smartAccountAddress = resolveSmartAccountAddress(user.device?.address)
+	const smartAccountAddress = isSmartAccountEnabled()
+		? resolveSmartAccountAddress(user.device?.address)
+		: null
 
 	const handleConnectExternalWallet = async () => {
 		if (isConnectingExternal) return

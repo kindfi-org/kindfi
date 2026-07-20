@@ -1,5 +1,6 @@
 'use client'
 
+import { isSmartAccountEnabled } from '@packages/lib/smart-account'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import {
 	Check,
@@ -113,7 +114,9 @@ export const UserMenu = ({ user }: { user: User }) => {
 	const [isSigningOut, setIsSigningOut] = useState(false)
 	const [isConnectingExternal, setIsConnectingExternal] = useState(false)
 
-	const smartAccountAddress = resolveSmartAccountAddress(user.device?.address)
+	const smartAccountAddress = isSmartAccountEnabled()
+		? resolveSmartAccountAddress(user.device?.address)
+		: null
 
 	const handleConnectExternalWallet = async () => {
 		if (isConnectingExternal) return

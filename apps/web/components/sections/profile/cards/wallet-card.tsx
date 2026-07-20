@@ -1,5 +1,6 @@
 'use client'
 
+import { isSmartAccountEnabled } from '@packages/lib/smart-account'
 import { CheckCircle2, Copy, Link2, LogOut, Wallet } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -71,27 +72,29 @@ export function WalletCard({
 			</div>
 
 			<div className="mt-5 space-y-4">
-				{smartAccountAddress ? (
-					<div className="space-y-2">
-						<div className="flex items-center justify-between gap-2">
-							<p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
-								{t('profile.smartAccount')}
-							</p>
-							<Badge variant="secondary" className="rounded-full text-[10px]">
-								{t('profile.primaryWallet')}
-							</Badge>
+				{isSmartAccountEnabled() ? (
+					smartAccountAddress ? (
+						<div className="space-y-2">
+							<div className="flex items-center justify-between gap-2">
+								<p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
+									{t('profile.smartAccount')}
+								</p>
+								<Badge variant="secondary" className="rounded-full text-[10px]">
+									{t('profile.primaryWallet')}
+								</Badge>
+							</div>
+							<AddressRow
+								address={smartAccountAddress}
+								isCopied={copiedSmartAccount}
+								onCopy={() => handleCopy(smartAccountAddress, 'smart')}
+							/>
 						</div>
-						<AddressRow
-							address={smartAccountAddress}
-							isCopied={copiedSmartAccount}
-							onCopy={() => handleCopy(smartAccountAddress, 'smart')}
-						/>
-					</div>
-				) : (
-					<div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-5 text-center text-sm text-muted-foreground">
-						{t('profile.smartAccountPending')}
-					</div>
-				)}
+					) : (
+						<div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-5 text-center text-sm text-muted-foreground">
+							{t('profile.smartAccountPending')}
+						</div>
+					)
+				) : null}
 
 				<div className="border-t border-slate-100 pt-4">
 					<div className="mb-2 flex items-center gap-2">

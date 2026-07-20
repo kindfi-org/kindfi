@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 import type { AppEnvInterface } from '@packages/lib/types'
-import { getRpId, getRpName } from '../lib/stellar/smart-account-kit-config.utils'
+import { getRpId, getRpName } from '../lib/smart-account/kit/smart-account-kit-config.utils'
 
 // Minimal appConfig shape used by the helpers
 const makeConfig = (): AppEnvInterface =>
@@ -16,7 +16,6 @@ const originalWindow = (globalThis as { window?: unknown }).window
 
 afterEach(() => {
 	if (originalWindow === undefined) {
-		// biome-ignore lint/performance/noDelete: test cleanup of injected global
 		delete (globalThis as { window?: unknown }).window
 	} else {
 		;(globalThis as { window?: unknown }).window = originalWindow

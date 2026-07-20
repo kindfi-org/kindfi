@@ -1,8 +1,9 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { createSmartAccountTransactionBuilder } from '@/lib/smart-account/adapters/transaction-builder.adapter'
+import { requireSmartAccountFeature } from '@/lib/smart-account/guards/require-smart-account-feature'
 import { contractInvokeSchema } from '~/lib/schemas/stellar.schemas'
-import { SmartWalletTransactionService } from '~/lib/stellar/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -12,13 +13,15 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function POST(req: NextRequest) {
 	try {
+		const featureGuard = requireSmartAccountFeature()
+		if (featureGuard) return featureGuard
+
 		const body = await req.json()
 		const validation = validateRequest(contractInvokeSchema, body)
 		if (!validation.success) return validation.response
 		const { from, contractAddress, functionName, args, sponsorFees } = validation.data
 
-		// Initialize service
-		const txService = new SmartWalletTransactionService(
+		const txService = createSmartAccountTransactionBuilder(
 			process.env.STELLAR_NETWORK_PASSPHRASE,
 			process.env.STELLAR_RPC_URL,
 			process.env.STELLAR_FUNDING_SECRET_KEY,

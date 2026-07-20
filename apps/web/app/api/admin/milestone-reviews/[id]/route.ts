@@ -92,11 +92,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 			return NextResponse.json({ error: 'Failed to update review request' }, { status: 500 })
 		}
 
-		const project = existing.project as {
-			title: string
-			slug: string
-			kindler_id: string
-		} | null
+		const projectRelation = existing.project as
+			| { title: string; slug: string; kindler_id: string }
+			| { title: string; slug: string; kindler_id: string }[]
+			| null
+		const project = Array.isArray(projectRelation) ? projectRelation[0] : projectRelation
 
 		if (project) {
 			void notifyOwnersOfMilestoneReviewDecision(status, {

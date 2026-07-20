@@ -14,7 +14,7 @@ import { FormShell } from '~/components/shared/form/form-shell'
 import { AuthLayout } from '~/components/shared/layout/auth/auth-layout'
 import { PasskeyCompatDialog } from '~/components/shared/passkey-compat-dialog'
 import { PasskeySetupTips } from '~/components/shared/passkey-setup-tips'
-import { useSmartAccountRegistration } from '~/hooks/passkey/use-smart-account-registration'
+import { usePasskeyRegistration } from '~/hooks/passkey/use-passkey-registration'
 import { useWebAuthnSupport } from '~/hooks/passkey/use-web-authn-support'
 import { formLayoutClasses } from '~/lib/form/form-styles'
 import { useI18n } from '~/lib/i18n'
@@ -39,7 +39,7 @@ export function PasskeyRegistrationComponent() {
 		publicKey,
 		handleRegister,
 		reset,
-	} = useSmartAccountRegistration(userEmail, userId)
+	} = usePasskeyRegistration(userEmail, userId)
 
 	useEffect(() => {
 		const supabase = createSupabaseBrowserClient()
