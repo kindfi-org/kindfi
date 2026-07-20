@@ -17,6 +17,8 @@ export interface Project {
 	category: Tables<'categories'> | null
 	goal: number
 	raised: number
+	/** Cumulative amount released via milestones with `released` status. */
+	releasedAmount?: number
 	investors: number
 	minInvestment: number
 	tags: Tag[]
