@@ -14,6 +14,10 @@ import {
 	getTxBadAuthMessage,
 } from '~/lib/utils/escrow/trustless-transaction-signing'
 
+/**
+ * Escrow signing facade over Stellar Wallet Kit (G-address only).
+ * @smart-account-integration-point — C-address Smart Accounts cannot sign Trustless Work txs.
+ */
 export function useTrustlessSigner() {
 	const wallet = useWallet()
 	const { networkId, networkPassphrase } = useStellarNetworkConfig()

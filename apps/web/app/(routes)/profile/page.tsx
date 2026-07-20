@@ -1,3 +1,4 @@
+import { isSmartAccountEnabled } from '@packages/lib/smart-account'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { Metadata } from 'next'
@@ -129,9 +130,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				created_at: profileData.created_at,
 				profile: profileData,
 			}}
-			smartAccountAddress={resolveSmartAccountAddress(
-				session.device?.address || session.user.device?.address,
-			)}
+			smartAccountAddress={
+				isSmartAccountEnabled()
+					? resolveSmartAccountAddress(session.device?.address || session.user.device?.address)
+					: null
+			}
 			kycCompleted={kycCompleted}
 		/>
 	)

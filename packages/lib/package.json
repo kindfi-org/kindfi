@@ -58,10 +58,21 @@
 		"./utils/wallet-address": {
 			"import": "./src/utils/wallet-address.ts",
 			"require": "./src/utils/wallet-address.ts"
+		},
+		"./smart-account": {
+			"import": "./src/smart-account/index.ts",
+			"require": "./src/smart-account/index.ts"
+		},
+		"./smart-account/server": {
+			"import": "./src/smart-account/server.ts",
+			"require": "./src/smart-account/server.ts"
 		}
 	},
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
+	"scripts": {
+		"test": "bun test"
+	},
 	"license": "MIT",
 	"dependencies": {
 		"@openzeppelin/relayer-plugin-channels": "^0.5.0",

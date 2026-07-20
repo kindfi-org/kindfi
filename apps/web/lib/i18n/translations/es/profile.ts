@@ -246,4 +246,47 @@ export const profile = {
 	matchingFunded: 'Financiado',
 	matchingCategories: 'Tus categorías',
 	matchingRegions: 'Tus regiones',
+	matchingStepProfile: 'Tu perfil e historial',
+	matchingStepAnalyze: 'Análisis con IA',
+	matchingStepRecommend: 'Selección personalizada',
+	matchingPrivacyNote:
+		'Solo se ejecuta cuando lo solicitas — nada se comparte ni se almacena más allá de esta sesión.',
+	matchingRefresh: 'Actualizar recomendaciones',
+	matchingTopPick: 'Mejor coincidencia',
+	matchingWhyMatch: 'Por qué coincide contigo',
+	matchingBrowseProjects: 'Ver todos los proyectos',
+	matchingNotEnoughProjects:
+		'No hay suficientes campañas activas para coincidencias ahora. Explora proyectos y vuelve pronto.',
+	matchingInsightsTitle: 'Según tus intereses',
+	matchingMatchesLabel: 'coincidencias encontradas',
+	manageMilestones: {
+		title: 'Revisiones de hitos',
+		description:
+			'Envía un release para revisión del administrador cuando el trabajo del hito esté listo. Los administradores de KindFi serán notificados y podrán continuar con la aprobación del escrow.',
+		noEscrowDescription:
+			'Las revisiones de hitos requieren un contrato de escrow activo. Contacta a KindFi si necesitas configurar escrow para este proyecto.',
+		noMilestones: 'No se encontraron releases para este contrato de escrow.',
+		releaseLabel: 'Release {n}',
+		requestReview: 'Solicitar revisión de hito',
+		requestSubmitted: 'Solicitud enviada. Los administradores han sido notificados.',
+		requestDialogTitle: 'Solicitar revisión de hito',
+		requestDialogDescription:
+			'Notifica a los administradores de KindFi que el Release {release} ({title}) está listo para revisión.',
+		requestNotesLabel: 'Notas para administradores (opcional)',
+		requestNotesPlaceholder: 'Comparte contexto, enlaces de evidencia o detalles de finalización…',
+		cancel: 'Cancelar',
+		submitting: 'Enviando…',
+		submitRequest: 'Enviar solicitud',
+		pendingMessage: 'Tu solicitud de revisión está pendiente. Un administrador responderá pronto.',
+		approvedMessage:
+			'Tu solicitud fue aprobada. Un administrador continuará con los pasos on-chain del escrow.',
+		onChainCompleteMessage: 'Este release ya fue aprobado o liberado on-chain.',
+		yourNotes: 'Tus notas',
+		adminNotes: 'Notas del administrador',
+		requestStatus: {
+			pending: 'Revisión pendiente',
+			approved: 'Aprobado',
+			rejected: 'Rechazado',
+		},
+	},
 }

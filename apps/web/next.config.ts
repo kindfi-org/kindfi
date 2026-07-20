@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
 	turbopack: {
 		root: path.join(__dirname, '../..'),
 	},
+	outputFileTracingIncludes: {
+		'/terms': ['./content/legal/**/*'],
+		'/privacy': ['./content/legal/**/*'],
+		'/cookies': ['./content/legal/**/*'],
+		'/licenses': ['./content/legal/**/*'],
+	},
 	experimental: {
 		mdxRs: true,
 		optimizePackageImports: [

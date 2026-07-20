@@ -5,13 +5,14 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
-import { CategoryBadge } from '~/components/sections/projects/shared'
+import { CategoryBadge, ReleasedProgressBar } from '~/components/sections/projects/shared'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
 import { cn } from '~/lib/utils'
 import { getContrastTextColor } from '~/lib/utils/color-utils'
+import { calculateReleasedProgressPercent } from '~/lib/utils/projects/milestone-funding'
 
 interface ProjectCardGridProps {
 	project: Project
@@ -29,6 +30,8 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 	})
 
 	const progressPercentage = progressPercent ?? 0
+	const releasedAmount = project.releasedAmount ?? 0
+	const releasedPercentage = calculateReleasedProgressPercent(releasedAmount, project.goal) ?? 0
 
 	const imageSrc = project.image || '/images/placeholder.png'
 
@@ -110,6 +113,12 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 						</span>
 						<span>{progressPercentage}%</span>
 					</div>
+
+					<ReleasedProgressBar
+						releasedAmount={releasedAmount}
+						progressPercentage={releasedPercentage}
+						className="mt-2"
+					/>
 
 					<div className="grid grid-cols-3 gap-2 mb-3 tabular-nums">
 						<div className="text-center">

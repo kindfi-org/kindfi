@@ -38,7 +38,7 @@ export function transformEnv(): AppEnvInterface {
 		features: {
 			enableEscrowFeature:
 				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
-			enableSmartAccountCreation: data.NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION === 'true',
+			enableSmartAccountCreation: data.NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION === 'true', // Must stay false on Mainnet production
 		},
 		vapid: {
 			email: data.VAPID_EMAIL || '',

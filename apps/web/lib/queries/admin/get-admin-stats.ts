@@ -7,6 +7,7 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 		foundationsResult,
 		usersResult,
 		escrowsResult,
+		pendingMilestoneReviewsResult,
 		projectsByStatus,
 		usersByRole,
 		donationsData,
@@ -16,6 +17,10 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 		client.from('foundations').select('id', { count: 'exact', head: true }),
 		client.from('profiles').select('id', { count: 'exact', head: true }),
 		client.from('escrow_contracts').select('id', { count: 'exact', head: true }),
+		client
+			.from('milestone_review_requests')
+			.select('id', { count: 'exact', head: true })
+			.eq('status', 'pending'),
 		client.from('projects').select('status, id'),
 		client.from('profiles').select('role, id'),
 		client.from('projects').select('current_amount, target_amount, status'),
@@ -103,6 +108,7 @@ export async function getAdminStats(client: TypedSupabaseClient) {
 		totalFoundations: foundationsResult.count || 0,
 		totalUsers: usersResult.count || 0,
 		totalEscrows: escrowsResult.count || 0,
+		pendingMilestoneReviews: pendingMilestoneReviewsResult.count || 0,
 
 		// Projects by status
 		projectsByStatus: projectsByStatusMap,

@@ -8,16 +8,16 @@ import { en } from './translations/en'
 
 export type Language = 'en' | 'es'
 
-// Recursive translation dictionary where leaves are strings
+// Recursive translation dictionary where leaves are strings or string arrays
 export interface TranslationDict {
-	[key: string]: string | TranslationDict
+	[key: string]: string | string[] | TranslationDict
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === 'object'
 }
 
-function resolveInBundle(dict: unknown, key: string): string | undefined {
+function resolveInBundle(dict: unknown, key: string): string | string[] | undefined {
 	const keys = key.split('.')
 	let value: unknown = dict
 
@@ -29,13 +29,18 @@ function resolveInBundle(dict: unknown, key: string): string | undefined {
 		}
 	}
 
-	return typeof value === 'string' ? value : undefined
+	if (typeof value === 'string' || Array.isArray(value)) {
+		return value
+	}
+
+	return undefined
 }
 
 interface I18nContextType {
 	language: Language
 	setLanguage: (lang: Language) => void
 	t: (key: string) => string
+	tArray: (key: string) => string[]
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
@@ -81,18 +86,29 @@ export function I18nProvider({ children }: I18nProviderProps) {
 		document.documentElement.lang = lang
 	}
 
-	const t = (key: string): string => {
+	const resolveValue = (key: string): string | string[] | undefined => {
 		const activeBundle = bundles[language]
-		const resolved =
+		return (
 			(activeBundle ? resolveInBundle(activeBundle, key) : undefined) ??
 			resolveInBundle(en, key) ??
 			(bundles.en ? resolveInBundle(bundles.en, key) : undefined)
+		)
+	}
 
-		return resolved ?? key
+	const t = (key: string): string => {
+		const resolved = resolveValue(key)
+		return typeof resolved === 'string' ? resolved : key
+	}
+
+	const tArray = (key: string): string[] => {
+		const resolved = resolveValue(key)
+		return Array.isArray(resolved) ? resolved : []
 	}
 
 	return (
-		<I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
+		<I18nContext.Provider value={{ language, setLanguage, t, tArray }}>
+			{children}
+		</I18nContext.Provider>
 	)
 }
 

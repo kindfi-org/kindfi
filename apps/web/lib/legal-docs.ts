@@ -57,12 +57,15 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDocConfig> = {
 	},
 }
 
-const getWebAppRoot = (): string => {
+/** Served from apps/web so Vercel file tracing includes them (same pattern as content/news). */
+const getLegalDocsDir = (): string => {
 	const cwd = process.cwd()
-	return cwd.endsWith(`${path.sep}web`) ? cwd : path.join(cwd, 'apps/web')
+	return cwd.endsWith(`${path.sep}web`)
+		? path.join(cwd, 'content/legal')
+		: path.join(cwd, 'apps/web/content/legal')
 }
 
-const LEGAL_DOCS_DIR = path.join(getWebAppRoot(), '../../docs/legal')
+const LEGAL_DOCS_DIR = getLegalDocsDir()
 
 const parseLegalMarkdown = (raw: string): { title: string; lastUpdated?: string; body: string } => {
 	const lines = raw.split('\n')

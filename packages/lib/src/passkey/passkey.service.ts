@@ -23,6 +23,7 @@ import {
 	saveUser,
 } from '../db/webauthn.database'
 import { logger } from '../logger'
+import { isSmartAccountEnabled } from '../smart-account/feature'
 import { ErrorCode, InAppError } from '../stellar/errors'
 import { StellarPasskeyService } from '../stellar/stellar-passkey.service'
 import type { AppEnvInterface } from '../types'
@@ -173,7 +174,7 @@ export const verifyRegistration = async ({
 		const existingCredential = credentials.find((cred) => cred.id === credential.id)
 
 		if (!existingCredential) {
-			if (appEnvConfig('web').features.enableSmartAccountCreation) {
+			if (isSmartAccountEnabled()) {
 				/**
 				 * Deploy smart wallet contract on-chain during registration
 				 * This creates the user's Stellar account as a smart contract
