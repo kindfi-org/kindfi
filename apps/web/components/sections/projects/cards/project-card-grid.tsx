@@ -33,6 +33,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: project.escrowType,
 		goal: project.goal,
+		dbReleasedAmount: project.releasedAmount,
 	})
 
 	const progressPercentage = progressPercent ?? 0

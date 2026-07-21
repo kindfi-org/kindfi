@@ -31,6 +31,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 		escrowContractAddress: project.escrowContractAddress,
 		escrowType: project.escrowType,
 		goal: project.goal,
+		dbReleasedAmount: project.releasedAmount,
 	})
 
 	const progressPercentage = progressPercent ?? 0

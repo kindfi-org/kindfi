@@ -16,6 +16,7 @@ interface UseProjectReleasedDisplayParams {
 	escrowType?: EscrowType
 	goal?: number | null
 	dbMilestones?: ReadonlyArray<ReleasableMilestone> | null
+	dbReleasedAmount?: number | null
 	preloadedEscrowData?: GetEscrowsFromIndexerResponse | null
 }
 
@@ -23,6 +24,7 @@ export function useProjectReleasedDisplay({
 	escrowContractAddress,
 	goal,
 	dbMilestones,
+	dbReleasedAmount,
 	preloadedEscrowData,
 }: UseProjectReleasedDisplayParams) {
 	const escrow = useOptionalEscrow()
@@ -88,11 +90,19 @@ export function useProjectReleasedDisplay({
 		() =>
 			resolveDisplayReleasedAmount({
 				dbMilestones,
+				dbReleasedAmount,
 				escrowContractAddress,
 				onChainReleasedAmount: hasEscrow ? effectiveOnChainAmount : null,
 				isLoadingOnChain: hasEscrow && isLoading && effectiveOnChainAmount === null,
 			}),
-		[dbMilestones, escrowContractAddress, effectiveOnChainAmount, hasEscrow, isLoading],
+		[
+			dbMilestones,
+			dbReleasedAmount,
+			escrowContractAddress,
+			effectiveOnChainAmount,
+			hasEscrow,
+			isLoading,
+		],
 	)
 
 	const releasedProgressPercent = useMemo(

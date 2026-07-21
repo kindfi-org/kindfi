@@ -168,4 +168,12 @@ describe('resolveDisplayReleasedAmount', () => {
 			}),
 		).toBe(100)
 	})
+
+	test('falls back to pre-aggregated DB released amount', () => {
+		expect(
+			resolveDisplayReleasedAmount({
+				dbReleasedAmount: 75,
+			}),
+		).toBe(75)
+	})
 })
