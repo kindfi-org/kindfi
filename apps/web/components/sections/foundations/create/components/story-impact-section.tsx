@@ -1,6 +1,7 @@
 'use client'
 
 import { BookOpen, CheckCircle2, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Button } from '~/components/base/button'
 import {
@@ -18,16 +19,23 @@ import { FormSectionHeader } from './form-section-header'
 
 const MAX_IMPACT_ITEMS = 12
 
+const createImpactItemId = () => crypto.randomUUID()
+
 export function StoryImpactSection() {
 	const form = useFormContext<CreateFoundationFormData>()
 	const impactHighlights = form.watch('impactHighlights') ?? []
+	const [impactItemIds, setImpactItemIds] = useState<string[]>(() =>
+		(form.getValues('impactHighlights') ?? []).map(() => createImpactItemId()),
+	)
 
 	const handleAddImpact = () => {
 		if (impactHighlights.length >= MAX_IMPACT_ITEMS) return
+		setImpactItemIds((prev) => [...prev, createImpactItemId()])
 		form.setValue('impactHighlights', [...impactHighlights, ''], { shouldDirty: true })
 	}
 
 	const handleRemoveImpact = (index: number) => {
+		setImpactItemIds((prev) => prev.filter((_, i) => i !== index))
 		form.setValue(
 			'impactHighlights',
 			impactHighlights.filter((_, i) => i !== index),
@@ -86,7 +94,7 @@ export function StoryImpactSection() {
 				{impactHighlights.length > 0 ? (
 					<ul className="space-y-3">
 						{impactHighlights.map((item, index) => (
-							<li key={`${item}-${index}`} className="flex items-start gap-2">
+							<li key={impactItemIds[index]} className="flex items-start gap-2">
 								<Input
 									placeholder="e.g., Built community gardens in 5 neighborhoods"
 									value={item}
