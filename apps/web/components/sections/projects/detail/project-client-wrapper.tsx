@@ -12,6 +12,7 @@ import {
 	ProjectTabsSkeleton,
 } from '~/components/sections/projects/detail/skeletons'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
+import { useI18n } from '~/lib/i18n'
 import type { getProjectBySlug } from '~/lib/queries/projects/get-project-by-slug'
 
 interface ProjectClientWrapperProps {
@@ -32,8 +33,9 @@ async function fetchProjectDetail(
 }
 
 export function ProjectClientWrapper({ projectSlug }: ProjectClientWrapperProps) {
+	const { language } = useI18n()
 	const { data: project, isLoading } = useQuery({
-		queryKey: ['project', projectSlug],
+		queryKey: ['project', projectSlug, language],
 		queryFn: () => fetchProjectDetail(projectSlug),
 		staleTime: 60_000,
 	})

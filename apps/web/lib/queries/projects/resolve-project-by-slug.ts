@@ -7,15 +7,25 @@ import {
 	getProjectDevelopmentOnlyFlag,
 } from '~/lib/queries/projects/development-only-access'
 import { getProjectBySlug } from '~/lib/queries/projects/get-project-by-slug'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import type { LocalizeOptions } from '~/lib/services/content-translation'
+
+export type ResolveProjectBySlugOptions = LocalizeOptions & {
+	viewerLocale?: SupportedLocale
+}
 
 /**
  * Loads a project detail payload, including development-only rows for authorized viewers.
  */
-export async function resolveProjectBySlug(slug: string, userId?: string | null) {
+export async function resolveProjectBySlug(
+	slug: string,
+	userId?: string | null,
+	options?: ResolveProjectBySlugOptions,
+) {
 	const publicClient = await createSupabaseServerClient()
 
 	try {
-		const publicProject = await getProjectBySlug(publicClient, slug)
+		const publicProject = await getProjectBySlug(publicClient, slug, options)
 		if (publicProject) {
 			return publicProject
 		}
@@ -42,5 +52,5 @@ export async function resolveProjectBySlug(slug: string, userId?: string | null)
 		return null
 	}
 
-	return getProjectBySlug(supabaseServiceRole, slug)
+	return getProjectBySlug(supabaseServiceRole, slug, { ...options, localize: false })
 }

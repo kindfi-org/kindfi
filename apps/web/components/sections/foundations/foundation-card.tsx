@@ -16,6 +16,8 @@ interface FoundationCardProps {
 		name: string
 		slug: string
 		description: string
+		story?: string | null
+		impactHighlights?: string[]
 		logoUrl: string | null
 		coverImageUrl: string | null
 		foundedYear: number
@@ -36,6 +38,9 @@ interface FoundationCardProps {
 const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 	const { t } = useI18n()
 	const yearFounded = foundation.foundedYear > 0 ? foundation.foundedYear : null
+	const cardSummary = foundation.story?.trim() || foundation.description
+	const impactCount =
+		foundation.impactHighlights?.filter((item) => item.trim().length > 0).length ?? 0
 	const hasActiveCampaigns = foundation.totalCampaignsOpen > 0
 	const hasSocialLinks =
 		foundation.websiteUrl != null ||
@@ -117,9 +122,17 @@ const FoundationCardComponent = ({ foundation }: FoundationCardProps) => {
 					{foundation.name}
 				</h3>
 
-				<p className="mb-6 line-clamp-2 min-w-0 text-center text-sm text-muted-foreground">
-					{foundation.description}
+				<p className="mb-2 line-clamp-2 min-w-0 text-center text-sm text-muted-foreground">
+					{cardSummary}
 				</p>
+
+				{impactCount > 0 ? (
+					<p className="mb-6 text-center text-xs font-medium text-emerald-700">
+						{t('foundations.impactHighlightsCount').replace('{count}', String(impactCount))}
+					</p>
+				) : (
+					<div className="mb-6" />
+				)}
 
 				<div
 					className={cn(

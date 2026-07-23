@@ -8,6 +8,7 @@ import {
 	foundationSlugParamSchema,
 	foundationUpdateFormSchema,
 } from '~/lib/schemas/foundation.schemas'
+import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -54,6 +55,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 		const formPayload = {
 			name: formData.get('name') ?? '',
 			description: formData.get('description') ?? '',
+			story: (formData.get('story') as string) || null,
+			impactHighlights: (() => {
+				const raw = formData.get('impactHighlights') as string | null
+				if (!raw) return []
+				try {
+					return JSON.parse(raw) as string[]
+				} catch {
+					return []
+				}
+			})(),
 			foundedYear: (() => {
 				const raw = formData.get('foundedYear')
 				return typeof raw === 'string' ? Number.parseInt(raw, 10) : NaN
@@ -71,20 +82,35 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 				}
 			})(),
 			logo: formData.get('logo') as File | null,
+			sourceLocale: (formData.get('sourceLocale') as string) || 'en',
 		}
 		const validation = validateRequest(foundationUpdateFormSchema, formPayload)
 		if (!validation.success) return validation.response
-		const { name, description, foundedYear, mission, vision, websiteUrl, socialLinks, logo } =
-			validation.data
+		const {
+			name,
+			description,
+			story,
+			impactHighlights,
+			foundedYear,
+			mission,
+			vision,
+			websiteUrl,
+			socialLinks,
+			logo,
+			sourceLocale,
+		} = validation.data
 
 		const updatePayload: Record<string, unknown> = {
 			name,
 			description,
+			story: story || null,
+			impact_highlights: impactHighlights ?? [],
 			founded_year: foundedYear,
 			mission: mission || null,
 			vision: vision || null,
 			website_url: websiteUrl || null,
 			social_links: socialLinks,
+			source_locale: sourceLocale,
 			updated_at: new Date().toISOString(),
 		}
 
@@ -118,6 +144,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 				}
 			}
 		}
+
+		scheduleContentTranslation('foundation', foundation.id)
 
 		return NextResponse.json({ slug: validatedSlug }, { status: 200 })
 	} catch (err) {

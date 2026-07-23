@@ -7,17 +7,22 @@ import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { CSRFTokenField, Form } from '~/components/base/form'
+import { ContentLanguageFormField } from '~/components/shared/content-language-form-field'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
 import { BasicInfoSection } from '../create/components/basic-info-section'
 import { FormFooter } from '../create/components/form-footer'
 import { LogoSection } from '../create/components/logo-section'
 import { MissionVisionSection } from '../create/components/mission-vision-section'
 import { SocialLinksSection } from '../create/components/social-links-section'
+import { StoryImpactSection } from '../create/components/story-impact-section'
 import { type CreateFoundationFormData, createFoundationSchema } from '../create/types'
 
 export type EditFoundationFormFoundation = {
 	name: string
 	description: string
+	story: string | null
+	impactHighlights: string[]
 	slug: string
 	foundedYear: number
 	mission: string | null
@@ -25,6 +30,7 @@ export type EditFoundationFormFoundation = {
 	websiteUrl: string | null
 	socialLinks: Record<string, string>
 	logoUrl: string | null
+	sourceLocale: SupportedLocale
 }
 
 type EditFoundationFormProps = {
@@ -41,12 +47,15 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 		defaultValues: {
 			name: foundation.name,
 			description: foundation.description,
+			story: foundation.story ?? '',
+			impactHighlights: foundation.impactHighlights ?? [],
 			slug: foundation.slug,
 			foundedYear: foundation.foundedYear,
 			mission: foundation.mission ?? '',
 			vision: foundation.vision ?? '',
 			websiteUrl: foundation.websiteUrl ?? '',
 			socialLinks: foundation.socialLinks ?? {},
+			sourceLocale: foundation.sourceLocale ?? 'en',
 			logo: null,
 		},
 	})
@@ -57,6 +66,13 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 				const formDataToSubmit = new FormData()
 				formDataToSubmit.append('name', data.name)
 				formDataToSubmit.append('description', data.description)
+				if (data.story) formDataToSubmit.append('story', data.story)
+				if (data.impactHighlights?.length) {
+					const filtered = data.impactHighlights.map((s) => s.trim()).filter(Boolean)
+					if (filtered.length) {
+						formDataToSubmit.append('impactHighlights', JSON.stringify(filtered))
+					}
+				}
 				formDataToSubmit.append('foundedYear', String(data.foundedYear))
 				if (data.mission) formDataToSubmit.append('mission', data.mission)
 				if (data.vision) formDataToSubmit.append('vision', data.vision)
@@ -67,6 +83,7 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 				if (data.logo instanceof File) {
 					formDataToSubmit.append('logo', data.logo)
 				}
+				formDataToSubmit.append('sourceLocale', data.sourceLocale ?? 'en')
 
 				const response = await fetch(`/api/foundations/${slug}`, {
 					method: 'PATCH',
@@ -96,14 +113,17 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 			<CardHeader className="border-b">
 				<CardTitle className="text-2xl font-bold">Edit foundation</CardTitle>
 				<CardDescription>
-					Update name, description, mission, vision, and logo. The foundation URL cannot be changed.
+					Update name, description, story, impact, mission, vision, and logo. The foundation URL
+					cannot be changed.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="pt-6">
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" noValidate>
 						<CSRFTokenField />
+						<ContentLanguageFormField />
 						<BasicInfoSection slugReadOnly />
+						<StoryImpactSection />
 						<MissionVisionSection />
 						<SocialLinksSection />
 						<LogoSection />

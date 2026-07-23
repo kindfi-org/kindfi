@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
+import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request, _params: { params: Promise<{ slug: string }> }) {
@@ -88,6 +89,8 @@ export async function POST(req: Request, _params: { params: Promise<{ slug: stri
 			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
+
+		scheduleContentTranslation('project', projectId)
 
 		return NextResponse.json({
 			message: 'Highlights saved successfully',

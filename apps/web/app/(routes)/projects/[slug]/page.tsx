@@ -6,6 +6,7 @@ import { cache } from 'react'
 import { ProjectClientWrapper } from '~/components/sections/projects/detail/project-client-wrapper'
 import { JsonLd } from '~/components/shared/json-ld'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { getViewerLocale } from '~/lib/i18n/locale-cookie.server'
 import { resolveProjectBySlug } from '~/lib/queries/projects/resolve-project-by-slug'
 import { buildProjectMetadata, getProjectPageUrl } from '~/lib/seo/project-metadata'
 import { getBreadcrumbSchema, SITE_URL } from '~/lib/seo/structured-data'
@@ -13,7 +14,8 @@ import { validateProjectSlug } from '~/lib/validation/project-slug'
 
 const getProjectBySlugCached = cache(async (slug: string) => {
 	const session = await getServerSession(nextAuthOption)
-	return resolveProjectBySlug(slug, session?.user?.id)
+	const viewerLocale = await getViewerLocale()
+	return resolveProjectBySlug(slug, session?.user?.id, { viewerLocale })
 })
 
 export async function generateMetadata({

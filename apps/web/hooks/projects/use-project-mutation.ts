@@ -64,6 +64,8 @@ export function useProjectMutation({
 				fd.append('developmentOnly', 'true')
 			}
 
+			fd.append('sourceLocale', formData.sourceLocale ?? 'en')
+
 			const res = await fetch(isUpdate ? '/api/projects/update' : '/api/projects/create', {
 				method: isUpdate ? 'PATCH' : 'POST',
 				body: fd,

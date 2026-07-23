@@ -10,7 +10,7 @@ export default async function FoundationCampaignsPage({
 }) {
 	const { slug } = await params
 	const supabase = await createSupabaseServerClient()
-	const foundation = await getFoundationBySlug(supabase, slug)
+	const foundation = await getFoundationBySlug(supabase, slug, { localize: false })
 
 	if (!foundation) {
 		return (

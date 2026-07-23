@@ -1,7 +1,23 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { logger } from '@/lib/logger'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import {
+	fetchContentTranslation,
+	fetchContentTranslations,
+	type LocalizeOptions,
+	resolveFoundationFields,
+	resolveLocalizedFields,
+} from '~/lib/services/content-translation'
 
-export async function getFoundationBySlug(client: TypedSupabaseClient, slug: string) {
+export type GetFoundationOptions = LocalizeOptions & {
+	viewerLocale?: SupportedLocale
+}
+
+export async function getFoundationBySlug(
+	client: TypedSupabaseClient,
+	slug: string,
+	options?: GetFoundationOptions,
+) {
 	const { data, error } = await client
 		.from('foundations')
 		.select(
@@ -10,6 +26,8 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
       name,
       slug,
       description,
+      story,
+      impact_highlights,
       logo_url,
       cover_image_url,
       founder_id,
@@ -18,6 +36,7 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
       vision,
       website_url,
       social_links,
+      source_locale,
       total_donations_received,
       total_campaigns_completed,
       total_campaigns_open,
@@ -51,6 +70,8 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 		name: string
 		slug: string
 		description: string
+		story: string | null
+		impact_highlights: string[]
 		logo_url: string | null
 		cover_image_url: string | null
 		founder_id: string
@@ -59,6 +80,7 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 		vision: string | null
 		website_url: string | null
 		social_links: Record<string, string>
+		source_locale: SupportedLocale
 		total_donations_received: string
 		total_campaigns_completed: number
 		total_campaigns_open: number
@@ -74,6 +96,31 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 			metadata: Record<string, unknown>
 		}>
 	}
+
+	const sourceLocale = foundation.source_locale ?? 'en'
+	const foundationTranslation =
+		options?.localize !== false
+			? await fetchContentTranslation(
+					client,
+					'foundation',
+					foundation.id,
+					options?.viewerLocale ?? 'en',
+				)
+			: null
+
+	const localizedFoundation = resolveFoundationFields(
+		{
+			name: foundation.name,
+			description: foundation.description,
+			story: foundation.story,
+			mission: foundation.mission,
+			vision: foundation.vision,
+			impactHighlights: foundation.impact_highlights ?? [],
+		},
+		sourceLocale,
+		foundationTranslation,
+		options,
+	)
 
 	// Parallel fetch: profile, escrows, campaigns (async-parallel)
 	const [profileResult, escrowsResult, campaignsResult] = await Promise.all([
@@ -109,7 +156,8 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 			target_amount,
 			percentage_complete,
 			kinder_count,
-			status
+			status,
+			source_locale
 		`,
 			)
 			.eq('foundation_id', foundation.id)
@@ -128,34 +176,61 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 	}>
 	const campaignsData = campaignsResult.data ?? []
 
-	const campaigns = campaignsData.map((p) => ({
-		id: p.id,
-		title: p.title,
-		slug: p.slug,
-		description: p.description,
-		imageUrl: p.image_url,
-		raised: Number(p.current_amount ?? 0),
-		goal: Number(p.target_amount ?? 0),
-		percentageComplete: Number(p.percentage_complete ?? 0),
-		investors: p.kinder_count ?? 0,
-		status: p.status ?? null,
-	}))
+	const campaignIds = campaignsData.map((p) => p.id)
+	const campaignTranslations =
+		options?.localize !== false && campaignIds.length > 0
+			? await fetchContentTranslations(
+					client,
+					'project',
+					campaignIds,
+					options?.viewerLocale ?? 'en',
+				)
+			: new Map()
+
+	const campaigns = campaignsData.map((p) => {
+		const projectSourceLocale = (p.source_locale as SupportedLocale) ?? 'en'
+		const localized = resolveLocalizedFields(
+			{
+				title: p.title,
+				description: p.description,
+			},
+			projectSourceLocale,
+			campaignTranslations.get(p.id),
+			options,
+		)
+
+		return {
+			id: p.id,
+			title: localized.title ?? p.title,
+			slug: p.slug,
+			description: localized.description ?? p.description,
+			imageUrl: p.image_url,
+			raised: Number(p.current_amount ?? 0),
+			goal: Number(p.target_amount ?? 0),
+			percentageComplete: Number(p.percentage_complete ?? 0),
+			investors: p.kinder_count ?? 0,
+			status: p.status ?? null,
+		}
+	})
 
 	const founder = profileData
 
 	return {
 		id: foundation.id,
-		name: foundation.name,
+		name: localizedFoundation.name ?? foundation.name,
 		slug: foundation.slug,
-		description: foundation.description,
+		description: localizedFoundation.description ?? foundation.description,
+		story: localizedFoundation.story ?? foundation.story,
+		impactHighlights: localizedFoundation.impactHighlights ?? foundation.impact_highlights ?? [],
 		logoUrl: foundation.logo_url,
 		coverImageUrl: foundation.cover_image_url,
 		founderId: foundation.founder_id,
 		foundedYear: foundation.founded_year,
-		mission: foundation.mission,
-		vision: foundation.vision,
+		mission: localizedFoundation.mission ?? foundation.mission,
+		vision: localizedFoundation.vision ?? foundation.vision,
 		websiteUrl: foundation.website_url,
 		socialLinks: foundation.social_links,
+		sourceLocale,
 		totalDonationsReceived: Number(foundation.total_donations_received || 0),
 		totalCampaignsCompleted: foundation.total_campaigns_completed || 0,
 		totalCampaignsOpen: foundation.total_campaigns_open || 0,

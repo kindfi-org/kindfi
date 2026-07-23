@@ -166,6 +166,51 @@ export const communityUpdateSchema = z.object({
   update_id: z.string().optional(),
 });
 
+export const contentEntityTypeSchema = z.union([
+  z.literal("foundation"),
+  z.literal("project"),
+  z.literal("project_pitch"),
+]);
+
+export const translationStatusSchema = z.union([
+  z.literal("pending"),
+  z.literal("complete"),
+  z.literal("failed"),
+  z.literal("stale"),
+]);
+
+export const contentTranslationsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  entity_id: z.string(),
+  entity_type: contentEntityTypeSchema,
+  error_message: z.string().optional().nullable(),
+  fields: jsonSchema.optional(),
+  id: z.string().optional(),
+  locale: z.string(),
+  model_id: z.string().optional().nullable(),
+  source_hash: z.string(),
+  source_locale: z.string(),
+  status: translationStatusSchema.optional(),
+  translated_at: z.string().optional().nullable(),
+  updated_at: z.string().optional(),
+});
+
+export const contentTranslationsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  entity_id: z.string().optional(),
+  entity_type: contentEntityTypeSchema.optional(),
+  error_message: z.string().optional().nullable(),
+  fields: jsonSchema.optional(),
+  id: z.string().optional(),
+  locale: z.string().optional(),
+  model_id: z.string().optional().nullable(),
+  source_hash: z.string().optional(),
+  source_locale: z.string().optional(),
+  status: translationStatusSchema.optional(),
+  translated_at: z.string().optional().nullable(),
+  updated_at: z.string().optional(),
+});
+
 export const contributionsRowSchema = z.object({
   amount: z.number(),
   contributor_id: z.string(),
@@ -495,12 +540,15 @@ export const foundationsInsertSchema = z.object({
   founded_year: z.number(),
   founder_id: z.string(),
   id: z.string().optional(),
+  impact_highlights: z.array(z.string()).optional(),
   logo_url: z.string().optional().nullable(),
   metadata: jsonSchema.optional(),
   mission: z.string().optional().nullable(),
   name: z.string(),
   slug: z.string(),
   social_links: jsonSchema.optional(),
+  source_locale: z.string().optional(),
+  story: z.string().optional().nullable(),
   total_campaigns_completed: z.number().optional(),
   total_campaigns_open: z.number().optional(),
   total_donations_received: z.number().optional(),
@@ -517,12 +565,15 @@ export const foundationsUpdateSchema = z.object({
   founded_year: z.number().optional(),
   founder_id: z.string().optional(),
   id: z.string().optional(),
+  impact_highlights: z.array(z.string()).optional(),
   logo_url: z.string().optional().nullable(),
   metadata: jsonSchema.optional(),
   mission: z.string().optional().nullable(),
   name: z.string().optional(),
   slug: z.string().optional(),
   social_links: jsonSchema.optional(),
+  source_locale: z.string().optional(),
+  story: z.string().optional().nullable(),
   total_campaigns_completed: z.number().optional(),
   total_campaigns_open: z.number().optional(),
   total_donations_received: z.number().optional(),
@@ -1178,6 +1229,7 @@ export const projectsInsertSchema = z.object({
   project_location: z.string(),
   slug: z.string().optional().nullable(),
   social_links: jsonSchema.optional(),
+  source_locale: z.string().optional(),
   status: projectStatusSchema.optional(),
   target_amount: z.number(),
   title: z.string(),
@@ -1201,6 +1253,7 @@ export const projectsUpdateSchema = z.object({
   project_location: z.string().optional(),
   slug: z.string().optional().nullable(),
   social_links: jsonSchema.optional(),
+  source_locale: z.string().optional(),
   status: projectStatusSchema.optional(),
   target_amount: z.number().optional(),
   title: z.string().optional(),
@@ -1493,6 +1546,22 @@ export const commentsRowSchema = z.object({
   updated_at: z.string().nullable(),
 });
 
+export const contentTranslationsRowSchema = z.object({
+  created_at: z.string(),
+  entity_id: z.string(),
+  entity_type: contentEntityTypeSchema,
+  error_message: z.string().nullable(),
+  fields: jsonSchema,
+  id: z.string(),
+  locale: z.string(),
+  model_id: z.string().nullable(),
+  source_hash: z.string(),
+  source_locale: z.string(),
+  status: translationStatusSchema,
+  translated_at: z.string().nullable(),
+  updated_at: z.string(),
+});
+
 export const escrowContractsRowSchema = z.object({
   amount: z.number(),
   completed_at: z.string().nullable(),
@@ -1528,12 +1597,15 @@ export const foundationsRowSchema = z.object({
   founded_year: z.number(),
   founder_id: z.string(),
   id: z.string(),
+  impact_highlights: z.array(z.string()),
   logo_url: z.string().nullable(),
   metadata: jsonSchema,
   mission: z.string().nullable(),
   name: z.string(),
   slug: z.string(),
   social_links: jsonSchema,
+  source_locale: z.string(),
+  story: z.string().nullable(),
   total_campaigns_completed: z.number(),
   total_campaigns_open: z.number(),
   total_donations_received: z.number(),
@@ -1640,6 +1712,7 @@ export const projectsRowSchema = z.object({
   project_location: z.string(),
   slug: z.string().nullable(),
   social_links: jsonSchema,
+  source_locale: z.string(),
   status: projectStatusSchema,
   target_amount: z.number(),
   title: z.string(),

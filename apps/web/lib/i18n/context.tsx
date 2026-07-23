@@ -2,6 +2,7 @@
 
 import type React from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { setLocaleCookie } from '~/lib/i18n/locale-cookie.shared'
 import { safeLocalStorageGet, safeLocalStorageSet } from '~/lib/utils/safe-storage'
 import { loadLocaleBundle } from './load-locale'
 import { en } from './translations/en'
@@ -57,6 +58,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 	useEffect(() => {
 		const savedLanguage = safeLocalStorageGet('language') as Language
 		if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
+			setLocaleCookie(savedLanguage)
 			const timer = setTimeout(() => {
 				setLanguageState(savedLanguage)
 			}, 0)
@@ -83,6 +85,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 	const setLanguage = (lang: Language) => {
 		setLanguageState(lang)
 		safeLocalStorageSet('language', lang)
+		setLocaleCookie(lang)
 		document.documentElement.lang = lang
 	}
 

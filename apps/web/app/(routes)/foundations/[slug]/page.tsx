@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import { FoundationDetailClientWrapper } from '~/components/sections/foundations/foundation-detail-client-wrapper'
 import { JsonLd } from '~/components/shared/json-ld'
+import { getViewerLocale } from '~/lib/i18n/locale-cookie.server'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
 
@@ -17,7 +18,8 @@ const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 /** Per-request cached fetch so metadata and page share one foundation load */
 const getFoundationCached = cache(async (slug: string) => {
 	const supabase = await createSupabaseServerClient()
-	return getFoundationBySlug(supabase, slug)
+	const viewerLocale = await getViewerLocale()
+	return getFoundationBySlug(supabase, slug, { viewerLocale })
 })
 
 export async function generateMetadata({ params }: FoundationDetailPageProps): Promise<Metadata> {

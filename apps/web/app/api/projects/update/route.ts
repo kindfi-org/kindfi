@@ -6,6 +6,7 @@ import { logger } from '@/lib/logger'
 import { authorizeProjectManage } from '~/lib/api/authorize-project-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectUpdateFormSchema } from '~/lib/schemas/project.schemas'
+import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import {
 	buildSocialLinks,
 	deleteFolderFromBucket,
@@ -45,6 +46,7 @@ export async function PATCH(req: Request) {
 			socialLinks,
 			image,
 			removeImage,
+			sourceLocale,
 		} = validation.data
 
 		// Verify user has permission to update this project
@@ -69,6 +71,7 @@ export async function PATCH(req: Request) {
 			project_location: location,
 			category_id: category,
 			social_links: buildSocialLinks(website, socialLinks),
+			source_locale: sourceLocale,
 		}
 
 		// If the image was updated, upload new one and attach to project
@@ -107,6 +110,8 @@ export async function PATCH(req: Request) {
 
 		// Upsert new tag relationships
 		await upsertTags(projectId, tags ?? [], supabase)
+
+		scheduleContentTranslation('project', projectId)
 
 		return NextResponse.json({ message: 'Project updated successfully' }, { status: 200 })
 	} catch (err) {

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isSupportedVideoUrl, SUPPORTED_VIDEO_PROVIDERS_LABEL } from '~/lib/utils/video-embed'
+import { sourceLocaleSchema } from './locale.schemas'
 
 const tagSchema = z.object({
 	name: z.string(),
@@ -20,6 +21,7 @@ export const projectCreateFormSchema = z
 		image: z.instanceof(File).nullable().optional(),
 		foundationId: z.string().uuid().optional().or(z.literal('')),
 		developmentOnly: z.boolean().optional().default(false),
+		sourceLocale: sourceLocaleSchema.optional().default('en'),
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',
@@ -41,6 +43,7 @@ export const projectUpdateFormSchema = z
 		socialLinks: z.array(z.string()).optional().default([]),
 		image: z.instanceof(File).nullable().optional(),
 		removeImage: z.boolean().optional(),
+		sourceLocale: sourceLocaleSchema.optional().default('en'),
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',

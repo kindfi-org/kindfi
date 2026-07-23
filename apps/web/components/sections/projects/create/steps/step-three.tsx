@@ -3,7 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { AlertCircle, Check, ChevronLeft, Loader2 } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
@@ -33,7 +33,7 @@ interface StepThreeProps {
 }
 
 export function StepThree({ onBack, onSubmit, isPending = false }: StepThreeProps) {
-	const { formData, updateFormData } = useCreateProject()
+	const { formData, updateFormData, lockedFoundation } = useCreateProject()
 	const prefersReducedMotion = useReducedMotion()
 
 	const {
@@ -50,11 +50,18 @@ export function StepThree({ onBack, onSubmit, isPending = false }: StepThreeProp
 		defaultValues: {
 			location: formData.location,
 			category: formData.category,
-			foundationId: (formData as { foundationId?: string }).foundationId || '',
+			foundationId:
+				lockedFoundation?.id ?? ((formData as { foundationId?: string }).foundationId || ''),
 			tags: formData.tags,
 		},
 		mode: 'onBlur',
 	})
+
+	useEffect(() => {
+		if (lockedFoundation) {
+			form.setValue('foundationId', lockedFoundation.id)
+		}
+	}, [lockedFoundation, form])
 
 	// Memoize category selection handler to prevent unnecessary re-renders
 	const handleCategorySelect = useCallback(
@@ -219,15 +226,25 @@ export function StepThree({ onBack, onSubmit, isPending = false }: StepThreeProp
 											<span className="text-muted-foreground font-normal">(optional)</span>
 										</FormLabel>
 										<FormControl>
-											<FoundationSelect
-												value={field.value || ''}
-												onChange={(value) => field.onChange(value || undefined)}
-											/>
+											{lockedFoundation ? (
+												<div className="flex items-center gap-2 rounded-md border border-purple-200 bg-purple-50 px-3 py-2 text-sm">
+													<span className="font-medium text-purple-900">
+														{lockedFoundation.name}
+													</span>
+													<span className="text-purple-700">(linked from foundation)</span>
+												</div>
+											) : (
+												<FoundationSelect
+													value={field.value || ''}
+													onChange={(value) => field.onChange(value || undefined)}
+												/>
+											)}
 										</FormControl>
 										<FormMessage />
 										<p className="text-sm text-muted-foreground">
-											If this campaign is part of a foundation, select it here. This helps build
-											trust and organize your campaigns.
+											{lockedFoundation
+												? 'This campaign will be linked to the foundation you are managing.'
+												: 'If this campaign is part of a foundation, select it here. This helps build trust and organize your campaigns.'}
 										</p>
 									</FormItem>
 								)}

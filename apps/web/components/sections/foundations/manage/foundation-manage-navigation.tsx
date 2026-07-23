@@ -3,11 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-	IoCalendarOutline,
 	IoCreateOutline,
 	IoMegaphoneOutline,
 	IoPeopleOutline,
-	IoSettingsOutline,
 	IoSpeedometerOutline,
 } from 'react-icons/io5'
 import { cn } from '~/lib/utils'
@@ -20,9 +18,7 @@ const SECTION_ICONS: Record<
 	overview: IoSpeedometerOutline,
 	edit: IoCreateOutline,
 	campaigns: IoMegaphoneOutline,
-	milestones: IoCalendarOutline,
 	members: IoPeopleOutline,
-	settings: IoSettingsOutline,
 }
 
 export function FoundationManageNavigation({ slug }: { slug: string }) {

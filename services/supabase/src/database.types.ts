@@ -217,6 +217,54 @@ export type Database = {
           },
         ]
       }
+      content_translations: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["content_entity_type"]
+          error_message: string | null
+          fields: Json
+          id: string
+          locale: string
+          model_id: string | null
+          source_hash: string
+          source_locale: string
+          status: Database["public"]["Enums"]["translation_status"]
+          translated_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: Database["public"]["Enums"]["content_entity_type"]
+          error_message?: string | null
+          fields?: Json
+          id?: string
+          locale: string
+          model_id?: string | null
+          source_hash: string
+          source_locale: string
+          status?: Database["public"]["Enums"]["translation_status"]
+          translated_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: Database["public"]["Enums"]["content_entity_type"]
+          error_message?: string | null
+          fields?: Json
+          id?: string
+          locale?: string
+          model_id?: string | null
+          source_hash?: string
+          source_locale?: string
+          status?: Database["public"]["Enums"]["translation_status"]
+          translated_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contributions: {
         Row: {
           amount: number
@@ -693,12 +741,15 @@ export type Database = {
           founded_year: number
           founder_id: string
           id: string
+          impact_highlights: string[]
           logo_url: string | null
           metadata: Json
           mission: string | null
           name: string
           slug: string
           social_links: Json
+          source_locale: string
+          story: string | null
           total_campaigns_completed: number
           total_campaigns_open: number
           total_donations_received: number
@@ -714,12 +765,15 @@ export type Database = {
           founded_year: number
           founder_id: string
           id?: string
+          impact_highlights?: string[]
           logo_url?: string | null
           metadata?: Json
           mission?: string | null
           name: string
           slug: string
           social_links?: Json
+          source_locale?: string
+          story?: string | null
           total_campaigns_completed?: number
           total_campaigns_open?: number
           total_donations_received?: number
@@ -735,12 +789,15 @@ export type Database = {
           founded_year?: number
           founder_id?: string
           id?: string
+          impact_highlights?: string[]
           logo_url?: string | null
           metadata?: Json
           mission?: string | null
           name?: string
           slug?: string
           social_links?: Json
+          source_locale?: string
+          story?: string | null
           total_campaigns_completed?: number
           total_campaigns_open?: number
           total_donations_received?: number
@@ -1553,6 +1610,7 @@ export type Database = {
           project_location: string
           slug: string | null
           social_links: Json
+          source_locale: string
           status: Database["public"]["Enums"]["project_status"]
           target_amount: number
           title: string
@@ -1575,6 +1633,7 @@ export type Database = {
           project_location: string
           slug?: string | null
           social_links?: Json
+          source_locale?: string
           status?: Database["public"]["Enums"]["project_status"]
           target_amount: number
           title: string
@@ -1597,6 +1656,7 @@ export type Database = {
           project_location?: string
           slug?: string | null
           social_links?: Json
+          source_locale?: string
           status?: Database["public"]["Enums"]["project_status"]
           target_amount?: number
           title?: string
@@ -1998,6 +2058,7 @@ export type Database = {
     Enums: {
       backup_state: "not_backed_up" | "backed_up"
       comment_type: "comment" | "question" | "answer"
+      content_entity_type: "foundation" | "project" | "project_pitch"
       creator_entity_type: "individual" | "ngo" | "foundation"
       credential_type: "public-key"
       device_type: "single_device" | "multi_device"
@@ -2046,6 +2107,7 @@ export type Database = {
         | "quest_master"
       referral_status: "pending" | "onboarded" | "first_donation" | "active"
       streak_period: "weekly" | "monthly"
+      translation_status: "pending" | "complete" | "failed" | "stale"
       user_role:
         | "donor"
         | "creator"
@@ -2182,6 +2244,7 @@ export const Constants = {
     Enums: {
       backup_state: ["not_backed_up", "backed_up"],
       comment_type: ["comment", "question", "answer"],
+      content_entity_type: ["foundation", "project", "project_pitch"],
       creator_entity_type: ["individual", "ngo", "foundation"],
       credential_type: ["public-key"],
       device_type: ["single_device", "multi_device"],
@@ -2235,6 +2298,7 @@ export const Constants = {
       ],
       referral_status: ["pending", "onboarded", "first_donation", "active"],
       streak_period: ["weekly", "monthly"],
+      translation_status: ["pending", "complete", "failed", "stale"],
       user_role: ["donor", "creator", "pending", "admin", "kinder", "kindler"],
     },
   },

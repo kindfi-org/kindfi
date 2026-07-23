@@ -16,8 +16,10 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
+import { ContentLanguageSelector } from '~/components/shared/content-language-selector'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { useI18n } from '~/lib/i18n/context'
 import { stepOneSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepOneData } from '~/lib/types/project/create-project.types'
 
@@ -27,6 +29,7 @@ interface StepOneProps {
 
 export function StepOne({ onNext }: StepOneProps) {
 	const { formData, updateFormData } = useCreateProject()
+	const { language } = useI18n()
 
 	const form = useForm<StepOneData>({
 		resolver: zodResolver(stepOneSchema),
@@ -55,6 +58,10 @@ export function StepOne({ onNext }: StepOneProps) {
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 							<CSRFTokenField />
+							<ContentLanguageSelector
+								value={formData.sourceLocale ?? language}
+								onChange={(locale) => updateFormData({ sourceLocale: locale })}
+							/>
 							<FormField
 								control={form.control}
 								name="title"

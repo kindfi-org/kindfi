@@ -11,9 +11,19 @@ interface TeamMemberListProps {
 	onEdit?: (member: ProjectTeamMember) => void
 	onDelete?: (memberId: string) => void
 	className?: string
+	entityLabel?: 'project' | 'foundation'
 }
 
-export function TeamMemberList({ members, onEdit, onDelete, className }: TeamMemberListProps) {
+export function TeamMemberList({
+	members,
+	onEdit,
+	onDelete,
+	className,
+	entityLabel = 'project',
+}: TeamMemberListProps) {
+	const isFoundation = entityLabel === 'foundation'
+	const entityName = isFoundation ? 'foundation' : 'project'
+
 	if (members.length === 0) {
 		return (
 			<Card className={cn(className, 'border border-border bg-card shadow-sm')}>
@@ -21,8 +31,8 @@ export function TeamMemberList({ members, onEdit, onDelete, className }: TeamMem
 					<User className="h-12 w-12 text-muted-foreground mb-4" aria-hidden="true" />
 					<h3 className="text-lg font-semibold mb-2">No team members yet</h3>
 					<p className="text-muted-foreground text-center max-w-md">
-						Add team members to showcase who&apos;s behind this project. Start by adding your first
-						team member above.
+						Add team members to showcase who&apos;s behind this {entityName}. Start by adding your
+						first team member above.
 					</p>
 				</CardContent>
 			</Card>
@@ -35,9 +45,13 @@ export function TeamMemberList({ members, onEdit, onDelete, className }: TeamMem
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<User className="h-5 w-5" aria-hidden="true" />
-						Project Team ({members.length})
+						{isFoundation ? 'Foundation Team' : 'Project Team'} ({members.length})
 					</CardTitle>
-					<CardDescription>The people behind this project and their contributions.</CardDescription>
+					<CardDescription>
+						{isFoundation
+							? 'The people behind this foundation and their contributions.'
+							: 'The people behind this project and their contributions.'}
+					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">

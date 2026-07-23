@@ -31,4 +31,9 @@ export const common = {
 	share: 'Share',
 	copy: 'Copy',
 	copied: 'Copied!',
+	contentLanguage: 'Content language',
+	contentLanguageHelp:
+		'The language you write in. KindFi will automatically generate a translation for visitors who use the other language.',
+	contentLanguageEn: 'English',
+	contentLanguageEs: 'Spanish',
 }

@@ -6,13 +6,16 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { CSRFTokenField, Form } from '~/components/base/form'
+import { ContentLanguageFormField } from '~/components/shared/content-language-form-field'
 import { useCreateFoundation } from '~/hooks/contexts/use-create-foundation.context'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { useI18n } from '~/lib/i18n/context'
 import { BasicInfoSection } from './components/basic-info-section'
 import { FormFooter } from './components/form-footer'
 import { LogoSection } from './components/logo-section'
 import { MissionVisionSection } from './components/mission-vision-section'
 import { SocialLinksSection } from './components/social-links-section'
+import { StoryImpactSection } from './components/story-impact-section'
 import { useFoundationFormSubmission } from './hooks/use-foundation-form-submission'
 import { type CreateFoundationFormData, createFoundationSchema } from './types'
 import { generateSlug } from './utils/slug-generator'
@@ -20,18 +23,22 @@ import { generateSlug } from './utils/slug-generator'
 export function CreateFoundationForm() {
 	const { formData, updateFormData } = useCreateFoundation()
 	const { submitFoundation, isSubmitting } = useFoundationFormSubmission()
+	const { language } = useI18n()
 
 	const form = useForm<CreateFoundationFormData>({
 		resolver: zodResolver(createFoundationSchema),
 		defaultValues: {
 			name: formData.name,
 			description: formData.description,
+			story: formData.story,
+			impactHighlights: formData.impactHighlights ?? [],
 			slug: formData.slug,
 			foundedYear: formData.foundedYear,
 			mission: formData.mission,
 			vision: formData.vision,
 			websiteUrl: formData.websiteUrl,
 			socialLinks: formData.socialLinks,
+			sourceLocale: language,
 			logo: null,
 		},
 	})
@@ -84,8 +91,10 @@ export function CreateFoundationForm() {
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" noValidate>
 							<CSRFTokenField />
+							<ContentLanguageFormField />
 
 							<BasicInfoSection />
+							<StoryImpactSection />
 							<MissionVisionSection />
 							<SocialLinksSection />
 							<LogoSection />
