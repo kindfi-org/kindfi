@@ -54,6 +54,16 @@ const RELEASE_READINESS_ALERT_CLASS: Record<ReleaseReadinessTone, string | undef
 	warning: undefined,
 }
 
+const getMilestoneReleaseKey = (
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): string => {
+	if (isSingleReleaseMilestone(milestone)) {
+		return 'single-release-milestone'
+	}
+
+	return [milestone.description, milestone.amount, milestone.receiver].join('::')
+}
+
 export function ReleaseTab({
 	escrowContractAddress,
 	escrowType,
@@ -225,7 +235,7 @@ export function ReleaseTab({
 											const released =
 												!isSingleReleaseMilestone(milestone) && milestone.flags?.released
 											return (
-												<SelectItem key={index} value={String(index)}>
+												<SelectItem key={getMilestoneReleaseKey(milestone)} value={String(index)}>
 													Milestone {index + 1}
 													{approved ? ' · Approved' : ''}
 													{released ? ' · Released' : ''}

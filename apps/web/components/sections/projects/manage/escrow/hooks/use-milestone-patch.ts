@@ -4,7 +4,6 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import type { JSX } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
