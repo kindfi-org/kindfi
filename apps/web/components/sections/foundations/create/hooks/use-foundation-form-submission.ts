@@ -33,6 +33,7 @@ export function useFoundationFormSubmission() {
 			if (data.logo instanceof File) {
 				formDataToSubmit.append('logo', data.logo)
 			}
+			formDataToSubmit.append('sourceLocale', data.sourceLocale ?? 'en')
 
 			const response = await fetch('/api/foundations/create', {
 				method: 'POST',

@@ -8,6 +8,7 @@ import {
 	foundationSlugParamSchema,
 	foundationUpdateFormSchema,
 } from '~/lib/schemas/foundation.schemas'
+import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -81,6 +82,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 				}
 			})(),
 			logo: formData.get('logo') as File | null,
+			sourceLocale: (formData.get('sourceLocale') as string) || 'en',
 		}
 		const validation = validateRequest(foundationUpdateFormSchema, formPayload)
 		if (!validation.success) return validation.response
@@ -95,6 +97,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 			websiteUrl,
 			socialLinks,
 			logo,
+			sourceLocale,
 		} = validation.data
 
 		const updatePayload: Record<string, unknown> = {
@@ -107,6 +110,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 			vision: vision || null,
 			website_url: websiteUrl || null,
 			social_links: socialLinks,
+			source_locale: sourceLocale,
 			updated_at: new Date().toISOString(),
 		}
 
@@ -140,6 +144,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
 				}
 			}
 		}
+
+		scheduleContentTranslation('foundation', foundation.id)
 
 		return NextResponse.json({ slug: validatedSlug }, { status: 200 })
 	} catch (err) {

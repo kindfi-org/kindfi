@@ -4,6 +4,7 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion } from 'framer-motion'
 import { Loader2, Save } from 'lucide-react'
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -22,10 +23,12 @@ import { LocationSelect } from '~/components/sections/projects/create/location-s
 import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
+import { ContentLanguageFormField } from '~/components/shared/content-language-form-field'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import { zodResolver } from '~/lib/form/zod-resolver'
 import { getAllCategories } from '~/lib/queries/projects'
 import { stepOneSchema, stepThreeSchema, stepTwoSchema } from '~/lib/schemas/create-project.schemas'
+import { sourceLocaleSchema } from '~/lib/schemas/locale.schemas'
 import type {
 	BasicProjectInfo,
 	CreateProjectFormData,
@@ -34,7 +37,14 @@ import { normalizeProjectToFormDefaults } from '~/lib/utils/project-utils'
 import { CategoryBadgeSkeleton } from '../skeletons'
 
 // Combine all schemas for the complete form
-const updateProjectSchema = stepOneSchema.and(stepTwoSchema).and(stepThreeSchema)
+const updateProjectSchema = stepOneSchema
+	.and(stepTwoSchema)
+	.and(stepThreeSchema)
+	.and(
+		z.object({
+			sourceLocale: sourceLocaleSchema.optional().default('en'),
+		}),
+	)
 
 interface UpdateProjectFormProps {
 	project: BasicProjectInfo
@@ -84,6 +94,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 						<Form {...form}>
 							<form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-6">
 								<CSRFTokenField />
+								<ContentLanguageFormField />
 								{/* Title */}
 								<FormField
 									control={form.control}

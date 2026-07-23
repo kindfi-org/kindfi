@@ -25,6 +25,7 @@ const initialFormData: CreateProjectFormData = {
 	location: '',
 	category: '',
 	tags: [],
+	sourceLocale: 'en',
 }
 
 export function CreateProjectProvider({ children }: { children: ReactNode }) {

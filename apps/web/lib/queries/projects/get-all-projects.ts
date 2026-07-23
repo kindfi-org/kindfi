@@ -4,6 +4,12 @@ import {
 	getProjectEscrowRowId,
 	resolveProjectEscrowContracts,
 } from '~/lib/queries/projects/resolve-project-escrow-contracts'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import {
+	fetchContentTranslations,
+	type LocalizeOptions,
+	resolveLocalizedFields,
+} from '~/lib/services/content-translation'
 import type { Project } from '~/lib/types/project'
 import { calculateReleasedAmount } from '~/lib/utils/projects/milestone-funding'
 
@@ -12,11 +18,16 @@ export type ProjectListItem = Project & {
 	developmentOnly: boolean
 }
 
+export type GetAllProjectsOptions = LocalizeOptions & {
+	viewerLocale?: SupportedLocale
+}
+
 export async function getAllProjects(
 	client: TypedSupabaseClient,
 	categorySlugs: string[] = [],
 	sortSlug = 'most-popular',
 	limit?: number,
+	options?: GetAllProjectsOptions,
 ): Promise<ProjectListItem[]> {
 	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-popular']
 
@@ -37,6 +48,7 @@ export async function getAllProjects(
       kinder_count,
       status,
       development_only,
+      source_locale,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
@@ -74,6 +86,12 @@ export async function getAllProjects(
 
 	if (error) throw error
 
+	const projectIds = data?.map((project) => project.id) ?? []
+	const translations =
+		options?.localize !== false && projectIds.length > 0
+			? await fetchContentTranslations(client, 'project', projectIds, options?.viewerLocale ?? 'en')
+			: new Map()
+
 	const escrowRowIds =
 		data
 			?.map((project) =>
@@ -91,6 +109,17 @@ export async function getAllProjects(
 
 	return (
 		data?.map((project) => {
+			const sourceLocale = (project.source_locale as SupportedLocale | undefined) ?? 'en'
+			const localized = resolveLocalizedFields(
+				{
+					title: project.title,
+					description: project.description,
+				},
+				sourceLocale,
+				translations.get(project.id),
+				options,
+			)
+
 			const escrowRowId = getProjectEscrowRowId(
 				(
 					project as unknown as {
@@ -102,9 +131,9 @@ export async function getAllProjects(
 
 			return {
 				id: project.id,
-				title: project.title,
+				title: localized.title ?? project.title,
 				slug: project.slug,
-				description: project.description,
+				description: localized.description ?? project.description,
 				image: project.image_url,
 				goal: project.target_amount,
 				raised: project.current_amount,

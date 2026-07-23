@@ -34,13 +34,17 @@ const fadeUp = (delay = 0) => ({
 
 export function HighlightedProjects() {
 	const [waitlistOpen, setWaitlistOpen] = useState(false)
-	const { t } = useI18n()
+	const { t, language } = useI18n()
 	const {
 		data: projects = [],
 		isLoading,
 		error,
-	} = useSupabaseQuery('highlighted-projects', (client) =>
-		getAllProjects(client, [], 'most-recent', 6),
+	} = useSupabaseQuery(
+		'highlighted-projects',
+		(client) => getAllProjects(client, [], 'most-recent', 6, { viewerLocale: language }),
+		{
+			additionalKeyValues: [language],
+		},
 	)
 
 	const {

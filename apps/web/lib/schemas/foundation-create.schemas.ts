@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sourceLocaleSchema } from './locale.schemas'
 
 const MAX_IMPACT_HIGHLIGHTS = 12
 const MAX_IMPACT_ITEM_LENGTH = 300
@@ -24,4 +25,5 @@ export const createFoundationFormSchema = z.object({
 	vision: z.string().nullable().optional(),
 	websiteUrl: z.string().url().nullable().optional().or(z.literal('')),
 	socialLinks: z.record(z.string(), z.string()).optional().default({}),
+	sourceLocale: sourceLocaleSchema.optional().default('en'),
 })

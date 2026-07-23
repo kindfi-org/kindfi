@@ -55,9 +55,13 @@ export function FoundationManageOverview({ slug }: FoundationManageOverviewProps
 		data: foundation,
 		isLoading,
 		error,
-	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, slug), {
-		additionalKeyValues: [slug],
-	})
+	} = useSupabaseQuery(
+		'foundation',
+		(client) => getFoundationBySlug(client, slug, { localize: false }),
+		{
+			additionalKeyValues: [slug],
+		},
+	)
 
 	const shouldReduceMotion = useReducedMotion()
 

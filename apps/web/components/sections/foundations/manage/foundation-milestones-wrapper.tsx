@@ -27,9 +27,13 @@ export function FoundationMilestonesWrapper({ foundationSlug }: FoundationMilest
 		data: foundation,
 		error,
 		isLoading,
-	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, foundationSlug), {
-		additionalKeyValues: [foundationSlug],
-	})
+	} = useSupabaseQuery(
+		'foundation',
+		(client) => getFoundationBySlug(client, foundationSlug, { localize: false }),
+		{
+			additionalKeyValues: [foundationSlug],
+		},
+	)
 
 	if (error ?? !foundation) {
 		notFound()

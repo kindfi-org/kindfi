@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createFoundationFormSchema } from '~/lib/schemas/foundation-create.schemas'
+import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import { uploadFoundationLogo } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -83,6 +84,7 @@ async function createFoundationHandler(req: NextRequest) {
 					return {}
 				}
 			})(),
+			sourceLocale: (formData.get('sourceLocale') as string) || 'en',
 		}
 		const validation = validateRequest(createFoundationFormSchema, formDataObj)
 		if (!validation.success) {
@@ -99,6 +101,7 @@ async function createFoundationHandler(req: NextRequest) {
 			vision,
 			websiteUrl,
 			socialLinks,
+			sourceLocale,
 		} = validation.data
 		const logo = formData.get('logo') as File | null
 
@@ -126,6 +129,7 @@ async function createFoundationHandler(req: NextRequest) {
 			vision: vision || null,
 			website_url: websiteUrl || null,
 			social_links: socialLinks as Json,
+			source_locale: sourceLocale,
 		}
 
 		// Insert new foundation and retrieve its ID and slug
@@ -162,6 +166,8 @@ async function createFoundationHandler(req: NextRequest) {
 				}
 			}
 		}
+
+		scheduleContentTranslation('foundation', foundation.id)
 
 		return NextResponse.json({ slug: foundation.slug }, { status: 201 })
 	} catch (err) {

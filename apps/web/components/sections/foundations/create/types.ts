@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sourceLocaleSchema } from '~/lib/schemas/locale.schemas'
 
 const MAX_NAME_LENGTH = 200
 const MAX_DESCRIPTION_LENGTH = 2000
@@ -63,6 +64,7 @@ export const createFoundationSchema = z.object({
 		)
 		.optional(),
 	logo: z.instanceof(File).optional().or(z.literal(null)),
+	sourceLocale: sourceLocaleSchema.optional().default('en'),
 })
 
 export type CreateFoundationFormData = z.infer<typeof createFoundationSchema>

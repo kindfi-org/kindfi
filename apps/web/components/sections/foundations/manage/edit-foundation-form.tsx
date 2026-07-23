@@ -7,7 +7,9 @@ import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { CSRFTokenField, Form } from '~/components/base/form'
+import { ContentLanguageFormField } from '~/components/shared/content-language-form-field'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
 import { BasicInfoSection } from '../create/components/basic-info-section'
 import { FormFooter } from '../create/components/form-footer'
 import { LogoSection } from '../create/components/logo-section'
@@ -28,6 +30,7 @@ export type EditFoundationFormFoundation = {
 	websiteUrl: string | null
 	socialLinks: Record<string, string>
 	logoUrl: string | null
+	sourceLocale: SupportedLocale
 }
 
 type EditFoundationFormProps = {
@@ -52,6 +55,7 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 			vision: foundation.vision ?? '',
 			websiteUrl: foundation.websiteUrl ?? '',
 			socialLinks: foundation.socialLinks ?? {},
+			sourceLocale: foundation.sourceLocale ?? 'en',
 			logo: null,
 		},
 	})
@@ -79,6 +83,7 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 				if (data.logo instanceof File) {
 					formDataToSubmit.append('logo', data.logo)
 				}
+				formDataToSubmit.append('sourceLocale', data.sourceLocale ?? 'en')
 
 				const response = await fetch(`/api/foundations/${slug}`, {
 					method: 'PATCH',
@@ -116,6 +121,7 @@ export function EditFoundationForm({ slug, foundation }: EditFoundationFormProps
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8" noValidate>
 						<CSRFTokenField />
+						<ContentLanguageFormField />
 						<BasicInfoSection slugReadOnly />
 						<StoryImpactSection />
 						<MissionVisionSection />

@@ -26,7 +26,7 @@ const formatResultsCount = (count: number, t: (key: string) => string) => {
 export function FoundationsClientWrapper() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const { t } = useI18n()
+	const { t, language } = useI18n()
 	const reducedMotion = useReducedMotion()
 	const sortSlug = normalizeFoundationListSort(searchParams.get('sort'))
 
@@ -34,9 +34,13 @@ export function FoundationsClientWrapper() {
 		data: foundations = [],
 		isLoading,
 		error,
-	} = useSupabaseQuery('foundations', (client) => getAllFoundations(client, sortSlug), {
-		additionalKeyValues: [sortSlug],
-	})
+	} = useSupabaseQuery(
+		'foundations',
+		(client) => getAllFoundations(client, sortSlug, undefined, { viewerLocale: language }),
+		{
+			additionalKeyValues: [sortSlug, language],
+		},
+	)
 
 	const handleSortChange = (newSort: FoundationListSortSlug) => {
 		const params = new URLSearchParams(searchParams.toString())

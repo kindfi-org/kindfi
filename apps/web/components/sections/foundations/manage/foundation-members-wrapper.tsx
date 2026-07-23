@@ -29,9 +29,13 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 		data: foundation,
 		error: foundationError,
 		isLoading: isFoundationLoading,
-	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, foundationSlug), {
-		additionalKeyValues: [foundationSlug],
-	})
+	} = useSupabaseQuery(
+		'foundation',
+		(client) => getFoundationBySlug(client, foundationSlug, { localize: false }),
+		{
+			additionalKeyValues: [foundationSlug],
+		},
+	)
 
 	const {
 		data: teamData,
