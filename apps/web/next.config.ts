@@ -55,6 +55,26 @@ const nextConfig: NextConfig = {
 				hostname: '*.mypinata.cloud',
 				pathname: '/ipfs/**',
 			},
+			{
+				protocol: 'https',
+				hostname: '*.googleusercontent.com',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '*.githubusercontent.com',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'pollar.xyz',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '*.pollar.xyz',
+				pathname: '/**',
+			},
 		],
 	},
 	async headers() {
