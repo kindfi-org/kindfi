@@ -10,6 +10,7 @@ interface CreateProjectContextType {
 	updateFormData: (data: Partial<CreateProjectFormData>) => void
 	currentStep: number
 	setCurrentStep: (step: number) => void
+	lockedFoundation?: { id: string; name: string }
 }
 
 const CreateProjectContext = createContext<CreateProjectContextType | undefined>(undefined)
@@ -28,8 +29,21 @@ const initialFormData: CreateProjectFormData = {
 	sourceLocale: 'en',
 }
 
-export function CreateProjectProvider({ children }: { children: ReactNode }) {
-	const [formData, setFormData] = useSetState<CreateProjectFormData>(initialFormData)
+type CreateProjectProviderProps = {
+	children: ReactNode
+	initialFoundationId?: string
+	lockedFoundation?: { id: string; name: string }
+}
+
+export function CreateProjectProvider({
+	children,
+	initialFoundationId,
+	lockedFoundation,
+}: CreateProjectProviderProps) {
+	const [formData, setFormData] = useSetState<CreateProjectFormData>({
+		...initialFormData,
+		...(initialFoundationId ? { foundationId: initialFoundationId } : {}),
+	})
 	const [currentStep, setCurrentStep] = useState(1)
 
 	const updateFormData = (data: Partial<CreateProjectFormData>) => {
@@ -43,6 +57,7 @@ export function CreateProjectProvider({ children }: { children: ReactNode }) {
 				updateFormData,
 				currentStep,
 				setCurrentStep,
+				lockedFoundation,
 			}}
 		>
 			{children}

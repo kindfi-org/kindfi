@@ -11,7 +11,6 @@ import {
 	Heart,
 	Megaphone,
 	Pencil,
-	TrendingUp,
 	Users,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -44,9 +43,7 @@ const OVERVIEW_CARD_ICONS: Record<
 	Exclude<FoundationManageSectionKey, 'overview' | 'edit'>,
 	React.ComponentType<{ className?: string }>
 > = {
-	milestones: TrendingUp,
 	members: Users,
-	settings: Building2,
 	campaigns: Megaphone,
 }
 
@@ -158,8 +155,7 @@ export function FoundationManageOverview({ slug }: FoundationManageOverviewProps
 				className="space-y-8 lg:space-y-12"
 			>
 				<motion.p variants={cardVariants} className="text-muted-foreground text-lg">
-					Overview and quick actions for your foundation. Edit details, milestones, team, and
-					settings.
+					Overview and quick actions for your foundation. Edit details, campaigns, and team.
 				</motion.p>
 
 				<motion.div

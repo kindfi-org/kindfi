@@ -3,7 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Building2, CheckCircle2, XCircle } from 'lucide-react'
+import { Building2, CheckCircle2, Plus, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useMemo, useState } from 'react'
@@ -170,11 +170,19 @@ export function FoundationCampaignsWrapper({
 
 	return (
 		<>
-			<ManageSectionHeader
-				title="Campaigns"
-				description="Assign your campaigns to this foundation to organize them under one umbrella."
-				icon={<Building2 size={24} className="relative z-10" aria-hidden="true" />}
-			/>
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-2">
+				<ManageSectionHeader
+					title="Campaigns"
+					description="Create and assign campaigns linked to this foundation."
+					icon={<Building2 size={24} className="relative z-10" aria-hidden="true" />}
+				/>
+				<Button asChild className="shrink-0 w-full sm:w-auto">
+					<Link href={`/create-project?foundationId=${foundationId}`}>
+						<Plus className="h-4 w-4 mr-1.5" aria-hidden="true" />
+						Create campaign
+					</Link>
+				</Button>
+			</div>
 
 			{/* Filter Tabs */}
 			<div className="flex gap-2 mb-6 border-b" role="tablist" aria-label="Filter campaigns">
@@ -233,13 +241,21 @@ export function FoundationCampaignsWrapper({
 								? 'All Campaigns Assigned'
 								: 'No Campaigns Found'}
 					</h3>
-					<p className="text-muted-foreground">
+					<p className="text-muted-foreground mb-6">
 						{filter === 'all'
-							? 'Create your first campaign to get started.'
+							? 'Create your first campaign to link it to this foundation.'
 							: filter === 'assigned'
 								? 'Assign campaigns using the buttons below.'
 								: 'All your campaigns are already assigned to this foundation.'}
 					</p>
+					{filter === 'all' && (
+						<Button asChild>
+							<Link href={`/create-project?foundationId=${foundationId}`}>
+								<Plus className="h-4 w-4 mr-1.5" aria-hidden="true" />
+								Create campaign
+							</Link>
+						</Button>
+					)}
 				</div>
 			) : (
 				<div className="space-y-4">

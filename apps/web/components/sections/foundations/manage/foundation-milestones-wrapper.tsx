@@ -11,14 +11,11 @@ import { Button } from '~/components/base/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { AddMilestoneDialog } from './add-milestone-dialog'
-import { FOUNDATION_MANAGE_SECTIONS } from './constants'
 import { ManagePageShell, ManageSectionHeader } from './shared'
 
 interface FoundationMilestonesWrapperProps {
 	foundationSlug: string
 }
-
-const milestonesSection = FOUNDATION_MANAGE_SECTIONS.find((s) => s.key === 'milestones')
 
 export function FoundationMilestonesWrapper({ foundationSlug }: FoundationMilestonesWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
@@ -67,10 +64,7 @@ export function FoundationMilestonesWrapper({ foundationSlug }: FoundationMilest
 				<ManageSectionHeader
 					icon={<IoCalendarOutline size={24} className="relative z-10" aria-hidden="true" />}
 					title="Foundation Milestones"
-					description={
-						milestonesSection?.description ??
-						"Track and showcase your foundation's key achievements"
-					}
+					description="Track and showcase your foundation's key achievements"
 				/>
 				<Button
 					onClick={() => setAddDialogOpen(true)}

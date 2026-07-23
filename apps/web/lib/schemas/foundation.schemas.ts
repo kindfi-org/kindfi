@@ -74,6 +74,10 @@ export const foundationTeamMemberDeleteQuerySchema = z.object({
 	memberId: z.string().uuid('Member ID is required'),
 })
 
+export const foundationFounderUpdateSchema = z.object({
+	userId: z.string().uuid('User ID is required'),
+})
+
 export const foundationUpdateFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
 	description: z.string().min(1, 'Description is required'),
