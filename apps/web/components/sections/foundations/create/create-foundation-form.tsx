@@ -13,6 +13,7 @@ import { FormFooter } from './components/form-footer'
 import { LogoSection } from './components/logo-section'
 import { MissionVisionSection } from './components/mission-vision-section'
 import { SocialLinksSection } from './components/social-links-section'
+import { StoryImpactSection } from './components/story-impact-section'
 import { useFoundationFormSubmission } from './hooks/use-foundation-form-submission'
 import { type CreateFoundationFormData, createFoundationSchema } from './types'
 import { generateSlug } from './utils/slug-generator'
@@ -26,6 +27,8 @@ export function CreateFoundationForm() {
 		defaultValues: {
 			name: formData.name,
 			description: formData.description,
+			story: formData.story,
+			impactHighlights: formData.impactHighlights ?? [],
 			slug: formData.slug,
 			foundedYear: formData.foundedYear,
 			mission: formData.mission,
@@ -86,6 +89,7 @@ export function CreateFoundationForm() {
 							<CSRFTokenField />
 
 							<BasicInfoSection />
+							<StoryImpactSection />
 							<MissionVisionSection />
 							<SocialLinksSection />
 							<LogoSection />

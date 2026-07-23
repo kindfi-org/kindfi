@@ -185,14 +185,15 @@ export function BasicInfoSection({ slugReadOnly = false }: BasicInfoSectionProps
 						</FormLabel>
 						<FormControl>
 							<Textarea
-								placeholder="Describe your foundation's purpose, impact, and what makes it unique…"
-								className="min-h-[120px] resize-none"
+								placeholder="A short summary of your foundation — what you do and who you help (1–2 sentences)…"
+								className="min-h-[100px] resize-none"
 								{...field}
 							/>
 						</FormControl>
 						<div className="flex justify-between items-center">
 							<FormDescription>
-								Provide a clear and compelling description of your foundation
+								Brief tagline shown on cards and search results. Use the Story section below for
+								your full narrative.
 							</FormDescription>
 							<span
 								className={`text-xs ${descriptionLength < 10 ? 'text-destructive' : 'text-muted-foreground'}`}

@@ -59,6 +59,16 @@ async function createFoundationHandler(req: NextRequest) {
 		const formDataObj = {
 			name: formData.get('name') ?? '',
 			description: formData.get('description') ?? '',
+			story: formData.get('story') ?? undefined,
+			impactHighlights: (() => {
+				const raw = formData.get('impactHighlights') as string | null
+				if (!raw) return []
+				try {
+					return JSON.parse(raw) as string[]
+				} catch {
+					return []
+				}
+			})(),
 			slug: formData.get('slug') ?? '',
 			foundedYear: formData.get('foundedYear') ?? '',
 			mission: formData.get('mission') ?? undefined,
@@ -78,8 +88,18 @@ async function createFoundationHandler(req: NextRequest) {
 		if (!validation.success) {
 			return validation.response
 		}
-		const { name, description, slug, foundedYear, mission, vision, websiteUrl, socialLinks } =
-			validation.data
+		const {
+			name,
+			description,
+			story,
+			impactHighlights,
+			slug,
+			foundedYear,
+			mission,
+			vision,
+			websiteUrl,
+			socialLinks,
+		} = validation.data
 		const logo = formData.get('logo') as File | null
 
 		// Check if slug already exists
@@ -97,6 +117,8 @@ async function createFoundationHandler(req: NextRequest) {
 		const insertData: TablesInsert<'foundations'> = {
 			name,
 			description,
+			story: story || null,
+			impact_highlights: impactHighlights ?? [],
 			slug,
 			founder_id: userId,
 			founded_year: foundedYear,

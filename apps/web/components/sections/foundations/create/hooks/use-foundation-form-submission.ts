@@ -15,6 +15,13 @@ export function useFoundationFormSubmission() {
 			const formDataToSubmit = new FormData()
 			formDataToSubmit.append('name', data.name)
 			formDataToSubmit.append('description', data.description)
+			if (data.story) formDataToSubmit.append('story', data.story)
+			if (data.impactHighlights?.length) {
+				const filtered = data.impactHighlights.map((s) => s.trim()).filter(Boolean)
+				if (filtered.length) {
+					formDataToSubmit.append('impactHighlights', JSON.stringify(filtered))
+				}
+			}
 			formDataToSubmit.append('slug', data.slug)
 			formDataToSubmit.append('foundedYear', String(data.foundedYear))
 			if (data.mission) formDataToSubmit.append('mission', data.mission)

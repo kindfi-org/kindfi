@@ -13,6 +13,8 @@ import { FoundationHeader } from './components/foundation-header'
 import { FoundationMilestones } from './components/foundation-milestones'
 import { FoundationMissionVision } from './components/foundation-mission-vision'
 import { FoundationNotFound } from './components/foundation-not-found'
+import { FoundationStoryImpact } from './components/foundation-story-impact'
+import { FoundationTeamSection } from './components/foundation-team-section'
 import { useFoundationDetail } from './hooks/use-foundation-detail'
 
 interface FoundationDetailClientWrapperProps {
@@ -59,6 +61,8 @@ export function FoundationDetailClientWrapper({ slug }: FoundationDetailClientWr
 
 			<FoundationMissionVision foundation={foundation} shouldReduceMotion={shouldReduceMotion} />
 
+			<FoundationStoryImpact foundation={foundation} shouldReduceMotion={shouldReduceMotion} />
+
 			{foundation.milestones && foundation.milestones.length > 0 ? (
 				<FoundationMilestones
 					milestones={foundation.milestones}
@@ -67,6 +71,8 @@ export function FoundationDetailClientWrapper({ slug }: FoundationDetailClientWr
 			) : null}
 
 			<FoundationCampaigns campaigns={campaignsWithSlug} shouldReduceMotion={shouldReduceMotion} />
+
+			<FoundationTeamSection slug={slug} shouldReduceMotion={shouldReduceMotion} />
 
 			<div className="grid gap-6 md:grid-cols-2">
 				{foundation.founder ? (

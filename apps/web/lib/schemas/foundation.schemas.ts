@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+const MAX_IMPACT_HIGHLIGHTS = 12
+const MAX_IMPACT_ITEM_LENGTH = 300
+
+const impactHighlightSchema = z.string().max(MAX_IMPACT_ITEM_LENGTH)
+
+const impactHighlightsField = z.preprocess((val) => {
+	if (!Array.isArray(val)) return []
+	return val.map((item) => String(item).trim()).filter(Boolean)
+}, z.array(impactHighlightSchema).max(MAX_IMPACT_HIGHLIGHTS).optional().default([]))
+
 export const checkSlugQuerySchema = z.object({
 	slug: z.string().min(1, 'Slug is required'),
 })
@@ -66,6 +76,8 @@ export const foundationTeamMemberDeleteQuerySchema = z.object({
 export const foundationUpdateFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
 	description: z.string().min(1, 'Description is required'),
+	story: z.string().nullable().optional(),
+	impactHighlights: impactHighlightsField,
 	foundedYear: z
 		.number()
 		.int()

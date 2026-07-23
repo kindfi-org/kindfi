@@ -41,4 +41,11 @@ export const foundations = {
 	share: 'Share',
 	activeCampaigns: 'active',
 	completedCampaigns: 'completed',
+	ourStory: 'Our Story',
+	ourImpact: 'Our Impact',
+	team: 'Our Team',
+	teamDescription: 'The people driving this foundation forward.',
+	impactHighlightsCount: '{count} impact highlights',
+	storyLabel: 'Story',
+	impactLabel: 'Impact',
 }

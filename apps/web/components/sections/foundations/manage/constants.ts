@@ -30,7 +30,7 @@ export const FOUNDATION_MANAGE_SECTIONS: ReadonlyArray<{
 	{
 		key: 'edit',
 		title: 'Edit foundation',
-		description: 'Update name, description, mission, vision, and logo.',
+		description: 'Update name, description, story, impact, mission, vision, and logo.',
 		href: (slug: string) => `/foundations/${slug}/manage/edit`,
 		path: '/edit',
 		cta: 'Edit foundation',
@@ -53,11 +53,11 @@ export const FOUNDATION_MANAGE_SECTIONS: ReadonlyArray<{
 	},
 	{
 		key: 'members',
-		title: 'Members',
-		description: 'View foundation founder and team information.',
+		title: 'Team members',
+		description: 'Add and remove team members who represent your foundation.',
 		href: (slug: string) => `/foundations/${slug}/manage/members`,
 		path: '/members',
-		cta: 'View Members',
+		cta: 'Manage team',
 	},
 	{
 		key: 'settings',

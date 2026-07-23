@@ -91,7 +91,7 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 			<ManageSectionHeader
 				icon={<IoPeopleOutline size={24} className="relative z-10" aria-hidden="true" />}
 				title="Foundation Team"
-				description={`Manage the people behind ${foundation.name}`}
+				description={`Add, view, and remove team members for ${foundation.name}`}
 			/>
 
 			<motion.div
@@ -179,7 +179,11 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 								.map((member) => member.userId as string),
 						].filter((id): id is string => Boolean(id))}
 					/>
-					<TeamMemberList members={teamMembers} onDelete={handleDeleteMember} />
+					<TeamMemberList
+						members={teamMembers}
+						onDelete={handleDeleteMember}
+						entityLabel="foundation"
+					/>
 				</div>
 			</motion.div>
 		</ManagePageShell>

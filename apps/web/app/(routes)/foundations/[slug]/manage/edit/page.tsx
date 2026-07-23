@@ -24,6 +24,8 @@ export default async function EditFoundationPage({
 				foundation={{
 					name: foundation.name,
 					description: foundation.description,
+					story: foundation.story,
+					impactHighlights: foundation.impactHighlights,
 					slug: foundation.slug,
 					foundedYear: foundation.foundedYear,
 					mission: foundation.mission,

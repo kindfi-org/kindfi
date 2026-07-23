@@ -10,6 +10,8 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
       name,
       slug,
       description,
+      story,
+      impact_highlights,
       logo_url,
       cover_image_url,
       founder_id,
@@ -51,6 +53,8 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 		name: string
 		slug: string
 		description: string
+		story: string | null
+		impact_highlights: string[]
 		logo_url: string | null
 		cover_image_url: string | null
 		founder_id: string
@@ -148,6 +152,8 @@ export async function getFoundationBySlug(client: TypedSupabaseClient, slug: str
 		name: foundation.name,
 		slug: foundation.slug,
 		description: foundation.description,
+		story: foundation.story,
+		impactHighlights: foundation.impact_highlights ?? [],
 		logoUrl: foundation.logo_url,
 		coverImageUrl: foundation.cover_image_url,
 		founderId: foundation.founder_id,
