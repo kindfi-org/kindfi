@@ -16,7 +16,7 @@ export default async function FoundationMembersPage({
 		prefetchSupabaseQuery(
 			queryClient,
 			'foundation',
-			(client) => getFoundationBySlug(client, slug),
+			(client) => getFoundationBySlug(client, slug, { localize: false }),
 			[slug],
 		),
 		prefetchSupabaseQuery(

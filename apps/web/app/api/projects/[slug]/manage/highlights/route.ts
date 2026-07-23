@@ -2,5 +2,5 @@ import { createProjectManageGetHandler } from '~/lib/api/create-project-manage-g
 import { getProjectHighlights } from '~/lib/queries/projects/get-project-highlights'
 
 export const GET = createProjectManageGetHandler((client, slug) =>
-	getProjectHighlights(client, slug),
+	getProjectHighlights(client, slug, { localize: false }),
 )

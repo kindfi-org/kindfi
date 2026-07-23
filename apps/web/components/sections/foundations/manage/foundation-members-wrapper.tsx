@@ -15,6 +15,7 @@ import { useFoundationTeamMutation } from '~/hooks/foundations/use-foundation-te
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 import { getFoundationTeamBySlug } from '~/lib/queries/foundations/get-foundation-team-by-slug'
 import type { CreateTeamMemberData } from '~/lib/types/project/project-team.types'
+import { ReplaceFounderDialog } from './replace-founder-dialog'
 import { ManagePageShell, ManageSectionHeader } from './shared'
 
 interface FoundationMembersWrapperProps {
@@ -23,15 +24,19 @@ interface FoundationMembersWrapperProps {
 
 export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
-	const { createMember, deleteMember } = useFoundationTeamMutation()
+	const { createMember, deleteMember, replaceFounder } = useFoundationTeamMutation()
 
 	const {
 		data: foundation,
 		error: foundationError,
 		isLoading: isFoundationLoading,
-	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, foundationSlug), {
-		additionalKeyValues: [foundationSlug],
-	})
+	} = useSupabaseQuery(
+		'foundation',
+		(client) => getFoundationBySlug(client, foundationSlug, { localize: false }),
+		{
+			additionalKeyValues: [foundationSlug],
+		},
+	)
 
 	const {
 		data: teamData,
@@ -60,6 +65,10 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 			foundationSlug,
 			...data,
 		})
+	}
+
+	const handleReplaceFounder = async (userId: string) => {
+		await replaceFounder.mutateAsync({ foundationSlug, userId })
 	}
 
 	const handleDeleteMember = async (memberId: string) => {
@@ -91,7 +100,7 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 			<ManageSectionHeader
 				icon={<IoPeopleOutline size={24} className="relative z-10" aria-hidden="true" />}
 				title="Foundation Team"
-				description={`Manage the people behind ${foundation.name}`}
+				description={`Add, view, and remove team members for ${foundation.name}`}
 			/>
 
 			<motion.div
@@ -145,6 +154,12 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 												)}
 												<Badge className="bg-purple-600 text-white border-0 mt-2">Founder</Badge>
 											</div>
+											<ReplaceFounderDialog
+												currentFounderId={foundation.founder.id}
+												currentFounderName={foundation.founder.displayName}
+												onReplace={handleReplaceFounder}
+												isPending={replaceFounder.isPending}
+											/>
 										</div>
 										{foundation.founder.bio ? (
 											<p className="text-muted-foreground leading-relaxed mt-3">
@@ -157,12 +172,16 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 						</Card>
 					) : (
 						<Card className="border-0 bg-muted/50">
-							<CardContent className="py-12 text-center">
+							<CardContent className="py-12 text-center space-y-4">
 								<Building2
 									className="h-16 w-16 text-muted-foreground mx-auto mb-4"
 									aria-hidden="true"
 								/>
 								<p className="text-muted-foreground">Founder information not available</p>
+								<ReplaceFounderDialog
+									onReplace={handleReplaceFounder}
+									isPending={replaceFounder.isPending}
+								/>
 							</CardContent>
 						</Card>
 					)}
@@ -179,7 +198,11 @@ export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWr
 								.map((member) => member.userId as string),
 						].filter((id): id is string => Boolean(id))}
 					/>
-					<TeamMemberList members={teamMembers} onDelete={handleDeleteMember} />
+					<TeamMemberList
+						members={teamMembers}
+						onDelete={handleDeleteMember}
+						entityLabel="foundation"
+					/>
 				</div>
 			</motion.div>
 		</ManagePageShell>

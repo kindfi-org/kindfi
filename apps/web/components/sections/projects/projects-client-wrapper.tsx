@@ -34,7 +34,7 @@ const formatResultsCount = (count: number, t: (key: string) => string) => {
 export function ProjectsClientWrapper() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const { t } = useI18n()
+	const { t, language } = useI18n()
 	const reducedMotion = useReducedMotion()
 	const categoryParams = searchParams.getAll('category')
 	const categoryFilterKey = categoryParams.join(',')
@@ -46,9 +46,14 @@ export function ProjectsClientWrapper() {
 		data: projects = [],
 		isLoading: isLoadingProjects,
 		error: projectError,
-	} = useSupabaseQuery('projects', (client) => getAllProjects(client, categoryParams, sortParam), {
-		additionalKeyValues: [categoryFilterKey, sortParam],
-	})
+	} = useSupabaseQuery(
+		'projects',
+		(client) =>
+			getAllProjects(client, categoryParams, sortParam, undefined, { viewerLocale: language }),
+		{
+			additionalKeyValues: [categoryFilterKey, sortParam, language],
+		},
+	)
 
 	const {
 		data: categories = [],

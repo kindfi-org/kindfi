@@ -1,4 +1,15 @@
 import { z } from 'zod'
+import { sourceLocaleSchema } from './locale.schemas'
+
+const MAX_IMPACT_HIGHLIGHTS = 12
+const MAX_IMPACT_ITEM_LENGTH = 300
+
+const impactHighlightSchema = z.string().max(MAX_IMPACT_ITEM_LENGTH)
+
+const impactHighlightsField = z.preprocess((val) => {
+	if (!Array.isArray(val)) return []
+	return val.map((item) => String(item).trim()).filter(Boolean)
+}, z.array(impactHighlightSchema).max(MAX_IMPACT_HIGHLIGHTS).optional().default([]))
 
 export const checkSlugQuerySchema = z.object({
 	slug: z.string().min(1, 'Slug is required'),
@@ -63,9 +74,15 @@ export const foundationTeamMemberDeleteQuerySchema = z.object({
 	memberId: z.string().uuid('Member ID is required'),
 })
 
+export const foundationFounderUpdateSchema = z.object({
+	userId: z.string().uuid('User ID is required'),
+})
+
 export const foundationUpdateFormSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
 	description: z.string().min(1, 'Description is required'),
+	story: z.string().nullable().optional(),
+	impactHighlights: impactHighlightsField,
 	foundedYear: z
 		.number()
 		.int()
@@ -77,4 +94,5 @@ export const foundationUpdateFormSchema = z.object({
 	websiteUrl: z.string().nullable().optional(),
 	socialLinks: z.record(z.string(), z.string()).optional().default({}),
 	logo: z.union([z.instanceof(File), z.null()]).optional(),
+	sourceLocale: sourceLocaleSchema.optional().default('en'),
 })

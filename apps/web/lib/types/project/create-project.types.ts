@@ -6,6 +6,7 @@ import type {
 	stepThreeSchema,
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
 import type { SocialLinks } from './project-detail.types'
 
 export interface Tag {
@@ -31,6 +32,7 @@ export interface CreateProjectFormData {
 	category: string
 	foundationId?: string
 	tags: Tag[]
+	sourceLocale?: SupportedLocale
 }
 
 export interface CountryOption {
@@ -57,4 +59,5 @@ export interface BasicProjectInfo {
 	location: string | null
 	category: Tables<'categories'> | null
 	tags: Tag[]
+	sourceLocale?: SupportedLocale
 }

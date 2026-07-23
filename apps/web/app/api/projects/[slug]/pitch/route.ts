@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectPitchFormSchema } from '~/lib/schemas/project.schemas'
+import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import {
 	deleteFolderFromBucket,
 	transformToEmbedUrl,
@@ -111,6 +112,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 		if (error) {
 			logger.error(error)
 			return NextResponse.json({ error: error.message }, { status: 500 })
+		}
+
+		const { data: pitchRow, error: pitchFetchError } = await supabase
+			.from('project_pitch')
+			.select('id')
+			.eq('project_id', projectId)
+			.single()
+
+		if (pitchFetchError || !pitchRow) {
+			logger.error('Failed to load pitch id after upsert', pitchFetchError)
+		} else {
+			scheduleContentTranslation('project_pitch', pitchRow.id)
 		}
 
 		return NextResponse.json({

@@ -1,9 +1,23 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { EscrowType } from '@trustless-work/escrow'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import {
+	fetchContentTranslation,
+	type LocalizeOptions,
+	resolveLocalizedFields,
+} from '~/lib/services/content-translation'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
 import { readEscrowTypeFromMetadata } from '~/lib/utils/escrow/resolve-escrow-type'
 
-export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, projectSlug: string) {
+export type GetBasicProjectInfoOptions = LocalizeOptions & {
+	viewerLocale?: SupportedLocale
+}
+
+export async function getBasicProjectInfoBySlug(
+	client: TypedSupabaseClient,
+	projectSlug: string,
+	options?: GetBasicProjectInfoOptions,
+) {
 	const { data: project, error } = await client
 		.from('projects')
 		.select(
@@ -24,6 +38,7 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 			social_links,
 			status,
 			foundation_id,
+			source_locale,
 			category:category_id ( * ),
 			project_tag_relationships (
 				tag:tag_id ( id, name, color )
@@ -38,6 +53,24 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 
 	if (error) throw error
 	if (!project) return null
+
+	const sourceLocale = ((project as { source_locale?: SupportedLocale }).source_locale ??
+		'en') as SupportedLocale
+
+	const projectTranslation =
+		options?.localize !== false
+			? await fetchContentTranslation(client, 'project', project.id, options?.viewerLocale ?? 'en')
+			: null
+
+	const localized = resolveLocalizedFields(
+		{
+			title: project.title,
+			description: project.description,
+		},
+		sourceLocale,
+		projectTranslation,
+		options,
+	)
 
 	// Normalize project_escrows shape (it may be object or array depending on RLS/relationship)
 	const escrowRel = (
@@ -69,14 +102,32 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 	if (foundationId) {
 		const { data: foundationRow } = await client
 			.from('foundations')
-			.select('id, name, slug')
+			.select('id, name, slug, source_locale')
 			.eq('id', foundationId)
 			.maybeSingle()
 
 		if (foundationRow) {
+			const foundationSourceLocale =
+				(foundationRow.source_locale as SupportedLocale | undefined) ?? 'en'
+			const foundationTranslation =
+				options?.localize !== false
+					? await fetchContentTranslation(
+							client,
+							'foundation',
+							foundationRow.id,
+							options?.viewerLocale ?? 'en',
+						)
+					: null
+			const localizedFoundation = resolveLocalizedFields(
+				{ name: foundationRow.name },
+				foundationSourceLocale,
+				foundationTranslation,
+				options,
+			)
+
 			foundation = {
 				id: foundationRow.id,
-				name: foundationRow.name,
+				name: localizedFoundation.name ?? foundationRow.name,
 				slug: foundationRow.slug,
 			}
 		}
@@ -85,9 +136,9 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 	return {
 		id: project.id,
 		kindlerId: (project as { kindler_id?: string | null }).kindler_id ?? undefined,
-		title: project.title,
+		title: localized.title ?? project.title,
 		slug: project.slug,
-		description: project.description,
+		description: localized.description ?? project.description,
 		image: project.image_url,
 		goal: project.target_amount,
 		raised: project.current_amount,
@@ -97,6 +148,7 @@ export async function getBasicProjectInfoBySlug(client: TypedSupabaseClient, pro
 		status: project.status,
 		category: project.category,
 		location: project.project_location,
+		sourceLocale,
 		socialLinks:
 			project.social_links && typeof project.social_links === 'object'
 				? (project.social_links as SocialLinks)

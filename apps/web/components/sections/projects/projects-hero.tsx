@@ -15,14 +15,15 @@ interface ProjectsHeroProps {
 }
 
 export function ProjectsHero({ categorySlugs = [], sortSlug = 'most-popular' }: ProjectsHeroProps) {
-	const { t } = useI18n()
+	const { t, language } = useI18n()
 	const reducedMotion = useReducedMotion()
 
 	const { data: projects = [], isLoading: isLoadingProjects } = useSupabaseQuery(
 		'projects',
-		(client) => getAllProjects(client, categorySlugs, sortSlug),
+		(client) =>
+			getAllProjects(client, categorySlugs, sortSlug, undefined, { viewerLocale: language }),
 		{
-			additionalKeyValues: [categorySlugs, sortSlug],
+			additionalKeyValues: [categorySlugs, sortSlug, language],
 		},
 	)
 

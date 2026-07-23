@@ -177,6 +177,7 @@ export function normalizeProjectToFormDefaults(project: BasicProjectInfo): Creat
 		location: project.location ?? '',
 		category: project.category?.id ?? '',
 		tags: project.tags ?? [],
+		sourceLocale: project.sourceLocale ?? 'en',
 	}
 }
 
@@ -212,6 +213,7 @@ export function parseFormData(formData: FormData) {
 		image: formData.get('image') as File | null,
 		foundationId: (formData.get('foundationId') as string) || undefined,
 		developmentOnly: formData.get('developmentOnly') === 'true',
+		sourceLocale: (formData.get('sourceLocale') as string) || 'en',
 	}
 }
 

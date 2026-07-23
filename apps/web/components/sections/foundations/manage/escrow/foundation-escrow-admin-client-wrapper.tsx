@@ -13,9 +13,13 @@ export function FoundationEscrowAdminClientWrapper({ foundationSlug }: { foundat
 		data: foundation,
 		error,
 		isLoading,
-	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, foundationSlug), {
-		additionalKeyValues: [foundationSlug],
-	})
+	} = useSupabaseQuery(
+		'foundation',
+		(client) => getFoundationBySlug(client, foundationSlug, { localize: false }),
+		{
+			additionalKeyValues: [foundationSlug],
+		},
+	)
 
 	if (error ?? !foundation) {
 		notFound()

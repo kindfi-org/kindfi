@@ -6,6 +6,8 @@ import { useSetState } from 'react-use'
 export interface CreateFoundationFormData {
 	name: string
 	description: string
+	story?: string
+	impactHighlights: string[]
 	slug: string
 	foundedYear: number
 	mission?: string
@@ -26,6 +28,8 @@ const CreateFoundationContext = createContext<CreateFoundationContextType | unde
 const initialFormData: CreateFoundationFormData = {
 	name: '',
 	description: '',
+	story: '',
+	impactHighlights: [],
 	slug: '',
 	foundedYear: new Date().getFullYear(),
 	mission: '',

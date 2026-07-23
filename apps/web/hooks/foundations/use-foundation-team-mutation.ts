@@ -143,8 +143,59 @@ export function useFoundationTeamMutation() {
 		},
 	})
 
+	const replaceFounder = useMutation<
+		{ message: string },
+		Error,
+		{ foundationSlug: string; userId: string }
+	>({
+		mutationFn: async ({ foundationSlug, userId }) => {
+			const res = await fetch(`/api/foundations/${foundationSlug}/founder`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userId }),
+			})
+
+			if (!res.ok) {
+				const clonedRes = res.clone()
+				let errorMessage = 'Failed to replace founder'
+
+				try {
+					const contentType = clonedRes.headers.get('content-type')
+					if (contentType?.includes('application/json')) {
+						const error = await clonedRes.json()
+						errorMessage = error?.error || errorMessage
+					} else {
+						const text = await clonedRes.text()
+						errorMessage = text || errorMessage
+					}
+				} catch {
+					// use default message
+				}
+
+				throw new Error(errorMessage)
+			}
+
+			return res.json()
+		},
+		onSuccess: (_data, variables) => {
+			toast.success('Founder updated successfully')
+			queryClient.invalidateQueries({
+				queryKey: ['supabase', 'foundation', variables.foundationSlug],
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['supabase', 'foundation-team', variables.foundationSlug],
+			})
+		},
+		onError: (error: Error) => {
+			toast.error('Failed to replace founder', {
+				description: error.message,
+			})
+		},
+	})
+
 	return {
 		createMember,
 		deleteMember,
+		replaceFounder,
 	}
 }

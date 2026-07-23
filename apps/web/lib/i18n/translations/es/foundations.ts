@@ -41,4 +41,11 @@ export const foundations = {
 	share: 'Compartir',
 	activeCampaigns: 'activas',
 	completedCampaigns: 'completadas',
+	ourStory: 'Nuestra historia',
+	ourImpact: 'Nuestro impacto',
+	team: 'Nuestro equipo',
+	teamDescription: 'Las personas que impulsan esta fundación.',
+	impactHighlightsCount: '{count} logros de impacto',
+	storyLabel: 'Historia',
+	impactLabel: 'Impacto',
 }

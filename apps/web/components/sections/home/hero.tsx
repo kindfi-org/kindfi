@@ -2,25 +2,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { type ReactNode, useMemo, useState } from 'react'
-import { Button } from '~/components/base/button'
+import { type ReactNode, useMemo } from 'react'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useTypewriter } from '~/hooks/use-typewriter'
 import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
-
-const WaitlistModal = dynamic(
-	() =>
-		import('~/components/sections/waitlist/waitlist-modal').then((mod) => ({
-			default: mod.WaitlistModal,
-		})),
-	{
-		loading: () => null,
-		ssr: false,
-	},
-)
 
 const fadeUp = (delay = 0) => ({
 	initial: { opacity: 0, y: 24 },
@@ -118,8 +105,6 @@ export function Hero() {
 						{...fadeUp(0.2)}
 						className="mt-10 flex w-full flex-col items-center gap-12 sm:mt-12"
 					>
-						<WaitlistCTA />
-
 						<EcosystemPartners
 							supportedByLabel={t('home.supportedBy')}
 							builtUsingLabel={t('home.builtUsing')}
@@ -194,23 +179,5 @@ function PartnerRow({ label, children }: { label: string; children: ReactNode })
 			</span>
 			{children}
 		</div>
-	)
-}
-
-function WaitlistCTA() {
-	const [open, setOpen] = useState(false)
-	const { t } = useI18n()
-
-	return (
-		<>
-			<Button
-				size="lg"
-				className="gradient-btn h-12 min-w-[220px] rounded-full px-8 text-base font-semibold text-white shadow-lg shadow-emerald-900/10 transition-transform hover:scale-[1.02]"
-				onClick={() => setOpen(true)}
-			>
-				{t('home.waitlistProject')}
-			</Button>
-			<WaitlistModal open={open} onOpenChange={setOpen} />
-		</>
 	)
 }

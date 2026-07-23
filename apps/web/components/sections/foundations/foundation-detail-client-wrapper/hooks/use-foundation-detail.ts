@@ -3,16 +3,22 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { useSession } from 'next-auth/react'
 import { useMemo } from 'react'
+import { useI18n } from '~/lib/i18n'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
 
 export function useFoundationDetail(slug: string) {
+	const { language } = useI18n()
 	const {
 		data: foundation,
 		isLoading,
 		error,
-	} = useSupabaseQuery('foundation', (client) => getFoundationBySlug(client, slug), {
-		additionalKeyValues: [slug],
-	})
+	} = useSupabaseQuery(
+		'foundation',
+		(client) => getFoundationBySlug(client, slug, { viewerLocale: language }),
+		{
+			additionalKeyValues: [slug, language],
+		},
+	)
 
 	const { data: session } = useSession()
 

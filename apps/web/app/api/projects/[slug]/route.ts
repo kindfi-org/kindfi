@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { getViewerLocale } from '~/lib/i18n/locale-cookie.server'
 import { resolveProjectBySlug } from '~/lib/queries/projects/resolve-project-by-slug'
 
 /**
@@ -12,7 +13,8 @@ export async function GET(_request: Request, context: { params: Promise<{ slug: 
 	try {
 		const { slug } = await context.params
 		const session = await getServerSession(nextAuthOption)
-		const project = await resolveProjectBySlug(slug, session?.user?.id)
+		const viewerLocale = await getViewerLocale()
+		const project = await resolveProjectBySlug(slug, session?.user?.id, { viewerLocale })
 
 		if (!project) {
 			return NextResponse.json({ error: 'Not found' }, { status: 404 })

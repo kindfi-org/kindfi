@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
 import { ProjectsHero } from '~/components/sections/projects/projects-hero'
 import { JsonLd } from '~/components/shared/json-ld'
+import { getViewerLocale } from '~/lib/i18n/locale-cookie.server'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
 
@@ -38,13 +39,14 @@ export default async function ProjectsPage({
 	const { sort, category } = await searchParams
 	const sortSlug = sort ?? 'most-popular'
 	const categorySlugs = Array.isArray(category) ? category : category ? [category] : []
+	const viewerLocale = await getViewerLocale()
 
 	await Promise.all([
 		prefetchSupabaseQuery(
 			queryClient,
 			'projects',
-			(client) => getAllProjects(client, categorySlugs, sortSlug),
-			[categorySlugs, sortSlug],
+			(client) => getAllProjects(client, categorySlugs, sortSlug, undefined, { viewerLocale }),
+			[categorySlugs, sortSlug, viewerLocale],
 		),
 		prefetchSupabaseQuery(queryClient, 'categories', getAllCategories),
 	])
