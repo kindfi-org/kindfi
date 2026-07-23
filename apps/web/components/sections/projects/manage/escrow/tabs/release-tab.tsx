@@ -29,6 +29,7 @@ import {
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
 } from '~/lib/utils/escrow/milestone-utils'
+import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { EtherfuseOffRampCard } from '../components/etherfuse-off-ramp-card'
 
 interface ReleaseTabProps {
@@ -60,7 +61,7 @@ export function ReleaseTab({
 	onSuccess,
 }: ReleaseTabProps) {
 	const { releaseFunds, sendTransaction } = useEscrow()
-	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [isProcessing, setIsProcessing] = useState(false)
 
@@ -168,11 +169,11 @@ export function ReleaseTab({
 				throw new Error('Failed to prepare release transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(releaseResponse.unsignedTransaction)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
+			await submitTrustlessEscrowXdr(
+				releaseResponse.unsignedTransaction,
+				signAndSubmitTrustlessTransaction,
+				sendTransaction,
+			)
 
 			toast.success('Funds released successfully')
 			onSuccess()

@@ -30,6 +30,7 @@ export interface AppEnvInterface {
 	features: {
 		enableEscrowFeature: boolean
 		enableSmartAccountCreation: boolean
+		enablePollarOnboarding: boolean
 	}
 	vapid: {
 		email: string
@@ -72,6 +73,11 @@ export interface AppEnvInterface {
 			apiKey: string
 			baseUrl: string
 			customerId: string
+		}
+		pollar: {
+			publishableKey: string
+			secretKey: string
+			apiBaseUrl: string
 		}
 	}
 	analytics: {

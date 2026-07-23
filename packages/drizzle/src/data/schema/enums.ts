@@ -58,5 +58,6 @@ export const projectStatus = pgEnum('project_status', [
 	'funded',
 	'rejected',
 ])
+export const onboardingProvider = pgEnum('onboarding_provider', ['legacy_passkey', 'pollar'])
 export const userRole = pgEnum('user_role', ['kinder', 'kindler'])
 export const creatorEntityType = pgEnum('creator_entity_type', ['individual', 'ngo', 'foundation'])

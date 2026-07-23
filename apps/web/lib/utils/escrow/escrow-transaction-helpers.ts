@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { saveEscrowContractAction } from '~/app/actions/escrow/save-escrow-contract'
 import { syncEscrowToDatabaseAction } from '~/app/actions/escrow/sync-escrow-to-database'
 import type { EscrowFormData } from '~/components/sections/projects/manage/escrow/types'
+import type { TrustlessSubmitResult } from '~/hooks/pollar/use-pollar-signer'
 import {
 	getKindfiDeployPlatformFee,
 	KINDFI_PLATFORM_FEE_PERCENT,
@@ -28,6 +29,7 @@ export interface TransactionHelperParams {
 		type: 'single-release' | 'multi-release',
 	) => Promise<EscrowRequestResponse>
 	signTransaction: (xdr: string) => Promise<string>
+	signAndSubmitTransaction?: (unsignedXdr: string) => Promise<TrustlessSubmitResult>
 	sendTransaction: (
 		xdr: string,
 	) => Promise<
@@ -43,12 +45,14 @@ export const deployAndSign = async ({
 	type,
 	deployEscrow,
 	signTransaction,
+	signAndSubmitTransaction,
 	sendTransaction,
 }: {
 	payload: InitializeSingleReleaseEscrowPayload | InitializeMultiReleaseEscrowPayload
 	type: 'single-release' | 'multi-release'
 	deployEscrow: TransactionHelperParams['deployEscrow']
 	signTransaction: TransactionHelperParams['signTransaction']
+	signAndSubmitTransaction?: TransactionHelperParams['signAndSubmitTransaction']
 	sendTransaction: TransactionHelperParams['sendTransaction']
 }): Promise<Record<string, unknown>> => {
 	let deployResponse: EscrowRequestResponse
@@ -75,21 +79,25 @@ export const deployAndSign = async ({
 		throw new Error(msg)
 	}
 
-	let signedXdr: string
-	try {
-		signedXdr = await signTransaction(deployResponse.unsignedTransaction)
-	} catch (error) {
-		const msg = error instanceof Error ? error.message : 'Failed to sign transaction'
-		toast.error('Failed to sign transaction', { description: msg })
-		throw new Error(msg)
-	}
-
 	let sendResult:
 		| InitializeSingleReleaseEscrowResponse
 		| InitializeMultiReleaseEscrowResponse
-		| { status: string }
+		| { status: string; txHash?: string }
 	try {
-		sendResult = await sendTransaction(signedXdr)
+		if (signAndSubmitTransaction) {
+			const submit = await signAndSubmitTransaction(deployResponse.unsignedTransaction)
+			if (submit.alreadySubmitted) {
+				sendResult = { status: 'SUCCESS', txHash: submit.hash }
+			} else {
+				if (!submit.signedXdr) {
+					throw new Error('No signed transaction returned')
+				}
+				sendResult = await sendTransaction(submit.signedXdr)
+			}
+		} else {
+			const signedXdr = await signTransaction(deployResponse.unsignedTransaction)
+			sendResult = await sendTransaction(signedXdr)
+		}
 	} catch (error) {
 		const msg = error instanceof Error ? error.message : 'Failed to send transaction'
 		toast.error('Failed to send transaction', { description: msg })
@@ -293,6 +301,7 @@ export const handleSingleRelease = async ({
 	projectSlug,
 	deployEscrow,
 	signTransaction,
+	signAndSubmitTransaction,
 	sendTransaction,
 	router,
 }: TransactionHelperParams): Promise<void> => {
@@ -335,6 +344,7 @@ export const handleSingleRelease = async ({
 		type: 'single-release',
 		deployEscrow,
 		signTransaction,
+		signAndSubmitTransaction,
 		sendTransaction,
 	})
 
@@ -359,6 +369,7 @@ export const handleMultiRelease = async ({
 	projectSlug,
 	deployEscrow,
 	signTransaction,
+	signAndSubmitTransaction,
 	sendTransaction,
 	router,
 }: TransactionHelperParams): Promise<void> => {
@@ -420,6 +431,7 @@ export const handleMultiRelease = async ({
 		type: 'multi-release',
 		deployEscrow,
 		signTransaction,
+		signAndSubmitTransaction,
 		sendTransaction,
 	})
 

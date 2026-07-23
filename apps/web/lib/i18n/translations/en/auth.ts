@@ -115,4 +115,24 @@ export const auth = {
 	passkeyCompatCrossEcosystemDetail: 'Different sync ecosystems — usually not compatible',
 	passkeyCompatTrigger: 'Mobile & desktop compatibility',
 	passkeyWhatIsTrigger: 'What is a passkey?',
+
+	// Pollar onboarding
+	pollarSignUpTitle: 'Get started in seconds',
+	pollarSignInTitle: 'Welcome back',
+	pollarSubtitle:
+		'Sign in with Google or explore more options — your wallet is created automatically by Pollar.',
+	continueWithGoogle: 'Continue with Google',
+	pollarMoreOptions: 'More sign-in options',
+	continueWithEmail: 'Continue with email',
+	pollarCustodyNotice:
+		'Your Stellar wallet is managed securely on your behalf. You own the funds; KindFi facilitates signing for donations and escrow.',
+	orContinueWith: 'Or',
+	usePasskeyInstead: 'Use passkey instead',
+	pollarBridgeSuccess: 'Account ready! Redirecting to your profile…',
+	pollarBridgeError: 'Could not complete sign-in',
+	pollarLinkWallet: 'Simplify your wallet',
+	pollarLinkWalletDescription:
+		'Connect with Pollar for seamless donations without installing a wallet extension.',
+	pollarWalletReady: 'Wallet ready',
+	pollarWalletBalance: 'Balance',
 }

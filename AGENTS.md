@@ -72,16 +72,20 @@ Defined in `appRequirements.web`:
 - `RESEND_SMTP_API_KEY` — email
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — rate limiting
 - `RP_ID`, `RP_NAME`, `EXPECTED_ORIGIN` — WebAuthn (JSON arrays)
+- `NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING`, `NEXT_PUBLIC_POLLAR_PUBLISHABLE_KEY`, `POLLAR_SECRET_KEY` — Pollar custodial wallet onboarding (feature-flagged)
 
 Env examples: `apps/web/.env.example`, `packages/drizzle/.env.example`, `apps/contract/.env.example`.
 
 ## Stellar & Passkey Stack (Canonical)
 
-**Production (Mainnet):** Passkey auth + Stellar Wallet Kit (G-address) + Trustless Work escrow. Smart Account C-address flows are **disabled** by default.
+**Production (Mainnet):** Dual onboarding — **Pollar** (social/email → custodial G-address, default when flag on) or **legacy passkey** + Stellar Wallet Kit (G-address) + Trustless Work escrow. Smart Account C-address flows are **disabled** by default.
 
 | Layer | Package / path | Notes |
 |-------|----------------|-------|
-| Production auth | `apps/web/hooks/passkey/use-passkey-auth.ts` | WebAuthn + NextAuth (not Smart Account-specific) |
+| Pollar onboarding | `apps/web/lib/pollar/` | Social/email login, custodial G-address, session bridge |
+| Pollar feature flag | `@packages/lib/pollar` | `NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING` |
+| Legacy auth | `apps/web/hooks/passkey/use-passkey-auth.ts` | WebAuthn + NextAuth |
+| Unified escrow signing | `apps/web/hooks/escrow/use-trustless-signer.ts` | Pollar `signAndSubmitTx` or Wallet Kit |
 | Production escrow signing | `@creit-tech/stellar-wallets-kit` | G-address only; required for Trustless Work |
 | Smart Account module | `apps/web/lib/smart-account/` | Isolated C-address logic; see README in that folder |
 | Shared Smart Account types | `@packages/lib/smart-account` | Feature flag, deployer, hooks |
@@ -91,9 +95,9 @@ Env examples: `apps/web/.env.example`, `packages/drizzle/.env.example`, `apps/co
 | Escrow | `@trustless-work/escrow` | Milestone-based funding (G-address signing only) |
 | Relayer | `@openzeppelin/relayer-sdk` | Fee-sponsored txs |
 
-**Do not wire Smart Account C-addresses into production escrow** until Trustless Work supports C-address signing. Do not use `passkey-kit` for new code.
+**Do not wire Smart Account C-addresses or Pollar smart-wallet C-addresses into production escrow** until Trustless Work supports C-address signing. Do not use `passkey-kit` for new code.
 
-Smart Account architecture and re-enable checklist: `apps/web/lib/smart-account/README.md`. Product context (why suspended, Mainnet replacement): `docs/smart-account-suspension.md`. Smart Account Kit API reference: `.cursor/rules/smart-account-kit.mdc`.
+Pollar setup and spike checklist: `apps/web/lib/pollar/README.md`. Smart Account architecture and re-enable checklist: `apps/web/lib/smart-account/README.md`. Product context (why suspended, Mainnet replacement): `docs/smart-account-suspension.md`. Smart Account Kit API reference: `.cursor/rules/smart-account-kit.mdc`.
 
 Contract development: `apps/contract` (Rust/Soroban). See `.agents/skills/soroban/SKILL.md`.
 
@@ -178,6 +182,7 @@ Specialized skills live in `.agents/skills/`. Read the relevant `SKILL.md` befor
 | Browser Supabase client | `packages/lib/src/supabase/client/browser-client.ts` |
 | Server Supabase client | `packages/lib/src/supabase/server/server-client.ts` |
 | Smart Account service | `apps/web/lib/smart-account/` | Isolated C-address module (feature-flagged) |
+| Pollar integration | `apps/web/lib/pollar/` | Custodial G-address onboarding + TW signing |
 | Drizzle schema | `packages/drizzle/src/data/schema/` |
 | Supabase migrations | `services/supabase/` |
 | Taskfile | `Taskfile.yml` |

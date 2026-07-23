@@ -113,7 +113,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 	const supabase = await createSupabaseServerClient()
 	const { data: profileData, error } = await supabase
 		.from('profiles')
-		.select('role, display_name, bio, image_url, slug, created_at')
+		.select(
+			'role, display_name, bio, image_url, slug, created_at, onboarding_provider, pollar_wallet_address, external_wallet_address',
+		)
 		.eq('id', session.user.id)
 		.single()
 

@@ -21,6 +21,7 @@ import {
 	deviceType,
 	kycStatusEnum,
 	kycVerificationEnum,
+	onboardingProvider,
 	profileVerificationStatus,
 	userRole,
 } from './enums'
@@ -49,6 +50,15 @@ export const profiles = pgTable(
 		websiteUrl: text('website_url'),
 		socialLinks: jsonb('social_links').default({}).notNull(),
 		externalWalletAddress: text('external_wallet_address'),
+		onboardingProvider: onboardingProvider('onboarding_provider')
+			.default('legacy_passkey')
+			.notNull(),
+		pollarUserId: text('pollar_user_id'),
+		pollarWalletAddress: text('pollar_wallet_address'),
+		pollarWalletActivatedAt: timestamp('pollar_wallet_activated_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
 	},
 	(table) => [
 		index('idx_profiles_creator_entity_type').using(

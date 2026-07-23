@@ -1,25 +1,125 @@
 'use client'
 
+import { isPollarOnboardingEnabled } from '@packages/lib/pollar'
 import { isSmartAccountEnabled } from '@packages/lib/smart-account'
+import { usePollar } from '@pollar/react'
 import { CheckCircle2, Copy, Link2, LogOut, Wallet } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { useI18n } from '~/lib/i18n'
+import { usePollarProviderReady } from '~/lib/pollar/provider'
 import { ProfileSurfaceCard } from '../profile-surface-card'
 
 interface WalletCardProps {
 	smartAccountAddress: string | null
 	externalWalletAddress: string | null
 	isExternalConnected: boolean
+	onboardingProvider?: 'legacy_passkey' | 'pollar' | null
+	pollarWalletAddress?: string | null
 	onConnectExternal: () => Promise<void>
 	onDisconnectExternal?: () => void
 }
 
 const truncateAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`
 
-export function WalletCard({
+export function WalletCard(props: WalletCardProps) {
+	if (props.onboardingProvider === 'pollar' && isPollarOnboardingEnabled()) {
+		return <PollarWalletCard {...props} />
+	}
+	return <LegacyWalletCard {...props} />
+}
+
+function PollarWalletCard({ pollarWalletAddress, externalWalletAddress }: WalletCardProps) {
+	const pollarReady = usePollarProviderReady()
+	const pollarAddress = pollarWalletAddress ?? externalWalletAddress
+
+	if (!pollarReady) {
+		if (!pollarAddress) {
+			return null
+		}
+
+		return (
+			<ProfileSurfaceCard className="h-full">
+				<WalletCardHeader isPollar />
+				<div className="mt-5">
+					<AddressRow address={pollarAddress} isCopied={false} onCopy={() => {}} />
+				</div>
+			</ProfileSurfaceCard>
+		)
+	}
+
+	return (
+		<PollarWalletCardConnected
+			pollarWalletAddress={pollarWalletAddress}
+			externalWalletAddress={externalWalletAddress}
+		/>
+	)
+}
+
+function PollarWalletCardConnected({
+	pollarWalletAddress,
+	externalWalletAddress,
+}: Pick<WalletCardProps, 'pollarWalletAddress' | 'externalWalletAddress'>) {
+	const { t } = useI18n()
+	const { walletBalance, refreshWalletBalance, openWalletBalanceModal } = usePollar()
+	const [copiedPollar, setCopiedPollar] = useState(false)
+
+	const pollarAddress = pollarWalletAddress ?? externalWalletAddress
+
+	useEffect(() => {
+		void refreshWalletBalance()
+	}, [refreshWalletBalance])
+
+	const handleCopy = async (address: string) => {
+		try {
+			await navigator.clipboard.writeText(address)
+			setCopiedPollar(true)
+			setTimeout(() => setCopiedPollar(false), 2000)
+			toast.success(t('profile.addressCopied'))
+		} catch {
+			toast.error(t('profile.addressCopyFailed'))
+		}
+	}
+
+	const usdcBalance =
+		walletBalance.step === 'loaded'
+			? walletBalance.data.balances.find((b) => b.code === 'USDC')?.balance
+			: null
+
+	if (!pollarAddress) {
+		return null
+	}
+
+	return (
+		<ProfileSurfaceCard className="h-full">
+			<WalletCardHeader isPollar />
+			<div className="mt-5 space-y-3">
+				<AddressRow
+					address={pollarAddress}
+					isCopied={copiedPollar}
+					onCopy={() => handleCopy(pollarAddress)}
+				/>
+				{usdcBalance ? (
+					<p className="text-sm text-muted-foreground">
+						{t('auth.pollarWalletBalance')}: {usdcBalance} USDC
+					</p>
+				) : null}
+				<Button
+					variant="outline"
+					size="sm"
+					className="w-full rounded-full"
+					onClick={() => openWalletBalanceModal()}
+				>
+					{t('auth.pollarWalletBalance')}
+				</Button>
+			</div>
+		</ProfileSurfaceCard>
+	)
+}
+
+function LegacyWalletCard({
 	smartAccountAddress,
 	externalWalletAddress,
 	isExternalConnected,
@@ -56,21 +156,7 @@ export function WalletCard({
 
 	return (
 		<ProfileSurfaceCard className="h-full">
-			<div className="flex items-start justify-between gap-3">
-				<div className="flex items-center gap-3">
-					<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-						<Wallet className="h-5 w-5" />
-					</div>
-					<div>
-						<h3 className="text-base font-semibold text-gray-900">{t('profile.walletsTitle')}</h3>
-						<p className="text-sm text-muted-foreground">{t('profile.walletsSubtitle')}</p>
-					</div>
-				</div>
-				<Badge className="rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-50">
-					{t('profile.passkeySecured')}
-				</Badge>
-			</div>
-
+			<WalletCardHeader />
 			<div className="mt-5 space-y-4">
 				{isSmartAccountEnabled() ? (
 					smartAccountAddress ? (
@@ -159,6 +245,28 @@ export function WalletCard({
 				</div>
 			</div>
 		</ProfileSurfaceCard>
+	)
+}
+
+function WalletCardHeader({ isPollar = false }: { isPollar?: boolean }) {
+	const { t } = useI18n()
+	return (
+		<div className="flex items-start justify-between gap-3">
+			<div className="flex items-center gap-3">
+				<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+					<Wallet className="h-5 w-5" />
+				</div>
+				<div>
+					<h3 className="text-base font-semibold text-gray-900">{t('profile.walletsTitle')}</h3>
+					<p className="text-sm text-muted-foreground">
+						{isPollar ? t('auth.pollarWalletReady') : t('profile.walletsSubtitle')}
+					</p>
+				</div>
+			</div>
+			<Badge className="rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-50">
+				{isPollar ? t('auth.pollarWalletReady') : t('profile.passkeySecured')}
+			</Badge>
+		</div>
 	)
 }
 

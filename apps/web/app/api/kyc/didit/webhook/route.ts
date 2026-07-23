@@ -114,6 +114,17 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Failed to update KYC record' }, { status: 500 })
 		}
 
+		if (kycStatus === 'approved' || kycStatus === 'verified') {
+			try {
+				const { activatePollarWalletForProfile } = await import(
+					'~/lib/pollar/bridge/link-pollar-user'
+				)
+				await activatePollarWalletForProfile(kycRecord.user_id)
+			} catch (activationError) {
+				logger.warn('[Pollar] Deferred wallet activation after KYC failed', activationError)
+			}
+		}
+
 		return NextResponse.json({ received: true })
 	} catch (error) {
 		logger.error('Error processing Didit webhook:', error)

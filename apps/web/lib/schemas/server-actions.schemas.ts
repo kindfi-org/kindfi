@@ -144,4 +144,8 @@ export const createFoundationInputSchema = z.object({
 	socialLinks: z.record(z.string(), z.string().url('Invalid URL')).optional(),
 })
 
+export const updateProfileRoleInputSchema = z.object({
+	role: z.enum(['creator', 'donor']),
+})
+
 export { stellarAddressSchema }

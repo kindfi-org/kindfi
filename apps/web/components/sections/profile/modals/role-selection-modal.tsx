@@ -1,12 +1,11 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
 import { Heart, Lightbulb } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { logger } from '@/lib/logger'
+import { updateProfileRoleAction } from '~/app/actions/profile/update-profile-role'
 import {
 	Dialog,
 	DialogContent,
@@ -16,6 +15,7 @@ import {
 } from '~/components/base/dialog'
 
 type Role = Database['public']['Enums']['user_role']
+type SelectableRole = Extract<Role, 'creator' | 'donor'>
 
 interface RoleSelectionModalProps {
 	open: boolean
@@ -28,32 +28,33 @@ interface RoleSelectionModalProps {
 export function RoleSelectionModal({
 	open,
 	onOpenChange,
-	userId,
+	userId: _userId,
 	currentRole,
 	onRoleSelected,
 }: RoleSelectionModalProps) {
 	const [isSaving, setIsSaving] = useState(false)
 	const [selectedRole, setSelectedRole] = useState<Role | null>(currentRole)
 
-	const handleRoleSelect = async (role: Role) => {
+	const handleRoleSelect = async (role: SelectableRole) => {
 		if (isSaving) return
 
 		setIsSaving(true)
 		try {
-			const supabase = createSupabaseBrowserClient()
-			const { error } = await supabase.from('profiles').update({ role }).eq('id', userId)
+			const result = await updateProfileRoleAction({ role })
 
-			if (error) throw error
+			if (!result.success) {
+				throw new Error(result.error)
+			}
 
 			setSelectedRole(role)
 			toast.success(`Welcome as a ${role === 'creator' ? 'Creator' : 'Donor'}!`)
 			onRoleSelected?.(role)
 			onOpenChange(false)
-			// Reload page to reflect changes
 			window.location.reload()
 		} catch (error) {
-			logger.error('Failed to update role:', error)
-			toast.error('Failed to update role. Please try again.')
+			const message =
+				error instanceof Error ? error.message : 'Failed to update role. Please try again.'
+			toast.error(message)
 		} finally {
 			setIsSaving(false)
 		}

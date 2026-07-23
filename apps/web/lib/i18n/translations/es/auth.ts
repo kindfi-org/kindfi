@@ -117,4 +117,23 @@ export const auth = {
 		'Ecosistemas de sincronización distintos — usualmente no compatible',
 	passkeyCompatTrigger: 'Compatibilidad móvil y escritorio',
 	passkeyWhatIsTrigger: '¿Qué es un passkey?',
+
+	pollarSignUpTitle: 'Comienza en segundos',
+	pollarSignInTitle: 'Bienvenido de nuevo',
+	pollarSubtitle:
+		'Inicia sesión con Google o explora más opciones — tu billetera se crea automáticamente por Pollar.',
+	continueWithGoogle: 'Continuar con Google',
+	pollarMoreOptions: 'Más opciones de inicio de sesión',
+	continueWithEmail: 'Continuar con correo',
+	pollarCustodyNotice:
+		'Tu billetera Stellar se gestiona de forma segura en tu nombre. Tú eres dueño de los fondos; KindFi facilita la firma para donaciones y escrow.',
+	orContinueWith: 'O',
+	usePasskeyInstead: 'Usar passkey en su lugar',
+	pollarBridgeSuccess: '¡Cuenta lista! Redirigiendo a tu perfil…',
+	pollarBridgeError: 'No se pudo completar el inicio de sesión',
+	pollarLinkWallet: 'Simplifica tu billetera',
+	pollarLinkWalletDescription:
+		'Conéctate con Pollar para donar sin instalar una extensión de billetera.',
+	pollarWalletReady: 'Billetera lista',
+	pollarWalletBalance: 'Saldo',
 }

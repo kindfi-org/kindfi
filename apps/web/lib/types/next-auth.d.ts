@@ -19,6 +19,12 @@ declare module 'next-auth' {
 				display_name?: string
 				bio?: string
 				image_url?: string
+				onboarding_provider?: string
+			}
+			onboardingProvider?: string
+			wallet?: {
+				address: string
+				provider: string
 			}
 		} & DefaultSession['user']
 		supabaseAccessToken?: string
@@ -27,6 +33,11 @@ declare module 'next-auth' {
 			public_key: string
 			address: string
 		}
+		wallet?: {
+			address: string
+			provider: string
+		}
+		onboardingProvider?: string
 	}
 
 	interface User {
@@ -35,17 +46,27 @@ declare module 'next-auth' {
 			display_name?: string
 			bio?: string
 			image_url?: string
+			onboarding_provider?: string
 		}
 		device?: {
 			credential_id: string
 			public_key: string
 			address: string
 		}
+		wallet?: {
+			address: string
+			provider: string
+		}
 	}
 
 	interface JWT {
 		role?: string
 		provider?: string
+		onboardingProvider?: string
+		wallet?: {
+			address: string
+			provider: string
+		}
 		device?: {
 			credential_id: string
 			public_key: string
@@ -59,6 +80,11 @@ declare module 'next-auth/jwt' {
 	interface JWT {
 		role?: string
 		provider?: string
+		onboardingProvider?: string
+		wallet?: {
+			address: string
+			provider: string
+		}
 		device?: {
 			credential_id: string
 			public_key: string

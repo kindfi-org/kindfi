@@ -124,7 +124,7 @@ export function EscrowProvider({ children }: { children: React.ReactNode }) {
 	const { getMultipleBalances: getMultipleBalancesMutation } = useGetMultipleEscrowBalances()
 
 	const getMultipleBalances = useCallback(
-		(payload: GetBalanceParams, type: EscrowType) => getMultipleBalancesMutation({ payload, type }),
+		(payload: GetBalanceParams, _type: EscrowType) => getMultipleBalancesMutation(payload),
 		[getMultipleBalancesMutation],
 	)
 	const { releaseFunds } = useReleaseFunds()
