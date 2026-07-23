@@ -35,7 +35,7 @@ export const MatchingCtaCard = ({ onActivate }: MatchingCtaCardProps) => {
 					<Button
 						type="button"
 						onClick={onActivate}
-						className="shrink-0 rounded-full bg-emerald-600 hover:bg-emerald-700"
+						className="shrink-0 rounded-full bg-emerald-400 text-white hover:bg-emerald-500"
 					>
 						<Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
 						{t('profile.matchingCtaButton')}

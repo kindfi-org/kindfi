@@ -32,6 +32,8 @@ import {
 } from '~/components/base/dropdown-menu'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
+import { isPollarOnboardedUser } from '~/lib/pollar/is-pollar-onboarded-user'
+import { signOutPollar } from '~/lib/pollar/sign-out-pollar'
 import { getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerAddressUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
@@ -117,6 +119,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 	const smartAccountAddress = isSmartAccountEnabled()
 		? resolveSmartAccountAddress(user.device?.address)
 		: null
+	const showExternalWalletActions = !isPollarOnboardedUser(user)
 
 	const handleConnectExternalWallet = async () => {
 		if (isConnectingExternal) return
@@ -160,6 +163,12 @@ export const UserMenu = ({ user }: { user: User }) => {
 				await supabase.auth.signOut()
 			} catch (error) {
 				logger.error('Error signing out from Supabase:', error)
+			}
+
+			try {
+				await signOutPollar()
+			} catch (error) {
+				logger.error('Error signing out from Pollar:', error)
 			}
 
 			await signOut({
@@ -226,7 +235,7 @@ export const UserMenu = ({ user }: { user: User }) => {
 					{smartAccountAddress ? (
 						<WalletAddressSection address={smartAccountAddress} label={t('profile.smartAccount')} />
 					) : null}
-					{isExternalConnected && externalWalletAddress ? (
+					{showExternalWalletActions && isExternalConnected && externalWalletAddress ? (
 						<WalletAddressSection
 							address={externalWalletAddress}
 							label={t('profile.externalWallet')}
@@ -236,30 +245,35 @@ export const UserMenu = ({ user }: { user: User }) => {
 
 				<DropdownMenuSeparator />
 
-				{/* External Stellar wallet (Wallets Kit) — separate from smart account */}
-				<div className="py-1">
-					{isExternalConnected && externalWalletAddress ? (
-						<DropdownMenuItem className="cursor-pointer" onSelect={handleDisconnectExternalWallet}>
-							<Unlink className="h-4 w-4 text-muted-foreground" />
-							<span className="font-medium">{t('profile.disconnectExternalWallet')}</span>
-						</DropdownMenuItem>
-					) : (
-						<DropdownMenuItem
-							className="cursor-pointer"
-							disabled={isConnectingExternal}
-							onSelect={handleConnectExternalWallet}
-						>
-							<Link2 className="h-4 w-4 text-emerald-600" />
-							<span className="font-medium">
-								{isConnectingExternal
-									? t('profile.connectingExternalWallet')
-									: t('profile.connectExternalWallet')}
-							</span>
-						</DropdownMenuItem>
-					)}
-				</div>
+				{/* External Stellar wallet (Wallets Kit) — hidden for Pollar onboarding */}
+				{showExternalWalletActions ? (
+					<div className="py-1">
+						{isExternalConnected && externalWalletAddress ? (
+							<DropdownMenuItem
+								className="cursor-pointer"
+								onSelect={handleDisconnectExternalWallet}
+							>
+								<Unlink className="h-4 w-4 text-muted-foreground" />
+								<span className="font-medium">{t('profile.disconnectExternalWallet')}</span>
+							</DropdownMenuItem>
+						) : (
+							<DropdownMenuItem
+								className="cursor-pointer"
+								disabled={isConnectingExternal}
+								onSelect={handleConnectExternalWallet}
+							>
+								<Link2 className="h-4 w-4 text-emerald-600" />
+								<span className="font-medium">
+									{isConnectingExternal
+										? t('profile.connectingExternalWallet')
+										: t('profile.connectExternalWallet')}
+								</span>
+							</DropdownMenuItem>
+						)}
+					</div>
+				) : null}
 
-				<DropdownMenuSeparator />
+				{showExternalWalletActions ? <DropdownMenuSeparator /> : null}
 
 				{/* Menu Items */}
 				<div className="py-1">

@@ -14,6 +14,8 @@ import { Avatar, AvatarFallback } from '~/components/base/avatar'
 import { Button } from '~/components/base/button'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useI18n } from '~/lib/i18n/context'
+import { isPollarOnboardedUser } from '~/lib/pollar/is-pollar-onboarded-user'
+import { signOutPollar } from '~/lib/pollar/sign-out-pollar'
 import { cn, getAvatarFallback } from '~/lib/utils'
 import { getStellarExplorerAddressUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
@@ -147,6 +149,7 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 	const smartAccountAddress = isSmartAccountEnabled()
 		? resolveSmartAccountAddress(user.device?.address)
 		: null
+	const showExternalWalletActions = !isPollarOnboardedUser(user)
 
 	const handleConnectExternalWallet = async () => {
 		if (isConnectingExternal) return
@@ -191,6 +194,12 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 				logger.error('Error signing out from Supabase:', error)
 			}
 
+			try {
+				await signOutPollar()
+			} catch (error) {
+				logger.error('Error signing out from Pollar:', error)
+			}
+
 			await signOut({
 				callbackUrl: '/sign-in?success=Successfully signed out',
 			})
@@ -226,37 +235,39 @@ export const MobileUserMenu = ({ user }: { user: User }) => {
 					<WalletCopyButton address={smartAccountAddress} className="w-full" />
 				</div>
 			) : null}
-			{isExternalConnected && externalWalletAddress ? (
+			{showExternalWalletActions && isExternalConnected && externalWalletAddress ? (
 				<div className="space-y-1 px-2">
 					<p className="text-xs font-medium text-muted-foreground">{t('profile.externalWallet')}</p>
 					<WalletCopyButton address={externalWalletAddress} className="w-full" />
 				</div>
 			) : null}
 			<div className="flex flex-col space-y-1">
-				{isExternalConnected && externalWalletAddress ? (
-					<Button
-						variant="ghost"
-						className="w-full justify-start font-medium"
-						type="button"
-						onClick={handleDisconnectExternalWallet}
-					>
-						<Unlink className="mr-2 h-4 w-4 text-muted-foreground" />
-						{t('profile.disconnectExternalWallet')}
-					</Button>
-				) : (
-					<Button
-						variant="ghost"
-						className="w-full justify-start font-medium"
-						type="button"
-						onClick={handleConnectExternalWallet}
-						disabled={isConnectingExternal}
-					>
-						<Link2 className="mr-2 h-4 w-4 text-emerald-600" />
-						{isConnectingExternal
-							? t('profile.connectingExternalWallet')
-							: t('profile.connectExternalWallet')}
-					</Button>
-				)}
+				{showExternalWalletActions ? (
+					isExternalConnected && externalWalletAddress ? (
+						<Button
+							variant="ghost"
+							className="w-full justify-start font-medium"
+							type="button"
+							onClick={handleDisconnectExternalWallet}
+						>
+							<Unlink className="mr-2 h-4 w-4 text-muted-foreground" />
+							{t('profile.disconnectExternalWallet')}
+						</Button>
+					) : (
+						<Button
+							variant="ghost"
+							className="w-full justify-start font-medium"
+							type="button"
+							onClick={handleConnectExternalWallet}
+							disabled={isConnectingExternal}
+						>
+							<Link2 className="mr-2 h-4 w-4 text-emerald-600" />
+							{isConnectingExternal
+								? t('profile.connectingExternalWallet')
+								: t('profile.connectExternalWallet')}
+						</Button>
+					)
+				) : null}
 				<Link href="/profile">
 					<Button variant="ghost" className="w-full justify-start font-medium">
 						<UserIcon className="mr-2 h-4 w-4" />

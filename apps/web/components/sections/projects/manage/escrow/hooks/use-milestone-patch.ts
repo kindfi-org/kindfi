@@ -4,7 +4,6 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import type { JSX } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
@@ -18,6 +17,7 @@ import {
 } from '~/lib/utils/escrow/build-update-escrow-payload'
 import { isSingleReleaseMilestone } from '~/lib/utils/escrow/milestone-utils'
 import { resolveValidatedEscrowData } from '~/lib/utils/escrow/resolve-validated-escrow-data'
+import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { getTrustlessWorkApiErrorMessage } from '~/lib/utils/escrow/trustless-work-api-error'
 
 export type ProcessingOperation = 'approve' | 'status' | 'add' | 'edit' | null
@@ -77,7 +77,7 @@ export const useMilestonePatch = ({
 		updateEscrow,
 		getEscrowByContractIds,
 	} = useEscrow()
-	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
 	const [processingOperation, setProcessingOperation] = useState<ProcessingOperation>(null)
 	const isProcessing = processingOperation !== null
 
@@ -98,14 +98,12 @@ export const useMilestonePatch = ({
 			throw new Error('Failed to prepare escrow update transaction')
 		}
 
-		const signedXdr = await signTrustlessTransaction(
+		await submitTrustlessEscrowXdr(
 			updateResponse.unsignedTransaction,
+			signAndSubmitTrustlessTransaction,
+			sendTransaction,
 			payload.signer,
 		)
-		const sendResult = await sendTransaction(signedXdr)
-		if (sendResult?.status !== 'SUCCESS') {
-			throw new Error('Transaction failed')
-		}
 
 		toast.success(successMessage)
 	}
@@ -130,11 +128,11 @@ export const useMilestonePatch = ({
 				throw new Error('Failed to prepare approval transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(approveResponse.unsignedTransaction)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
+			await submitTrustlessEscrowXdr(
+				approveResponse.unsignedTransaction,
+				signAndSubmitTrustlessTransaction,
+				sendTransaction,
+			)
 
 			toast.success('Release approved successfully')
 		} catch (error) {
@@ -179,11 +177,11 @@ export const useMilestonePatch = ({
 				throw new Error('Failed to prepare status change transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(changeResponse.unsignedTransaction)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
+			await submitTrustlessEscrowXdr(
+				changeResponse.unsignedTransaction,
+				signAndSubmitTrustlessTransaction,
+				sendTransaction,
+			)
 
 			toast.success('Release status updated successfully')
 		} catch (error) {

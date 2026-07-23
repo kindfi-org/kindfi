@@ -1,11 +1,10 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { logger } from '@/lib/logger'
+import { updateProfileRoleAction } from '~/app/actions/profile/update-profile-role'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
 import {
 	Select,
@@ -16,31 +15,32 @@ import {
 } from '~/components/base/select'
 
 type Role = Database['public']['Enums']['user_role']
+type SelectableRole = Extract<Role, 'creator' | 'donor'>
 
 interface RoleCardProps {
 	userId: string
 	currentRole: Role
 }
 
-export function RoleCard({ userId, currentRole }: RoleCardProps) {
+export function RoleCard({ userId: _userId, currentRole }: RoleCardProps) {
 	const [isChanging, setIsChanging] = useState(false)
 	const [selectedRole, setSelectedRole] = useState<Role>(currentRole)
 
-	const handleRoleChange = async (newRole: Role) => {
+	const handleRoleChange = async (newRole: SelectableRole) => {
 		setIsChanging(true)
 		try {
-			const supabase = createSupabaseBrowserClient()
-			const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId)
+			const result = await updateProfileRoleAction({ role: newRole })
 
-			if (error) throw error
+			if (!result.success) {
+				throw new Error(result.error)
+			}
 
 			setSelectedRole(newRole)
 			toast.success(`Role updated to ${newRole === 'creator' ? 'Creator' : 'Donor'}`)
-			// Reload page to reflect changes
 			window.location.reload()
 		} catch (error) {
-			logger.error('Failed to update role:', error)
-			toast.error('Failed to update role')
+			const message = error instanceof Error ? error.message : 'Failed to update role'
+			toast.error(message)
 		} finally {
 			setIsChanging(false)
 		}
@@ -57,7 +57,7 @@ export function RoleCard({ userId, currentRole }: RoleCardProps) {
 				<CardContent className="space-y-3 relative z-10">
 					<Select
 						value={selectedRole}
-						onValueChange={(value) => handleRoleChange(value as Role)}
+						onValueChange={(value) => handleRoleChange(value as SelectableRole)}
 						disabled={isChanging}
 					>
 						<SelectTrigger className="w-full border-border bg-background hover:border-primary/50">

@@ -73,6 +73,8 @@ export function calculateReleasedAmountFromEscrow(
 
 export type ResolveDisplayReleasedParams = {
 	dbMilestones?: ReadonlyArray<ReleasableMilestone> | null
+	/** Pre-aggregated DB fallback when milestone rows are not loaded. */
+	dbReleasedAmount?: number | null
 	escrowContractAddress?: string | null
 	onChainReleasedAmount?: number | null
 	isLoadingOnChain?: boolean
@@ -84,12 +86,16 @@ export type ResolveDisplayReleasedParams = {
  */
 export function resolveDisplayReleasedAmount({
 	dbMilestones,
+	dbReleasedAmount,
 	escrowContractAddress,
 	onChainReleasedAmount,
 	isLoadingOnChain = false,
 }: ResolveDisplayReleasedParams): number | null {
 	const hasEscrow = Boolean(escrowContractAddress)
-	const dbReleased = calculateReleasedAmount(dbMilestones)
+	const dbReleased =
+		dbReleasedAmount !== undefined && dbReleasedAmount !== null
+			? (coerceNumericAmount(dbReleasedAmount) ?? 0)
+			: calculateReleasedAmount(dbMilestones)
 
 	if (!hasEscrow) {
 		return dbReleased

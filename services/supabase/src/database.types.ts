@@ -552,6 +552,44 @@ export type Database = {
           },
         ]
       }
+      foundation_members: {
+        Row: {
+          foundation_id: string
+          id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["project_member_role"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          foundation_id: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["project_member_role"]
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          foundation_id?: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["project_member_role"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "foundation_members_foundation_id_fkey"
+            columns: ["foundation_id"]
+            isOneToOne: false
+            referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       foundation_milestones: {
         Row: {
           achieved_date: string
@@ -589,44 +627,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "foundation_milestones_foundation_id_fkey"
-            columns: ["foundation_id"]
-            isOneToOne: false
-            referencedRelation: "foundations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      foundation_members: {
-        Row: {
-          foundation_id: string
-          id: string
-          joined_at: string
-          role: Database["public"]["Enums"]["project_member_role"]
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          foundation_id: string
-          id?: string
-          joined_at?: string
-          role?: Database["public"]["Enums"]["project_member_role"]
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          foundation_id?: string
-          id?: string
-          joined_at?: string
-          role?: Database["public"]["Enums"]["project_member_role"]
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "foundation_members_foundation_id_fkey"
             columns: ["foundation_id"]
             isOneToOne: false
             referencedRelation: "foundations"
@@ -967,53 +967,6 @@ export type Database = {
         }
         Relationships: []
       }
-      milestones: {
-        Row: {
-          amount: number
-          completed_at: string | null
-          created_at: string | null
-          deadline: string
-          description: string | null
-          id: string
-          order_index: number
-          project_id: string
-          status: Database["public"]["Enums"]["milestone_status"]
-          title: string
-        }
-        Insert: {
-          amount: number
-          completed_at?: string | null
-          created_at?: string | null
-          deadline: string
-          description?: string | null
-          id?: string
-          order_index: number
-          project_id: string
-          status?: Database["public"]["Enums"]["milestone_status"]
-          title: string
-        }
-        Update: {
-          amount?: number
-          completed_at?: string | null
-          created_at?: string | null
-          deadline?: string
-          description?: string | null
-          id?: string
-          order_index?: number
-          project_id?: string
-          status?: Database["public"]["Enums"]["milestone_status"]
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "milestones_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       milestone_review_requests: {
         Row: {
           created_at: string
@@ -1077,6 +1030,53 @@ export type Database = {
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string | null
+          deadline: string
+          description: string | null
+          id: string
+          order_index: number
+          project_id: string
+          status: Database["public"]["Enums"]["milestone_status"]
+          title: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string | null
+          deadline: string
+          description?: string | null
+          id?: string
+          order_index: number
+          project_id: string
+          status?: Database["public"]["Enums"]["milestone_status"]
+          title: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string | null
+          deadline?: string
+          description?: string | null
+          id?: string
+          order_index?: number
+          project_id?: string
+          status?: Database["public"]["Enums"]["milestone_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1218,6 +1218,10 @@ export type Database = {
           id: string
           image_url: string | null
           next_auth_user_id: string | null
+          onboarding_provider: Database["public"]["Enums"]["onboarding_provider"]
+          pollar_user_id: string | null
+          pollar_wallet_activated_at: string | null
+          pollar_wallet_address: string | null
           role: Database["public"]["Enums"]["user_role"]
           slug: string | null
           social_links: Json
@@ -1238,6 +1242,10 @@ export type Database = {
           id: string
           image_url?: string | null
           next_auth_user_id?: string | null
+          onboarding_provider?: Database["public"]["Enums"]["onboarding_provider"]
+          pollar_user_id?: string | null
+          pollar_wallet_activated_at?: string | null
+          pollar_wallet_address?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
           social_links?: Json
@@ -1258,6 +1266,10 @@ export type Database = {
           id?: string
           image_url?: string | null
           next_auth_user_id?: string | null
+          onboarding_provider?: Database["public"]["Enums"]["onboarding_provider"]
+          pollar_user_id?: string | null
+          pollar_wallet_activated_at?: string | null
+          pollar_wallet_address?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
           social_links?: Json
@@ -1956,6 +1968,7 @@ export type Database = {
         Args: { p_field: string; p_option_id: string; p_weight: number }
         Returns: undefined
       }
+      is_platform_admin: { Args: never; Returns: boolean }
       is_project_owner: {
         Args: { project_uuid: string; user_uuid: string }
         Returns: boolean
@@ -2007,6 +2020,7 @@ export type Database = {
       notification_delivery_status: "pending" | "delivered" | "failed"
       notification_priority: "low" | "medium" | "high" | "urgent"
       notification_type: "info" | "success" | "warning" | "error"
+      onboarding_provider: "legacy_passkey" | "pollar"
       profile_verification_status: "unverified" | "verified"
       project_member_role:
         | "admin"
@@ -2192,6 +2206,7 @@ export const Constants = {
       notification_delivery_status: ["pending", "delivered", "failed"],
       notification_priority: ["low", "medium", "high", "urgent"],
       notification_type: ["info", "success", "warning", "error"],
+      onboarding_provider: ["legacy_passkey", "pollar"],
       profile_verification_status: ["unverified", "verified"],
       project_member_role: [
         "admin",

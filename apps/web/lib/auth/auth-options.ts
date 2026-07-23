@@ -1,17 +1,18 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
 import type { Enums } from '@services/supabase'
-import jwt from 'jsonwebtoken'
 import type { NextAuthOptions, User } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { kindfiPollarProvider } from '~/auth/kindfi-pollar.provider'
 import { KindfiSupabaseAdapter } from '~/auth/kindfi-supabase-adapter'
 import { kindfiWebAuthnProvider } from '~/auth/kindfi-webauthn.provider'
+import { signSupabaseAccessToken } from '~/lib/auth/supabase-access-token'
 
 const appConfig: AppEnvInterface = appEnvConfig('web')
 
 export const nextAuthOption: NextAuthOptions = {
 	adapter: KindfiSupabaseAdapter(),
-	providers: [kindfiWebAuthnProvider],
+	providers: [kindfiWebAuthnProvider, kindfiPollarProvider],
 	pages: {
 		signIn: '/sign-in',
 		// signOut: '/sign-out',
@@ -28,29 +29,40 @@ export const nextAuthOption: NextAuthOptions = {
 				token.name = user.name
 				token.role = userData.userData?.role as Enums<'user_role'>
 				token.provider = account?.provider || 'webauthn'
+				token.onboardingProvider =
+					(userData.userData as { onboarding_provider?: string } | undefined)
+						?.onboarding_provider ?? 'legacy_passkey'
 
 				// Add device data for WebAuthn sessions
 				if (account?.provider === 'credentials' && userData.device) {
 					token.device = userData.device
 				}
 
+				// Pollar wallet in session
+				if (
+					account?.provider === 'pollar' &&
+					(userData as User & { wallet?: { address: string } }).wallet
+				) {
+					token.wallet = (
+						userData as User & { wallet: { address: string; provider: string } }
+					).wallet
+				}
+
 				// Generate separate Supabase access token for RLS (different from NextAuth token)
-				const signingSecret = process.env.SUPABASE_JWT_SECRET
-				if (signingSecret) {
-					const supabasePayload = {
-						aud: 'authenticated',
-						exp: Math.floor(Date.now() / 1000) + appConfig.auth.token.expiration,
-						sub: user.id,
-						email: user.email,
-						role: 'authenticated',
-						user_metadata: {
-							role: userData.userData?.role,
-							provider: account?.provider || 'webauthn',
-						},
-					}
-					const supabaseJwt = jwt.sign(supabasePayload, signingSecret)
+				const supabaseJwt = signSupabaseAccessToken({
+					userId: user.id,
+					email: user.email,
+					metadata: {
+						role: userData.userData?.role,
+						provider: account?.provider || 'webauthn',
+					},
+				})
+				if (supabaseJwt) {
 					token.supabaseAccessToken = supabaseJwt
-					token.sub = supabaseJwt
+				} else if (process.env.NODE_ENV === 'development') {
+					logger.warn(
+						'[Auth] SUPABASE_JWT_SECRET is missing — browser/server Supabase RLS auth will not work until it is set.',
+					)
 				}
 			}
 
@@ -82,6 +94,15 @@ export const nextAuthOption: NextAuthOptions = {
 			if (token.device) {
 				session.user.device = token.device
 				session.device = token.device
+			}
+
+			if (token.wallet) {
+				session.user.wallet = token.wallet as { address: string; provider: string }
+				session.wallet = token.wallet as { address: string; provider: string }
+			}
+
+			if (token.onboardingProvider) {
+				session.user.onboardingProvider = token.onboardingProvider as string
 			}
 
 			// Add Supabase-specific JWT for RLS (separate from NextAuth token)

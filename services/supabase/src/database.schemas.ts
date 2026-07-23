@@ -374,6 +374,35 @@ export const foundationEscrowsUpdateSchema = z.object({
   updated_at: z.string().optional(),
 });
 
+export const projectMemberRoleSchema = z.union([
+  z.literal("admin"),
+  z.literal("editor"),
+  z.literal("advisor"),
+  z.literal("community"),
+  z.literal("core"),
+  z.literal("others"),
+]);
+
+export const foundationMembersInsertSchema = z.object({
+  foundation_id: z.string(),
+  id: z.string().optional(),
+  joined_at: z.string().optional(),
+  role: projectMemberRoleSchema.optional(),
+  title: z.string().optional(),
+  updated_at: z.string().optional(),
+  user_id: z.string(),
+});
+
+export const foundationMembersUpdateSchema = z.object({
+  foundation_id: z.string().optional(),
+  id: z.string().optional(),
+  joined_at: z.string().optional(),
+  role: projectMemberRoleSchema.optional(),
+  title: z.string().optional(),
+  updated_at: z.string().optional(),
+  user_id: z.string().optional(),
+});
+
 export const foundationMilestonesRowSchema = z.object({
   achieved_date: z.string(),
   created_at: z.string(),
@@ -408,6 +437,48 @@ export const foundationMilestonesUpdateSchema = z.object({
   metadata: jsonSchema.optional().nullable(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
+});
+
+export const foundationTeamRowSchema = z.object({
+  bio: z.string().nullable(),
+  created_at: z.string(),
+  foundation_id: z.string(),
+  full_name: z.string(),
+  id: z.string(),
+  order_index: z.number(),
+  photo_url: z.string().nullable(),
+  role_title: z.string(),
+  updated_at: z.string(),
+  user_id: z.string().nullable(),
+  years_involved: z.number().nullable(),
+});
+
+export const foundationTeamInsertSchema = z.object({
+  bio: z.string().optional().nullable(),
+  created_at: z.string().optional(),
+  foundation_id: z.string(),
+  full_name: z.string(),
+  id: z.string().optional(),
+  order_index: z.number().optional(),
+  photo_url: z.string().optional().nullable(),
+  role_title: z.string(),
+  updated_at: z.string().optional(),
+  user_id: z.string().optional().nullable(),
+  years_involved: z.number().optional().nullable(),
+});
+
+export const foundationTeamUpdateSchema = z.object({
+  bio: z.string().optional().nullable(),
+  created_at: z.string().optional(),
+  foundation_id: z.string().optional(),
+  full_name: z.string().optional(),
+  id: z.string().optional(),
+  order_index: z.number().optional(),
+  photo_url: z.string().optional().nullable(),
+  role_title: z.string().optional(),
+  updated_at: z.string().optional(),
+  user_id: z.string().optional().nullable(),
+  years_involved: z.number().optional().nullable(),
 });
 
 export const creatorEntityTypeSchema = z.union([
@@ -637,6 +708,51 @@ export const kycReviewsUpdateSchema = z.object({
   verification_level: kycVerificationEnumSchema.optional(),
 });
 
+export const milestoneReviewRequestsRowSchema = z.object({
+  created_at: z.string(),
+  escrow_contract_id: z.string(),
+  id: z.string(),
+  milestone_index: z.number(),
+  milestone_title: z.string().nullable(),
+  project_id: z.string(),
+  request_notes: z.string().nullable(),
+  requester_id: z.string(),
+  review_notes: z.string().nullable(),
+  reviewed_at: z.string().nullable(),
+  reviewer_id: z.string().nullable(),
+  status: z.string(),
+});
+
+export const milestoneReviewRequestsInsertSchema = z.object({
+  created_at: z.string().optional(),
+  escrow_contract_id: z.string(),
+  id: z.string().optional(),
+  milestone_index: z.number(),
+  milestone_title: z.string().optional().nullable(),
+  project_id: z.string(),
+  request_notes: z.string().optional().nullable(),
+  requester_id: z.string(),
+  review_notes: z.string().optional().nullable(),
+  reviewed_at: z.string().optional().nullable(),
+  reviewer_id: z.string().optional().nullable(),
+  status: z.string().optional(),
+});
+
+export const milestoneReviewRequestsUpdateSchema = z.object({
+  created_at: z.string().optional(),
+  escrow_contract_id: z.string().optional(),
+  id: z.string().optional(),
+  milestone_index: z.number().optional(),
+  milestone_title: z.string().optional().nullable(),
+  project_id: z.string().optional(),
+  request_notes: z.string().optional().nullable(),
+  requester_id: z.string().optional(),
+  review_notes: z.string().optional().nullable(),
+  reviewed_at: z.string().optional().nullable(),
+  reviewer_id: z.string().optional().nullable(),
+  status: z.string().optional(),
+});
+
 export const milestoneStatusSchema = z.union([
   z.literal("pending"),
   z.literal("completed"),
@@ -781,6 +897,11 @@ export const notificationsUpdateSchema = z.object({
   user_id: z.string().optional(),
 });
 
+export const onboardingProviderSchema = z.union([
+  z.literal("legacy_passkey"),
+  z.literal("pollar"),
+]);
+
 export const userRoleSchema = z.union([
   z.literal("donor"),
   z.literal("creator"),
@@ -802,6 +923,10 @@ export const profilesInsertSchema = z.object({
   id: z.string(),
   image_url: z.string().optional().nullable(),
   next_auth_user_id: z.string().optional().nullable(),
+  onboarding_provider: onboardingProviderSchema.optional(),
+  pollar_user_id: z.string().optional().nullable(),
+  pollar_wallet_activated_at: z.string().optional().nullable(),
+  pollar_wallet_address: z.string().optional().nullable(),
   role: userRoleSchema.optional(),
   slug: z.string().optional().nullable(),
   social_links: jsonSchema.optional(),
@@ -821,6 +946,10 @@ export const profilesUpdateSchema = z.object({
   id: z.string().optional(),
   image_url: z.string().optional().nullable(),
   next_auth_user_id: z.string().optional().nullable(),
+  onboarding_provider: onboardingProviderSchema.optional(),
+  pollar_user_id: z.string().optional().nullable(),
+  pollar_wallet_activated_at: z.string().optional().nullable(),
+  pollar_wallet_address: z.string().optional().nullable(),
   role: userRoleSchema.optional(),
   slug: z.string().optional().nullable(),
   social_links: jsonSchema.optional(),
@@ -849,14 +978,15 @@ export const projectEscrowsUpdateSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export const projectMemberRoleSchema = z.union([
-  z.literal("admin"),
-  z.literal("editor"),
-  z.literal("advisor"),
-  z.literal("community"),
-  z.literal("core"),
-  z.literal("others"),
-]);
+export const projectMembersRowSchema = z.object({
+  id: z.string(),
+  joined_at: z.string(),
+  project_id: z.string(),
+  role: projectMemberRoleSchema,
+  title: z.string(),
+  updated_at: z.string(),
+  user_id: z.string(),
+});
 
 export const projectMembersInsertSchema = z.object({
   id: z.string().optional(),
@@ -960,6 +1090,7 @@ export const projectTeamRowSchema = z.object({
   project_id: z.string(),
   role_title: z.string(),
   updated_at: z.string(),
+  user_id: z.string().nullable(),
   years_involved: z.number().nullable(),
 });
 
@@ -973,6 +1104,7 @@ export const projectTeamInsertSchema = z.object({
   project_id: z.string(),
   role_title: z.string(),
   updated_at: z.string().optional(),
+  user_id: z.string().optional().nullable(),
   years_involved: z.number().optional().nullable(),
 });
 
@@ -986,6 +1118,7 @@ export const projectTeamUpdateSchema = z.object({
   project_id: z.string().optional(),
   role_title: z.string().optional(),
   updated_at: z.string().optional(),
+  user_id: z.string().optional().nullable(),
   years_involved: z.number().optional().nullable(),
 });
 
@@ -1377,6 +1510,16 @@ export const escrowContractsRowSchema = z.object({
   updated_at: z.string().nullable(),
 });
 
+export const foundationMembersRowSchema = z.object({
+  foundation_id: z.string(),
+  id: z.string(),
+  joined_at: z.string(),
+  role: projectMemberRoleSchema,
+  title: z.string(),
+  updated_at: z.string(),
+  user_id: z.string(),
+});
+
 export const foundationsRowSchema = z.object({
   cover_image_url: z.string().nullable(),
   created_at: z.string(),
@@ -1469,21 +1612,15 @@ export const profilesRowSchema = z.object({
   id: z.string(),
   image_url: z.string().nullable(),
   next_auth_user_id: z.string().nullable(),
+  onboarding_provider: onboardingProviderSchema,
+  pollar_user_id: z.string().nullable(),
+  pollar_wallet_activated_at: z.string().nullable(),
+  pollar_wallet_address: z.string().nullable(),
   role: userRoleSchema,
   slug: z.string().nullable(),
   social_links: jsonSchema,
   updated_at: z.string(),
   website_url: z.string().nullable(),
-});
-
-export const projectMembersRowSchema = z.object({
-  id: z.string(),
-  joined_at: z.string(),
-  project_id: z.string(),
-  role: projectMemberRoleSchema,
-  title: z.string(),
-  updated_at: z.string(),
-  user_id: z.string(),
 });
 
 export const projectsRowSchema = z.object({

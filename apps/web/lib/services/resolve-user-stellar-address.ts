@@ -19,7 +19,7 @@ const normalizeAddress = (address: string | null | undefined): string | null => 
 
 /**
  * Resolve the best Stellar address for gamification and on-chain contract calls.
- * Prefers explicit overrides, then smart-account device addresses, then linked external wallet.
+ * Prefers explicit overrides, Pollar wallet, device C-address, then linked external wallet.
  */
 export const resolveUserStellarAddress = async (
 	supabase: TypedSupabaseClient,
@@ -36,6 +36,17 @@ export const resolveUserStellarAddress = async (
 		return sessionAddress
 	}
 
+	const { data: profile } = await supabase
+		.from('profiles')
+		.select('pollar_wallet_address, external_wallet_address, onboarding_provider')
+		.eq('id', userId)
+		.maybeSingle()
+
+	const pollarWallet = normalizeAddress(profile?.pollar_wallet_address)
+	if (pollarWallet) {
+		return pollarWallet
+	}
+
 	const { data: device } = await supabase
 		.from('devices')
 		.select('address')
@@ -49,12 +60,6 @@ export const resolveUserStellarAddress = async (
 	if (deviceAddress) {
 		return deviceAddress
 	}
-
-	const { data: profile } = await supabase
-		.from('profiles')
-		.select('external_wallet_address')
-		.eq('id', userId)
-		.maybeSingle()
 
 	const profileWallet = normalizeAddress(profile?.external_wallet_address)
 	if (profileWallet) {

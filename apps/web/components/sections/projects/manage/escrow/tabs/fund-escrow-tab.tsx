@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
+import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { EtherfuseOnRampCard } from '../components/etherfuse-on-ramp-card'
 
 const QUICK_AMOUNTS = [100, 500, 1000, 5000]
@@ -34,7 +35,7 @@ export function FundEscrowTab({
 	onSuccess,
 }: FundEscrowTabProps) {
 	const { fundEscrow, sendTransaction } = useEscrow()
-	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
 	const [fundAmount, setFundAmount] = useState<number | ''>('')
 	const [isProcessing, setIsProcessing] = useState(false)
 
@@ -70,11 +71,11 @@ export function FundEscrowTab({
 				throw new Error('Failed to prepare funding transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(fundResponse.unsignedTransaction)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
+			await submitTrustlessEscrowXdr(
+				fundResponse.unsignedTransaction,
+				signAndSubmitTrustlessTransaction,
+				sendTransaction,
+			)
 
 			toast.success('Escrow funded successfully', {
 				description: `Added $${amount.toLocaleString()} to the escrow.`,

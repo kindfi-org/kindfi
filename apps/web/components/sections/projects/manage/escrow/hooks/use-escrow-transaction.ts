@@ -19,7 +19,7 @@ interface UseEscrowTransactionParams {
 export function useEscrowTransaction({ projectId, projectSlug }: UseEscrowTransactionParams) {
 	const router = useRouter()
 	const { deployEscrow, sendTransaction } = useEscrow()
-	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const handleCreateEscrow = async (formData: EscrowFormData) => {
@@ -41,7 +41,8 @@ export function useEscrowTransaction({ projectId, projectSlug }: UseEscrowTransa
 					projectId,
 					projectSlug,
 					deployEscrow,
-					signTransaction: signTrustlessTransaction,
+					signTransaction: async () => '',
+					signAndSubmitTransaction: signAndSubmitTrustlessTransaction,
 					sendTransaction,
 					router,
 				})
@@ -54,7 +55,8 @@ export function useEscrowTransaction({ projectId, projectSlug }: UseEscrowTransa
 					projectId,
 					projectSlug,
 					deployEscrow,
-					signTransaction: signTrustlessTransaction,
+					signTransaction: async () => '',
+					signAndSubmitTransaction: signAndSubmitTrustlessTransaction,
 					sendTransaction,
 					router,
 				})

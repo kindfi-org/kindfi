@@ -4,38 +4,45 @@ import { appEnvConfig } from '../../config'
 import type { AppEnvInterface } from '../../types'
 import type { TypedSupabaseClient } from '../../types/supabase-client.types'
 
-let client: TypedSupabaseClient | undefined
+let anonClient: TypedSupabaseClient | undefined
+
+export interface SupabaseBrowserClientOptions {
+	/** NextAuth-minted JWT for RLS; sent as Authorization header (not GoTrue setSession). */
+	accessToken?: string
+}
 
 /**
- * Creates (or reuses) a singleton Supabase browser client.
+ * Creates (or reuses) a Supabase browser client.
  *
- * Designed for client-side usage in React components.
- *
- * @returns Supabase browser client instance.
- *
- * @example
- * const supabase = createSupabaseBrowserClient();
- * const { data } = await supabase.from('categories').select('*');
+ * Without `accessToken`, returns a shared anon client. With `accessToken`, returns a
+ * per-session client that attaches `Authorization: Bearer <jwt>` for RLS.
  */
-export function createSupabaseBrowserClient() {
+export function createSupabaseBrowserClient(
+	options?: SupabaseBrowserClientOptions,
+): TypedSupabaseClient {
 	const appConfig: AppEnvInterface = appEnvConfig()
-	if (client) {
-		return client
+	const url =
+		appConfig.database.url || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ''
+	const anonKey =
+		appConfig.database.anonKey ||
+		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+		process.env.SUPABASE_ANON_KEY ||
+		''
+
+	if (options?.accessToken) {
+		return createBrowserClient<Database>(url, anonKey, {
+			global: {
+				headers: {
+					Authorization: `Bearer ${options.accessToken}`,
+				},
+			},
+		})
 	}
 
-	// ? There is a moment in the react render that process.env doesn't exist in the browser hence,
-	// ? a fallback is required to add on this render step cycle...
-	// ? - @andlerrl
-	client = createBrowserClient<Database>(
-		appConfig.database.url ||
-			process.env.NEXT_PUBLIC_SUPABASE_URL ||
-			process.env.SUPABASE_URL ||
-			'',
-		appConfig.database.anonKey ||
-			process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-			process.env.SUPABASE_ANON_KEY ||
-			'',
-	)
+	if (anonClient) {
+		return anonClient
+	}
 
-	return client
+	anonClient = createBrowserClient<Database>(url, anonKey)
+	return anonClient
 }
