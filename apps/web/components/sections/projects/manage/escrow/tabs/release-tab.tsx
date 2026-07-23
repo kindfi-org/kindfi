@@ -29,6 +29,7 @@ import {
 	getMilestoneStatus,
 	isSingleReleaseMilestone,
 } from '~/lib/utils/escrow/milestone-utils'
+import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { EtherfuseOffRampCard } from '../components/etherfuse-off-ramp-card'
 
 interface ReleaseTabProps {
@@ -53,6 +54,16 @@ const RELEASE_READINESS_ALERT_CLASS: Record<ReleaseReadinessTone, string | undef
 	warning: undefined,
 }
 
+const getMilestoneReleaseKey = (
+	milestone: SingleReleaseMilestone | MultiReleaseMilestone,
+): string => {
+	if (isSingleReleaseMilestone(milestone)) {
+		return 'single-release-milestone'
+	}
+
+	return [milestone.description, milestone.amount, milestone.receiver].join('::')
+}
+
 export function ReleaseTab({
 	escrowContractAddress,
 	escrowType,
@@ -60,7 +71,7 @@ export function ReleaseTab({
 	onSuccess,
 }: ReleaseTabProps) {
 	const { releaseFunds, sendTransaction } = useEscrow()
-	const { ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [isProcessing, setIsProcessing] = useState(false)
 
@@ -168,11 +179,11 @@ export function ReleaseTab({
 				throw new Error('Failed to prepare release transaction')
 			}
 
-			const signedXdr = await signTrustlessTransaction(releaseResponse.unsignedTransaction)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
+			await submitTrustlessEscrowXdr(
+				releaseResponse.unsignedTransaction,
+				signAndSubmitTrustlessTransaction,
+				sendTransaction,
+			)
 
 			toast.success('Funds released successfully')
 			onSuccess()
@@ -224,7 +235,7 @@ export function ReleaseTab({
 											const released =
 												!isSingleReleaseMilestone(milestone) && milestone.flags?.released
 											return (
-												<SelectItem key={index} value={String(index)}>
+												<SelectItem key={getMilestoneReleaseKey(milestone)} value={String(index)}>
 													Milestone {index + 1}
 													{approved ? ' · Approved' : ''}
 													{released ? ' · Released' : ''}

@@ -39,6 +39,7 @@ export function transformEnv(): AppEnvInterface {
 			enableEscrowFeature:
 				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
 			enableSmartAccountCreation: data.NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION === 'true', // Must stay false on Mainnet production
+			enablePollarOnboarding: data.NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING === 'true',
 		},
 		vapid: {
 			email: data.VAPID_EMAIL || '',
@@ -84,6 +85,14 @@ export function transformEnv(): AppEnvInterface {
 				apiKey: data.ETHERFUSE_API_KEY || '',
 				baseUrl: data.ETHERFUSE_BASE_URL || 'https://api.sand.etherfuse.com',
 				customerId: data.ETHERFUSE_CUSTOMER_ID || '',
+			},
+			pollar: {
+				publishableKey: data.NEXT_PUBLIC_POLLAR_PUBLISHABLE_KEY || '',
+				secretKey:
+					data.POLLAR_SECRET_KEY ||
+					(data as { POLAR_WALLET_SECRET_KEY?: string }).POLAR_WALLET_SECRET_KEY ||
+					'',
+				apiBaseUrl: data.POLLAR_API_BASE_URL || 'https://api.pollar.xyz',
 			},
 		},
 		analytics: {
@@ -143,6 +152,7 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: 
 		features: z.object({
 			enableEscrowFeature: z.boolean(),
 			enableSmartAccountCreation: z.boolean(),
+			enablePollarOnboarding: z.boolean(),
 		}),
 		vapid: z.object({
 			email: z.string(),
@@ -186,6 +196,11 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: 
 				apiKey: z.string(),
 				baseUrl: z.string(),
 				customerId: z.string(),
+			}),
+			pollar: z.object({
+				publishableKey: z.string(),
+				secretKey: z.string(),
+				apiBaseUrl: z.string(),
 			}),
 		}),
 		analytics: z.object({
@@ -402,6 +417,10 @@ export const baseEnvSchema = z.object({
 	NEXT_PUBLIC_APP_ENV: z.enum(['development', 'production', 'test']).optional(),
 	NEXT_PUBLIC_ENABLE_ESCROW_FEATURE: z.enum(['true', 'false']).optional(),
 	NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION: z.enum(['true', 'false']).optional(),
+	NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING: z.enum(['true', 'false']).optional(),
+	NEXT_PUBLIC_POLLAR_PUBLISHABLE_KEY: z.string().optional(),
+	POLLAR_SECRET_KEY: z.string().optional(),
+	POLLAR_API_BASE_URL: z.string().url('Invalid Pollar API base URL format').optional(),
 
 	// Stellar Configuration
 	STELLAR_NETWORK_URL: z.string().url('Invalid Stellar Network URL format').optional(),
@@ -516,6 +535,10 @@ export const appRequirements = {
 			'KV_REST_API_TOKEN',
 			'STELLAR_SIGNATURE_MAX_ATTEMPTS',
 			'STELLAR_SIGNATURE_WINDOW_MS',
+			'NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING',
+			'NEXT_PUBLIC_POLLAR_PUBLISHABLE_KEY',
+			'POLLAR_SECRET_KEY',
+			'POLLAR_API_BASE_URL',
 		] as const,
 	},
 	'kyc-server': {

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { usePollarSigner } from '~/hooks/pollar/use-pollar-signer'
 import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import { useEscrowForm } from '../context/escrow-form-context'
 
@@ -9,6 +10,8 @@ import { useEscrowForm } from '../context/escrow-form-context'
  */
 export function useWalletSync() {
 	const { address } = useWallet()
+	const { pollarAddress, isPollarReady } = usePollarSigner()
+	const effectiveAddress = isPollarReady && pollarAddress ? pollarAddress : address
 	const { formData, setField, suggestions } = useEscrowForm()
 	const { suggestedTitle, suggestedEngagementId, suggestedDescription } = suggestions
 
@@ -29,15 +32,15 @@ export function useWalletSync() {
 
 	// Sync external wallet (G-address) into empty role fields
 	useEffect(() => {
-		if (!isExternalStellarWalletAddress(address)) return
-		if (!formData.approver.trim()) setField('approver', address)
-		if (!formData.serviceProvider.trim()) setField('serviceProvider', address)
-		if (!formData.releaseSigner.trim()) setField('releaseSigner', address)
-		if (!formData.disputeResolver.trim()) setField('disputeResolver', address)
-		if (!formData.platformAddress.trim()) setField('platformAddress', address)
-		if (!formData.receiver.trim()) setField('receiver', address)
+		if (!isExternalStellarWalletAddress(effectiveAddress)) return
+		if (!formData.approver.trim()) setField('approver', effectiveAddress)
+		if (!formData.serviceProvider.trim()) setField('serviceProvider', effectiveAddress)
+		if (!formData.releaseSigner.trim()) setField('releaseSigner', effectiveAddress)
+		if (!formData.disputeResolver.trim()) setField('disputeResolver', effectiveAddress)
+		if (!formData.platformAddress.trim()) setField('platformAddress', effectiveAddress)
+		if (!formData.receiver.trim()) setField('receiver', effectiveAddress)
 	}, [
-		address,
+		effectiveAddress,
 		formData.approver,
 		formData.serviceProvider,
 		formData.releaseSigner,
@@ -53,14 +56,17 @@ export function useWalletSync() {
 		.join('|')
 
 	useEffect(() => {
-		if (!isExternalStellarWalletAddress(address) || formData.selectedEscrowType !== 'multi-release')
+		if (
+			!isExternalStellarWalletAddress(effectiveAddress) ||
+			formData.selectedEscrowType !== 'multi-release'
+		)
 			return
 		const updated = formData.milestones.map((m) => {
-			if ('receiver' in m && !m.receiver.trim()) return { ...m, receiver: address }
+			if ('receiver' in m && !m.receiver.trim()) return { ...m, receiver: effectiveAddress }
 			return m
 		})
 		// Only update if something changed
 		const changed = updated.some((m, i) => m !== formData.milestones[i])
 		if (changed) setField('milestones', updated)
-	}, [address, formData.selectedEscrowType, setField, formData.milestones])
+	}, [effectiveAddress, formData.selectedEscrowType, setField, formData.milestones])
 }

@@ -10,7 +10,9 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { trackOnboardingPath } from '~/lib/pollar/analytics'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { buildFormSchema, type FormValues } from '../types'
 
 interface UseProjectSidebarFormSubmitParams {
@@ -29,7 +31,8 @@ export function useProjectSidebarFormSubmit({
 	resolveEscrowTypeForFunding,
 }: UseProjectSidebarFormSubmitParams) {
 	const { fundEscrow, sendTransaction } = useEscrow()
-	const { address, ensureTrustlessSigner, signTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction, isPollarSigner } =
+		useTrustlessSigner()
 	const { user } = useAuth()
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
@@ -94,12 +97,11 @@ export function useProjectSidebarFormSubmit({
 				throw new Error('No unsigned transaction returned')
 			}
 
-			const signedXdr = await signTrustlessTransaction(fundResponse.unsignedTransaction)
-
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
+			const sendResult = await submitTrustlessEscrowXdr(
+				fundResponse.unsignedTransaction,
+				signAndSubmitTrustlessTransaction,
+				sendTransaction,
+			)
 
 			const txHash =
 				sendResult && 'txHash' in sendResult && typeof sendResult.txHash === 'string'
@@ -125,7 +127,7 @@ export function useProjectSidebarFormSubmit({
 							contractId: project.escrowContractAddress,
 							amount: data.investmentAmount,
 							transactionHash: txHash,
-							walletAddress: address ?? undefined,
+							walletAddress: signer ?? undefined,
 						}),
 					})
 
@@ -141,6 +143,7 @@ export function useProjectSidebarFormSubmit({
 			}
 
 			if (contributionSynced) {
+				trackOnboardingPath(isPollarSigner ? 'pollar' : 'legacy_passkey', 'donation_completed')
 				toast.success('Thank you for your support!', {
 					description: `You've donated ${formattedAmount}`,
 					icon: <CircleCheck className="text-primary" />,

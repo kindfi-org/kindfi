@@ -70,6 +70,9 @@ interface ProfileDashboardProps {
 			bio: string | null
 			image_url: string | null
 			slug?: string | null
+			onboarding_provider?: 'legacy_passkey' | 'pollar' | null
+			pollar_wallet_address?: string | null
+			external_wallet_address?: string | null
 		} | null
 	}
 	smartAccountAddress?: string | null
@@ -216,6 +219,12 @@ export function ProfileDashboard({
 								smartAccountAddress={smartAccountAddress ?? null}
 								externalWalletAddress={externalWalletAddress}
 								isExternalConnected={isConnected}
+								onboardingProvider={user.profile?.onboarding_provider ?? 'legacy_passkey'}
+								pollarWalletAddress={
+									user.profile?.pollar_wallet_address ??
+									user.profile?.external_wallet_address ??
+									null
+								}
 								onConnectExternal={connect}
 								onDisconnectExternal={disconnect}
 							/>

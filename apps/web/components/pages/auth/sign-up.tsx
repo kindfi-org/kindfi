@@ -1,14 +1,16 @@
 'use client'
 
+import { isPollarOnboardingEnabled } from '@packages/lib/pollar'
 import { Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { ChangeEvent } from 'react'
 import { useSetState } from 'react-use'
 import { signUpAction } from '~/app/actions/sign-up'
 import { Button } from '~/components/base/button'
 import { CSRFTokenField } from '~/components/base/form'
 import { Input } from '~/components/base/input'
+import { PollarLoginSection } from '~/components/pages/auth/pollar-login-section'
 import { FormAlert } from '~/components/shared/form/form-alert'
 import { FormFieldGroup } from '~/components/shared/form/form-field-group'
 import { FormShell } from '~/components/shared/form/form-shell'
@@ -21,6 +23,8 @@ import { cn } from '~/lib/utils'
 
 export function SignupComponent() {
 	const router = useRouter()
+	const searchParams = useSearchParams()
+	const showPasskeyFlow = !isPollarOnboardingEnabled() || searchParams.get('flow') === 'passkey'
 	const { t } = useI18n()
 	const [{ email, isSubmitting, error, success }, setSignUpState] = useSetState({
 		email: '',
@@ -97,52 +101,60 @@ export function SignupComponent() {
 				<form className={formLayoutClasses.stack} aria-label="Sign up" onSubmit={onSubmit}>
 					<CSRFTokenField />
 
-					{success ? <FormAlert variant="success">{success}</FormAlert> : null}
-					{error ? <FormAlert variant="error">{error}</FormAlert> : null}
+					{isPollarOnboardingEnabled() && !showPasskeyFlow ? (
+						<PollarLoginSection variant="sign-up" legacyHref="/sign-up?flow=passkey" />
+					) : null}
 
-					<FormFieldGroup
-						id="email"
-						label={t('auth.email')}
-						error={isEmailInvalid ? t('auth.invalidEmail') : emailExistsError}
-						required
-					>
-						<div className="relative">
-							<Mail
-								className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-								aria-hidden="true"
-							/>
-							<Input
+					{showPasskeyFlow ? (
+						<>
+							{success ? <FormAlert variant="success">{success}</FormAlert> : null}
+							{error ? <FormAlert variant="error">{error}</FormAlert> : null}
+
+							<FormFieldGroup
 								id="email"
-								name="email"
-								type="email"
-								placeholder={t('auth.emailPlaceholder')}
+								label={t('auth.email')}
+								error={isEmailInvalid ? t('auth.invalidEmail') : emailExistsError}
 								required
-								aria-invalid={isEmailInvalid || Boolean(emailExistsError)}
-								onChange={onEmailChange}
-								value={email}
-								autoComplete="email"
-								className={cn('pl-10')}
-							/>
-						</div>
-					</FormFieldGroup>
+							>
+								<div className="relative">
+									<Mail
+										className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+										aria-hidden="true"
+									/>
+									<Input
+										id="email"
+										name="email"
+										type="email"
+										placeholder={t('auth.emailPlaceholder')}
+										required
+										aria-invalid={isEmailInvalid || Boolean(emailExistsError)}
+										onChange={onEmailChange}
+										value={email}
+										autoComplete="email"
+										className={cn('pl-10')}
+									/>
+								</div>
+							</FormFieldGroup>
 
-					<Button
-						className="gradient-btn w-full text-white"
-						type="submit"
-						disabled={isSubmitting || isEmailInvalid || !email || Boolean(emailExistsError)}
-						aria-live="polite"
-						aria-busy={isSubmitting}
-					>
-						{isSubmitting ? (
-							t('auth.creatingAccount')
-						) : (
-							<>
-								{t('auth.createAccountBtn')} <UserPlus className="ml-2 h-4 w-4" />
-							</>
-						)}
-					</Button>
+							<Button
+								className="gradient-btn w-full text-white"
+								type="submit"
+								disabled={isSubmitting || isEmailInvalid || !email || Boolean(emailExistsError)}
+								aria-live="polite"
+								aria-busy={isSubmitting}
+							>
+								{isSubmitting ? (
+									t('auth.creatingAccount')
+								) : (
+									<>
+										{t('auth.createAccountBtn')} <UserPlus className="ml-2 h-4 w-4" />
+									</>
+								)}
+							</Button>
 
-					<PasskeyInfoDialog />
+							<PasskeyInfoDialog />
+						</>
+					) : null}
 				</form>
 			</FormShell>
 		</AuthLayout>

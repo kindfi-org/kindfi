@@ -66,6 +66,10 @@
 		"./smart-account/server": {
 			"import": "./src/smart-account/server.ts",
 			"require": "./src/smart-account/server.ts"
+		},
+		"./pollar": {
+			"import": "./src/pollar/index.ts",
+			"require": "./src/pollar/index.ts"
 		}
 	},
 	"main": "./src/index.ts",
