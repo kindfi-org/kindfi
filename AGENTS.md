@@ -193,3 +193,33 @@ Specialized skills live in `.agents/skills/`. Read the relevant `SKILL.md` befor
 - [README.md](./README.md) — community, contributing, quick start
 - [apps/web/README.md](./apps/web/README.md) — web app structure and features
 - [Architecture docs](https://kindfis-organization.gitbook.io/development/kindfi-architecture)
+
+## Cursor Cloud specific instructions
+
+Durable, non-obvious caveats for running this repo in the Cursor Cloud VM. Standard commands live in `Taskfile.yml` / `apps/web/README.md`; the update script already runs `bun install`.
+
+### Running the web app (primary product)
+- Start: `task web:dev` (or `cd apps/web && bun dev`) → http://localhost:3000. Turbopack compiles routes on first request.
+- `apps/web/.env` is required (gitignored). It is generated during setup with **local Supabase** keys. Regenerate keys with `cd services/supabase && bunx supabase status --workdir . -o env`.
+- Env gotcha: do **not** put `CHALLENGE_TTL_SECONDS` in `apps/web/.env`. `transformEnv()` reads it raw and the schema requires a number; a string value fails startup validation. Leaving it unset yields the numeric default.
+
+### Local Supabase (Docker) — non-obvious CLI quirk
+- Docker is preinstalled (fuse-overlayfs, `containerd-snapshotter` disabled, iptables-legacy). If `docker info` fails, start the daemon: `sudo dockerd &` (then `sudo chmod 666 /var/run/docker.sock`).
+- Start Supabase from the config dir with an explicit workdir: `cd services/supabase && bunx supabase start --workdir .`. Plain `supabase start` mis-detects the workdir (the project dir is itself named `supabase`) and aborts on `auth.email.template.*.content_path`. In this CLI version, `content_path` resolves relative to workdir while migrations/seed resolve under `<workdir>/supabase`.
+- Because of that split, `--workdir .` brings the stack up but does **not** auto-apply the migrations in `services/supabase/migrations`.
+
+### Known schema drift (applies to a fresh local DB)
+The committed `services/supabase/migrations` do not cleanly build a working schema from scratch:
+- The RLS-policy migration for `kyc_reviews` predates the migration that creates the table (filename order ≠ dependency order).
+- `user_role` enum value `pending` (and `admin`) is referenced by profile-creation triggers but added in a later migration — apply `ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'pending'` / `'admin'` if triggers fail.
+- App code (`lib/queries/projects/get-basic-project-info-by-slug.ts`) selects `projects.foundation_id` and reads a `foundations` table, but **no committed migration creates them**; project detail pages throw Postgres `42703` without `projects.foundation_id`. Add `ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS foundation_id uuid;` locally.
+- Practical local setup: apply migrations tolerantly via `psql` (multiple passes, no `ON_ERROR_STOP`), then patch the objects above, then `NOTIFY pgrst, 'reload schema';` so PostgREST sees new columns. The committed `services/supabase/seed.sql` is also drifted (enum/FK mismatches) and only partially loads.
+
+### Flows that need external services (cannot be exercised locally without secrets)
+- **Email signup / OTP**: `lib/auth/signup-otp.service.ts` sends the code via **Resend** and hard-requires `RESEND_SMTP_API_KEY` (no dev/Mailpit fallback). Supabase Auth has `enable_confirmations = false`, so it is only the Resend send that blocks.
+- **KYC**: needs Didit + the `services/ai` Express service (`task ai:dev`).
+- **Passkey / smart-account auth** (the primary auth): needs a WebAuthn authenticator; not feasible headless.
+- Unauthenticated **project discovery** (browse `/projects`, filter by category, open `/projects/[slug]`) is fully exercisable locally and is the recommended smoke test.
+
+### Lint / test status
+- `bun run lint` (Biome) and `cd apps/web && bun test` both run, but have **pre-existing** failures unrelated to setup (formatting nits; several tests time out waiting on unconfigured Redis/Upstash and external APIs).
