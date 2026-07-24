@@ -1,36 +1,28 @@
 import {
-	IoCreateOutline,
+	IoDocumentTextOutline,
 	IoLockClosedOutline,
-	IoMegaphoneOutline,
+	IoNewspaperOutline,
 	IoPeopleOutline,
 	IoSettingsOutline,
-	IoStarOutline,
 } from 'react-icons/io5'
 import type { CategoryConfig, ManageSection } from '~/lib/types/project/manage.types'
 
+/** Legacy section list — prefer PROJECT_MANAGE_NAV_SECTIONS for new UI. Kept for category config. */
 export const manageSections: ManageSection[] = [
 	{
-		title: 'Basics',
-		description: 'Core details like name, category, location, and metadata.',
-		href: 'basics',
-		cta: 'Edit basics',
-		Icon: IoCreateOutline,
+		title: 'Content setup',
+		description: 'Guided bilingual setup for basics, story, and campaign impact.',
+		href: 'content',
+		cta: 'Set up content',
+		Icon: IoDocumentTextOutline,
 		category: 'content',
 	},
 	{
-		title: 'Story',
-		description: 'Your narrative, problem statement, solution, and impact.',
-		href: 'pitch',
-		cta: 'Edit story',
-		Icon: IoMegaphoneOutline,
-		category: 'content',
-	},
-	{
-		title: 'Campaign Impact',
-		description: 'Key achievements, traction, and measurable outcomes.',
-		href: 'highlights',
-		cta: 'Add impact points',
-		Icon: IoStarOutline,
+		title: 'Updates',
+		description: 'Post progress and news for supporters on your public project page.',
+		href: 'updates',
+		cta: 'Post update',
+		Icon: IoNewspaperOutline,
 		category: 'content',
 	},
 	{
@@ -63,24 +55,22 @@ export const manageCategoryConfig: Record<ManageSection['category'], CategoryCon
 	content: {
 		label: 'Content',
 		color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
-		gradient: 'from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20',
-		iconGradient: 'from-blue-500 to-indigo-600',
+		gradient: 'from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent',
+		iconGradient: 'from-blue-500 to-blue-600',
 		accent: 'blue',
 	},
 	team: {
 		label: 'Team',
-		color:
-			'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900',
-		gradient: 'from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20',
-		iconGradient: 'from-purple-500 to-pink-600',
-		accent: 'purple',
+		color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
+		gradient: 'from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent',
+		iconGradient: 'from-blue-500 to-blue-600',
+		accent: 'blue',
 	},
 	escrow: {
 		label: 'Escrow',
-		color:
-			'bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-900',
-		gradient: 'from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20',
-		iconGradient: 'from-green-500 to-emerald-600',
-		accent: 'green',
+		color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900',
+		gradient: 'from-blue-50/50 to-transparent dark:from-blue-950/10 dark:to-transparent',
+		iconGradient: 'from-blue-500 to-blue-600',
+		accent: 'blue',
 	},
 } as const

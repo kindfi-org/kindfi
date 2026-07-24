@@ -3,9 +3,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
+import { sanitizeProjectTranslationForApi } from '~/lib/utils/project-utils'
 
 type CreateProjectResponse = {
 	slug: string
+	id: string
 }
 
 type UpdateProjectResponse = {
@@ -66,8 +68,9 @@ export function useProjectMutation({
 
 			fd.append('sourceLocale', formData.sourceLocale ?? 'en')
 
-			if (formData.translation) {
-				fd.append('translation', JSON.stringify(formData.translation))
+			const translation = sanitizeProjectTranslationForApi(formData.translation)
+			if (translation) {
+				fd.append('translation', JSON.stringify(translation))
 			}
 
 			const res = await fetch(isUpdate ? '/api/projects/update' : '/api/projects/create', {

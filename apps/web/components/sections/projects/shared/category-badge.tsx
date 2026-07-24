@@ -1,6 +1,7 @@
 'use client'
 
 import type { Tables } from '@services/supabase'
+import type { CSSProperties } from 'react'
 
 import { cn } from '~/lib/utils'
 import { categoryIcons } from '~/lib/utils/category-icons'
@@ -66,10 +67,12 @@ export function CategoryBadge({
 						displayClassName,
 						'cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
 					)}
-					style={{
-						...displayStyle,
-						'--tw-ring-color': category.color,
-					}}
+					style={
+						{
+							...displayStyle,
+							'--tw-ring-color': category.color,
+						} as CSSProperties
+					}
 					aria-pressed={selected}
 					aria-label={`Select category ${category.name}`}
 				>

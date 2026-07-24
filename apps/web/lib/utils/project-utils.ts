@@ -1,6 +1,9 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { v4 as uuidv4 } from 'uuid'
-import type { ProjectTranslationContent } from '~/lib/services/content-translation/types'
+import type {
+	ProjectPitchTranslationContent,
+	ProjectTranslationContent,
+} from '~/lib/services/content-translation/types'
 import { countries } from '../constants/projects/countries.constant'
 import type {
 	BasicProjectInfo,
@@ -155,6 +158,41 @@ export function getSocialTypeFromUrl(url: string): string | null {
 }
 
 /**
+ * Strips empty translation fields so PATCH requests do not fail validation
+ * when the form still has placeholder `{ title: '', description: '' }`.
+ */
+export function sanitizeProjectTranslationForApi(
+	translation?: ProjectTranslationContent,
+): ProjectTranslationContent | undefined {
+	if (!translation) return undefined
+
+	const title = translation.title?.trim()
+	const description = translation.description?.trim()
+	const result: ProjectTranslationContent = {}
+
+	if (title && title.length >= 3) result.title = title
+	if (description && description.length >= 10) result.description = description
+
+	return Object.keys(result).length > 0 ? result : undefined
+}
+
+export function sanitizePitchTranslationForApi(
+	translation?: ProjectPitchTranslationContent,
+): ProjectPitchTranslationContent | undefined {
+	if (!translation) return undefined
+
+	const title = translation.title?.trim()
+	const story = translation.story?.trim()
+	const plainStory = story?.replace(/<[^>]*>/g, '').trim() ?? ''
+	const result: ProjectPitchTranslationContent = {}
+
+	if (title && title.length >= 1) result.title = title
+	if (plainStory.length >= 50 && story) result.story = story
+
+	return Object.keys(result).length > 0 ? result : undefined
+}
+
+/**
  * Normalizes a backend project object into a format that matches
  * the CreateProjectFormData interface used in frontend forms.
  *
@@ -219,9 +257,11 @@ export function parseFormData(formData: FormData) {
 		foundationId: (formData.get('foundationId') as string) || undefined,
 		developmentOnly: formData.get('developmentOnly') === 'true',
 		sourceLocale: (formData.get('sourceLocale') as string) || 'en',
-		translation: safeJsonParse(
-			formData.get('translation') as string,
-			undefined as ProjectTranslationContent | undefined,
+		translation: sanitizeProjectTranslationForApi(
+			safeJsonParse(
+				formData.get('translation') as string,
+				undefined as ProjectTranslationContent | undefined,
+			),
 		),
 	}
 }

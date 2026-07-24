@@ -1,6 +1,5 @@
 'use client'
 
-import { useReducedMotion } from 'framer-motion'
 import { Check } from 'lucide-react'
 import { cn } from '~/lib/utils'
 import {
@@ -20,61 +19,54 @@ export function EscrowStepIndicator({
 	stepValidation,
 	onStepClick,
 }: EscrowStepIndicatorProps) {
-	const prefersReducedMotion = useReducedMotion()
 	const currentIndex = ESCROW_WIZARD_STEPS.findIndex((step) => step.id === currentStep)
 
 	return (
-		<nav aria-label="Escrow creation progress" className="w-full">
-			<ol className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+		<nav aria-label="Escrow creation progress" className="w-full space-y-2">
+			<ol className="flex flex-wrap gap-2">
 				{ESCROW_WIZARD_STEPS.map((step, index) => {
 					const isCurrent = step.id === currentStep
 					const isPast = index < currentIndex
-					const isComplete = isPast && stepValidation[step.id].valid
-					const isClickable = Boolean(onStepClick) && (isPast || isComplete)
+					const isComplete = stepValidation[step.id].valid && (isPast || isCurrent)
+					const isIncomplete = !stepValidation[step.id].valid && !isCurrent
+					const isClickable = Boolean(onStepClick) && (isPast || stepValidation[step.id].valid)
 
 					return (
-						<li
-							key={step.id}
-							className="flex min-w-0 flex-1 items-start gap-3 sm:flex-col sm:items-center"
-						>
+						<li key={step.id}>
 							<button
 								type="button"
 								disabled={!isClickable}
-								onClick={() => isClickable && onStepClick?.(step.id)}
+								onClick={() => {
+									if (isClickable) onStepClick?.(step.id)
+								}}
 								className={cn(
-									'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-[background-color,border-color,color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-									isComplete && 'border-emerald-600 bg-emerald-600 text-white',
-									isCurrent && !isComplete && 'border-primary bg-primary text-primary-foreground',
-									!isCurrent &&
-										!isComplete &&
-										'border-muted-foreground/30 bg-background text-muted-foreground',
-									isClickable && 'cursor-pointer hover:border-primary/70',
-									!isClickable && 'cursor-default',
+									'inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+									isComplete && !isCurrent
+										? 'border-emerald-600/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+										: null,
+									isCurrent
+										? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'
+										: null,
+									isIncomplete ? 'border-border bg-background text-muted-foreground' : null,
+									isClickable ? 'cursor-pointer hover:border-blue-500/50' : 'cursor-default',
 								)}
 								aria-current={isCurrent ? 'step' : undefined}
 								aria-label={`${step.label}${isComplete ? ', completed' : isCurrent ? ', current step' : ''}`}
 							>
-								{isComplete ? <Check className="h-4 w-4" aria-hidden="true" /> : index + 1}
-							</button>
-
-							<div className="min-w-0 flex-1 sm:text-center">
-								<p
-									className={cn(
-										'text-sm font-medium text-wrap-balance',
-										isCurrent ? 'text-foreground' : 'text-muted-foreground',
-									)}
-								>
-									{step.shortLabel}
-								</p>
-								{isCurrent ? (
-									<p
-										className="mt-0.5 hidden text-xs text-muted-foreground sm:block"
-										style={{ transition: prefersReducedMotion ? undefined : 'opacity 0.2s' }}
+								{isComplete && !isCurrent ? (
+									<Check className="h-3.5 w-3.5" aria-hidden="true" />
+								) : (
+									<span
+										className={cn(
+											'flex h-4 w-4 items-center justify-center rounded-full text-[10px]',
+											isCurrent ? 'bg-blue-600 text-white' : 'bg-muted text-muted-foreground',
+										)}
 									>
-										{step.description}
-									</p>
-								) : null}
-							</div>
+										{index + 1}
+									</span>
+								)}
+								{step.shortLabel}
+							</button>
 						</li>
 					)
 				})}

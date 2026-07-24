@@ -153,7 +153,7 @@ async function createProjectHandler(req: NextRequest) {
 				.catch((err) => logger.error('[Project create] Notification error:', err))
 		}
 
-		return NextResponse.json({ slug: project.slug }, { status: 201 })
+		return NextResponse.json({ slug: project.slug, id: project.id }, { status: 201 })
 	} catch (err) {
 		logger.error(err)
 		return NextResponse.json(

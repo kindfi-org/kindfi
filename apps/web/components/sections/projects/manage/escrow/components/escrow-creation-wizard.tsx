@@ -105,9 +105,9 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 					onStepClick={handleStepClick}
 				/>
 
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-xl text-wrap-balance">{stepTitle}</CardTitle>
+				<Card className="border-border">
+					<CardHeader className="space-y-1.5">
+						<CardTitle className="text-xl font-semibold text-wrap-balance">{stepTitle}</CardTitle>
 						<CardDescription>{stepDescription}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
@@ -136,7 +136,7 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 					</CardContent>
 				</Card>
 
-				<div className="sticky bottom-4 z-20 flex flex-col-reverse gap-3 rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+				<div className="sticky bottom-4 z-20 flex flex-col-reverse gap-3 rounded-lg border border-border bg-background/95 p-4 shadow-md backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
 					<Button
 						type="button"
 						variant="outline"

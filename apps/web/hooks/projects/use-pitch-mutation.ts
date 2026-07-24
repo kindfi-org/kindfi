@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { ProjectPitchFormData } from '~/lib/types/project/create-project.types'
+import { sanitizePitchTranslationForApi } from '~/lib/utils/project-utils'
 
 type ProjectPitchRequestData = ProjectPitchFormData & {
 	projectId: string
@@ -32,8 +33,9 @@ export function useProjectPitchMutation() {
 				fd.append('removePitchDeck', 'true')
 			}
 
-			if (formData.translation) {
-				fd.append('translation', JSON.stringify(formData.translation))
+			const pitchTranslation = sanitizePitchTranslationForApi(formData.translation)
+			if (pitchTranslation) {
+				fd.append('translation', JSON.stringify(pitchTranslation))
 			}
 
 			const res = await fetch(`/api/projects/${formData.projectSlug}/pitch`, {

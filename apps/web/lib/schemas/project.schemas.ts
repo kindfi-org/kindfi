@@ -7,23 +7,55 @@ const tagSchema = z.object({
 	color: z.string(),
 })
 
-const projectTranslationFieldsSchema = z
-	.object({
-		title: z.string().min(3, 'Title must be at least 3 characters').optional(),
-		description: z.string().min(10, 'Description must be at least 10 characters').optional(),
-	})
-	.optional()
+const emptyToUndefined = (value: unknown) => {
+	if (typeof value !== 'string') return value
+	const trimmed = value.trim()
+	return trimmed === '' ? undefined : trimmed
+}
 
-const projectPitchTranslationFieldsSchema = z
-	.object({
-		title: z
-			.string()
-			.min(1, 'Title is required')
-			.max(100, 'Title must be less than 100 characters')
-			.optional(),
-		story: z.string().min(50, 'Story must be at least 50 characters').optional(),
-	})
-	.optional()
+const projectTranslationFieldsSchema = z.preprocess(
+	(value) => {
+		if (!value || typeof value !== 'object') return undefined
+
+		const obj = value as { title?: unknown; description?: unknown }
+		const title = emptyToUndefined(obj.title)
+		const description = emptyToUndefined(obj.description)
+
+		if (title === undefined && description === undefined) return undefined
+
+		return { title, description }
+	},
+	z
+		.object({
+			title: z.string().min(3, 'Title must be at least 3 characters').optional(),
+			description: z.string().min(10, 'Description must be at least 10 characters').optional(),
+		})
+		.optional(),
+)
+
+const projectPitchTranslationFieldsSchema = z.preprocess(
+	(value) => {
+		if (!value || typeof value !== 'object') return undefined
+
+		const obj = value as { title?: unknown; story?: unknown }
+		const title = emptyToUndefined(obj.title)
+		const story = emptyToUndefined(obj.story)
+
+		if (title === undefined && story === undefined) return undefined
+
+		return { title, story }
+	},
+	z
+		.object({
+			title: z
+				.string()
+				.min(1, 'Title is required')
+				.max(100, 'Title must be less than 100 characters')
+				.optional(),
+			story: z.string().min(50, 'Story must be at least 50 characters').optional(),
+		})
+		.optional(),
+)
 
 export const projectCreateFormSchema = z
 	.object({
@@ -163,7 +195,10 @@ const highlightItemSchema = z.object({
 export const highlightsUpdateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
 	highlights: z.array(highlightItemSchema).min(2, 'At least 2 highlights are required'),
-	translationHighlights: z.array(highlightItemSchema).optional(),
+	translationHighlights: z
+		.array(highlightItemSchema)
+		.min(2, 'At least 2 highlights are required')
+		.optional(),
 })
 
 export const projectUpdateCreateSchema = z.object({

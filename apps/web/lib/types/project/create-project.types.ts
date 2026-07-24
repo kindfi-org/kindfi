@@ -70,4 +70,5 @@ export interface BasicProjectInfo {
 	tags: Tag[]
 	sourceLocale?: SupportedLocale
 	translation?: ProjectTranslationContent
+	foundation?: { id: string; name: string; slug: string }
 }

@@ -23,6 +23,10 @@ export function useHighlightsMutation() {
 
 	return useMutation<HighlightsSaveResponse, Error, HighlightsRequestData>({
 		mutationFn: async (data: HighlightsRequestData) => {
+			const completeTranslationHighlights = data.translationHighlights?.filter(
+				(highlight) => highlight.title.trim().length > 0 && highlight.description.trim().length > 0,
+			)
+
 			const res = await fetch(`/api/projects/${data.projectSlug}/highlights`, {
 				method: 'POST',
 				headers: {
@@ -31,10 +35,16 @@ export function useHighlightsMutation() {
 				body: JSON.stringify({
 					projectId: data.projectId,
 					highlights: data.highlights,
-					translationHighlights: data.translationHighlights?.map(({ title, description }) => ({
-						title,
-						description,
-					})),
+					...(completeTranslationHighlights && completeTranslationHighlights.length >= 2
+						? {
+								translationHighlights: completeTranslationHighlights.map(
+									({ title, description }) => ({
+										title,
+										description,
+									}),
+								),
+							}
+						: {}),
 				}),
 			})
 

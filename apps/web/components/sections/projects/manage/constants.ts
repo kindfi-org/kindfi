@@ -5,9 +5,7 @@
 
 export type ProjectManageSectionKey =
 	| 'overview'
-	| 'basics'
-	| 'pitch'
-	| 'highlights'
+	| 'content'
 	| 'updates'
 	| 'members'
 	| 'milestones'
@@ -40,31 +38,13 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 		cta: 'View dashboard',
 	},
 	{
-		key: 'basics',
-		title: 'Basics',
-		description: 'Core details like name, category, location, and metadata.',
-		href: (slug) => `/projects/${slug}/manage/basics`,
-		path: '/basics',
+		key: 'content',
+		title: 'Content setup',
+		description: 'Guided bilingual setup for basics, story, and campaign impact.',
+		href: (slug) => `/projects/${slug}/manage/content`,
+		path: '/content',
 		match: 'prefix',
-		cta: 'Edit basics',
-	},
-	{
-		key: 'pitch',
-		title: 'Story',
-		description: 'Your narrative, problem statement, solution, and impact.',
-		href: (slug) => `/projects/${slug}/manage/pitch`,
-		path: '/pitch',
-		match: 'prefix',
-		cta: 'Edit story',
-	},
-	{
-		key: 'highlights',
-		title: 'Campaign Impact',
-		description: 'Key achievements, traction, and measurable outcomes.',
-		href: (slug) => `/projects/${slug}/manage/highlights`,
-		path: '/highlights',
-		match: 'prefix',
-		cta: 'Add impact points',
+		cta: 'Set up content',
 	},
 	{
 		key: 'updates',

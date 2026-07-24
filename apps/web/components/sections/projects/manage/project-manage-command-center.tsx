@@ -5,16 +5,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 import {
-	IoCreateOutline,
+	IoDocumentTextOutline,
 	IoFlagOutline,
 	IoLockClosedOutline,
-	IoMegaphoneOutline,
 	IoNewspaperOutline,
 	IoOpenOutline,
 	IoPeopleOutline,
 	IoSettingsOutline,
 	IoSpeedometerOutline,
-	IoStarOutline,
 } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -32,9 +30,7 @@ const SECTION_ICONS: Record<
 	React.ComponentType<{ size?: number; className?: string }>
 > = {
 	overview: IoSpeedometerOutline,
-	basics: IoCreateOutline,
-	pitch: IoMegaphoneOutline,
-	highlights: IoStarOutline,
+	content: IoDocumentTextOutline,
 	updates: IoNewspaperOutline,
 	members: IoPeopleOutline,
 	milestones: IoFlagOutline,
