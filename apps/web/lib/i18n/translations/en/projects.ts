@@ -63,6 +63,13 @@ export const projects = {
 	found: 'Found',
 	showing: 'Showing',
 	project: 'project',
+	detail: {
+		released: 'Released',
+		fundingStats: 'Project funding stats',
+		fundingProgress: 'Funding progress',
+		shareTitle: 'Share this project',
+		shareHint: 'Share on social media or copy the link for messaging apps and more.',
+	},
 	manage: {
 		contentLanguageHelp:
 			'The primary language for your campaign. You also need to complete the other language version below.',

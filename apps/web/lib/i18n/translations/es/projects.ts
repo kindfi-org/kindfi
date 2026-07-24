@@ -63,6 +63,13 @@ export const projects = {
 	found: 'Encontrados',
 	showing: 'Mostrando',
 	project: 'proyecto',
+	detail: {
+		released: 'Liberado',
+		fundingStats: 'Estadísticas de financiamiento',
+		fundingProgress: 'Progreso de financiamiento',
+		shareTitle: 'Compartir este proyecto',
+		shareHint: 'Comparte en redes sociales o copia el enlace para apps de mensajería y más.',
+	},
 	manage: {
 		contentLanguageHelp:
 			'El idioma principal de tu campaña. También debes completar la versión en el otro idioma más abajo.',
