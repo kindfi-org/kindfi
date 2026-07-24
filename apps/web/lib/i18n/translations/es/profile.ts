@@ -260,16 +260,16 @@ export const profile = {
 	matchingInsightsTitle: 'Según tus intereses',
 	matchingMatchesLabel: 'coincidencias encontradas',
 	manageMilestones: {
-		title: 'Revisiones de hitos',
+		title: 'Revisiones de releases',
 		description:
-			'Envía un release para revisión del administrador cuando el trabajo del hito esté listo. Los administradores de KindFi serán notificados y podrán continuar con la aprobación del escrow.',
+			'Envía un release para revisión del administrador cuando el trabajo del release esté listo. Los administradores de KindFi serán notificados y podrán continuar con la aprobación del escrow.',
 		noEscrowDescription:
-			'Las revisiones de hitos requieren un contrato de escrow activo. Contacta a KindFi si necesitas configurar escrow para este proyecto.',
+			'Las revisiones de releases requieren un contrato de escrow activo. Contacta a KindFi si necesitas configurar escrow para este proyecto.',
 		noMilestones: 'No se encontraron releases para este contrato de escrow.',
 		releaseLabel: 'Release {n}',
-		requestReview: 'Solicitar revisión de hito',
+		requestReview: 'Solicitar revisión de release',
 		requestSubmitted: 'Solicitud enviada. Los administradores han sido notificados.',
-		requestDialogTitle: 'Solicitar revisión de hito',
+		requestDialogTitle: 'Solicitar revisión de release',
 		requestDialogDescription:
 			'Notifica a los administradores de KindFi que el Release {release} ({title}) está listo para revisión.',
 		requestNotesLabel: 'Notas para administradores (opcional)',

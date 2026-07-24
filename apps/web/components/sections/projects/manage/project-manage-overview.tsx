@@ -5,14 +5,12 @@ import Link from 'next/link'
 import { useMemo } from 'react'
 import {
 	IoChevronForwardOutline,
-	IoCreateOutline,
+	IoDocumentTextOutline,
 	IoFlagOutline,
 	IoLockClosedOutline,
-	IoMegaphoneOutline,
 	IoNewspaperOutline,
 	IoPeopleOutline,
 	IoSettingsOutline,
-	IoStarOutline,
 } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
@@ -26,6 +24,7 @@ import {
 	createManageSectionVariants,
 } from '~/lib/constants/animations/manage-page.animations'
 import { manageCategoryConfig } from '~/lib/constants/projects'
+import { useI18n } from '~/lib/i18n/context'
 import type { ProjectStatus } from '~/lib/projects/project-status'
 import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import {
@@ -33,15 +32,15 @@ import {
 	type ProjectManageNavSection,
 	type ProjectManageSectionKey,
 } from './constants'
+import { ManageSectionHeader } from './manage-section-header'
 import { ProjectStatusPanel } from './project-status-panel'
+import { TranslationProgressCard } from './translation-progress-card'
 
 const SECTION_CARD_ICONS: Record<
 	Exclude<ProjectManageSectionKey, 'overview'>,
 	React.ComponentType<{ size?: number; className?: string }>
 > = {
-	basics: IoCreateOutline,
-	pitch: IoMegaphoneOutline,
-	highlights: IoStarOutline,
+	content: IoDocumentTextOutline,
 	updates: IoNewspaperOutline,
 	members: IoPeopleOutline,
 	milestones: IoFlagOutline,
@@ -54,9 +53,7 @@ const OVERVIEW_SECTION_KEYS: Record<
 	'content' | 'team' | 'escrow' | 'overview'
 > = {
 	overview: 'overview',
-	basics: 'content',
-	pitch: 'content',
-	highlights: 'content',
+	content: 'content',
 	updates: 'content',
 	members: 'team',
 	milestones: 'escrow',
@@ -76,6 +73,7 @@ type ProjectManageOverviewProps = {
 }
 
 export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOverviewProps) {
+	const { t } = useI18n()
 	const prefersReducedMotion = useReducedMotion()
 	const { data: project, isLoading } = useManagedProjectQuery<
 		Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>
@@ -141,9 +139,19 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 	const formattedProgress = progressPercent === null ? '…' : `${progressPercent}%`
 	const projectStatus = (project?.status ?? 'draft') as ProjectStatus
 
+	const dashboardDescription = isPlatformAdmin
+		? t('projects.manage.dashboardDescriptionAdmin').replace(
+				'{title}',
+				project?.title ?? t('projects.manage.thisProject'),
+			)
+		: t('projects.manage.dashboardDescription').replace(
+				'{title}',
+				project?.title ?? t('projects.manage.thisProject'),
+			)
+
 	if (isLoading) {
 		return (
-			<div className="space-y-6 pt-2" aria-live="polite">
+			<div className="space-y-6" aria-live="polite">
 				<div className="h-28 animate-pulse rounded-xl bg-muted" />
 				<div className="grid gap-4 sm:grid-cols-3">
 					<div className="h-32 animate-pulse rounded-xl bg-muted" />
@@ -159,28 +167,25 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 			variants={containerVariants}
 			initial="hidden"
 			animate="show"
-			className="space-y-10 pt-2 lg:space-y-12"
+			className="space-y-10 lg:space-y-12"
 		>
 			<motion.section variants={sectionVariants} className="space-y-4">
-				<div>
-					<h1 className="text-2xl font-bold tracking-tight md:text-3xl">Dashboard</h1>
-					<p className="mt-1 max-w-2xl text-muted-foreground">
-						Everything you need to run{' '}
-						<span className="font-medium text-foreground">{project?.title ?? 'this project'}</span>
-						—content, team
-						{isPlatformAdmin ? ', and escrow' : ''} in one place.
-					</p>
-				</div>
+				<ManageSectionHeader
+					title={t('projects.manage.dashboardTitle')}
+					description={dashboardDescription}
+				/>
 
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 					<StatCard
 						label={raisedLabel}
 						value={formattedRaised}
-						hint={isPlatformAdmin && hasEscrow ? 'Live from Trustless Work escrow' : undefined}
+						hint={
+							isPlatformAdmin && hasEscrow ? t('projects.manage.raisedFromEscrowHint') : undefined
+						}
 					/>
-					<StatCard label="Goal" value={formattedGoal} />
-					<StatCard label="Supporters" value={formattedSupporters} />
-					<StatCard label="Progress" value={formattedProgress} />
+					<StatCard label={t('projects.goal')} value={formattedGoal} />
+					<StatCard label={t('projects.supporters')} value={formattedSupporters} />
+					<StatCard label={t('projects.manage.progressLabel')} value={formattedProgress} />
 				</div>
 			</motion.section>
 
@@ -188,10 +193,13 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 				<ProjectStatusPanel slug={slug} status={projectStatus} isPlatformAdmin={isPlatformAdmin} />
 			</motion.section>
 
+			<motion.section variants={sectionVariants}>
+				<TranslationProgressCard slug={slug} />
+			</motion.section>
+
 			<OverviewCategorySection
 				label={OVERVIEW_CATEGORY_LABELS.content.label}
 				colorClass={OVERVIEW_CATEGORY_LABELS.content.color}
-				gradientClass="from-blue-200 via-indigo-200 to-transparent dark:from-blue-900 dark:via-indigo-900"
 				sections={sectionsByCategory.content}
 				slug={slug}
 				categoryConfig={manageCategoryConfig.content}
@@ -202,7 +210,6 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 			<OverviewCategorySection
 				label={OVERVIEW_CATEGORY_LABELS.team.label}
 				colorClass={OVERVIEW_CATEGORY_LABELS.team.color}
-				gradientClass="from-purple-200 via-pink-200 to-transparent dark:from-purple-900 dark:via-pink-900"
 				sections={sectionsByCategory.team}
 				slug={slug}
 				categoryConfig={manageCategoryConfig.team}
@@ -214,7 +221,6 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 				<OverviewCategorySection
 					label={OVERVIEW_CATEGORY_LABELS.escrow.label}
 					colorClass={OVERVIEW_CATEGORY_LABELS.escrow.color}
-					gradientClass="from-green-200 via-emerald-200 to-transparent dark:from-green-900 dark:via-emerald-900"
 					sections={sectionsByCategory.escrow}
 					slug={slug}
 					categoryConfig={manageCategoryConfig.escrow}
@@ -228,12 +234,12 @@ export function ProjectManageOverview({ slug, isPlatformAdmin }: ProjectManageOv
 
 function StatCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
 	return (
-		<Card className="border-border/80 bg-card/80">
+		<Card className="border-border/80 bg-card">
 			<CardHeader className="pb-2">
 				<CardDescription className="text-xs font-medium uppercase tracking-wide">
 					{label}
 				</CardDescription>
-				<CardTitle className="text-2xl font-bold tabular-nums">{value}</CardTitle>
+				<CardTitle className="text-2xl font-semibold tabular-nums">{value}</CardTitle>
 				{hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
 			</CardHeader>
 		</Card>
@@ -243,7 +249,6 @@ function StatCard({ label, value, hint }: { label: string; value: string; hint?:
 function OverviewCategorySection({
 	label,
 	colorClass,
-	gradientClass,
 	sections,
 	slug,
 	categoryConfig,
@@ -252,26 +257,27 @@ function OverviewCategorySection({
 }: {
 	label: string
 	colorClass: string
-	gradientClass: string
 	sections: ProjectManageNavSection[]
 	slug: string
 	categoryConfig: (typeof manageCategoryConfig)[keyof typeof manageCategoryConfig]
 	cardVariants: ReturnType<typeof createManageCardVariants>
 	sectionVariants: ReturnType<typeof createManageSectionVariants>
 }) {
+	if (sections.length === 0) return null
+
 	return (
-		<motion.section variants={sectionVariants} className="space-y-6">
+		<motion.section variants={sectionVariants} className="space-y-4">
 			<div className="flex items-center gap-4">
-				<Badge variant="outline" className={`${colorClass} text-sm font-semibold px-4 py-1.5`}>
+				<Badge variant="outline" className={`${colorClass} text-sm font-medium px-3 py-1`}>
 					{label}
 				</Badge>
-				<div className={`h-px flex-1 bg-gradient-to-r ${gradientClass}`} />
+				<div className="h-px flex-1 bg-border" />
 			</div>
 			<motion.div
 				variants={staggerContainer}
 				initial="initial"
 				animate="animate"
-				className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+				className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
 			>
 				{sections.map((section) => (
 					<SectionCard
@@ -302,21 +308,17 @@ function SectionCard({
 
 	return (
 		<motion.div variants={variants}>
-			<Card className="group relative overflow-hidden transition-[transform,box-shadow] duration-300 hover:shadow-lg hover:-translate-y-1 border border-border bg-card">
-				<div
-					className={`absolute inset-0 bg-gradient-to-br ${categoryConfig.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300`}
-					aria-hidden="true"
-				/>
+			<Card className="group relative overflow-hidden border border-border bg-card transition-shadow duration-200 hover:shadow-md">
 				<CardHeader className="relative z-10 pb-4">
 					<div className="flex items-start gap-4">
 						<div
-							className={`mt-1 rounded-lg bg-gradient-to-br ${categoryConfig.iconGradient} p-3 text-white shadow-sm group-hover:shadow-md transition-shadow duration-300`}
+							className={`mt-0.5 rounded-lg bg-gradient-to-br ${categoryConfig.iconGradient} p-2.5 text-white`}
 							aria-hidden="true"
 						>
-							<Icon size={20} aria-hidden="true" />
+							<Icon size={18} aria-hidden="true" />
 						</div>
-						<div className="min-w-0 flex-1 space-y-2">
-							<CardTitle className="text-xl font-semibold text-foreground">
+						<div className="min-w-0 flex-1 space-y-1.5">
+							<CardTitle className="text-lg font-semibold text-foreground">
 								{section.title}
 							</CardTitle>
 							<CardDescription className="text-sm leading-relaxed text-muted-foreground">
@@ -328,14 +330,14 @@ function SectionCard({
 				<CardContent className="relative z-10 pt-0">
 					<Link
 						href={section.href(slug)}
-						className="inline-block w-full group/button focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+						className="inline-block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
 					>
 						<Button
 							variant="outline"
-							className="w-full border-border bg-background hover:bg-muted/50 transition-colors duration-200 font-medium"
+							className="w-full border-border bg-background hover:bg-muted/50 font-medium"
 							endIcon={
 								<IoChevronForwardOutline
-									className="group-hover/button:translate-x-0.5 transition-transform duration-200"
+									className="group-hover:translate-x-0.5 transition-transform duration-200"
 									aria-hidden="true"
 								/>
 							}

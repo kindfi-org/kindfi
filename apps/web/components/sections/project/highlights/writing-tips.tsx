@@ -3,7 +3,7 @@ import { Card } from '~/components/base/card'
 
 const WRITING_TIPS = [
 	{ id: 'tip-1', label: 'Be specific with numbers and achievements' },
-	{ id: 'tip-2', label: 'Focus on verified metrics and milestones' },
+	{ id: 'tip-2', label: 'Focus on verified metrics and releases' },
 	{ id: 'tip-3', label: 'Highlight unique selling points' },
 	{ id: 'tip-4', label: 'Include relevant partnerships or recognition' },
 	{ id: 'tip-5', label: 'Quantify your impact where possible' },

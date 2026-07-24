@@ -5,14 +5,16 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
-import { CategoryBadge, ReleasedProgressBar } from '~/components/sections/projects/shared'
+import {
+	CategoryBadge,
+	ProjectTagList,
+	ReleasedProgressBar,
+} from '~/components/sections/projects/shared'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { useProjectReleasedDisplay } from '~/hooks/projects/use-project-released-display'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
-import { cn } from '~/lib/utils'
-import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectCardListProps {
 	project: Project
@@ -69,7 +71,11 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						</h3>
 						<div className="flex shrink-0 flex-wrap gap-1.5">
 							{project.category && (
-								<CategoryBadge category={project.category} className="text-xs sm:text-sm" />
+								<CategoryBadge
+									category={project.category}
+									variant="display"
+									className="text-[10px] sm:text-[11px]"
+								/>
 							)}
 							{project.escrowContractAddress && (
 								<Badge
@@ -146,22 +152,7 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.minDonation')}</p>
 							</div>
 						</div>
-						<div className="flex flex-wrap gap-1" aria-label="Project tags">
-							{project.tags.map((tag) => {
-								const bg = tag.color || '#ccc' // fallback
-								const textColor = getContrastTextColor(bg)
-
-								return (
-									<Badge
-										key={tag.id}
-										className={cn('uppercase', textColor)}
-										style={{ backgroundColor: bg }}
-									>
-										{tag.name}
-									</Badge>
-								)
-							})}
-						</div>
+						<ProjectTagList tags={project.tags} />
 					</div>
 				</div>
 			</motion.article>

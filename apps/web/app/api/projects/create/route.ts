@@ -7,7 +7,6 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
-import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
 import {
 	buildSocialLinks,
 	parseFormData,
@@ -154,9 +153,7 @@ async function createProjectHandler(req: NextRequest) {
 				.catch((err) => logger.error('[Project create] Notification error:', err))
 		}
 
-		scheduleContentTranslation('project', project.id)
-
-		return NextResponse.json({ slug: project.slug }, { status: 201 })
+		return NextResponse.json({ slug: project.slug, id: project.id }, { status: 201 })
 	} catch (err) {
 		logger.error(err)
 		return NextResponse.json(

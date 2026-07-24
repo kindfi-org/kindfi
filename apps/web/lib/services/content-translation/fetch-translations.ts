@@ -1,5 +1,5 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
-import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import { getOppositeLocale, type SupportedLocale } from '~/lib/schemas/locale.schemas'
 import type { ContentEntityType, ContentTranslationRow } from './types'
 
 export async function fetchContentTranslations(
@@ -35,4 +35,13 @@ export async function fetchContentTranslation(
 ): Promise<ContentTranslationRow | null> {
 	const map = await fetchContentTranslations(client, entityType, [entityId], locale)
 	return map.get(entityId) ?? null
+}
+
+export async function fetchOppositeLocaleTranslation(
+	client: TypedSupabaseClient,
+	entityType: ContentEntityType,
+	entityId: string,
+	sourceLocale: SupportedLocale,
+): Promise<ContentTranslationRow | null> {
+	return fetchContentTranslation(client, entityType, entityId, getOppositeLocale(sourceLocale))
 }

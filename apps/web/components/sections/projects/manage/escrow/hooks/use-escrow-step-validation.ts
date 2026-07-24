@@ -14,7 +14,7 @@ export const ESCROW_WIZARD_STEPS: {
 		id: 'type',
 		label: 'Escrow Type',
 		shortLabel: 'Type',
-		description: 'Choose how funds are released when milestones are approved.',
+		description: 'Choose how funds are released when releases are approved.',
 	},
 	{
 		id: 'details',
@@ -30,9 +30,9 @@ export const ESCROW_WIZARD_STEPS: {
 	},
 	{
 		id: 'milestones',
-		label: 'Milestones',
-		shortLabel: 'Milestones',
-		description: 'Define deliverables and, for multi-release, per-milestone payouts.',
+		label: 'Releases',
+		shortLabel: 'Releases',
+		description: 'Define deliverables and, for multi-release, per-release payouts.',
 	},
 	{
 		id: 'review',
@@ -91,14 +91,14 @@ function validateMilestones(formData: EscrowFormData): string[] {
 	const issues: string[] = []
 	const described = formData.milestones.filter((m) => m.description.trim().length > 0)
 
-	if (described.length === 0) issues.push('Add at least one milestone with a description.')
+	if (described.length === 0) issues.push('Add at least one release with a description.')
 
 	if (formData.selectedEscrowType === 'multi-release') {
 		for (const [index, milestone] of formData.milestones.entries()) {
 			if (!milestone.description.trim()) continue
 
 			if (!('amount' in milestone && 'receiver' in milestone)) {
-				issues.push(`Milestone ${index + 1} is missing amount or receiver.`)
+				issues.push(`Release ${index + 1} is missing amount or receiver.`)
 				continue
 			}
 
@@ -107,11 +107,11 @@ function validateMilestones(formData: EscrowFormData): string[] {
 				!Number.isFinite(milestone.amount) ||
 				milestone.amount <= 0
 			) {
-				issues.push(`Milestone ${index + 1} needs a positive amount.`)
+				issues.push(`Release ${index + 1} needs a positive amount.`)
 			}
 
 			if (!isValidAddress(milestone.receiver)) {
-				issues.push(`Milestone ${index + 1} needs a valid receiver G-address.`)
+				issues.push(`Release ${index + 1} needs a valid receiver G-address.`)
 			}
 		}
 	}

@@ -5,7 +5,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
-import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
+import { upsertManualTranslation } from '~/lib/services/content-translation/server'
 import { validateRequest } from '~/lib/utils/validation'
 
 export async function POST(req: Request, _params: { params: Promise<{ slug: string }> }) {
@@ -20,14 +20,14 @@ export async function POST(req: Request, _params: { params: Promise<{ slug: stri
 		const body = await req.json()
 		const validation = validateRequest(highlightsUpdateSchema, body)
 		if (!validation.success) return validation.response
-		const { projectId, highlights } = validation.data
+		const { projectId, highlights, translationHighlights } = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
 		const [projectResult, memberResult] = await Promise.all([
 			supabaseServiceRole
 				.from('projects')
-				.select('id, kindler_id, metadata')
+				.select('id, kindler_id, metadata, source_locale')
 				.eq('id', projectId)
 				.single(),
 			supabaseServiceRole
@@ -90,10 +90,17 @@ export async function POST(req: Request, _params: { params: Promise<{ slug: stri
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
-		scheduleContentTranslation('project', projectId)
+		const sourceLocale =
+			((project as { source_locale?: string }).source_locale as 'en' | 'es' | undefined) ?? 'en'
+
+		if (translationHighlights?.length) {
+			await upsertManualTranslation('project', projectId, sourceLocale, {
+				highlights: translationHighlights,
+			})
+		}
 
 		return NextResponse.json({
-			message: 'Highlights saved successfully',
+			message: 'Campaign impact saved successfully',
 		})
 	} catch (err) {
 		logger.error(err)

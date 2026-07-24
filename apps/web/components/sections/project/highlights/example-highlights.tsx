@@ -5,7 +5,7 @@ import { ExampleHighlightCard } from './example-highlight-card'
 export function ExampleHighlights() {
 	return (
 		<Card className="bg-white p-6 border-none shadow-lg">
-			<h3 className="text-xl font-semibold mb-6 md:mb-8">Example Highlights</h3>
+			<h3 className="text-xl font-semibold mb-6 md:mb-8">Example Campaign Impact</h3>
 			<div className="space-y-6">
 				<ExampleHighlightCard
 					icon={<IoStarOutline className="text-black" size={22} />}

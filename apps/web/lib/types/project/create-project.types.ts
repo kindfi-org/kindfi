@@ -7,6 +7,10 @@ import type {
 	stepTwoSchema,
 } from '~/lib/schemas/create-project.schemas'
 import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import type {
+	ProjectPitchTranslationContent,
+	ProjectTranslationContent,
+} from '~/lib/services/content-translation/types'
 import type { SocialLinks } from './project-detail.types'
 
 export interface Tag {
@@ -33,6 +37,7 @@ export interface CreateProjectFormData {
 	foundationId?: string
 	tags: Tag[]
 	sourceLocale?: SupportedLocale
+	translation?: ProjectTranslationContent
 }
 
 export interface CountryOption {
@@ -47,6 +52,10 @@ export type StepTwoData = z.infer<typeof stepTwoSchema>
 export type StepThreeData = z.infer<typeof stepThreeSchema>
 export type ProjectPitchData = z.infer<typeof projectPitchSchema>
 
+export interface ProjectPitchFormData extends ProjectPitchData {
+	translation?: ProjectPitchTranslationContent
+}
+
 export interface BasicProjectInfo {
 	id: string
 	slug: string | null
@@ -60,4 +69,6 @@ export interface BasicProjectInfo {
 	category: Tables<'categories'> | null
 	tags: Tag[]
 	sourceLocale?: SupportedLocale
+	translation?: ProjectTranslationContent
+	foundation?: { id: string; name: string; slug: string }
 }

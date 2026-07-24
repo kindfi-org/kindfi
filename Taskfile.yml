@@ -97,3 +97,9 @@ tasks:
     desc: "Run tests for the AI service"
     cmds:
       - cd services/ai && bun test
+
+  # ? Git workflow tasks
+  sync:develop:
+    desc: "Merge origin/main into develop after a release (keeps branches in sync)"
+    cmds:
+      - bun run sync:develop

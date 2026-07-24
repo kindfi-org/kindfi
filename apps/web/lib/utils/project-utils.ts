@@ -1,5 +1,9 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { v4 as uuidv4 } from 'uuid'
+import type {
+	ProjectPitchTranslationContent,
+	ProjectTranslationContent,
+} from '~/lib/services/content-translation/types'
 import { countries } from '../constants/projects/countries.constant'
 import type {
 	BasicProjectInfo,
@@ -154,6 +158,41 @@ export function getSocialTypeFromUrl(url: string): string | null {
 }
 
 /**
+ * Strips empty translation fields so PATCH requests do not fail validation
+ * when the form still has placeholder `{ title: '', description: '' }`.
+ */
+export function sanitizeProjectTranslationForApi(
+	translation?: ProjectTranslationContent,
+): ProjectTranslationContent | undefined {
+	if (!translation) return undefined
+
+	const title = translation.title?.trim()
+	const description = translation.description?.trim()
+	const result: ProjectTranslationContent = {}
+
+	if (title && title.length >= 3) result.title = title
+	if (description && description.length >= 10) result.description = description
+
+	return Object.keys(result).length > 0 ? result : undefined
+}
+
+export function sanitizePitchTranslationForApi(
+	translation?: ProjectPitchTranslationContent,
+): ProjectPitchTranslationContent | undefined {
+	if (!translation) return undefined
+
+	const title = translation.title?.trim()
+	const story = translation.story?.trim()
+	const plainStory = story?.replace(/<[^>]*>/g, '').trim() ?? ''
+	const result: ProjectPitchTranslationContent = {}
+
+	if (title && title.length >= 1) result.title = title
+	if (plainStory.length >= 50 && story) result.story = story
+
+	return Object.keys(result).length > 0 ? result : undefined
+}
+
+/**
  * Normalizes a backend project object into a format that matches
  * the CreateProjectFormData interface used in frontend forms.
  *
@@ -178,6 +217,10 @@ export function normalizeProjectToFormDefaults(project: BasicProjectInfo): Creat
 		category: project.category?.id ?? '',
 		tags: project.tags ?? [],
 		sourceLocale: project.sourceLocale ?? 'en',
+		translation: {
+			title: project.translation?.title ?? '',
+			description: project.translation?.description ?? '',
+		},
 	}
 }
 
@@ -205,7 +248,7 @@ export function parseFormData(formData: FormData) {
 		description: formData.get('description') as string,
 		targetAmount: Number(formData.get('targetAmount')),
 		minimumInvestment: Number(formData.get('minimumInvestment')),
-		website: formData.get('website') as string,
+		website: (formData.get('website') as string | null) ?? '',
 		location: formData.get('location') as string,
 		category: formData.get('category') as string,
 		tags: safeJsonParse(formData.get('tags') as string, [] as { name: string; color: string }[]),
@@ -214,6 +257,12 @@ export function parseFormData(formData: FormData) {
 		foundationId: (formData.get('foundationId') as string) || undefined,
 		developmentOnly: formData.get('developmentOnly') === 'true',
 		sourceLocale: (formData.get('sourceLocale') as string) || 'en',
+		translation: sanitizeProjectTranslationForApi(
+			safeJsonParse(
+				formData.get('translation') as string,
+				undefined as ProjectTranslationContent | undefined,
+			),
+		),
 	}
 }
 

@@ -65,7 +65,7 @@ export function ProjectTabs({ project, projectSlug }: ProjectTabsProps) {
 			>
 				<TabsTrigger value="overview">Overview</TabsTrigger>
 				{hasTeam ? <TabsTrigger value="team">Team</TabsTrigger> : null}
-				<TabsTrigger value="milestones">Milestones</TabsTrigger>
+				<TabsTrigger value="milestones">Releases</TabsTrigger>
 				<TabsTrigger value="updates">Updates</TabsTrigger>
 				<TabsTrigger value="donations">Latest Donations</TabsTrigger>
 			</TabsList>

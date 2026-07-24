@@ -7,13 +7,67 @@ const tagSchema = z.object({
 	color: z.string(),
 })
 
+const emptyToUndefined = (value: unknown) => {
+	if (typeof value !== 'string') return value
+	const trimmed = value.trim()
+	return trimmed === '' ? undefined : trimmed
+}
+
+const projectTranslationFieldsSchema = z.preprocess(
+	(value) => {
+		if (!value || typeof value !== 'object') return undefined
+
+		const obj = value as { title?: unknown; description?: unknown }
+		const title = emptyToUndefined(obj.title)
+		const description = emptyToUndefined(obj.description)
+
+		if (title === undefined && description === undefined) return undefined
+
+		return { title, description }
+	},
+	z
+		.object({
+			title: z.string().min(3, 'Title must be at least 3 characters').optional(),
+			description: z.string().min(10, 'Description must be at least 10 characters').optional(),
+		})
+		.optional(),
+)
+
+const projectPitchTranslationFieldsSchema = z.preprocess(
+	(value) => {
+		if (!value || typeof value !== 'object') return undefined
+
+		const obj = value as { title?: unknown; story?: unknown }
+		const title = emptyToUndefined(obj.title)
+		const story = emptyToUndefined(obj.story)
+
+		if (title === undefined && story === undefined) return undefined
+
+		return { title, story }
+	},
+	z
+		.object({
+			title: z
+				.string()
+				.min(1, 'Title is required')
+				.max(100, 'Title must be less than 100 characters')
+				.optional(),
+			story: z.string().min(50, 'Story must be at least 50 characters').optional(),
+		})
+		.optional(),
+)
+
 export const projectCreateFormSchema = z
 	.object({
 		title: z.string().min(3, 'Title must be at least 3 characters'),
 		description: z.string().min(10, 'Description must be at least 10 characters'),
 		targetAmount: z.number().min(1, 'Target amount must be at least 1'),
 		minimumInvestment: z.number().min(1, 'Minimum investment must be at least 1'),
-		website: z.string().optional().default(''),
+		website: z
+			.string()
+			.nullable()
+			.optional()
+			.transform((v) => v ?? ''),
 		location: z.string().min(1, 'Location is required'),
 		category: z.string().min(1, 'Category is required'),
 		tags: z.array(tagSchema).optional().default([]),
@@ -36,7 +90,11 @@ export const projectUpdateFormSchema = z
 		description: z.string().min(10, 'Description must be at least 10 characters'),
 		targetAmount: z.number().min(1, 'Target amount must be at least 1'),
 		minimumInvestment: z.number().min(1, 'Minimum investment must be at least 1'),
-		website: z.string().optional().default(''),
+		website: z
+			.string()
+			.nullable()
+			.optional()
+			.transform((v) => v ?? ''),
 		location: z.string().min(1, 'Location is required'),
 		category: z.string().min(1, 'Category is required'),
 		tags: z.array(tagSchema).optional().default([]),
@@ -44,6 +102,7 @@ export const projectUpdateFormSchema = z
 		image: z.instanceof(File).nullable().optional(),
 		removeImage: z.boolean().optional(),
 		sourceLocale: sourceLocaleSchema.optional().default('en'),
+		translation: projectTranslationFieldsSchema,
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',
@@ -64,6 +123,7 @@ export const projectPitchFormSchema = z.object({
 		}),
 	pitchDeck: z.instanceof(File).nullable().optional(),
 	removePitchDeck: z.boolean().optional(),
+	translation: projectPitchTranslationFieldsSchema,
 })
 
 export const projectSlugParamSchema = z.object({
@@ -135,6 +195,10 @@ const highlightItemSchema = z.object({
 export const highlightsUpdateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
 	highlights: z.array(highlightItemSchema).min(2, 'At least 2 highlights are required'),
+	translationHighlights: z
+		.array(highlightItemSchema)
+		.min(2, 'At least 2 highlights are required')
+		.optional(),
 })
 
 export const projectUpdateCreateSchema = z.object({

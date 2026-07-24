@@ -2,9 +2,11 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
 import {
 	fetchContentTranslation,
+	fetchOppositeLocaleTranslation,
 	type LocalizeOptions,
 	resolveLocalizedFields,
 } from '~/lib/services/content-translation'
+import type { ProjectPitchTranslationContent } from '~/lib/services/content-translation/types'
 
 export type GetProjectPitchOptions = LocalizeOptions & {
 	viewerLocale?: SupportedLocale
@@ -25,10 +27,12 @@ export async function getProjectPitch(
 
 	if (!data) {
 		return {
+			id: null,
 			title: '',
 			story: '',
 			pitchDeck: null,
 			videoUrl: null,
+			translation: undefined,
 		}
 	}
 
@@ -60,10 +64,27 @@ export async function getProjectPitch(
 		options,
 	)
 
+	let translation: ProjectPitchTranslationContent | undefined
+	if (options?.localize === false) {
+		const oppositeTranslation = await fetchOppositeLocaleTranslation(
+			client,
+			'project_pitch',
+			data.id,
+			sourceLocale,
+		)
+		const fields = oppositeTranslation?.fields as ProjectPitchTranslationContent | undefined
+		translation = {
+			title: fields?.title ?? '',
+			story: fields?.story ?? '',
+		}
+	}
+
 	return {
+		id: data.id,
 		title: localized.title ?? data.title,
 		story: localized.story ?? data.story,
 		pitchDeck: data.pitch_deck,
 		videoUrl: data.video_url,
+		translation,
 	}
 }

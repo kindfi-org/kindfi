@@ -259,16 +259,16 @@ export const profile = {
 	matchingInsightsTitle: 'Based on your interests',
 	matchingMatchesLabel: 'matches found',
 	manageMilestones: {
-		title: 'Milestone reviews',
+		title: 'Release reviews',
 		description:
-			'Submit a release for admin review when your milestone work is ready. KindFi admins will be notified and can proceed with escrow approval.',
+			'Submit a release for admin review when your release work is ready. KindFi admins will be notified and can proceed with escrow approval.',
 		noEscrowDescription:
-			'Milestone reviews require an active escrow contract. Contact KindFi if you need escrow setup for this project.',
+			'Release reviews require an active escrow contract. Contact KindFi if you need escrow setup for this project.',
 		noMilestones: 'No releases found for this escrow contract.',
 		releaseLabel: 'Release {n}',
-		requestReview: 'Request milestone review',
+		requestReview: 'Request release review',
 		requestSubmitted: 'Review request submitted. Admins have been notified.',
-		requestDialogTitle: 'Request milestone review',
+		requestDialogTitle: 'Request release review',
 		requestDialogDescription:
 			'Notify KindFi admins that Release {release} ({title}) is ready for review.',
 		requestNotesLabel: 'Notes for admins (optional)',

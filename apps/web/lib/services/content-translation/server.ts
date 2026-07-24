@@ -8,3 +8,4 @@ export {
 	scheduleContentTranslations,
 } from './schedule-translation'
 export { translateEntityFields } from './translate-entity'
+export { upsertManualTranslation } from './upsert-manual-translation'

@@ -107,10 +107,15 @@ export default async function FoundationDetailPage({ params }: FoundationDetailP
 				])}
 			/>
 			<main
-				className="min-h-screen bg-[#fafbfc]"
+				className="relative isolate min-h-screen overflow-hidden bg-[#fafbfc]"
 				aria-label={`${foundation.name} foundation profile`}
 			>
-				<div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+				<div className="pointer-events-none absolute inset-0" aria-hidden="true">
+					<div className="absolute inset-0 bg-grid-slate-100/50 mask-[radial-gradient(ellipse_at_top,white,transparent_70%)]" />
+					<div className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
+					<div className="absolute -right-20 top-56 h-80 w-80 rounded-full bg-teal-100/40 blur-3xl" />
+				</div>
+				<div className="relative container mx-auto px-4 py-8 md:px-8 md:py-12 lg:py-14">
 					<HydrationBoundary state={dehydratedState}>
 						<FoundationDetailClientWrapper slug={slug} />
 					</HydrationBoundary>

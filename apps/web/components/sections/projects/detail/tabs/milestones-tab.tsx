@@ -45,7 +45,7 @@ export function MilestonesTab({
 					[]
 				const mapped: Milestone[] = ms.map((m, idx) => ({
 					id: String(idx),
-					title: m.description || `Milestone ${idx + 1}`,
+					title: m.description || `Release ${idx + 1}`,
 					description: m.description || '',
 					amount: (m as MultiReleaseMilestone).amount ?? 0,
 					deadline: new Date().toISOString(),
@@ -72,13 +72,13 @@ export function MilestonesTab({
 		if (escrowContractAddress && isLoadingOnChain) {
 			return (
 				<div className="p-6 text-center text-gray-500 bg-white rounded-xl shadow-sm">
-					Loading milestones from escrow...
+					Loading releases from escrow...
 				</div>
 			)
 		}
 		return (
 			<div className="p-6 text-center text-gray-500 bg-white rounded-xl shadow-sm">
-				No milestones available for this project.
+				No releases available for this project.
 			</div>
 		)
 	}
@@ -90,10 +90,10 @@ export function MilestonesTab({
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 		>
-			<h2 className="mb-2 text-2xl font-bold">Project Milestones</h2>
+			<h2 className="mb-2 text-2xl font-bold">Releases</h2>
 			{escrowContractAddress && releasedCount > 0 ? (
 				<p className="mb-8 text-sm text-muted-foreground">
-					{releasedCount} of {sortedMilestones.length} milestone
+					{releasedCount} of {sortedMilestones.length} release
 					{sortedMilestones.length === 1 ? '' : 's'} have had funds released on-chain.
 				</p>
 			) : (
@@ -133,42 +133,42 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 				return (
 					<>
 						<CheckCircle {...iconProps} className="text-green-500" />
-						<span className="sr-only">Milestone completed</span>
+						<span className="sr-only">Release completed</span>
 					</>
 				)
 			case 'pending':
 				return (
 					<>
 						<Clock {...iconProps} className="text-amber-500" />
-						<span className="sr-only">Milestone pending</span>
+						<span className="sr-only">Release pending</span>
 					</>
 				)
 			case 'approved':
 				return (
 					<>
 						<CheckCircle {...iconProps} className="text-blue-500" />
-						<span className="sr-only">Milestone approved</span>
+						<span className="sr-only">Release approved</span>
 					</>
 				)
 			case 'released':
 				return (
 					<>
 						<Send {...iconProps} className="text-emerald-600" />
-						<span className="sr-only">Milestone released — funds disbursed on-chain</span>
+						<span className="sr-only">Release disbursed — funds released on-chain</span>
 					</>
 				)
 			case 'rejected':
 				return (
 					<>
 						<AlertCircle {...iconProps} className="text-red-500" />
-						<span className="sr-only">Milestone rejected</span>
+						<span className="sr-only">Release rejected</span>
 					</>
 				)
 			case 'disputed':
 				return (
 					<>
 						<AlertCircle {...iconProps} className="text-yellow-600" />
-						<span className="sr-only">Milestone disputed</span>
+						<span className="sr-only">Release disputed</span>
 					</>
 				)
 			default:

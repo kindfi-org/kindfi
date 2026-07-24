@@ -13,6 +13,7 @@ type HighlightsRequestData = {
 	projectId: string
 	projectSlug: string
 	highlights: Highlight[]
+	translationHighlights?: Highlight[]
 }
 
 type HighlightsSaveResponse = { message: string }
@@ -22,6 +23,10 @@ export function useHighlightsMutation() {
 
 	return useMutation<HighlightsSaveResponse, Error, HighlightsRequestData>({
 		mutationFn: async (data: HighlightsRequestData) => {
+			const completeTranslationHighlights = data.translationHighlights?.filter(
+				(highlight) => highlight.title.trim().length > 0 && highlight.description.trim().length > 0,
+			)
+
 			const res = await fetch(`/api/projects/${data.projectSlug}/highlights`, {
 				method: 'POST',
 				headers: {
@@ -30,6 +35,16 @@ export function useHighlightsMutation() {
 				body: JSON.stringify({
 					projectId: data.projectId,
 					highlights: data.highlights,
+					...(completeTranslationHighlights && completeTranslationHighlights.length >= 2
+						? {
+								translationHighlights: completeTranslationHighlights.map(
+									({ title, description }) => ({
+										title,
+										description,
+									}),
+								),
+							}
+						: {}),
 				}),
 			})
 
@@ -57,8 +72,8 @@ export function useHighlightsMutation() {
 			return res.json()
 		},
 		onSuccess: (_data, variables) => {
-			toast.success('Highlights saved successfully! 🎉', {
-				description: 'All your highlights have been saved successfully.',
+			toast.success('Campaign impact saved successfully! 🎉', {
+				description: 'All your impact points have been saved successfully.',
 			})
 			queryClient.invalidateQueries({
 				queryKey: ['project', variables.projectSlug],
@@ -68,7 +83,7 @@ export function useHighlightsMutation() {
 			})
 		},
 		onError: (error: Error) => {
-			toast.error('Failed to save highlights', {
+			toast.error('Failed to save campaign impact', {
 				description: error.message,
 			})
 		},

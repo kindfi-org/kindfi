@@ -24,11 +24,11 @@ export function EscrowMilestones() {
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<h3 className="text-sm font-medium">
-						Milestones <span className="text-destructive">*</span>
+						Releases <span className="text-destructive">*</span>
 					</h3>
 					<p className="mt-1 text-xs text-muted-foreground">
 						{isMulti
-							? 'Each milestone needs a description, amount, and receiver address.'
+							? 'Each release needs a description, amount, and receiver address.'
 							: 'Describe each deliverable. Funds release together once all are approved.'}
 					</p>
 				</div>
@@ -40,13 +40,13 @@ export function EscrowMilestones() {
 					className="shrink-0"
 				>
 					<Plus className="mr-2 h-4 w-4" aria-hidden="true" />
-					Add Milestone
+					Add Release
 				</Button>
 			</div>
 
 			{isMulti && milestoneTotal > 0 ? (
 				<p className="text-sm text-muted-foreground">
-					Combined milestone total:{' '}
+					Combined release total:{' '}
 					<span className="font-semibold tabular-nums text-foreground">{milestoneTotal}</span>
 				</p>
 			) : null}
@@ -55,7 +55,7 @@ export function EscrowMilestones() {
 				{milestones.length === 0 ? (
 					<div className="rounded-lg border border-dashed p-6 text-center">
 						<p className="text-sm text-muted-foreground">
-							No milestones yet. Add at least one to continue.
+							No releases yet. Add at least one to continue.
 						</p>
 					</div>
 				) : null}
@@ -64,7 +64,7 @@ export function EscrowMilestones() {
 					isMulti && 'amount' in milestone && 'receiver' in milestone ? (
 						<div key={milestone.id} className="space-y-3 rounded-xl border bg-card p-4">
 							<div className="flex items-center justify-between gap-3">
-								<span className="text-sm font-semibold">Milestone {index + 1}</span>
+								<span className="text-sm font-semibold">Release {index + 1}</span>
 								<Button
 									type="button"
 									variant="ghost"
@@ -72,7 +72,7 @@ export function EscrowMilestones() {
 									onClick={() => removeMilestone(milestone.id)}
 									className="h-8 w-8 p-0"
 									disabled={milestones.length <= 1}
-									aria-label={`Remove milestone ${index + 1}`}
+									aria-label={`Remove release ${index + 1}`}
 								>
 									<Trash2 className="h-4 w-4" aria-hidden="true" />
 								</Button>
@@ -145,7 +145,7 @@ export function EscrowMilestones() {
 									htmlFor={`milestone-desc-${milestone.id}`}
 									className="text-xs text-muted-foreground"
 								>
-									Milestone {index + 1}
+									Release {index + 1}
 								</Label>
 								<Input
 									id={`milestone-desc-${milestone.id}`}

@@ -5,9 +5,7 @@
 
 export type ProjectManageSectionKey =
 	| 'overview'
-	| 'basics'
-	| 'pitch'
-	| 'highlights'
+	| 'content'
 	| 'updates'
 	| 'members'
 	| 'milestones'
@@ -40,31 +38,13 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 		cta: 'View dashboard',
 	},
 	{
-		key: 'basics',
-		title: 'Basics',
-		description: 'Core details like name, category, location, and metadata.',
-		href: (slug) => `/projects/${slug}/manage/basics`,
-		path: '/basics',
+		key: 'content',
+		title: 'Content setup',
+		description: 'Guided bilingual setup for basics, story, and campaign impact.',
+		href: (slug) => `/projects/${slug}/manage/content`,
+		path: '/content',
 		match: 'prefix',
-		cta: 'Edit basics',
-	},
-	{
-		key: 'pitch',
-		title: 'Pitch',
-		description: 'Your story, problem statement, solution, and roadmap.',
-		href: (slug) => `/projects/${slug}/manage/pitch`,
-		path: '/pitch',
-		match: 'prefix',
-		cta: 'Improve pitch',
-	},
-	{
-		key: 'highlights',
-		title: 'Highlights',
-		description: 'Key achievements, traction and notable metrics.',
-		href: (slug) => `/projects/${slug}/manage/highlights`,
-		path: '/highlights',
-		match: 'prefix',
-		cta: 'Add highlights',
+		cta: 'Set up content',
 	},
 	{
 		key: 'updates',
@@ -86,7 +66,7 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 	},
 	{
 		key: 'milestones',
-		title: 'Milestones',
+		title: 'Releases',
 		description: 'Request admin review when a release is ready.',
 		href: (slug) => `/projects/${slug}/manage/milestones`,
 		path: '/milestones',
@@ -97,8 +77,7 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 	{
 		key: 'escrow-setup',
 		title: 'Escrow setup',
-		description:
-			'Step-by-step setup for your Trustless Work escrow contract, roles, and milestones.',
+		description: 'Step-by-step setup for your Trustless Work escrow contract, roles, and releases.',
 		href: (slug) => `/projects/${slug}/manage/settings`,
 		path: '/settings',
 		match: 'exact',
@@ -108,7 +87,7 @@ export const PROJECT_MANAGE_NAV_SECTIONS: ReadonlyArray<ProjectManageNavSection>
 	{
 		key: 'escrow-manage',
 		title: 'Escrow ops',
-		description: 'Fund the contract, approve milestones, and release payments step by step.',
+		description: 'Fund the contract, approve releases, and disburse payments step by step.',
 		href: (slug) => `/projects/${slug}/manage/settings/manage`,
 		path: '/settings/manage',
 		match: 'prefix',

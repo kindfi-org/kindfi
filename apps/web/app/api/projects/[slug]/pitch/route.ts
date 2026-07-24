@@ -5,13 +5,22 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectPitchFormSchema } from '~/lib/schemas/project.schemas'
-import { scheduleContentTranslation } from '~/lib/services/content-translation/server'
+import { upsertManualTranslation } from '~/lib/services/content-translation/server'
 import {
 	deleteFolderFromBucket,
 	transformToEmbedUrl,
 	uploadPitchDeck,
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
+
+function safeJsonParse<T>(raw: string | null, fallback: T): T {
+	if (!raw) return fallback
+	try {
+		return JSON.parse(raw) as T
+	} catch {
+		return fallback
+	}
+}
 
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
@@ -32,6 +41,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 			videoUrl: (formData.get('videoUrl') as string) || null,
 			pitchDeck: formData.get('pitchDeck') as File | null,
 			removePitchDeck: formData.get('removePitchDeck') === 'true',
+			translation: safeJsonParse(formData.get('translation') as string | null, undefined),
 		}
 		const validation = validateRequest(projectPitchFormSchema, formPayload)
 		if (!validation.success) return validation.response
@@ -43,12 +53,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 			videoUrl: rawVideoUrl,
 			pitchDeck,
 			removePitchDeck,
+			translation,
 		} = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
 		const [projectResult, memberResult] = await Promise.all([
-			supabaseServiceRole.from('projects').select('id, kindler_id').eq('id', projectId).single(),
+			supabaseServiceRole
+				.from('projects')
+				.select('id, kindler_id, source_locale')
+				.eq('id', projectId)
+				.single(),
 			supabaseServiceRole
 				.from('project_members')
 				.select('role')
@@ -122,12 +137,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
 
 		if (pitchFetchError || !pitchRow) {
 			logger.error('Failed to load pitch id after upsert', pitchFetchError)
-		} else {
-			scheduleContentTranslation('project_pitch', pitchRow.id)
+		} else if (translation) {
+			const sourceLocale =
+				((project as { source_locale?: string }).source_locale as 'en' | 'es' | undefined) ?? 'en'
+			await upsertManualTranslation('project_pitch', pitchRow.id, sourceLocale, translation)
 		}
 
 		return NextResponse.json({
-			message: 'Project pitch upserted successfully',
+			message: 'Project story saved successfully',
 		})
 	} catch (err) {
 		logger.error(err)

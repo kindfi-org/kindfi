@@ -1,6 +1,11 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
-import { fetchContentTranslation, type LocalizeOptions } from '~/lib/services/content-translation'
+import {
+	fetchContentTranslation,
+	fetchOppositeLocaleTranslation,
+	type LocalizeOptions,
+} from '~/lib/services/content-translation'
+import type { ProjectHighlightTranslationItem } from '~/lib/services/content-translation/types'
 
 interface Highlight {
 	id: string
@@ -16,7 +21,12 @@ export async function getProjectHighlights(
 	client: TypedSupabaseClient,
 	projectSlug: string,
 	options?: GetProjectHighlightsOptions,
-): Promise<{ projectId: string; highlights: Highlight[] } | null> {
+): Promise<{
+	projectId: string
+	sourceLocale: SupportedLocale
+	highlights: Highlight[]
+	translationHighlights: Highlight[]
+} | null> {
 	const { data: project, error } = await client
 		.from('projects')
 		.select('id, metadata, source_locale')
@@ -60,8 +70,44 @@ export async function getProjectHighlights(
 			}
 		}) || []
 
+	let translationHighlightsData: ProjectHighlightTranslationItem[] = []
+	if (options?.localize === false) {
+		const oppositeTranslation = await fetchOppositeLocaleTranslation(
+			client,
+			'project',
+			project.id,
+			sourceLocale,
+		)
+		translationHighlightsData =
+			(
+				oppositeTranslation?.fields as
+					| { highlights?: ProjectHighlightTranslationItem[] }
+					| undefined
+			)?.highlights ?? []
+	}
+
+	const translationHighlights: Highlight[] =
+		options?.localize === false
+			? translationHighlightsData.length > 0
+				? translationHighlightsData.map((h, index) => {
+						const contentHash = `${h.title}-${h.description}`.slice(0, 20)
+						return {
+							id: `translation-highlight-${index}-${contentHash.replace(/\s+/g, '-')}`,
+							title: h.title || '',
+							description: h.description || '',
+						}
+					})
+				: highlights.map((h) => ({
+						id: h.id.replace('highlight-', 'translation-highlight-'),
+						title: '',
+						description: '',
+					}))
+			: []
+
 	return {
 		projectId: project.id,
+		sourceLocale,
 		highlights,
+		translationHighlights,
 	}
 }

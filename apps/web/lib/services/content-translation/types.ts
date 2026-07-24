@@ -4,7 +4,17 @@ export type ContentEntityType = 'foundation' | 'project' | 'project_pitch'
 
 export type TranslationStatus = 'pending' | 'complete' | 'failed' | 'stale'
 
-export interface ProjectHighlightFields {
+export interface ProjectTranslationContent {
+	title?: string
+	description?: string
+}
+
+export interface ProjectPitchTranslationContent {
+	title?: string
+	story?: string
+}
+
+export interface ProjectHighlightTranslationItem {
 	title: string
 	description: string
 }
@@ -21,12 +31,17 @@ export interface FoundationTranslationFields {
 export interface ProjectTranslationFields {
 	title?: string
 	description?: string
-	highlights?: ProjectHighlightFields[]
+	highlights?: ProjectHighlightTranslationItem[]
 }
 
 export interface ProjectPitchTranslationFields {
 	title?: string
 	story?: string
+}
+
+export interface ProjectHighlightFields {
+	title: string
+	description: string
 }
 
 export type TranslationFields =

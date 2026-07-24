@@ -17,6 +17,7 @@ import {
 	getMilestoneReleasePhase,
 	getMilestoneReleasePhaseBadgeVariant,
 } from '~/lib/utils/escrow/milestone-utils'
+import { ManageSectionHeader } from '../manage-section-header'
 import { RequestReviewDialog } from './request-review-dialog'
 
 type MilestoneReviewsPanelProps = {
@@ -103,26 +104,24 @@ export const MilestoneReviewsPanel = ({ slug }: MilestoneReviewsPanelProps) => {
 
 	if (!escrowContractAddress) {
 		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>{t('profile.manageMilestones.title')}</CardTitle>
-					<CardDescription>{t('profile.manageMilestones.noEscrowDescription')}</CardDescription>
-				</CardHeader>
-			</Card>
+			<div className="space-y-6">
+				<ManageSectionHeader
+					title={t('profile.manageMilestones.title')}
+					description={t('profile.manageMilestones.noEscrowDescription')}
+				/>
+			</div>
 		)
 	}
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">{t('profile.manageMilestones.title')}</h1>
-				<p className="mt-1 max-w-2xl text-muted-foreground">
-					{t('profile.manageMilestones.description')}
-				</p>
-			</div>
+			<ManageSectionHeader
+				title={t('profile.manageMilestones.title')}
+				description={t('profile.manageMilestones.description')}
+			/>
 
 			{milestones.length === 0 ? (
-				<Card>
+				<Card className="border-border">
 					<CardContent className="py-8 text-center text-muted-foreground">
 						{t('profile.manageMilestones.noMilestones')}
 					</CardContent>
@@ -138,7 +137,7 @@ export const MilestoneReviewsPanel = ({ slug }: MilestoneReviewsPanelProps) => {
 							t('profile.manageMilestones.releaseLabel').replace('{n}', String(index + 1))
 
 						return (
-							<Card key={`${escrowContractAddress}-release-${index}`}>
+							<Card key={`${escrowContractAddress}-release-${index}`} className="border-border">
 								<CardHeader className="pb-3">
 									<div className="flex flex-wrap items-start justify-between gap-3">
 										<div className="space-y-1">

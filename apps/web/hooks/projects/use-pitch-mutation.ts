@@ -2,9 +2,10 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
+import type { ProjectPitchFormData } from '~/lib/types/project/create-project.types'
+import { sanitizePitchTranslationForApi } from '~/lib/utils/project-utils'
 
-type ProjectPitchRequestData = ProjectPitchData & {
+type ProjectPitchRequestData = ProjectPitchFormData & {
 	projectId: string
 	projectSlug: string
 }
@@ -30,6 +31,11 @@ export function useProjectPitchMutation() {
 				fd.append('pitchDeck', formData.pitchDeck)
 			} else if (formData.pitchDeck === null) {
 				fd.append('removePitchDeck', 'true')
+			}
+
+			const pitchTranslation = sanitizePitchTranslationForApi(formData.translation)
+			if (pitchTranslation) {
+				fd.append('translation', JSON.stringify(pitchTranslation))
 			}
 
 			const res = await fetch(`/api/projects/${formData.projectSlug}/pitch`, {
@@ -61,7 +67,7 @@ export function useProjectPitchMutation() {
 			return res.json()
 		},
 		onSuccess: (_data, variables) => {
-			toast.success('Pitch saved successfully! 🎉', {
+			toast.success('Story saved successfully! 🎉', {
 				description: 'All your changes have been recorded successfully.',
 			})
 			queryClient.invalidateQueries({
@@ -72,7 +78,7 @@ export function useProjectPitchMutation() {
 			})
 		},
 		onError: (error: Error) => {
-			toast.error('Failed to save pitch', {
+			toast.error('Failed to save story', {
 				description: error.message,
 			})
 		},

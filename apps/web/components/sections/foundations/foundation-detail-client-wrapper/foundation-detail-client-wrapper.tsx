@@ -3,13 +3,12 @@
 import { useReducedMotion } from 'framer-motion'
 import { FoundationBreadcrumb } from './components/foundation-breadcrumb'
 import { FoundationCampaigns } from './components/foundation-campaigns'
-import { FoundationCoverImage } from './components/foundation-cover-image'
 import { FoundationDetailSkeleton } from './components/foundation-detail-skeleton'
 import {
 	FoundationConnectCard,
 	FoundationFounderCard,
 } from './components/foundation-founder-connect'
-import { FoundationHeader } from './components/foundation-header'
+import { FoundationHero } from './components/foundation-hero'
 import { FoundationMilestones } from './components/foundation-milestones'
 import { FoundationMissionVision } from './components/foundation-mission-vision'
 import { FoundationNotFound } from './components/foundation-not-found'
@@ -43,21 +42,18 @@ export function FoundationDetailClientWrapper({ slug }: FoundationDetailClientWr
 	}
 
 	return (
-		<div className="space-y-10 sm:space-y-12">
-			<FoundationBreadcrumb />
-
-			<div className="relative">
-				<FoundationCoverImage foundation={foundation} />
+		<div className="space-y-12 sm:space-y-14 md:space-y-16">
+			<div className="space-y-5">
+				<FoundationBreadcrumb />
+				<FoundationHero
+					foundation={foundation}
+					slug={slug}
+					yearFounded={yearFounded}
+					formattedDonations={formattedDonations}
+					shareUrl={shareUrl}
+					isFounder={isFounder}
+				/>
 			</div>
-
-			<FoundationHeader
-				foundation={foundation}
-				slug={slug}
-				yearFounded={yearFounded}
-				formattedDonations={formattedDonations}
-				shareUrl={shareUrl}
-				isFounder={isFounder}
-			/>
 
 			<FoundationMissionVision foundation={foundation} shouldReduceMotion={shouldReduceMotion} />
 
@@ -74,7 +70,7 @@ export function FoundationDetailClientWrapper({ slug }: FoundationDetailClientWr
 
 			<FoundationTeamSection slug={slug} shouldReduceMotion={shouldReduceMotion} />
 
-			<div className="grid gap-6 md:grid-cols-2">
+			<div className="grid gap-5 md:grid-cols-2">
 				{foundation.founder ? (
 					<FoundationFounderCard
 						founder={foundation.founder}

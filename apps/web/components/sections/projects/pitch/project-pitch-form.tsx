@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Loader2, Save, Video } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -17,10 +18,12 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
+import { ProjectOppositeLocaleTranslationCard } from '~/components/shared/project-opposite-locale-translation-card'
 import { useProjectPitchMutation } from '~/hooks/projects/use-pitch-mutation'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { useI18n } from '~/lib/i18n/context'
 import { projectPitchSchema } from '~/lib/schemas/create-project.schemas'
-import type { ProjectPitchData } from '~/lib/types/project/create-project.types'
+import type { ProjectPitchFormData } from '~/lib/types/project/create-project.types'
 import { FileUpload } from './file-upload'
 
 const RichTextEditor = dynamic(
@@ -34,23 +37,45 @@ const RichTextEditor = dynamic(
 interface ProjectPitchFormProps {
 	projectId: string
 	projectSlug: string
-	pitch?: ProjectPitchData | null
+	sourceLocale?: 'en' | 'es'
+	pitch?: (ProjectPitchFormData & { translation?: ProjectPitchFormData['translation'] }) | null
 }
 
-export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitchFormProps) {
+const projectPitchManageSchema = projectPitchSchema.and(
+	z.object({
+		translation: z
+			.object({
+				title: z.string().optional(),
+				story: z.string().optional(),
+			})
+			.optional(),
+	}),
+)
+
+export function ProjectPitchForm({
+	projectId,
+	projectSlug,
+	sourceLocale = 'en',
+	pitch,
+}: ProjectPitchFormProps) {
+	const { t } = useI18n()
 	const { mutateAsync: savePitch, isPending } = useProjectPitchMutation()
 
-	const form = useForm<ProjectPitchData>({
-		resolver: zodResolver(projectPitchSchema),
+	const form = useForm<ProjectPitchFormData>({
+		resolver: zodResolver(projectPitchManageSchema),
 		defaultValues: {
 			title: pitch?.title || '',
 			story: pitch?.story || '',
 			pitchDeck: pitch?.pitchDeck || null,
 			videoUrl: pitch?.videoUrl || null,
+			translation: {
+				title: pitch?.translation?.title ?? '',
+				story: pitch?.translation?.story ?? '',
+			},
 		},
 	})
 
-	const handleSubmit = async (data: ProjectPitchData) => {
+	const handleSubmit = async (data: ProjectPitchFormData) => {
 		const payload = {
 			...data,
 			projectId,
@@ -89,7 +114,7 @@ export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitch
 										<FormControl>
 											<div className="relative">
 												<Input
-													placeholder="Enter your pitch title"
+													placeholder="Enter your story title"
 													maxLength={100}
 													className=" pr-16"
 													value={field.value ?? ''}
@@ -135,6 +160,61 @@ export function ProjectPitchForm({ projectId, projectSlug, pitch }: ProjectPitch
 									</FormItem>
 								)}
 							/>
+
+							<ProjectOppositeLocaleTranslationCard sourceLocale={sourceLocale}>
+								<FormField
+									control={form.control}
+									name="translation.title"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className="pt-2">
+												Title <span className="text-destructive">*</span>
+											</FormLabel>
+											<FormControl>
+												<div className="relative">
+													<Input
+														placeholder="Enter the translated story title"
+														maxLength={100}
+														className=" pr-16"
+														value={field.value ?? ''}
+														onChange={field.onChange}
+														onBlur={field.onBlur}
+														name={field.name}
+														ref={field.ref}
+													/>
+													<div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+														{(field.value ?? '').length}/100
+													</div>
+												</div>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="translation.story"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												Story <span className="text-destructive">*</span>
+											</FormLabel>
+											<FormControl>
+												<RichTextEditor
+													value={field.value ?? ''}
+													onChange={field.onChange}
+													error={form.formState.errors.translation?.story?.message}
+												/>
+											</FormControl>
+											<FormDescription>
+												{t('projects.manage.translationSectionDescription')}
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</ProjectOppositeLocaleTranslationCard>
 
 							{/* Pitch Deck Upload */}
 							<FormField
