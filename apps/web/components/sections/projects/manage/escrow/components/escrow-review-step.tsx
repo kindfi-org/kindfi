@@ -64,7 +64,7 @@ export function EscrowReviewStep() {
 						) : null}
 						{isMulti && milestoneTotal > 0 ? (
 							<div>
-								<dt className="text-xs font-medium text-muted-foreground">Milestone Total</dt>
+								<dt className="text-xs font-medium text-muted-foreground">Release Total</dt>
 								<dd className="mt-1 text-sm font-medium tabular-nums">{milestoneTotal}</dd>
 							</div>
 						) : null}
@@ -100,9 +100,9 @@ export function EscrowReviewStep() {
 
 			<Card>
 				<CardHeader className="pb-3">
-					<CardTitle className="text-lg">Milestones</CardTitle>
+					<CardTitle className="text-lg">Releases</CardTitle>
 					<CardDescription>
-						{formData.milestones.length} milestone{formData.milestones.length === 1 ? '' : 's'}{' '}
+						{formData.milestones.length} release{formData.milestones.length === 1 ? '' : 's'}{' '}
 						defined.
 					</CardDescription>
 				</CardHeader>
@@ -110,7 +110,7 @@ export function EscrowReviewStep() {
 					{formData.milestones.map((milestone, index) => (
 						<div key={milestone.id} className="rounded-lg border bg-muted/30 p-3">
 							<p className="text-sm font-medium">
-								Milestone {index + 1}: {milestone.description || 'Untitled'}
+								Release {index + 1}: {milestone.description || 'Untitled'}
 							</p>
 							{'amount' in milestone && 'receiver' in milestone ? (
 								<div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">

@@ -86,7 +86,7 @@ export const PitchAIAnalysis = ({
 						<Bot className="h-4 w-4" aria-hidden="true" />
 					</div>
 					<div>
-						<h3 className="text-base font-semibold leading-tight">AI Pitch Advisor</h3>
+						<h3 className="text-base font-semibold leading-tight">AI Story Advisor</h3>
 						<StatusIndicator status={status} />
 					</div>
 				</div>

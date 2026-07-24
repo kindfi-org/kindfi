@@ -69,7 +69,7 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 				/>
 				{project.category && (
 					<div className="absolute top-4 left-4">
-						<CategoryBadge category={project.category} />
+						<CategoryBadge category={project.category} variant="display" />
 					</div>
 				)}
 			</div>

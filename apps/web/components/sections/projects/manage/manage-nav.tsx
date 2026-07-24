@@ -29,12 +29,12 @@ const links: {
 	},
 	{
 		href: (slug) => `/projects/${slug}/manage/pitch`,
-		label: 'Pitch',
+		label: 'Story',
 		Icon: IoMegaphoneOutline,
 	},
 	{
 		href: (slug) => `/projects/${slug}/manage/highlights`,
-		label: 'Highlights',
+		label: 'Campaign Impact',
 		Icon: IoStarOutline,
 	},
 	{

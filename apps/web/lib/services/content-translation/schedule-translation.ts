@@ -6,7 +6,14 @@ import { enqueueTranslation } from './enqueue-translation'
 import { runTranslationJob } from './run-translation-job'
 import type { ContentEntityType } from './types'
 
+/** Only foundations use AI translation; projects are edited manually in manage. */
+const AI_TRANSLATED_ENTITY_TYPES: ContentEntityType[] = ['foundation']
+
 export function scheduleContentTranslation(entityType: ContentEntityType, entityId: string): void {
+	if (!AI_TRANSLATED_ENTITY_TYPES.includes(entityType)) {
+		return
+	}
+
 	after(async () => {
 		try {
 			const job = await enqueueTranslation(entityType, entityId)

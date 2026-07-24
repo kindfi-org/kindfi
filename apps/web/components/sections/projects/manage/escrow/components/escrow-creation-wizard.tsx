@@ -35,7 +35,7 @@ const STEP_CONTENT: Record<
 	type: {
 		title: 'Choose Escrow Type',
 		description:
-			'Single-release pays out once when all milestones are approved. Multi-release pays each milestone separately.',
+			'Single-release pays out once when all releases are approved. Multi-release pays each release separately.',
 	},
 	details: {
 		title: 'Project Details',
@@ -48,9 +48,9 @@ const STEP_CONTENT: Record<
 			'Each role must be a Stellar G-address from an external wallet (Freighter, xBull, etc.).',
 	},
 	milestones: {
-		title: 'Define Milestones',
+		title: 'Define Releases',
 		description:
-			'Describe deliverables. For multi-release, set the amount and receiver for each milestone.',
+			'Describe deliverables. For multi-release, set the amount and receiver for each release.',
 	},
 }
 

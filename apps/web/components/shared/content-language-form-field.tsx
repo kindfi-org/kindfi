@@ -6,9 +6,13 @@ import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
 
 type ContentLanguageFormFieldProps = {
 	disabled?: boolean
+	helpText?: string
 }
 
-export const ContentLanguageFormField = ({ disabled = false }: ContentLanguageFormFieldProps) => {
+export const ContentLanguageFormField = ({
+	disabled = false,
+	helpText,
+}: ContentLanguageFormFieldProps) => {
 	const form = useFormContext<{ sourceLocale?: SupportedLocale }>()
 
 	return (
@@ -18,6 +22,7 @@ export const ContentLanguageFormField = ({ disabled = false }: ContentLanguageFo
 				form.setValue('sourceLocale', locale, { shouldDirty: true, shouldValidate: true })
 			}
 			disabled={disabled}
+			helpText={helpText}
 		/>
 	)
 }

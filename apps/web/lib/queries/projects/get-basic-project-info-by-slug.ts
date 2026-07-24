@@ -3,9 +3,11 @@ import type { EscrowType } from '@trustless-work/escrow'
 import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
 import {
 	fetchContentTranslation,
+	fetchOppositeLocaleTranslation,
 	type LocalizeOptions,
 	resolveLocalizedFields,
 } from '~/lib/services/content-translation'
+import type { ProjectTranslationContent } from '~/lib/services/content-translation/types'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
 import { readEscrowTypeFromMetadata } from '~/lib/utils/escrow/resolve-escrow-type'
 
@@ -71,6 +73,21 @@ export async function getBasicProjectInfoBySlug(
 		projectTranslation,
 		options,
 	)
+
+	let translation: ProjectTranslationContent | undefined
+	if (options?.localize === false) {
+		const oppositeTranslation = await fetchOppositeLocaleTranslation(
+			client,
+			'project',
+			project.id,
+			sourceLocale,
+		)
+		const fields = oppositeTranslation?.fields as ProjectTranslationContent | undefined
+		translation = {
+			title: fields?.title ?? '',
+			description: fields?.description ?? '',
+		}
+	}
 
 	// Normalize project_escrows shape (it may be object or array depending on RLS/relationship)
 	const escrowRel = (
@@ -149,6 +166,7 @@ export async function getBasicProjectInfoBySlug(
 		category: project.category,
 		location: project.project_location,
 		sourceLocale,
+		translation,
 		socialLinks:
 			project.social_links && typeof project.social_links === 'object'
 				? (project.social_links as SocialLinks)

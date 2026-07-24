@@ -63,4 +63,16 @@ export const projects = {
 	found: 'Encontrados',
 	showing: 'Mostrando',
 	project: 'proyecto',
+	manage: {
+		contentLanguageHelp:
+			'El idioma principal de tu campaña. También debes completar la versión en el otro idioma más abajo.',
+		translationSectionTitleEn: 'Versión en inglés',
+		translationSectionTitleEs: 'Versión en español',
+		translationSectionDescription:
+			'Agrega la traducción manual para visitantes que navegan en el otro idioma. Ambas versiones deben estar completas.',
+		sourceContent: 'Contenido principal',
+		translationContent: 'Traducción',
+		highlightsEnglishTab: 'Impacto de campaña en inglés',
+		highlightsSpanishTab: 'Impacto de campaña en español',
+	},
 }

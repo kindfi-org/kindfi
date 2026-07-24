@@ -2,5 +2,5 @@ import { createProjectManageGetHandler } from '~/lib/api/create-project-manage-g
 import { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
 
 export const GET = createProjectManageGetHandler((client, slug) =>
-	getProjectPitchDataBySlug(client, slug),
+	getProjectPitchDataBySlug(client, slug, { localize: false }),
 )

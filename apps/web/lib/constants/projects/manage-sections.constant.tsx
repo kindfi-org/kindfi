@@ -18,18 +18,18 @@ export const manageSections: ManageSection[] = [
 		category: 'content',
 	},
 	{
-		title: 'Pitch',
-		description: 'Your story, problem statement, solution, and roadmap.',
+		title: 'Story',
+		description: 'Your narrative, problem statement, solution, and impact.',
 		href: 'pitch',
-		cta: 'Improve pitch',
+		cta: 'Edit story',
 		Icon: IoMegaphoneOutline,
 		category: 'content',
 	},
 	{
-		title: 'Highlights',
-		description: 'Key achievements, traction and notable metrics.',
+		title: 'Campaign Impact',
+		description: 'Key achievements, traction, and measurable outcomes.',
 		href: 'highlights',
-		cta: 'Add highlights',
+		cta: 'Add impact points',
 		Icon: IoStarOutline,
 		category: 'content',
 	},
@@ -43,8 +43,7 @@ export const manageSections: ManageSection[] = [
 	},
 	{
 		title: 'Escrow Creation',
-		description:
-			'Step-by-step setup for your Trustless Work escrow contract, roles, and milestones.',
+		description: 'Step-by-step setup for your Trustless Work escrow contract, roles, and releases.',
 		href: 'settings',
 		cta: 'Create escrow',
 		Icon: IoSettingsOutline,
@@ -52,7 +51,7 @@ export const manageSections: ManageSection[] = [
 	},
 	{
 		title: 'Escrow Management',
-		description: 'Fund the contract, approve milestones, and release payments step by step.',
+		description: 'Fund the contract, approve releases, and disburse payments step by step.',
 		href: 'settings/manage',
 		cta: 'Manage escrow',
 		Icon: IoLockClosedOutline,

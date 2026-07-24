@@ -1,5 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { v4 as uuidv4 } from 'uuid'
+import type { ProjectTranslationContent } from '~/lib/services/content-translation/types'
 import { countries } from '../constants/projects/countries.constant'
 import type {
 	BasicProjectInfo,
@@ -178,6 +179,10 @@ export function normalizeProjectToFormDefaults(project: BasicProjectInfo): Creat
 		category: project.category?.id ?? '',
 		tags: project.tags ?? [],
 		sourceLocale: project.sourceLocale ?? 'en',
+		translation: {
+			title: project.translation?.title ?? '',
+			description: project.translation?.description ?? '',
+		},
 	}
 }
 
@@ -205,7 +210,7 @@ export function parseFormData(formData: FormData) {
 		description: formData.get('description') as string,
 		targetAmount: Number(formData.get('targetAmount')),
 		minimumInvestment: Number(formData.get('minimumInvestment')),
-		website: formData.get('website') as string,
+		website: (formData.get('website') as string | null) ?? '',
 		location: formData.get('location') as string,
 		category: formData.get('category') as string,
 		tags: safeJsonParse(formData.get('tags') as string, [] as { name: string; color: string }[]),
@@ -214,6 +219,10 @@ export function parseFormData(formData: FormData) {
 		foundationId: (formData.get('foundationId') as string) || undefined,
 		developmentOnly: formData.get('developmentOnly') === 'true',
 		sourceLocale: (formData.get('sourceLocale') as string) || 'en',
+		translation: safeJsonParse(
+			formData.get('translation') as string,
+			undefined as ProjectTranslationContent | undefined,
+		),
 	}
 }
 

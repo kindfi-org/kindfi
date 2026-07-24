@@ -10,6 +10,20 @@ function randomHexColor(): string {
 }
 
 /** Normalize user/database colors to 6-char hex; fall back when invalid. */
+/** Convert a hex color to rgba for translucent overlays and tinted surfaces. */
+export function hexToRgba(
+	color: string | null | undefined,
+	alpha: number,
+	fallback = DEFAULT_HEX_COLOR,
+): string {
+	const hex = normalizeHexColor(color, fallback).replace('#', '')
+	const r = Number.parseInt(hex.slice(0, 2), 16)
+	const g = Number.parseInt(hex.slice(2, 4), 16)
+	const b = Number.parseInt(hex.slice(4, 6), 16)
+	const clampedAlpha = Math.min(1, Math.max(0, alpha))
+	return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`
+}
+
 export function normalizeHexColor(
 	color: string | null | undefined,
 	fallback = DEFAULT_HEX_COLOR,

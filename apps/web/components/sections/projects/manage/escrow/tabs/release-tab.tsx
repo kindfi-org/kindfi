@@ -110,7 +110,7 @@ export function ReleaseTab({
 		}
 
 		const phase = getMilestoneReleasePhase(selectedMilestone)
-		const milestoneLabel = `Milestone ${selectedIndex + 1}`
+		const milestoneLabel = `Release ${selectedIndex + 1}`
 
 		if (phase === 'released') {
 			return {
@@ -220,7 +220,7 @@ export function ReleaseTab({
 					<TabsContent value="crypto" className="mt-6 space-y-6">
 						{!isSingleRelease ? (
 							<div className="space-y-2">
-								<Label htmlFor="release-milestone">Milestone to Release</Label>
+								<Label htmlFor="release-milestone">Release to disburse</Label>
 								<Select
 									value={selectedMilestoneIndex}
 									onValueChange={setSelectedMilestoneIndex}
@@ -236,7 +236,7 @@ export function ReleaseTab({
 												!isSingleReleaseMilestone(milestone) && milestone.flags?.released
 											return (
 												<SelectItem key={getMilestoneReleaseKey(milestone)} value={String(index)}>
-													Milestone {index + 1}
+													Release {index + 1}
 													{approved ? ' · Approved' : ''}
 													{released ? ' · Released' : ''}
 												</SelectItem>
@@ -296,12 +296,12 @@ export function ReleaseTab({
 									<CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
 									{isSingleRelease
 										? 'Already released'
-										: `Milestone ${selectedIndex + 1} already released`}
+										: `Release ${selectedIndex + 1} already released`}
 								</>
 							) : (
 								<>
 									<Send className="mr-2 h-4 w-4" aria-hidden="true" />
-									{isSingleRelease ? 'Release All Funds' : `Release Milestone ${selectedIndex + 1}`}
+									{isSingleRelease ? 'Release All Funds' : `Release ${selectedIndex + 1}`}
 								</>
 							)}
 						</Button>

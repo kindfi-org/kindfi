@@ -81,11 +81,11 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 						</div>
 						<div>
 							<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
-								Project Pitch
+								Project Story
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-								Create a compelling pitch that showcases your project&apos;s impact and inspires
-								supporters to join your mission
+								Share your project narrative, the problem you solve, and the impact you aim to
+								achieve
 							</p>
 						</div>
 					</div>
@@ -108,6 +108,7 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 							<ProjectPitchForm
 								projectId={project.id}
 								projectSlug={project.slug}
+								sourceLocale={project.sourceLocale}
 								pitch={project.pitch}
 							/>
 						)}
@@ -140,10 +141,10 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 									</div>
 								</div>
 								<div>
-									<p className="text-sm font-medium text-foreground">AI Pitch Advisor</p>
+									<p className="text-sm font-medium text-foreground">AI Story Advisor</p>
 									<p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-										Get personalized feedback on your pitch once you&apos;ve filled in the title and
-										story.
+										Get personalized feedback on your story once you&apos;ve filled in the title and
+										narrative.
 									</p>
 								</div>
 								<Button
@@ -163,7 +164,7 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 								</Button>
 								{(!project?.pitch?.title || !project?.pitch?.story) && (
 									<p className="text-xs text-muted-foreground">
-										Save your pitch first to enable this feature
+										Save your story first to enable this feature
 									</p>
 								)}
 							</motion.div>

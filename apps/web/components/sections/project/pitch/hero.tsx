@@ -25,11 +25,11 @@ export function Hero() {
 	return (
 		<motion.div className="mx-auto" {...fadeInUp}>
 			<motion.h1 className="text-2xl font-bold" {...fadeInWithDelay(0.2)}>
-				Complete Your Pitch
+				Complete Your Story
 			</motion.h1>
 			<motion.p className="text-gray-600" {...fadeInWithDelay(0.4)}>
-				Before you can start collecting reservations, fill out at least 2 Highlights, your Pitch,
-				and your Contract.
+				Before you can start collecting reservations, fill out at least 2 Campaign Impact points,
+				your Project Story, and your Contract.
 			</motion.p>
 
 			<motion.section className="rounded-lg shadow-md p-6 mt-5" {...scaleFadeIn}>

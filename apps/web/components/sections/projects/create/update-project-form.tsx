@@ -24,8 +24,10 @@ import { SocialLinks } from '~/components/sections/projects/create/social-links'
 import { TagInput } from '~/components/sections/projects/create/tag-input'
 import { CategoryBadge } from '~/components/sections/projects/shared'
 import { ContentLanguageFormField } from '~/components/shared/content-language-form-field'
+import { ProjectOppositeLocaleTranslationCard } from '~/components/shared/project-opposite-locale-translation-card'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { useI18n } from '~/lib/i18n/context'
 import { getAllCategories } from '~/lib/queries/projects'
 import { stepOneSchema, stepThreeSchema, stepTwoSchema } from '~/lib/schemas/create-project.schemas'
 import { sourceLocaleSchema } from '~/lib/schemas/locale.schemas'
@@ -43,6 +45,12 @@ const updateProjectSchema = stepOneSchema
 	.and(
 		z.object({
 			sourceLocale: sourceLocaleSchema.optional().default('en'),
+			translation: z
+				.object({
+					title: z.string().optional(),
+					description: z.string().optional(),
+				})
+				.optional(),
 		}),
 	)
 
@@ -51,6 +59,7 @@ interface UpdateProjectFormProps {
 }
 
 export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
+	const { t } = useI18n()
 	const { mutateAsync: updateProject, isPending } = useProjectMutation({
 		projectId: project.id,
 	})
@@ -94,7 +103,7 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 						<Form {...form}>
 							<form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-6">
 								<CSRFTokenField />
-								<ContentLanguageFormField />
+								<ContentLanguageFormField helpText={t('projects.manage.contentLanguageHelp')} />
 								{/* Title */}
 								<FormField
 									control={form.control}
@@ -132,6 +141,57 @@ export function UpdateProjectForm({ project }: UpdateProjectFormProps) {
 										</FormItem>
 									)}
 								/>
+
+								<ProjectOppositeLocaleTranslationCard
+									sourceLocale={form.watch('sourceLocale') ?? 'en'}
+								>
+									<FormField
+										control={form.control}
+										name="translation.title"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													Title <span className="text-destructive">*</span>
+												</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Enter the translated project title"
+														value={field.value ?? ''}
+														onChange={field.onChange}
+														onBlur={field.onBlur}
+														name={field.name}
+														ref={field.ref}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="translation.description"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>
+													Description <span className="text-destructive">*</span>
+												</FormLabel>
+												<FormControl>
+													<Textarea
+														placeholder="Describe your project in the other language"
+														className="min-h-[120px]"
+														value={field.value ?? ''}
+														onChange={field.onChange}
+														onBlur={field.onBlur}
+														name={field.name}
+														ref={field.ref}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</ProjectOppositeLocaleTranslationCard>
 
 								{/* Target Amount */}
 								<div className="grid grid-cols-1 gap-6 md:grid-cols-2">

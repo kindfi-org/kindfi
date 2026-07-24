@@ -63,4 +63,16 @@ export const projects = {
 	found: 'Found',
 	showing: 'Showing',
 	project: 'project',
+	manage: {
+		contentLanguageHelp:
+			'The primary language for your campaign. You also need to complete the other language version below.',
+		translationSectionTitleEn: 'English version',
+		translationSectionTitleEs: 'Spanish version',
+		translationSectionDescription:
+			'Add the manual translation for visitors browsing in the other language. Both versions should be complete.',
+		sourceContent: 'Primary content',
+		translationContent: 'Translation',
+		highlightsEnglishTab: 'English campaign impact',
+		highlightsSpanishTab: 'Spanish campaign impact',
+	},
 }

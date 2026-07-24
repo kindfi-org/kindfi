@@ -13,6 +13,7 @@ type HighlightsRequestData = {
 	projectId: string
 	projectSlug: string
 	highlights: Highlight[]
+	translationHighlights?: Highlight[]
 }
 
 type HighlightsSaveResponse = { message: string }
@@ -30,6 +31,10 @@ export function useHighlightsMutation() {
 				body: JSON.stringify({
 					projectId: data.projectId,
 					highlights: data.highlights,
+					translationHighlights: data.translationHighlights?.map(({ title, description }) => ({
+						title,
+						description,
+					})),
 				}),
 			})
 
@@ -57,8 +62,8 @@ export function useHighlightsMutation() {
 			return res.json()
 		},
 		onSuccess: (_data, variables) => {
-			toast.success('Highlights saved successfully! 🎉', {
-				description: 'All your highlights have been saved successfully.',
+			toast.success('Campaign impact saved successfully! 🎉', {
+				description: 'All your impact points have been saved successfully.',
 			})
 			queryClient.invalidateQueries({
 				queryKey: ['project', variables.projectSlug],
@@ -68,7 +73,7 @@ export function useHighlightsMutation() {
 			})
 		},
 		onError: (error: Error) => {
-			toast.error('Failed to save highlights', {
+			toast.error('Failed to save campaign impact', {
 				description: error.message,
 			})
 		},

@@ -37,7 +37,7 @@ const AboutProject: React.FC<AboutProjectProps> = ({
 			<div className="border-t border-gray-200 my-4" />
 
 			<div className="project-highlights mb-6">
-				<h3 className="text-xl font-bold text-black mb-2">Project Highlights</h3>
+				<h3 className="text-xl font-bold text-black mb-2">Campaign Impact</h3>
 				<ul className="grid grid-cols-2 gap-4">
 					{highlights.map((highlight) => (
 						<li key={highlight.id} className="flex items-start pl-4">

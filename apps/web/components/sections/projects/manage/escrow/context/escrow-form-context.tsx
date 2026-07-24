@@ -79,12 +79,12 @@ export function EscrowFormProvider({ children, initialData }: EscrowFormProvider
 				? [
 						{
 							id: genId(),
-							description: 'Milestone 1',
+							description: 'Release 1',
 							amount: '',
 							receiver: walletAddress ?? '',
 						},
 					]
-				: [{ id: genId(), description: 'Milestone 1' }],
+				: [{ id: genId(), description: 'Release 1' }],
 	}))
 
 	const setField = useCallback(
@@ -100,11 +100,11 @@ export function EscrowFormProvider({ children, initialData }: EscrowFormProvider
 				prev.selectedEscrowType === 'multi-release'
 					? {
 							id: genId(),
-							description: `Milestone ${prev.milestones.length + 1}`,
+							description: `Release ${prev.milestones.length + 1}`,
 							amount: '' as const,
 							receiver: '',
 						}
-					: { id: genId(), description: `Milestone ${prev.milestones.length + 1}` }
+					: { id: genId(), description: `Release ${prev.milestones.length + 1}` }
 			return { ...prev, milestones: [...prev.milestones, next] }
 		})
 	}, [])

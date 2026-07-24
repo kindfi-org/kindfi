@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { memo } from 'react'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
-import { CategoryBadge } from '~/components/sections/projects/shared'
+import { CategoryBadge, ProjectTagList } from '~/components/sections/projects/shared'
 import { getFadeInViewProps } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { ProjectMatchRecommendation } from '~/lib/services/project-matching/schemas'
@@ -52,7 +52,9 @@ export const RecommendedProjectCard = memo(function RecommendedProjectCard({
 								{t('profile.matchingTopPick')}
 							</Badge>
 						) : null}
-						{project.category ? <CategoryBadge category={project.category} /> : null}
+						{project.category ? (
+							<CategoryBadge category={project.category} variant="display" />
+						) : null}
 						<Badge className="w-fit rounded-full border-0 bg-emerald-600/90 text-[10px] text-white">
 							{t('profile.matchingScore')} {project.matchScore}%
 						</Badge>
@@ -99,23 +101,7 @@ export const RecommendedProjectCard = memo(function RecommendedProjectCard({
 						</div>
 					</div>
 
-					{project.tags.length > 0 ? (
-						<div className="flex flex-wrap gap-1">
-							{project.tags.slice(0, 3).map((tag) => (
-								<Badge
-									key={tag.name}
-									variant="outline"
-									className="text-xs"
-									style={{
-										borderColor: tag.color || undefined,
-										color: tag.color || undefined,
-									}}
-								>
-									{tag.name}
-								</Badge>
-							))}
-						</div>
-					) : null}
+					{project.tags.length > 0 ? <ProjectTagList tags={project.tags} limit={3} /> : null}
 
 					<Button asChild variant="outline" size="sm" className="w-full rounded-full">
 						<Link href={`/projects/${project.slug}`}>

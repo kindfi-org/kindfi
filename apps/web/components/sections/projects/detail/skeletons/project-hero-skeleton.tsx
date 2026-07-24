@@ -3,7 +3,7 @@ import { Skeleton } from '~/components/base/skeleton'
 export function ProjectHeroSkeleton() {
 	return (
 		<div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-			<Skeleton className="h-64 md:h-80 lg:h-96 w-full" />
+			<Skeleton className="h-96 md:h-112 lg:h-144 w-full" />
 			<div className="p-6">
 				<Skeleton className="h-10 w-3/4 mb-3" />
 				<Skeleton className="h-4 w-full mb-6" />

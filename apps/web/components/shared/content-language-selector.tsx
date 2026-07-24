@@ -15,12 +15,14 @@ type ContentLanguageSelectorProps = {
 	value: SupportedLocale
 	onChange: (locale: SupportedLocale) => void
 	disabled?: boolean
+	helpText?: string
 }
 
 export const ContentLanguageSelector = ({
 	value,
 	onChange,
 	disabled = false,
+	helpText,
 }: ContentLanguageSelectorProps) => {
 	const { t } = useI18n()
 
@@ -40,7 +42,7 @@ export const ContentLanguageSelector = ({
 					<SelectItem value="es">{t('common.contentLanguageEs')}</SelectItem>
 				</SelectContent>
 			</Select>
-			<p className="text-sm text-muted-foreground">{t('common.contentLanguageHelp')}</p>
+			<p className="text-sm text-muted-foreground">{helpText ?? t('common.contentLanguageHelp')}</p>
 		</div>
 	)
 }

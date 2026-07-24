@@ -5,14 +5,16 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '~/components/base/badge'
-import { CategoryBadge, ReleasedProgressBar } from '~/components/sections/projects/shared'
+import {
+	CategoryBadge,
+	ProjectTagList,
+	ReleasedProgressBar,
+} from '~/components/sections/projects/shared'
 import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-display'
 import { useProjectReleasedDisplay } from '~/hooks/projects/use-project-released-display'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
-import { cn } from '~/lib/utils'
-import { getContrastTextColor } from '~/lib/utils/color-utils'
 
 interface ProjectCardGridProps {
 	project: Project
@@ -66,7 +68,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 					<div className="absolute top-3 left-3 flex flex-col gap-2 drop-shadow">
-						{project.category && <CategoryBadge category={project.category} />}
+						{project.category && <CategoryBadge category={project.category} variant="display" />}
 						{project.escrowContractAddress && (
 							<Badge
 								className="rounded-full border-0 bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-medium text-white"
@@ -154,25 +156,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 						</div>
 					</div>
 
-					<div className="flex flex-wrap gap-1" aria-label="Project tags">
-						{project.tags.map((tag) => {
-							const bg = tag.color || '#ccc' // fallback
-							const textColor = getContrastTextColor(bg)
-
-							return (
-								<Badge
-									key={tag.id}
-									className={cn(
-										'uppercase transition-transform duration-200 group-hover:-translate-y-0.5',
-										textColor,
-									)}
-									style={{ backgroundColor: bg }}
-								>
-									{tag.name}
-								</Badge>
-							)
-						})}
-					</div>
+					<ProjectTagList tags={project.tags} className="mt-auto pt-1" />
 				</div>
 			</motion.article>
 		</Link>
