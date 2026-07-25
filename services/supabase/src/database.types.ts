@@ -1760,6 +1760,33 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_profiles: {
+        Row: {
+          activated_at: string
+          created_at: string
+          on_chain_ready: boolean
+          referral_code: string
+          stellar_address: string | null
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          on_chain_ready?: boolean
+          referral_code: string
+          stellar_address?: string | null
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          on_chain_ready?: boolean
+          referral_code?: string
+          stellar_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrer_statistics: {
         Row: {
           active_referrals: number

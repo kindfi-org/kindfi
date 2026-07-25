@@ -2,7 +2,7 @@
 
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
-import { CalendarDays, Mail, Settings2, Sparkles } from 'lucide-react'
+import { CalendarDays, Mail, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
@@ -21,7 +21,6 @@ interface ProfileHeaderProps {
 	bio: string | null
 	role: Role
 	createdAt: string
-	onOpenSettings?: () => void
 }
 
 const ROLE_LABEL_KEYS: Record<
@@ -40,7 +39,6 @@ export function ProfileHeader({
 	bio,
 	role,
 	createdAt,
-	onOpenSettings,
 }: ProfileHeaderProps) {
 	const { t } = useI18n()
 
@@ -119,17 +117,6 @@ export function ProfileHeader({
 					</div>
 
 					<div className="flex flex-wrap gap-2 lg:justify-end">
-						{onOpenSettings ? (
-							<Button
-								type="button"
-								variant="outline"
-								className="rounded-full border-slate-200 bg-white/80"
-								onClick={onOpenSettings}
-							>
-								<Settings2 className="mr-2 h-4 w-4" />
-								{t('profile.settings')}
-							</Button>
-						) : null}
 						{role === 'creator' ? (
 							<Button asChild className="gradient-btn rounded-full px-5 text-white shadow-md">
 								<Link href="/create-project">{t('profile.createCampaign')}</Link>

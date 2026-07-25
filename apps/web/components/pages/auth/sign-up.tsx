@@ -5,6 +5,7 @@ import { Mail, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { ChangeEvent } from 'react'
+import { useEffect } from 'react'
 import { useSetState } from 'react-use'
 import { signUpAction } from '~/app/actions/sign-up'
 import { Button } from '~/components/base/button'
@@ -19,6 +20,7 @@ import { PasskeyInfoDialog } from '~/components/shared/passkey-info-dialog'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { formLayoutClasses } from '~/lib/form/form-styles'
 import { useI18n } from '~/lib/i18n'
+import { savePendingReferralCode } from '~/lib/referral/pending-referral-code'
 import { cn } from '~/lib/utils'
 
 export function SignupComponent() {
@@ -26,6 +28,13 @@ export function SignupComponent() {
 	const searchParams = useSearchParams()
 	const showPasskeyFlow = !isPollarOnboardingEnabled() || searchParams.get('flow') === 'passkey'
 	const { t } = useI18n()
+
+	useEffect(() => {
+		const refCode = searchParams.get('ref')
+		if (refCode) {
+			savePendingReferralCode(refCode)
+		}
+	}, [searchParams])
 	const [{ email, isSubmitting, error, success }, setSignUpState] = useSetState({
 		email: '',
 		isSubmitting: false,

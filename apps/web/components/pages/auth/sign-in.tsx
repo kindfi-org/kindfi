@@ -4,7 +4,7 @@ import { isPollarOnboardingEnabled } from '@packages/lib/pollar'
 import { Fingerprint } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { type ChangeEvent, useState } from 'react'
+import { type ChangeEvent, useEffect, useState } from 'react'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { PollarLoginSection } from '~/components/pages/auth/pollar-login-section'
@@ -17,12 +17,20 @@ import { usePasskeyAuth } from '~/hooks/passkey/use-passkey-auth'
 import { useFormValidation } from '~/hooks/use-form-validation'
 import { formLayoutClasses } from '~/lib/form/form-styles'
 import { useI18n } from '~/lib/i18n'
+import { savePendingReferralCode } from '~/lib/referral/pending-referral-code'
 
 export function LoginComponent() {
 	const searchParams = useSearchParams()
 	const showPasskeyFlow = !isPollarOnboardingEnabled() || searchParams.get('flow') === 'passkey'
 	const [email, setEmail] = useState('')
 	const { t } = useI18n()
+
+	useEffect(() => {
+		const refCode = searchParams.get('ref')
+		if (refCode) {
+			savePendingReferralCode(refCode)
+		}
+	}, [searchParams])
 
 	const { isEmailInvalid, handleValidation, resetValidation } = useFormValidation({
 		email: true,

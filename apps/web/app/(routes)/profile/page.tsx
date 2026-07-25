@@ -25,6 +25,7 @@ interface ProfilePageProps {
 		kyc?: string
 		verificationSessionId?: string
 		status?: string
+		section?: string
 	}>
 }
 
@@ -138,6 +139,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 					: null
 			}
 			kycCompleted={kycCompleted}
+			initialSection={params.section}
 		/>
 	)
 }

@@ -6,6 +6,7 @@ import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { usePollarSigner } from '~/hooks/pollar/use-pollar-signer'
 import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import { useEscrowForm } from '../context/escrow-form-context'
 import type { EscrowFormData } from '../types'
@@ -69,7 +70,9 @@ function RoleField({
 export function EscrowRoleFields() {
 	const { formData, fillRolesFromWallet } = useEscrowForm()
 	const { address } = useWallet()
-	const canFillFromWallet = isExternalStellarWalletAddress(address)
+	const { pollarAddress, isPollarReady } = usePollarSigner()
+	const effectiveAddress = isPollarReady && pollarAddress ? pollarAddress : address
+	const canFillFromWallet = isExternalStellarWalletAddress(effectiveAddress)
 
 	const approverId = useId()
 	const spId = useId()
@@ -94,7 +97,7 @@ export function EscrowRoleFields() {
 						variant="outline"
 						size="sm"
 						disabled={!canFillFromWallet}
-						onClick={() => canFillFromWallet && fillRolesFromWallet(address)}
+						onClick={() => canFillFromWallet && fillRolesFromWallet(effectiveAddress)}
 						className="shrink-0"
 					>
 						<Link2 className="mr-2 h-4 w-4" aria-hidden="true" />

@@ -22,6 +22,7 @@ import {
 } from '~/components/base/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
 import { MODULES, REPUTATION_EVENTS } from './admin-gamification-triggers/constants'
 import { useAdminGamificationTriggerForm } from './admin-gamification-triggers/hooks/use-admin-gamification-trigger-form'
 import type { TriggerResponse } from './admin-gamification-triggers/types'
@@ -91,19 +92,25 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function ConnectedWalletBanner({
 	address,
 	walletName,
-	isConnected,
+	isReady,
+	isPollarUser,
+	isPollarSigner,
+	isKitConnected,
 	isInitialized,
-	onConnect,
-	onDisconnect,
+	onConnectKit,
+	onDisconnectKit,
 }: {
 	address: string | null
 	walletName: string | null
-	isConnected: boolean
+	isReady: boolean
+	isPollarUser: boolean
+	isPollarSigner: boolean
+	isKitConnected: boolean
 	isInitialized: boolean
-	onConnect: () => void
-	onDisconnect: () => void
+	onConnectKit: () => void
+	onDisconnectKit: () => void
 }) {
-	if (!isInitialized) {
+	if (!isInitialized && !isPollarUser) {
 		return (
 			<div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
 				<IoWalletOutline className="h-4 w-4 shrink-0" />
@@ -112,45 +119,70 @@ function ConnectedWalletBanner({
 		)
 	}
 
-	if (!isConnected || !address) {
+	if (!isReady || !address) {
 		return (
 			<div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-start gap-3 text-sm">
 					<IoWalletOutline className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
 					<div>
-						<p className="font-medium">Connect a Stellar wallet</p>
+						<p className="font-medium">
+							{isPollarUser ? 'Loading your Pollar wallet' : 'Connect a Stellar wallet'}
+						</p>
 						<p className="text-muted-foreground">
-							Triggers run against your connected Stellar Wallets Kit address.
+							{isPollarUser
+								? 'Your Pollar Stellar wallet is being restored. Triggers use this address as the on-chain user.'
+								: 'Connect Freighter, xBull, or another Stellar wallet. Triggers use this address as the on-chain user.'}
 						</p>
 					</div>
 				</div>
-				<Button type="button" size="sm" onClick={onConnect}>
-					Connect wallet
-				</Button>
+				{isPollarUser ? null : (
+					<Button type="button" size="sm" onClick={onConnectKit}>
+						Connect wallet
+					</Button>
+				)}
 			</div>
 		)
 	}
+
+	const displayName = isPollarSigner
+		? 'Pollar Wallet'
+		: walletName || (isPollarUser ? 'Pollar Wallet' : 'Stellar Wallet')
 
 	return (
 		<div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
 			<div className="flex items-start gap-3 text-sm">
 				<IoWalletOutline className="mt-0.5 h-4 w-4 shrink-0" />
 				<div className="min-w-0">
-					<p className="font-medium">Connected{walletName ? ` · ${walletName}` : ''}</p>
+					<p className="font-medium">Connected · {displayName}</p>
 					<p className="truncate font-mono text-xs text-muted-foreground" title={address}>
 						{truncateAddress(address)}
 					</p>
 				</div>
 			</div>
-			<Button type="button" size="sm" variant="outline" onClick={onDisconnect}>
-				Disconnect
-			</Button>
+			{isPollarUser ? null : isKitConnected ? (
+				<Button type="button" size="sm" variant="outline" onClick={onDisconnectKit}>
+					Disconnect
+				</Button>
+			) : (
+				<Button type="button" size="sm" variant="outline" onClick={onConnectKit}>
+					Switch wallet
+				</Button>
+			)}
 		</div>
 	)
 }
 
 export function AdminGamificationTriggers() {
-	const { address, walletName, isConnected, isInitialized, connect, disconnect } = useWallet()
+	const { walletName, isInitialized } = useWallet()
+	const {
+		address,
+		isReady,
+		isPollarUser,
+		isPollarSigner,
+		isKitConnected,
+		connectKit,
+		disconnectKit,
+	} = useEffectiveWalletAddress()
 	const form = useAdminGamificationTriggerForm(address)
 
 	return (
@@ -165,8 +197,9 @@ export function AdminGamificationTriggers() {
 							<CardTitle>Contract Triggers</CardTitle>
 							<CardDescription>
 								Admin-only tools to invoke the same production contract methods (NFT, Reputation,
-								Quest, Streak, Referral, Governance) without going through donations. Calls are
-								on-chain only and do not update gamification database tables.
+								Quest, Streak, Referral, Governance) without going through donations. Uses your
+								Pollar or Stellar Wallet Kit address as the on-chain user. Calls are on-chain only
+								and do not update gamification database tables.
 							</CardDescription>
 						</div>
 					</div>
@@ -175,10 +208,13 @@ export function AdminGamificationTriggers() {
 					<ConnectedWalletBanner
 						address={address}
 						walletName={walletName}
-						isConnected={isConnected}
+						isReady={isReady}
+						isPollarUser={isPollarUser}
+						isPollarSigner={isPollarSigner}
+						isKitConnected={isKitConnected}
 						isInitialized={isInitialized}
-						onConnect={connect}
-						onDisconnect={disconnect}
+						onConnectKit={connectKit}
+						onDisconnectKit={disconnectKit}
 					/>
 
 					<Tabs value={form.activeModule} onValueChange={form.setActiveModule}>

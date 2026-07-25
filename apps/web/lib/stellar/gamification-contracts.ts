@@ -94,7 +94,7 @@ interface RecordReputationEventParams {
 	points?: number
 }
 
-export type GamificationTxResult<T extends Record<string, unknown> = {}> = {
+export type GamificationTxResult<T extends Record<string, unknown> = Record<string, unknown>> = {
 	success: boolean
 	txHash?: string
 	error?: string
@@ -1149,6 +1149,58 @@ export class GamificationContractService {
 				}
 			}
 		})
+	}
+
+	/**
+	 * Read referrer statistics from the Referral contract (simulation-only read).
+	 * Returns success when the contract is reachable; stats may be null for new referrers.
+	 */
+	async getReferrerStatistics(
+		referralContractAddress: string,
+		referrerAddress: string,
+	): Promise<{ success: boolean; hasStats: boolean; error?: string }> {
+		try {
+			const args = [nativeToScVal(Address.fromString(referrerAddress), { type: 'address' })]
+
+			const operation = Operation.invokeContractFunction({
+				contract: referralContractAddress,
+				function: 'get_referrer_statistics',
+				args,
+			})
+
+			const account = await this.server
+				.getAccount(this.recorderKeypair.publicKey())
+				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
+
+			const transaction = new TransactionBuilder(account, {
+				fee: this.txFee,
+				networkPassphrase: this.networkPassphrase,
+			})
+				.addOperation(operation)
+				.setTimeout(60)
+				.build()
+
+			const simulation = await this.server.simulateTransaction(transaction)
+
+			if (Api.isSimulationError(simulation)) {
+				return { success: false, hasStats: false, error: simulation.error }
+			}
+
+			let hasStats = false
+			if (simulation.result?.retval) {
+				const { scValToNative } = await import('@stellar/stellar-sdk')
+				const result = scValToNative(simulation.result.retval)
+				hasStats = result !== undefined && result !== null
+			}
+
+			return { success: true, hasStats }
+		} catch (error) {
+			return {
+				success: false,
+				hasStats: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			}
+		}
 	}
 
 	/**

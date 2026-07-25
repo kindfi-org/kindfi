@@ -116,7 +116,7 @@ export const useEtherfuseUserOnboarding = (userId: string, walletAddress: string
 
 	const startOnboarding = useCallback(async () => {
 		if (!walletAddress) {
-			throw new Error('Connect an external wallet before starting Etherfuse onboarding.')
+			throw new Error('A Stellar wallet is required before starting Etherfuse onboarding.')
 		}
 
 		setIsStarting(true)

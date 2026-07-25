@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { AlertCircle, Loader2, RefreshCw, Sparkles, X } from 'lucide-react'
-import Link from 'next/link'
 import { useCallback, useState } from 'react'
 import { Button } from '~/components/base/button'
 import { useProjectMatching } from '~/hooks/profile/use-project-matching'
@@ -11,6 +10,7 @@ import { useI18n } from '~/lib/i18n'
 import { ProfileSectionHeader } from '../profile-section-header'
 import { ProfileSurfaceCard } from '../profile-surface-card'
 import { MatchingCtaCard } from './matching-cta-card'
+import { MatchingEmptyState } from './matching-empty-state'
 import { MatchingLoadingSkeleton } from './matching-loading-skeleton'
 import { MatchingPreferenceInsights } from './matching-preference-insights'
 import { RecommendedProjectCard } from './recommended-project-card'
@@ -127,7 +127,11 @@ export const ProjectMatchingSection = () => {
 								</div>
 							) : null}
 
-							{showError ? (
+							{showError && notEnoughCandidates ? (
+								<MatchingEmptyState onRetry={handleRetry} />
+							) : null}
+
+							{showError && !notEnoughCandidates ? (
 								<div className="space-y-4">
 									<div className="flex items-start gap-2 rounded-md border border-destructive/20 bg-destructive/10 p-3">
 										<AlertCircle
@@ -135,28 +139,19 @@ export const ProjectMatchingSection = () => {
 											aria-hidden="true"
 										/>
 										<p className="text-sm text-destructive">
-											{notEnoughCandidates
-												? t('profile.matchingNotEnoughProjects')
-												: (errorMessage ?? t('profile.matchingError'))}
+											{errorMessage ?? t('profile.matchingError')}
 										</p>
 									</div>
-									<div className="flex flex-wrap gap-2">
-										<Button
-											type="button"
-											variant="outline"
-											size="sm"
-											onClick={handleRetry}
-											className="rounded-full"
-										>
-											<RefreshCw className="mr-2 h-3.5 w-3.5" />
-											{t('profile.matchingRetry')}
-										</Button>
-										{notEnoughCandidates ? (
-											<Button asChild size="sm" className="rounded-full">
-												<Link href="/projects">{t('profile.matchingBrowseProjects')}</Link>
-											</Button>
-										) : null}
-									</div>
+									<Button
+										type="button"
+										variant="outline"
+										size="sm"
+										onClick={handleRetry}
+										className="rounded-full"
+									>
+										<RefreshCw className="mr-2 h-3.5 w-3.5" />
+										{t('profile.matchingRetry')}
+									</Button>
 								</div>
 							) : null}
 

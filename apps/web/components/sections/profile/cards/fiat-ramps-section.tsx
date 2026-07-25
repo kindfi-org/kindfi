@@ -16,18 +16,20 @@ import { RampsWithdrawPanel } from './ramps/ramps-withdraw-panel'
 
 interface FiatRampsSectionProps {
 	userId: string
-	externalWalletAddress: string | null
-	isExternalConnected: boolean
-	onConnectExternal: () => Promise<void>
+	walletAddress: string | null
+	isWalletReady: boolean
+	isPollarUser: boolean
+	onConnectKit: () => Promise<void>
 }
 
 type RampMode = 'deposit' | 'withdraw'
 
 export function FiatRampsSection({
 	userId,
-	externalWalletAddress,
-	isExternalConnected,
-	onConnectExternal,
+	walletAddress,
+	isWalletReady,
+	isPollarUser,
+	onConnectKit,
 }: FiatRampsSectionProps) {
 	const { t } = useI18n()
 	const [mode, setMode] = useState<RampMode>('deposit')
@@ -39,7 +41,7 @@ export function FiatRampsSection({
 		refreshStatus,
 		status,
 		hasStartedOnboarding,
-	} = useEtherfuseUserOnboarding(userId, externalWalletAddress)
+	} = useEtherfuseUserOnboarding(userId, walletAddress)
 
 	const handleStartOnboarding = async () => {
 		try {
@@ -59,22 +61,33 @@ export function FiatRampsSection({
 				description={t('profile.rampsDescription')}
 			/>
 
-			{!isExternalConnected || !externalWalletAddress ? (
+			{!isWalletReady || !walletAddress ? (
 				<motion.div {...profileFadeUp(0.05)}>
 					<ProfileSurfaceCard padding="lg" className="overflow-hidden">
 						<div className="relative mx-auto flex max-w-lg flex-col items-center gap-5 py-4 text-center">
 							<div className="relative space-y-2">
 								<h3 className="text-xl font-semibold text-gray-900">
-									{t('profile.rampsWalletRequiredTitle')}
+									{isPollarUser
+										? t('profile.rampsPollarWalletLoadingTitle')
+										: t('profile.rampsWalletRequiredTitle')}
 								</h3>
 								<p className="text-sm leading-relaxed text-muted-foreground">
-									{t('profile.rampsWalletRequiredDescription')}
+									{isPollarUser
+										? t('profile.rampsPollarWalletLoadingDescription')
+										: t('profile.rampsWalletRequiredDescription')}
 								</p>
 							</div>
-							<Button onClick={onConnectExternal} variant="outline" className="rounded-full">
-								<Link2 className="mr-2 h-4 w-4" aria-hidden="true" />
-								{t('profile.connectExternalWallet')}
-							</Button>
+							{isPollarUser ? (
+								<Loader2
+									className="h-5 w-5 animate-spin text-muted-foreground"
+									aria-hidden="true"
+								/>
+							) : (
+								<Button onClick={onConnectKit} variant="outline" className="rounded-full">
+									<Link2 className="mr-2 h-4 w-4" aria-hidden="true" />
+									{t('profile.connectExternalWallet')}
+								</Button>
+							)}
 						</div>
 					</ProfileSurfaceCard>
 				</motion.div>
@@ -84,7 +97,7 @@ export function FiatRampsSection({
 						<RampsSidebar
 							mode={mode}
 							onModeChange={setMode}
-							walletAddress={externalWalletAddress}
+							walletAddress={walletAddress}
 							isOnboardingReady={isReady}
 							hasStartedOnboarding={hasStartedOnboarding}
 							onboardingStatus={status}
@@ -99,7 +112,7 @@ export function FiatRampsSection({
 						{mode === 'deposit' ? (
 							<RampsDepositPanel
 								userId={userId}
-								walletAddress={externalWalletAddress}
+								walletAddress={walletAddress}
 								etherfuseCustomerId={onboarding?.customerId}
 								etherfuseBankAccountId={onboarding?.bankAccountId}
 								isOnboardingReady={isReady}
@@ -113,7 +126,7 @@ export function FiatRampsSection({
 						) : (
 							<RampsWithdrawPanel
 								userId={userId}
-								walletAddress={externalWalletAddress}
+								walletAddress={walletAddress}
 								etherfuseCustomerId={onboarding?.customerId}
 								bankAccountId={onboarding?.bankAccountId}
 								isOnboardingReady={isReady}
