@@ -100,7 +100,7 @@ interface ProfileSectionTabsProps {
 	effectiveWalletAddress: string | null
 	isWalletReady: boolean
 	isPollarUser: boolean
-	onConnectKit: () => void
+	onConnectKit: () => Promise<void>
 	initialSection?: string
 	defaultTab?: string
 }
