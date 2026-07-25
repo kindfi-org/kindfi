@@ -25,6 +25,9 @@ export const profile = {
 	rampsWalletRequiredTitle: 'External wallet required',
 	rampsWalletRequiredDescription:
 		'Connect Freighter, xBull, or another Stellar wallet to receive ramp deposits and sign withdrawals.',
+	rampsPollarWalletLoadingTitle: 'Loading your wallet',
+	rampsPollarWalletLoadingDescription:
+		'Your Pollar Stellar wallet is being restored. Ramp deposits and withdrawals will be available in a moment.',
 	rampsOnboardingRequired:
 		'Complete Etherfuse verification for this wallet before creating ramp orders.',
 	rampsStartOnboarding: 'Complete Etherfuse setup',

@@ -25,6 +25,9 @@ export const profile = {
 	rampsWalletRequiredTitle: 'Se requiere billetera externa',
 	rampsWalletRequiredDescription:
 		'Conecta Freighter, xBull u otra billetera Stellar para recibir depósitos y firmar retiros.',
+	rampsPollarWalletLoadingTitle: 'Cargando tu billetera',
+	rampsPollarWalletLoadingDescription:
+		'Tu billetera Stellar de Pollar se está restaurando. Los depósitos y retiros estarán disponibles en un momento.',
 	rampsOnboardingRequired:
 		'Completa la verificación de Etherfuse para esta billetera antes de crear órdenes.',
 	rampsStartOnboarding: 'Completar configuración de Etherfuse',

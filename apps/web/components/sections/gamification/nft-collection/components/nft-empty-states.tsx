@@ -4,7 +4,7 @@ export function NftNotConnected() {
 	return (
 		<div className="text-center py-12 text-muted-foreground">
 			<Sparkles className="h-12 w-12 mx-auto mb-4 opacity-50" />
-			<p>Connect your wallet to view your NFT collection</p>
+			<p>Sign in and connect a wallet to view your NFT collection</p>
 		</div>
 	)
 }

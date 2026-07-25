@@ -31,6 +31,7 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/base/dropdown-menu'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
 import { useI18n } from '~/lib/i18n/context'
 import { isPollarOnboardedUser } from '~/lib/pollar/is-pollar-onboarded-user'
 import { signOutPollar } from '~/lib/pollar/sign-out-pollar'
@@ -113,6 +114,8 @@ export const UserMenu = ({ user }: { user: User }) => {
 		connect,
 		disconnect,
 	} = useWallet()
+	const { address: effectiveWalletAddress, isReady: isEffectiveWalletReady } =
+		useEffectiveWalletAddress()
 	const [isSigningOut, setIsSigningOut] = useState(false)
 	const [isConnectingExternal, setIsConnectingExternal] = useState(false)
 
@@ -239,6 +242,12 @@ export const UserMenu = ({ user }: { user: User }) => {
 						<WalletAddressSection
 							address={externalWalletAddress}
 							label={t('profile.externalWallet')}
+						/>
+					) : null}
+					{!showExternalWalletActions && isEffectiveWalletReady && effectiveWalletAddress ? (
+						<WalletAddressSection
+							address={effectiveWalletAddress}
+							label={t('auth.pollarWalletReady')}
 						/>
 					) : null}
 				</div>

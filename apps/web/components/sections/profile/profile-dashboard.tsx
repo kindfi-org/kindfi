@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
+import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
 import { useI18n } from '~/lib/i18n'
 import { isCreatorProfileRole } from '~/lib/profile/is-creator-profile-role'
 import { cn } from '~/lib/utils'
@@ -101,6 +102,15 @@ export function ProfileDashboard({
 		[user.profile?.display_name, user.email],
 	)
 	const { address: externalWalletAddress, connect, disconnect, isConnected } = useWallet()
+	const {
+		address: effectiveWalletAddress,
+		isReady: isWalletReady,
+		isPollarUser,
+		connectKit,
+	} = useEffectiveWalletAddress({
+		profilePollarAddress: user.profile?.pollar_wallet_address,
+		profileExternalAddress: user.profile?.external_wallet_address,
+	})
 	const imageUrl = user.profile?.image_url ?? null
 	const bio = user.profile?.bio ?? null
 	const [showRoleModal, setShowRoleModal] = useState(false)
@@ -278,9 +288,10 @@ export function ProfileDashboard({
 							<TabsContent value="ramps" className="mt-0">
 								<FiatRampsSection
 									userId={user.id}
-									externalWalletAddress={externalWalletAddress}
-									isExternalConnected={isConnected}
-									onConnectExternal={connect}
+									walletAddress={effectiveWalletAddress}
+									isWalletReady={isWalletReady}
+									isPollarUser={isPollarUser}
+									onConnectKit={connectKit}
 								/>
 							</TabsContent>
 							<TabsContent value="gamification" className="mt-0">

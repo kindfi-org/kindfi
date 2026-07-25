@@ -119,17 +119,6 @@ export function ProfileHeader({
 					</div>
 
 					<div className="flex flex-wrap gap-2 lg:justify-end">
-						{onOpenSettings ? (
-							<Button
-								type="button"
-								variant="outline"
-								className="rounded-full border-slate-200 bg-white/80"
-								onClick={onOpenSettings}
-							>
-								<Settings2 className="mr-2 h-4 w-4" />
-								{t('profile.settings')}
-							</Button>
-						) : null}
 						{role === 'creator' ? (
 							<Button asChild className="gradient-btn rounded-full px-5 text-white shadow-md">
 								<Link href="/create-project">{t('profile.createCampaign')}</Link>

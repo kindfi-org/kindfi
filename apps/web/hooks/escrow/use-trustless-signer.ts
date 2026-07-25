@@ -107,6 +107,9 @@ export function useTrustlessSigner() {
 
 	return {
 		...wallet,
+		address: isPollarReady && pollarAddress ? pollarAddress : wallet.address,
+		isConnected: isPollarReady || wallet.isConnected,
+		walletName: isPollarReady ? 'Pollar Wallet' : wallet.walletName,
 		ensureTrustlessSigner,
 		signTrustlessTransaction,
 		signAndSubmitTrustlessTransaction,
