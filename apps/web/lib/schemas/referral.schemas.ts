@@ -18,3 +18,11 @@ export const referralDonationSchema = z.object({
 export const referralOnboardSchema = z.object({
 	referred_id: z.string().uuid('Invalid referred ID'),
 })
+
+export const applyReferralCodeSchema = z.object({
+	code: z
+		.string()
+		.min(6, 'Referral code is too short')
+		.max(12, 'Referral code is too long')
+		.transform((value) => value.trim().toUpperCase()),
+})

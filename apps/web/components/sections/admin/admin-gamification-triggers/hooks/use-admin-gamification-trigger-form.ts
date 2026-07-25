@@ -62,7 +62,7 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 
 	const handleSubmit = (payload: AdminGamificationTriggerInput) => {
 		if (!address) {
-			toast.error('Connect a Stellar wallet first')
+			toast.error('A Stellar wallet address is required')
 			return
 		}
 		setLastResult(null)
