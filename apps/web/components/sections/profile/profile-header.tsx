@@ -2,7 +2,7 @@
 
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
-import { CalendarDays, Mail, Settings2, Sparkles } from 'lucide-react'
+import { CalendarDays, Mail, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import { Badge } from '~/components/base/badge'
@@ -21,7 +21,6 @@ interface ProfileHeaderProps {
 	bio: string | null
 	role: Role
 	createdAt: string
-	onOpenSettings?: () => void
 }
 
 const ROLE_LABEL_KEYS: Record<
@@ -40,7 +39,6 @@ export function ProfileHeader({
 	bio,
 	role,
 	createdAt,
-	onOpenSettings,
 }: ProfileHeaderProps) {
 	const { t } = useI18n()
 

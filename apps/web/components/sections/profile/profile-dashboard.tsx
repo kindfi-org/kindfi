@@ -2,61 +2,21 @@
 
 import type { Database } from '@services/supabase'
 import { motion } from 'framer-motion'
-import dynamic from 'next/dynamic'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, startTransition, useEffect, useMemo, useState } from 'react'
+import { startTransition, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
 import { useI18n } from '~/lib/i18n'
-import { isCreatorProfileRole } from '~/lib/profile/is-creator-profile-role'
-import { cn } from '~/lib/utils'
 import { safeLocalStorageSet } from '~/lib/utils/safe-storage'
-import { AccountInfoCard } from './cards/account-info-card'
 import { GovernanceCard } from './cards/governance-card'
 import { KYCCard } from './cards/kyc-card'
-import { PersonalInfoCard } from './cards/personal-info-card'
 import { WalletCard } from './cards/wallet-card'
 import { RoleSelectionModal } from './modals/role-selection-modal'
 import { ProfileHeader } from './profile-header'
 import { profileFadeUp } from './profile-motion'
+import { ProfileSectionTabs } from './profile-section-tabs'
 import { ProfileShell } from './profile-shell'
-import { ProfileViewSkeleton } from './skeletons'
-
-const CreatorProfile = dynamic(
-	() =>
-		import('./views/creator-profile').then((mod) => ({
-			default: mod.CreatorProfile,
-		})),
-	{
-		loading: () => <ProfileViewSkeleton />,
-		ssr: false,
-	},
-)
-
-const DonorProfile = dynamic(
-	() =>
-		import('./views/donor-profile').then((mod) => ({
-			default: mod.DonorProfile,
-		})),
-	{
-		loading: () => <ProfileViewSkeleton />,
-		ssr: false,
-	},
-)
-
-const FiatRampsSection = dynamic(
-	() =>
-		import('./cards/fiat-ramps-section').then((mod) => ({
-			default: mod.FiatRampsSection,
-		})),
-	{
-		loading: () => <ProfileViewSkeleton />,
-		ssr: false,
-	},
-)
 
 type Role = Database['public']['Enums']['user_role']
 
@@ -78,25 +38,19 @@ interface ProfileDashboardProps {
 	}
 	smartAccountAddress?: string | null
 	defaultTab?: 'overview' | 'settings'
+	initialSection?: string
 	kycCompleted?: boolean
 }
-
-const TAB_TRIGGER_CLASS = cn(
-	'rounded-full px-4 py-2 text-sm font-medium transition-all',
-	'data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm',
-	'data-[state=inactive]:text-slate-500 data-[state=inactive]:hover:text-gray-800',
-)
 
 export function ProfileDashboard({
 	user,
 	smartAccountAddress,
 	defaultTab = 'overview',
+	initialSection,
 	kycCompleted = false,
 }: ProfileDashboardProps) {
 	const { t } = useI18n()
-	const router = useRouter()
 	const role: Role | null = user.profile?.role ?? null
-	const showCreatorProfile = isCreatorProfileRole(role)
 	const displayName = useMemo(
 		() => user.profile?.display_name || user.email?.split('@')[0] || 'You',
 		[user.profile?.display_name, user.email],
@@ -114,8 +68,6 @@ export function ProfileDashboard({
 	const imageUrl = user.profile?.image_url ?? null
 	const bio = user.profile?.bio ?? null
 	const [showRoleModal, setShowRoleModal] = useState(false)
-	const searchParams = useSearchParams()
-	const activeSection = searchParams?.get('section') || defaultTab
 
 	useEffect(() => {
 		if (role === 'pending' || role === null) {
@@ -180,35 +132,6 @@ export function ProfileDashboard({
 			})
 	}, [kycCompleted, t])
 
-	const handleTabChange = (value: string) => {
-		const params = new URLSearchParams(searchParams?.toString() || '')
-		params.set('section', value)
-		router.push(`/profile?${params.toString()}`, { scroll: false })
-	}
-
-	const openSettings = () => handleTabChange('settings')
-
-	const renderSection = (section: string) => {
-		const ProfileView = showCreatorProfile ? CreatorProfile : DonorProfile
-		return (
-			<Suspense fallback={<ProfileViewSkeleton />}>
-				<ProfileView
-					userId={user.id}
-					displayName={displayName}
-					showSection={
-						section as
-							| 'overview'
-							| 'gamification'
-							| 'donations'
-							| 'nfts'
-							| 'campaigns'
-							| 'foundations'
-					}
-				/>
-			</Suspense>
-		)
-	}
-
 	return (
 		<ProfileShell>
 			<SectionContainer maxWidth="6xl" className="py-8 sm:py-10 lg:py-12">
@@ -220,7 +143,6 @@ export function ProfileDashboard({
 						bio={bio}
 						role={role}
 						createdAt={user.created_at}
-						onOpenSettings={openSettings}
 					/>
 
 					<motion.div {...profileFadeUp(0.08)} className="grid gap-5 lg:grid-cols-5">
@@ -248,88 +170,16 @@ export function ProfileDashboard({
 						<GovernanceCard />
 					</motion.div>
 
-					<motion.div {...profileFadeUp(0.12)}>
-						<Tabs value={activeSection} onValueChange={handleTabChange} className="space-y-6">
-							<div className="overflow-x-auto pb-1">
-								<TabsList className="inline-flex h-auto w-max min-w-full gap-1 rounded-full border border-white/70 bg-white/60 p-1.5 shadow-sm backdrop-blur-sm sm:min-w-0">
-									<TabsTrigger value="overview" className={TAB_TRIGGER_CLASS}>
-										{t('profile.tabOverview')}
-									</TabsTrigger>
-									<TabsTrigger value="ramps" className={TAB_TRIGGER_CLASS}>
-										{t('profile.tabRamps')}
-									</TabsTrigger>
-									<TabsTrigger value="gamification" className={TAB_TRIGGER_CLASS}>
-										{t('profile.tabGamification')}
-									</TabsTrigger>
-									{role === 'donor' ? (
-										<TabsTrigger value="donations" className={TAB_TRIGGER_CLASS}>
-											{t('profile.tabDonations')}
-										</TabsTrigger>
-									) : null}
-									{showCreatorProfile ? (
-										<>
-											<TabsTrigger value="campaigns" className={TAB_TRIGGER_CLASS}>
-												{t('profile.tabCampaigns')}
-											</TabsTrigger>
-											<TabsTrigger value="foundations" className={TAB_TRIGGER_CLASS}>
-												{t('profile.tabFoundations')}
-											</TabsTrigger>
-										</>
-									) : null}
-									<TabsTrigger value="settings" className={TAB_TRIGGER_CLASS}>
-										{t('profile.tabSettings')}
-									</TabsTrigger>
-								</TabsList>
-							</div>
-
-							<TabsContent value="overview" className="mt-0">
-								{renderSection('overview')}
-							</TabsContent>
-							<TabsContent value="ramps" className="mt-0">
-								<FiatRampsSection
-									userId={user.id}
-									walletAddress={effectiveWalletAddress}
-									isWalletReady={isWalletReady}
-									isPollarUser={isPollarUser}
-									onConnectKit={connectKit}
-								/>
-							</TabsContent>
-							<TabsContent value="gamification" className="mt-0">
-								{renderSection('gamification')}
-							</TabsContent>
-							{role === 'donor' ? (
-								<TabsContent value="donations" className="mt-0">
-									{renderSection('donations')}
-								</TabsContent>
-							) : null}
-							{showCreatorProfile ? (
-								<>
-									<TabsContent value="campaigns" className="mt-0">
-										{renderSection('campaigns')}
-									</TabsContent>
-									<TabsContent value="foundations" className="mt-0">
-										{renderSection('foundations')}
-									</TabsContent>
-								</>
-							) : null}
-							<TabsContent value="settings" className="mt-0">
-								<div className="grid gap-6 lg:grid-cols-2">
-									<PersonalInfoCard
-										userId={user.id}
-										displayName={user.profile?.display_name ?? ''}
-										bio={user.profile?.bio ?? ''}
-										imageUrl={user.profile?.image_url ?? ''}
-										_email={user.email}
-									/>
-									<AccountInfoCard
-										userEmail={user.email}
-										createdAt={user.created_at}
-										slug={user.profile?.slug ?? ''}
-									/>
-								</div>
-							</TabsContent>
-						</Tabs>
-					</motion.div>
+					<ProfileSectionTabs
+						user={user}
+						displayName={displayName}
+						effectiveWalletAddress={effectiveWalletAddress}
+						isWalletReady={isWalletReady}
+						isPollarUser={isPollarUser}
+						onConnectKit={connectKit}
+						initialSection={initialSection}
+						defaultTab={defaultTab}
+					/>
 				</div>
 
 				<RoleSelectionModal
