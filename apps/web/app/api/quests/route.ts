@@ -1,10 +1,18 @@
-import { Keypair } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { createQuestSchema } from '~/lib/schemas/quest.schemas'
+import {
+	ensureAllQuestDefinitionsOnChain,
+	getAdminKeypair,
+	QUEST_TYPE_TO_CONTRACT,
+	type QuestDefinitionRow,
+	questExpiresAtUnix,
+	syncQuestProgressOnChain,
+} from '~/lib/services/quest-chain-sync.service'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -70,7 +78,13 @@ export async function GET(_req: NextRequest) {
 
 		if (hasContributions && questsMissingProgress.length > 0) {
 			try {
-				await syncQuestProgress(supabase, userId, questsMissingProgress, progressMap)
+				await syncQuestProgress(
+					supabase,
+					userId,
+					questsMissingProgress as QuestDefinitionRow[],
+					progressMap,
+					quests ?? [],
+				)
 			} catch (syncErr) {
 				logger.error('[Quests] Error syncing quest progress:', syncErr)
 			}
@@ -141,15 +155,75 @@ export async function POST(req: NextRequest) {
 			contract_address,
 		} = validation.data
 
-		// Get next quest_id (simple increment from max)
-		const { data: maxQuest } = await supabase
-			.from('quest_definitions')
-			.select('quest_id')
-			.order('quest_id', { ascending: false })
-			.limit(1)
-			.single()
+		const questContractAddress = contract_address || process.env.QUEST_CONTRACT_ADDRESS
+		const adminKeypair = getAdminKeypair()
+		const contractService = new GamificationContractService()
 
-		const quest_id = (maxQuest?.quest_id || 0) + 1
+		// Keep on-chain quest IDs aligned with existing DB rows before creating a new quest
+		const { data: existingQuests } = await supabase
+			.from('quest_definitions')
+			.select('*')
+			.order('quest_id', { ascending: true })
+
+		if (questContractAddress && adminKeypair && existingQuests?.length) {
+			const syncResult = await ensureAllQuestDefinitionsOnChain(
+				contractService,
+				questContractAddress,
+				existingQuests,
+				adminKeypair,
+			)
+			if (!syncResult.success) {
+				logger.error('[Quest API] Failed to sync existing quests to chain:', syncResult.error)
+			}
+		}
+
+		const contractQuestType = QUEST_TYPE_TO_CONTRACT[quest_type] ?? 4
+		const expiresAtUnix = questExpiresAtUnix(expires_at || null)
+
+		// Create on-chain first so quest_id matches the contract counter
+		let onChainResult: {
+			success: boolean
+			questId?: number
+			error?: string
+		} | null = null
+		let quest_id = ((existingQuests?.[existingQuests.length - 1]?.quest_id ?? 0) as number) + 1
+
+		if (questContractAddress && adminKeypair) {
+			try {
+				onChainResult = await contractService.createQuest(
+					questContractAddress,
+					{
+						questType: contractQuestType,
+						name,
+						description,
+						targetValue: target_value,
+						rewardPoints: reward_points || 0,
+						expiresAt: expiresAtUnix,
+					},
+					adminKeypair,
+				)
+
+				if (onChainResult.success && onChainResult.questId !== undefined) {
+					quest_id = onChainResult.questId
+				} else if (!onChainResult.success) {
+					logger.error('[Quest API] Failed to sync quest to on-chain:', onChainResult.error)
+				}
+			} catch (error) {
+				logger.error('[Quest API] Error syncing quest to on-chain:', error)
+				onChainResult = {
+					success: false,
+					error: error instanceof Error ? error.message : 'Unknown error',
+				}
+			}
+		} else if (questContractAddress && !adminKeypair) {
+			logger.warn(
+				'[Quest API] No admin private key found. Quest will use DB-only quest_id assignment.',
+			)
+		} else {
+			logger.warn(
+				'[Quest API] No quest contract address configured. Quest created in database only.',
+			)
+		}
 
 		const { data: quest, error } = await supabase
 			.from('quest_definitions')
@@ -170,72 +244,6 @@ export async function POST(req: NextRequest) {
 		if (error) {
 			logger.error('Error creating quest:', error)
 			return NextResponse.json({ error: 'Failed to create quest' }, { status: 500 })
-		}
-
-		// Map quest_type from database enum to contract enum value
-		const questTypeMap: Record<string, number> = {
-			multi_region_donation: 0,
-			weekly_streak: 1,
-			multi_category_donation: 2,
-			referral_quest: 3,
-			total_donation_amount: 4,
-			quest_master: 5,
-		}
-
-		const contractQuestType = questTypeMap[quest_type] ?? 4 // Default to total_donation_amount
-
-		// Convert expires_at to Unix timestamp (0 for no expiration)
-		const expiresAtUnix =
-			expires_at && expires_at !== '' ? Math.floor(new Date(expires_at).getTime() / 1000) : 0
-
-		// Sync quest to on-chain contract
-		let onChainResult: {
-			success: boolean
-			questId?: number
-			error?: string
-		} | null = null
-		const questContractAddress = contract_address || process.env.QUEST_CONTRACT_ADDRESS
-
-		if (questContractAddress) {
-			try {
-				// Use admin private key if available, otherwise use recorder keypair
-				// (assuming recorder has admin role granted)
-				const adminPrivateKey = process.env.ADMIN_PRIVATE_KEY || process.env.SOROBAN_PRIVATE_KEY
-
-				if (!adminPrivateKey) {
-					logger.warn(
-						'[Quest API] No admin private key found. Quest created in database but not synced to chain.',
-					)
-				} else {
-					const adminKeypair = Keypair.fromSecret(adminPrivateKey)
-					const contractService = new GamificationContractService()
-
-					onChainResult = await contractService.createQuest(
-						questContractAddress,
-						{
-							questType: contractQuestType,
-							name: quest.name,
-							description: quest.description,
-							targetValue: quest.target_value,
-							rewardPoints: quest.reward_points || 0,
-							expiresAt: expiresAtUnix,
-						},
-						adminKeypair,
-					)
-
-					if (onChainResult.success) {
-					} else {
-						logger.error('[Quest API] Failed to sync quest to on-chain:', onChainResult.error)
-					}
-				}
-			} catch (error) {
-				logger.error('[Quest API] Error syncing quest to on-chain:', error)
-				// Don't fail the request if on-chain sync fails - quest is still in database
-			}
-		} else {
-			logger.warn(
-				'[Quest API] No quest contract address configured. Quest created in database only.',
-			)
 		}
 
 		return NextResponse.json(
@@ -264,17 +272,15 @@ export async function POST(req: NextRequest) {
 async function syncQuestProgress(
 	supabase: Awaited<typeof import('@packages/lib/supabase')>['supabase'],
 	userId: string,
-	missingQuests: Array<{
-		quest_id: number
-		quest_type: string
-		target_value: number
-	}>,
+	missingQuests: QuestDefinitionRow[],
 	progressMap: Map<number, Record<string, unknown>>,
+	allQuests: QuestDefinitionRow[],
 ) {
 	const questTypes = new Set(missingQuests.map((q) => q.quest_type))
+	const dbQuestsById = new Map(allQuests.map((quest) => [quest.quest_id, quest]))
 
 	// Fetch contribution data needed for each quest type in parallel
-	const [amountResult, categoryResult] = await Promise.all([
+	const [amountResult, categoryResult, stellarAddress] = await Promise.all([
 		questTypes.has('total_donation_amount')
 			? supabase.from('contributions').select('amount').eq('contributor_id', userId)
 			: Promise.resolve({ data: null }),
@@ -284,6 +290,7 @@ async function syncQuestProgress(
 					.select('project_id, projects!inner(category_id)')
 					.eq('contributor_id', userId)
 			: Promise.resolve({ data: null }),
+		resolveUserStellarAddress(supabase, userId, {}),
 	])
 
 	for (const quest of missingQuests) {
@@ -330,6 +337,30 @@ async function syncQuestProgress(
 
 		if (inserted) {
 			progressMap.set(quest.quest_id, inserted)
+		}
+
+		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
+			try {
+				const chainResult = await syncQuestProgressOnChain({
+					quest,
+					userAddress: stellarAddress,
+					questId: quest.quest_id,
+					progressValue,
+					dbQuestsById,
+				})
+
+				if (chainResult && !chainResult.success) {
+					logger.error(
+						`[Quests] Failed to backfill on-chain progress for quest ${quest.quest_id}:`,
+						chainResult.error,
+					)
+				}
+			} catch (chainError) {
+				logger.error(
+					`[Quests] Error backfilling on-chain progress for quest ${quest.quest_id}:`,
+					chainError,
+				)
+			}
 		}
 	}
 }

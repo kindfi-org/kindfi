@@ -5,8 +5,8 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { RateLimiter } from '~/lib/auth/rate-limiter'
 import { questProgressSchema } from '~/lib/schemas/quest.schemas'
+import { syncQuestProgressOnChain } from '~/lib/services/quest-chain-sync.service'
 import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
 const rateLimiter = new RateLimiter()
@@ -66,35 +66,24 @@ export async function POST(req: NextRequest) {
 
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
-				const contractService = new GamificationContractService()
-				const questContractAddress =
-					quest.contract_address ||
-					process.env.QUEST_CONTRACT_ADDRESS ||
-					process.env.NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS
+				contractResult = await syncQuestProgressOnChain({
+					quest,
+					userAddress: stellarAddress,
+					questId: quest_id,
+					progressValue: progress_value,
+				})
 
-				if (questContractAddress) {
-					contractResult = await contractService.updateQuestProgress(questContractAddress, {
-						userAddress: stellarAddress,
-						questId: quest_id,
-						progressValue: progress_value,
-					})
-
-					if (!contractResult.success) {
-						logger.error(
-							'[Quest API] Failed to update quest progress on-chain:',
-							contractResult.error,
-						)
-						// Continue with database update even if contract call fails
-					} else {
-					}
-				} else {
-					logger.warn('[Quest API] Quest contract address not configured')
+				if (contractResult && !contractResult.success) {
+					logger.error(
+						'[Quest API] Failed to update quest progress on-chain:',
+						contractResult.error,
+					)
+					// Continue with database update even if contract call fails
 				}
 			} catch (error) {
 				logger.error('[Quest API] Error calling quest contract:', error)
 				// Continue with database update even if contract call fails
 			}
-		} else {
 		}
 
 		if (!quest.is_active) {

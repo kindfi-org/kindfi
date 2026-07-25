@@ -9,6 +9,7 @@ import {
 	STELLAR_MAINNET_PASSPHRASE,
 } from '~/lib/config/stellar-network.config'
 import { adminGamificationTriggerSchema } from '~/lib/schemas/admin-gamification-trigger.schemas'
+import { syncQuestProgressOnChain } from '~/lib/services/quest-chain-sync.service'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { GovernanceContractService } from '~/lib/stellar/governance-contract'
 import { getStellarExplorerTxUrl } from '~/lib/utils/escrow/stellar-explorer'
@@ -184,11 +185,31 @@ export async function POST(req: NextRequest) {
 						{ status: 503 },
 					)
 				}
-				const result = await contractService.updateQuestProgress(address, {
-					userAddress: input.userAddress,
-					questId: input.questId,
-					progressValue: input.progressValue,
-				})
+
+				const { supabase } = await import('@packages/lib/supabase')
+				const { data: questDefinition } = await supabase
+					.from('quest_definitions')
+					.select('*')
+					.eq('quest_id', input.questId)
+					.maybeSingle()
+
+				const result = questDefinition
+					? ((await syncQuestProgressOnChain({
+							quest: questDefinition,
+							userAddress: input.userAddress,
+							questId: input.questId,
+							progressValue: input.progressValue,
+							contractService,
+						})) ?? {
+							success: false,
+							error: 'Quest chain sync skipped (missing SOROBAN_PRIVATE_KEY or contract address)',
+						})
+					: await contractService.updateQuestProgress(address, {
+							userAddress: input.userAddress,
+							questId: input.questId,
+							progressValue: input.progressValue,
+						})
+
 				return buildResponse(result, input.module, input.action)
 			}
 

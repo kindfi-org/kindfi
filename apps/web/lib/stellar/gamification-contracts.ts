@@ -149,6 +149,31 @@ export class GamificationContractService {
 		this.recorderKeypair = Keypair.fromSecret(secretKey)
 	}
 
+	/** Poll until a submitted transaction is included or fails (mainnet can be slow). */
+	private async waitForSubmittedTransaction(
+		hash: string,
+		maxAttempts = 30,
+		intervalMs = 2000,
+	): Promise<{ success: boolean; error?: string }> {
+		for (let attempt = 0; attempt < maxAttempts; attempt++) {
+			const tx = await this.server.getTransaction(hash)
+
+			if (tx.status === Api.GetTransactionStatus.SUCCESS) {
+				return { success: true }
+			}
+
+			if (tx.status === Api.GetTransactionStatus.FAILED) {
+				return { success: false, error: 'Transaction failed on-chain' }
+			}
+
+			if (attempt < maxAttempts - 1) {
+				await new Promise((resolve) => setTimeout(resolve, intervalMs))
+			}
+		}
+
+		return { success: false, error: 'Transaction confirmation timeout' }
+	}
+
 	/**
 	 * Record a donation in the Streak contract
 	 */
@@ -511,6 +536,80 @@ export class GamificationContractService {
 	}
 
 	/**
+	 * Read-only check: returns true when get_quest returns a definition for questId.
+	 */
+	async questExistsOnChain(questContractAddress: string, questId: number): Promise<boolean> {
+		try {
+			const account = await this.server
+				.getAccount(this.recorderKeypair.publicKey())
+				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
+
+			const operation = Operation.invokeContractFunction({
+				contract: questContractAddress,
+				function: 'get_quest',
+				args: [nativeToScVal(questId, { type: 'u32' })],
+			})
+
+			const transaction = new TransactionBuilder(account, {
+				fee: this.txFee,
+				networkPassphrase: this.networkPassphrase,
+			})
+				.addOperation(operation)
+				.setTimeout(60)
+				.build()
+
+			const simulation = await this.server.simulateTransaction(transaction)
+
+			if (Api.isSimulationError(simulation)) {
+				return false
+			}
+
+			const retval = simulation.result?.retval
+			if (!retval) {
+				return false
+			}
+
+			// Option::None is scvVoid; Option::Some(QuestDefinition) is the struct map
+			if (retval.switch().name === 'scvVoid') {
+				return false
+			}
+
+			const { scValToNative } = await import('@stellar/stellar-sdk')
+			const value = scValToNative(retval)
+
+			if (value === null || value === undefined) {
+				return false
+			}
+
+			if (typeof value === 'object') {
+				if ('quest_id' in value) {
+					return true
+				}
+				// Some SDK encodings wrap Option as { tag: 'Some', values: [...] }
+				const tagged = value as { tag?: string; values?: unknown[] }
+				if (tagged.tag === 'Some' && tagged.values?.[0]) {
+					return true
+				}
+			}
+
+			return true
+		} catch {
+			return false
+		}
+	}
+
+	/**
+	 * Highest on-chain quest_id that currently exists (0 when the contract has no quests).
+	 */
+	async getMaxQuestIdOnChain(questContractAddress: string): Promise<number> {
+		let maxId = 0
+		while (await this.questExistsOnChain(questContractAddress, maxId + 1)) {
+			maxId++
+		}
+		return maxId
+	}
+
+	/**
 	 * Update quest progress in the Quest contract
 	 */
 	async updateQuestProgress(
@@ -679,6 +778,15 @@ export class GamificationContractService {
 					return {
 						success: false,
 						error: `Transaction failed: ${JSON.stringify(result)}`,
+					}
+				}
+
+				const confirmation = await this.waitForSubmittedTransaction(result.hash)
+				if (!confirmation.success) {
+					return {
+						success: false,
+						txHash: result.hash,
+						error: confirmation.error,
 					}
 				}
 

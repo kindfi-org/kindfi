@@ -25,6 +25,7 @@ import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
 import { MODULES, REPUTATION_EVENTS } from './admin-gamification-triggers/constants'
 import { useAdminGamificationTriggerForm } from './admin-gamification-triggers/hooks/use-admin-gamification-trigger-form'
+import { QuestProgressBackfillPanel } from './admin-gamification-triggers/quest-progress-backfill-panel'
 import type { TriggerResponse } from './admin-gamification-triggers/types'
 
 const truncateAddress = (value: string) => `${value.slice(0, 6)}…${value.slice(-6)}`
@@ -249,12 +250,15 @@ export function AdminGamificationTriggers() {
 								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									form.handleSubmit({
-										module: 'streak',
-										action: 'record_donation',
-										userAddress: address,
-										period: form.period,
-									})
+									form.handleSubmit(
+										{
+											module: 'streak',
+											action: 'record_donation',
+											userAddress: address,
+											period: form.period,
+										},
+										address,
+									)
 								}}
 							>
 								{form.isPending ? 'Submitting…' : 'Record streak donation'}
@@ -290,11 +294,14 @@ export function AdminGamificationTriggers() {
 								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									form.handleSubmit({
-										module: 'referral',
-										action: form.referralAction,
-										referredAddress: address,
-									})
+									form.handleSubmit(
+										{
+											module: 'referral',
+											action: form.referralAction,
+											referredAddress: address,
+										},
+										address,
+									)
 								}}
 							>
 								{form.isPending ? 'Submitting…' : `Run ${form.referralAction}`}
@@ -303,9 +310,17 @@ export function AdminGamificationTriggers() {
 
 						<TabsContent value="quest" className="space-y-4">
 							<p className="text-sm text-muted-foreground">
-								Calls <code className="text-xs">quest.update_progress</code> for your connected
-								wallet. Completing a quest awards reputation via CPI.
+								Calls <code className="text-xs">quest.update_progress</code> for a user&apos;s
+								G-address (DB + on-chain). Completing a quest awards reputation via CPI.
 							</p>
+							<Field label="Target user G-address">
+								<Input
+									placeholder="G… (defaults to connected wallet if empty)"
+									value={form.targetUserAddress}
+									onChange={(e) => form.setTargetUserAddress(e.target.value)}
+									className="font-mono text-sm"
+								/>
+							</Field>
 							<div className="grid gap-4 sm:grid-cols-2">
 								<Field label="Quest ID (on-chain)">
 									<Input
@@ -325,20 +340,23 @@ export function AdminGamificationTriggers() {
 								</Field>
 							</div>
 							<Button
-								disabled={!form.canSubmit}
+								disabled={!form.canSubmitWithAddress(address)}
 								onClick={() => {
-									if (!address) return
-									form.handleSubmit({
-										module: 'quest',
-										action: 'update_progress',
-										userAddress: address,
-										questId: Number(form.questId),
-										progressValue: Number(form.progressValue),
-									})
+									form.handleSubmit(
+										{
+											module: 'quest',
+											action: 'update_progress',
+											userAddress: form.targetUserAddress.trim() || address || '',
+											questId: Number(form.questId),
+											progressValue: Number(form.progressValue),
+										},
+										address,
+									)
 								}}
 							>
 								{form.isPending ? 'Submitting…' : 'Update quest progress'}
 							</Button>
+							<QuestProgressBackfillPanel />
 						</TabsContent>
 
 						<TabsContent value="nft" className="space-y-4">
@@ -378,23 +396,26 @@ export function AdminGamificationTriggers() {
 								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									form.handleSubmit({
-										module: 'nft',
-										action: form.nftAction,
-										toAddress: form.nftAction === 'mint' ? address : undefined,
-										tokenId:
-											form.nftAction === 'update_metadata' ? Number(form.tokenId) : undefined,
-										metadata: {
-											name: form.nftName,
-											description: 'Manually triggered for contract verification',
-											imageUri: 'https://kindfi.org/images/nft-placeholder.png',
-											externalUrl: 'https://kindfi.org/profile?section=gamification',
-											attributes: [
-												{ trait_type: 'Tier', value: 'Bronze' },
-												{ trait_type: 'Source', value: 'Admin Trigger' },
-											],
+									form.handleSubmit(
+										{
+											module: 'nft',
+											action: form.nftAction,
+											toAddress: form.nftAction === 'mint' ? address : undefined,
+											tokenId:
+												form.nftAction === 'update_metadata' ? Number(form.tokenId) : undefined,
+											metadata: {
+												name: form.nftName,
+												description: 'Manually triggered for contract verification',
+												imageUri: 'https://kindfi.org/images/nft-placeholder.png',
+												externalUrl: 'https://kindfi.org/profile?section=gamification',
+												attributes: [
+													{ trait_type: 'Tier', value: 'Bronze' },
+													{ trait_type: 'Source', value: 'Admin Trigger' },
+												],
+											},
 										},
-									})
+										address,
+									)
 								}}
 							>
 								{form.isPending ? 'Submitting…' : `Run NFT ${form.nftAction}`}
@@ -435,13 +456,16 @@ export function AdminGamificationTriggers() {
 								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									form.handleSubmit({
-										module: 'reputation',
-										action: 'record_event',
-										userAddress: address,
-										eventType: Number(form.eventType),
-										points: form.customPoints ? Number(form.customPoints) : undefined,
-									})
+									form.handleSubmit(
+										{
+											module: 'reputation',
+											action: 'record_event',
+											userAddress: address,
+											eventType: Number(form.eventType),
+											points: form.customPoints ? Number(form.customPoints) : undefined,
+										},
+										address,
+									)
 								}}
 							>
 								{form.isPending ? 'Submitting…' : 'Record reputation event'}
@@ -507,15 +531,18 @@ export function AdminGamificationTriggers() {
 								disabled={!form.canSubmit}
 								onClick={() => {
 									if (!address) return
-									form.handleSubmit({
-										module: 'governance',
-										action: 'record_vote',
-										voterAddress: address,
-										roundId: Number(form.roundId),
-										optionId: Number(form.optionId),
-										voteType: form.voteType,
-										tier: form.tier,
-									})
+									form.handleSubmit(
+										{
+											module: 'governance',
+											action: 'record_vote',
+											voterAddress: address,
+											roundId: Number(form.roundId),
+											optionId: Number(form.optionId),
+											voteType: form.voteType,
+											tier: form.tier,
+										},
+										address,
+									)
 								}}
 							>
 								{form.isPending ? 'Submitting…' : 'Record governance vote'}

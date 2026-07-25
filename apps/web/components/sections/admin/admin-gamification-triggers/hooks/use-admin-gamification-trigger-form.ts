@@ -27,6 +27,7 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 	>('create_referral')
 	const [questId, setQuestId] = useState('0')
 	const [progressValue, setProgressValue] = useState('1')
+	const [targetUserAddress, setTargetUserAddress] = useState('')
 	const [nftAction, setNftAction] = useState<'mint' | 'update_metadata'>('mint')
 	const [tokenId, setTokenId] = useState('0')
 	const [nftName, setNftName] = useState('KindFi Impact NFT (Admin Test)')
@@ -60,14 +61,42 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 		},
 	})
 
-	const handleSubmit = (payload: AdminGamificationTriggerInput) => {
-		if (!address) {
+	const resolveTargetAddress = (connectedAddress: string | null): string | null => {
+		const trimmed = targetUserAddress.trim()
+		if (trimmed) return trimmed
+		return connectedAddress
+	}
+
+	const handleSubmit = (
+		payload: AdminGamificationTriggerInput,
+		connectedAddress: string | null,
+	) => {
+		if (
+			payload.module === 'quest' ||
+			payload.module === 'reputation' ||
+			payload.module === 'streak'
+		) {
+			const targetAddress = resolveTargetAddress(connectedAddress)
+			if (!targetAddress) {
+				toast.error('Enter a target Stellar G-address or connect a wallet')
+				return
+			}
+			setLastResult(null)
+			mutation.mutate({ ...payload, userAddress: targetAddress })
+			return
+		}
+
+		if (!connectedAddress) {
 			toast.error('A Stellar wallet address is required')
 			return
 		}
+
 		setLastResult(null)
 		mutation.mutate(payload)
 	}
+
+	const canSubmitWithAddress = (connectedAddress: string | null) =>
+		Boolean(resolveTargetAddress(connectedAddress)) && !mutation.isPending
 
 	const canSubmit = Boolean(address) && !mutation.isPending
 
@@ -87,6 +116,9 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 		setQuestId,
 		progressValue,
 		setProgressValue,
+		targetUserAddress,
+		setTargetUserAddress,
+		canSubmitWithAddress,
 		nftAction,
 		setNftAction,
 		tokenId,

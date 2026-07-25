@@ -1,62 +1,56 @@
 #!/bin/bash
 # sync-quests-to-chain.sh
-# Sync quests from database to on-chain Quest contract
+# Sync quest_definitions from Supabase to the on-chain Quest contract.
+#
+# Default: runs apps/web/scripts/sync-quests-to-chain.ts (reads DB, skips existing quests).
+# Legacy:  --seed-defaults creates the 3 hardcoded starter quests (fresh deploys only).
 
-# Don't exit on error - we want to continue even if admin role grant fails
-set +e
+set -euo pipefail
 
-echo "========================================"
-echo "  Sync Quests to On-Chain"
-echo "========================================"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-# Parse command line arguments
 NETWORK="testnet"
 SOURCE=""
 QUEST_CONTRACT_ID=""
+MODE="from-db"
+
+usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --testnet                  Use testnet (default)"
+    echo "  --futurenet                Use futurenet"
+    echo "  --mainnet                  Use mainnet"
+    echo "  --source NAME              Stellar CLI identity (default: bran / production)"
+    echo "  --quest-contract ID        Quest contract ID (required for --seed-defaults)"
+    echo "  --from-db                  Sync all quest_definitions from Supabase (default)"
+    echo "  --seed-defaults            Legacy: create 3 hardcoded starter quests via CLI"
+    echo "  --help                     Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  $0 --mainnet --quest-contract CDKFK..."
+    echo "  $0 --testnet --seed-defaults --quest-contract CAAW..."
+}
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --futurenet)
-            NETWORK="futurenet"
-            shift
-            ;;
-        --testnet)
-            NETWORK="testnet"
-            shift
-            ;;
-        --mainnet)
-            NETWORK="mainnet"
-            shift
-            ;;
-        --source)
-            SOURCE="$2"
-            shift 2
-            ;;
-        --quest-contract)
-            QUEST_CONTRACT_ID="$2"
-            shift 2
-            ;;
-        --help)
-            echo "Usage: $0 [OPTIONS]"
-            echo ""
-            echo "Options:"
-            echo "  --testnet                  Use testnet (default)"
-            echo "  --futurenet                Use futurenet"
-            echo "  --mainnet                  Use mainnet"
-            echo "  --source NAME              Stellar account identity to use (default: bran)"
-            echo "  --quest-contract ID        Quest contract ID (required)"
-            echo ""
-            exit 0
-            ;;
+        --futurenet) NETWORK="futurenet"; shift ;;
+        --testnet)   NETWORK="testnet"; shift ;;
+        --mainnet)   NETWORK="mainnet"; shift ;;
+        --source)    SOURCE="$2"; shift 2 ;;
+        --quest-contract) QUEST_CONTRACT_ID="$2"; shift 2 ;;
+        --from-db)   MODE="from-db"; shift ;;
+        --seed-defaults) MODE="seed-defaults"; shift ;;
+        --help)      usage; exit 0 ;;
         *)
             echo "Unknown option: $1"
-            echo "Use --help for usage information"
+            usage
             exit 1
             ;;
     esac
 done
 
-# Set default source
 if [[ -z "$SOURCE" ]]; then
     case $NETWORK in
         testnet)
@@ -66,145 +60,187 @@ if [[ -z "$SOURCE" ]]; then
                 SOURCE="bob-f"
             fi
             ;;
-        futurenet)
-            SOURCE="bob-f"
-            ;;
-        mainnet)
-            SOURCE="production"
-            ;;
+        futurenet) SOURCE="bob-f" ;;
+        mainnet)   SOURCE="production" ;;
     esac
 fi
 
-# Get admin address from source
-ADMIN_ADDRESS=$(stellar keys address "$SOURCE")
+echo "========================================"
+echo "  Sync Quests to On-Chain"
+echo "========================================"
+echo ""
+echo "Network:  $NETWORK"
+echo "Source:   $SOURCE"
+echo "Mode:     $MODE"
+echo ""
 
-# Validate required parameters
+# ---------------------------------------------------------------------------
+# Default: TypeScript sync from Supabase (skips existing, fills ID gaps)
+# ---------------------------------------------------------------------------
+if [[ "$MODE" == "from-db" ]]; then
+    if [[ -n "$QUEST_CONTRACT_ID" ]]; then
+        export QUEST_CONTRACT_ADDRESS="$QUEST_CONTRACT_ID"
+        export NEXT_PUBLIC_QUEST_CONTRACT_ADDRESS="$QUEST_CONTRACT_ID"
+    fi
+
+    case $NETWORK in
+        mainnet)
+            export NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE:-Public Global Stellar Network ; September 2015}"
+            export RPC_URL="${RPC_URL:-https://mainnet.sorobanrpc.com}"
+            echo "Mainnet sync uses ADMIN_PRIVATE_KEY (production account), not testnet STELLAR_FUNDING_SECRET_KEY."
+            echo "Ensure apps/web/.env has ADMIN_PRIVATE_KEY set to your \`production\` Stellar CLI secret."
+            echo ""
+            ;;
+        testnet)
+            export NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
+            export RPC_URL="${RPC_URL:-https://soroban-testnet.stellar.org}"
+            ;;
+    esac
+
+    echo "Running Supabase → on-chain sync via apps/web/scripts/sync-quests-to-chain.ts"
+    echo ""
+
+    cd "$REPO_ROOT/apps/web"
+    bun run scripts/sync-quests-to-chain.ts
+    exit $?
+fi
+
+# ---------------------------------------------------------------------------
+# Legacy: seed 3 default quests via Stellar CLI (fresh deploys only)
+# ---------------------------------------------------------------------------
 if [[ -z "$QUEST_CONTRACT_ID" ]]; then
-    echo "Error: --quest-contract is required"
+    echo "Error: --quest-contract is required for --seed-defaults"
     exit 1
 fi
 
-echo ""
-echo "=== Configuration ==="
-echo "Network:         $NETWORK"
-echo "Source:          $SOURCE"
-echo "Admin Address:   $ADMIN_ADDRESS"
+ADMIN_ADDRESS="$(stellar keys address "$SOURCE")"
+
 echo "Quest Contract:  $QUEST_CONTRACT_ID"
+echo "Admin Address:   $ADMIN_ADDRESS"
 echo ""
 
-# Step 0: Grant admin role to admin address (required for create_quest)
-# Note: The admin address set during initialization should be able to grant roles,
-# but it needs to explicitly grant itself the "admin" role to use #[only_role(caller, "admin")]
-echo ""
-echo "=== Step 0: Granting Admin Role ==="
-echo "Attempting to grant admin role to admin address..."
-echo "Note: If this fails with error 2000, the admin address may already have permissions"
-echo "      through the AccessControl admin mechanism, but needs the 'admin' role explicitly."
-
-stellar contract invoke \
-    --network "$NETWORK" \
-    --source "$SOURCE" \
-    --id "$QUEST_CONTRACT_ID" \
-    -- grant_role \
-    --account "$ADMIN_ADDRESS" \
-    --role 'admin' \
-    --caller "$ADMIN_ADDRESS" 2>&1 | tee /tmp/quest-admin-grant.log
-
-GRANT_RESULT=$?
-if [[ $GRANT_RESULT -eq 0 ]]; then
-    echo "✅ Admin role granted successfully"
-else
-    echo "⚠️  Admin role grant returned non-zero exit code"
-    echo "Checking if admin role is already granted..."
-    HAS_ROLE=$(stellar contract invoke \
+invoke_read() {
+    stellar contract invoke \
         --network "$NETWORK" \
         --source "$SOURCE" \
         --id "$QUEST_CONTRACT_ID" \
-        -- has_role \
-        --account "$ADMIN_ADDRESS" \
-        --role 'admin' 2>&1 | grep -o '[0-9]' | head -1 || echo "0")
-    
-    if [[ "$HAS_ROLE" != "0" ]]; then
-        echo "✅ Admin role is already granted (exit code: $HAS_ROLE)"
-    else
-        echo "❌ Admin role is not granted. Error details:"
-        cat /tmp/quest-admin-grant.log
-        echo ""
-        echo "This may indicate that the admin address needs different permissions."
-        echo "Attempting to create quests anyway..."
+        -- "$@"
+}
+
+invoke_write() {
+    local label="$1"
+    shift
+    echo ""
+    echo "=== $label ==="
+    if invoke_read "$@"; then
+        echo "✅ $label succeeded"
+        return 0
     fi
-fi
+    echo "❌ $label failed"
+    return 1
+}
 
-# Quest type mapping: database -> contract enum value
-# total_donation_amount -> 4 (TotalDonationAmount)
-# multi_category_donation -> 2 (MultiCategoryDonation)
-# multi_region_donation -> 0 (MultiRegionDonation)
-# weekly_streak -> 1 (WeeklyStreak)
-# referral_quest -> 3 (ReferralQuest)
-# quest_master -> 5 (QuestMaster)
+quest_exists() {
+    local quest_id="$1"
+    local output
+    if output="$(invoke_read get_quest --quest_id "$quest_id" 2>&1)"; then
+        if echo "$output" | grep -qiE 'not found|Error|HostError|None|null'; then
+            return 1
+        fi
+        return 0
+    fi
+    return 1
+}
 
-# Quest 1: First Donation
-echo ""
-echo "=== Creating Quest 1: First Donation ==="
-stellar contract invoke \
-    --network "$NETWORK" \
-    --source "$SOURCE" \
-    --id "$QUEST_CONTRACT_ID" \
-    -- create_quest \
-    --caller "$ADMIN_ADDRESS" \
-    --quest_type 4 \
-    --name "First Donation" \
-    --description "Make your first donation to any project" \
-    --target_value 1 \
-    --reward_points 50 \
-    --expires_at 0
+has_admin_role() {
+    local output
+    output="$(invoke_read has_role --account "$ADMIN_ADDRESS" --role admin 2>&1 || true)"
+    if echo "$output" | grep -qE '^[1-9][0-9]*$'; then
+        return 0
+    fi
+    if echo "$output" | grep -qE 'Some\(|u32'; then
+        return 0
+    fi
+    # Some CLI versions print the role index on its own line
+    if echo "$output" | grep -qE '[1-9]'; then
+        if ! echo "$output" | grep -qiE 'Error|HostError|None|null|0'; then
+            return 0
+        fi
+    fi
+    return 1
+}
 
-echo "✅ Quest 1 created"
+ensure_admin_role() {
+    echo "=== Step 0: Verify admin role ==="
 
-# Quest 2: Generous Donor
-echo ""
-echo "=== Creating Quest 2: Generous Donor ==="
-stellar contract invoke \
-    --network "$NETWORK" \
-    --source "$SOURCE" \
-    --id "$QUEST_CONTRACT_ID" \
-    -- create_quest \
-    --caller "$ADMIN_ADDRESS" \
-    --quest_type 4 \
-    --name "Generous Donor" \
-    --description "Donate a total of \$100 across all projects" \
-    --target_value 100 \
-    --reward_points 100 \
-    --expires_at 0
+    if has_admin_role; then
+        echo "✅ Admin role already granted for $ADMIN_ADDRESS"
+        return 0
+    fi
 
-echo "✅ Quest 2 created"
+    echo "Admin role missing — granting via grant_role..."
+    if ! invoke_write "Grant admin role" \
+        grant_role \
+        --account "$ADMIN_ADDRESS" \
+        --role admin \
+        --caller "$ADMIN_ADDRESS"; then
+        echo ""
+        echo "❌ Could not grant admin role. create_quest requires Error #2000 authorization."
+        echo "   Ensure $SOURCE is the contract admin from get_admin."
+        exit 1
+    fi
 
-# Quest 3: Diverse Supporter
-echo ""
-echo "=== Creating Quest 3: Diverse Supporter ==="
-stellar contract invoke \
-    --network "$NETWORK" \
-    --source "$SOURCE" \
-    --id "$QUEST_CONTRACT_ID" \
-    -- create_quest \
-    --caller "$ADMIN_ADDRESS" \
-    --quest_type 2 \
-    --name "Diverse Supporter" \
-    --description "Donate to projects in 3 different categories" \
-    --target_value 3 \
-    --reward_points 75 \
-    --expires_at 0
+    if ! has_admin_role; then
+        echo "❌ grant_role succeeded but has_role(admin) is still false"
+        exit 1
+    fi
 
-echo "✅ Quest 3 created"
+    echo "✅ Admin role verified"
+}
+
+create_quest_if_missing() {
+    local quest_id="$1"
+    local label="$2"
+    local quest_type="$3"
+    local name="$4"
+    local description="$5"
+    local target_value="$6"
+    local reward_points="$7"
+
+    if quest_exists "$quest_id"; then
+        echo "⏭️  Quest $quest_id ($name) already on-chain — skipping"
+        return 0
+    fi
+
+    invoke_write "$label" \
+        create_quest \
+        --caller "$ADMIN_ADDRESS" \
+        --quest_type "$quest_type" \
+        --name "$name" \
+        --description "$description" \
+        --target_value "$target_value" \
+        --reward_points "$reward_points" \
+        --expires_at 0
+}
+
+ensure_admin_role
+
+# Only seed when those IDs are missing — never duplicate existing quests
+create_quest_if_missing 1 "Create Quest 1: First Donation" 4 \
+    "First Donation" "Make your first donation to any project" 1 50
+
+create_quest_if_missing 2 "Create Quest 2: Generous Donor" 4 \
+    "Generous Donor" "Donate a total of \$100 across all projects" 100 100
+
+create_quest_if_missing 3 "Create Quest 3: Diverse Supporter" 2 \
+    "Diverse Supporter" "Donate to projects in 3 different categories" 3 75
 
 echo ""
 echo "========================================"
-echo "  Quest Sync Complete!"
+echo "  Quest Seed Complete!"
 echo "========================================"
 echo ""
-echo "All 3 quests have been created on-chain."
-echo ""
-echo "Next steps:"
-echo "1. Test gamification updates by making a donation"
-echo "2. Verify quest progress updates correctly"
+echo "Verify with:"
+echo "  stellar contract invoke --network $NETWORK --source $SOURCE \\"
+echo "    --id $QUEST_CONTRACT_ID -- get_quest --quest_id 1"
 echo ""
