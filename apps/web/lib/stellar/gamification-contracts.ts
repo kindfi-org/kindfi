@@ -94,7 +94,7 @@ interface RecordReputationEventParams {
 	points?: number
 }
 
-export type GamificationTxResult<T extends Record<string, unknown> = {}> = {
+export type GamificationTxResult<T extends Record<string, unknown> = Record<string, never>> = {
 	success: boolean
 	txHash?: string
 	error?: string
