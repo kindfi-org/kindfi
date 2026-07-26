@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
+import { createSupabaseServerClient, prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
@@ -8,7 +8,6 @@ import { PROJECTS_PAGE_SIZE } from '~/hooks/projects/use-paginated-projects'
 import { getViewerLocale } from '~/lib/i18n/locale-cookie.server'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
-import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 
 export const metadata: Metadata = {
 	title: 'Projects | KindFi',

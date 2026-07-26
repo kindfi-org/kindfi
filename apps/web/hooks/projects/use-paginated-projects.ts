@@ -35,7 +35,14 @@ export function usePaginatedProjects({
 		queryKey: ['projects-paginated', categoryKey, sortSlug, language, pageSize] as const,
 		queryFn: async ({ pageParam = 0 }) => {
 			const supabase = createSupabaseBrowserClient()
-			return getAllProjects(supabase, categorySlugs, sortSlug, pageSize, { viewerLocale: language }, pageParam)
+			return getAllProjects(
+				supabase,
+				categorySlugs,
+				sortSlug,
+				pageSize,
+				{ viewerLocale: language },
+				pageParam as number,
+			)
 		},
 		initialPageParam: 0,
 		getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
