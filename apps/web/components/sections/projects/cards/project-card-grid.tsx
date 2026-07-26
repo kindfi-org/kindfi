@@ -52,9 +52,6 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 			<motion.article
 				className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-lg"
 				whileHover={cardHover}
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.3 }}
 			>
 				<div className="relative h-48 overflow-hidden">
 					<Image
