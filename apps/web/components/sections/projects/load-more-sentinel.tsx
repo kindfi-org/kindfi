@@ -54,13 +54,10 @@ export function LoadMoreSentinel({ onLoadMore, isLoading, hasMore }: LoadMoreSen
 			aria-atomic="true"
 		>
 			{isLoading ? (
-				<span
-					className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700"
-					role="status"
-				>
+				<output className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
 					<Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
 					{t('projects.loading')}
-				</span>
+				</output>
 			) : (
 				<button
 					type="button"
