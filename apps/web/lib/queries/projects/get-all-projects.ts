@@ -22,13 +22,54 @@ export type GetAllProjectsOptions = LocalizeOptions & {
 	viewerLocale?: SupportedLocale
 }
 
+/**
+ * Result shape returned when using cursor-based pagination (`offset` provided).
+ * `total` is the full catalog count for the current filters so the client can
+ * display "X of Y" and determine whether more pages exist.
+ */
+export type PaginatedProjectsResult = {
+	items: ProjectListItem[]
+	total: number
+	nextOffset: number | null
+}
+
+/**
+ * Fetch a page of projects from Supabase.
+ *
+ * Pagination behaviour:
+ * - When `offset` is provided the function uses PostgREST `.range()` and
+ *   returns `PaginatedProjectsResult` (items + total + nextOffset).
+ * - When only `limit` is provided (legacy path) or neither is provided, the
+ *   function returns the flat `ProjectListItem[]` array for backward-compat.
+ */
 export async function getAllProjects(
 	client: TypedSupabaseClient,
 	categorySlugs: string[] = [],
 	sortSlug = 'most-popular',
 	limit?: number,
 	options?: GetAllProjectsOptions,
-): Promise<ProjectListItem[]> {
+): Promise<ProjectListItem[]>
+
+export async function getAllProjects(
+	client: TypedSupabaseClient,
+	categorySlugs: string[],
+	sortSlug: string,
+	limit: number,
+	options: GetAllProjectsOptions | undefined,
+	offset: number,
+): Promise<PaginatedProjectsResult>
+
+export async function getAllProjects(
+	client: TypedSupabaseClient,
+	categorySlugs: string[] = [],
+	sortSlug = 'most-popular',
+	limit?: number,
+	options?: GetAllProjectsOptions,
+	offset?: number,
+): Promise<ProjectListItem[] | PaginatedProjectsResult> {
+	const isPaginated = typeof offset === 'number'
+	const pageSize = limit ?? 12
+
 	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-popular']
 
 	let query = client
@@ -61,6 +102,7 @@ export async function getAllProjects(
         escrow_id
       )
     `,
+			isPaginated ? { count: 'exact' } : {},
 		)
 		.order(column, { ascending })
 
@@ -78,11 +120,15 @@ export async function getAllProjects(
 		}
 	}
 
-	if (limit) {
+	if (isPaginated) {
+		// Cursor-based pagination: fetch exactly one page
+		query = query.range(offset, offset + pageSize - 1)
+	} else if (limit) {
+		// Legacy limit-only path (hero, search, etc.)
 		query = query.limit(limit)
 	}
 
-	const { data, error } = await query
+	const { data, error, count } = await query
 
 	if (error) throw error
 
@@ -107,7 +153,7 @@ export async function getAllProjects(
 
 	const escrowContracts = await resolveProjectEscrowContracts(client, escrowRowIds)
 
-	return (
+	const items: ProjectListItem[] =
 		data?.map((project) => {
 			const sourceLocale = (project.source_locale as SupportedLocale | undefined) ?? 'en'
 			const localized = resolveLocalizedFields(
@@ -155,5 +201,12 @@ export async function getAllProjects(
 				),
 			} satisfies ProjectListItem
 		}) ?? []
-	)
+
+	if (isPaginated) {
+		const total = count ?? 0
+		const nextOffset = offset + items.length < total ? offset + pageSize : null
+		return { items, total, nextOffset }
+	}
+
+	return items
 }

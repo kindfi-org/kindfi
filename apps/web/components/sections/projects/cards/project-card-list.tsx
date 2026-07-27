@@ -48,9 +48,6 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 			<motion.article
 				className="flex h-full flex-row overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-md"
 				whileHover={cardHover}
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.3 }}
 			>
 				<div className="relative w-1/4 min-w-[100px] max-w-[180px] overflow-hidden">
 					<Image

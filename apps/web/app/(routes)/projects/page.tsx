@@ -1,9 +1,10 @@
-import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
+import { createSupabaseServerClient, prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import type { Metadata } from 'next'
 import { ProjectsClientWrapper } from '~/components/sections/projects/projects-client-wrapper'
 import { ProjectsHero } from '~/components/sections/projects/projects-hero'
 import { JsonLd } from '~/components/shared/json-ld'
+import { PROJECTS_PAGE_SIZE } from '~/hooks/projects/use-paginated-projects'
 import { getViewerLocale } from '~/lib/i18n/locale-cookie.server'
 import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
 import { getBreadcrumbSchema } from '~/lib/seo/structured-data'
@@ -41,13 +42,42 @@ export default async function ProjectsPage({
 	const categorySlugs = Array.isArray(category) ? category : category ? [category] : []
 	const viewerLocale = await getViewerLocale()
 
+	const categoryKey = categorySlugs.join(',')
+
 	await Promise.all([
-		prefetchSupabaseQuery(
-			queryClient,
-			'projects',
-			(client) => getAllProjects(client, categorySlugs, sortSlug, undefined, { viewerLocale }),
-			[categorySlugs, sortSlug, viewerLocale],
-		),
+		/**
+		 * Prefetch the first page of projects using the same query key shape as
+		 * `usePaginatedProjects` so the client hydrates correctly without a
+		 * second round-trip.
+		 */
+		(async () => {
+			const supabase = await createSupabaseServerClient()
+			await queryClient.prefetchInfiniteQuery({
+				queryKey: [
+					'projects-paginated',
+					categoryKey,
+					sortSlug,
+					viewerLocale,
+					PROJECTS_PAGE_SIZE,
+				] as const,
+				queryFn: async ({ pageParam = 0 }) => {
+					return getAllProjects(
+						supabase,
+						categorySlugs,
+						sortSlug,
+						PROJECTS_PAGE_SIZE,
+						{ viewerLocale },
+						pageParam as number,
+					)
+				},
+				initialPageParam: 0,
+				getNextPageParam: (lastPage) => {
+					const page = lastPage as { nextOffset: number | null }
+					return page.nextOffset ?? undefined
+				},
+				pages: 1, // Only prefetch the first page on the server
+			})
+		})(),
 		prefetchSupabaseQuery(queryClient, 'categories', getAllCategories),
 	])
 

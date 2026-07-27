@@ -20,6 +20,7 @@ export const projects = {
 	filterHint: 'Tap one or more categories to narrow the list.',
 	resultsCountOne: '{count} cause found',
 	resultsCountMany: '{count} causes found',
+	resultsShowing: 'Showing {shown} of {total} projects',
 	emptyDescription:
 		'There are no projects available at the moment. Start a campaign or check back soon.',
 	emptyFilteredDescription:
