@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { getIPFSUrl } from '~/lib/services/pinata'
 import { getUserStats } from '~/lib/services/user-stats'
 
 /**
@@ -30,8 +31,15 @@ export async function GET() {
 			logger.error('Error fetching user NFT:', error)
 		}
 
+		const imageUrl = nft?.image_ipfs_hash ? getIPFSUrl(nft.image_ipfs_hash) : null
+
 		return NextResponse.json({
-			nft: nft || null,
+			nft: nft
+				? {
+						...nft,
+						image_url: imageUrl,
+					}
+				: null,
 			stats,
 		})
 	} catch (error) {

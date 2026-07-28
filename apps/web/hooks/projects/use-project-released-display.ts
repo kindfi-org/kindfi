@@ -1,8 +1,14 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import type { EscrowType, GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo, useRef } from 'react'
 import { useOptionalEscrow } from '~/hooks/contexts/use-escrow.context'
+import {
+	ESCROW_QUERY_POLL_MS,
+	ESCROW_QUERY_STALE_MS,
+	escrowReleasedQueryKey,
+} from '~/lib/constants/escrow-query.constants'
 import {
 	calculateReleasedAmountFromEscrow,
 	calculateReleasedProgressPercent,
@@ -29,62 +35,40 @@ export function useProjectReleasedDisplay({
 }: UseProjectReleasedDisplayParams) {
 	const escrow = useOptionalEscrow()
 	const getEscrowByContractIds = escrow?.getEscrowByContractIds
+	const getEscrowByContractIdsRef = useRef(getEscrowByContractIds)
+	getEscrowByContractIdsRef.current = getEscrowByContractIds
 
 	const hasEscrow = projectHasEscrow({ escrowContractAddress })
-	const [onChainReleasedAmount, setOnChainReleasedAmount] = useState<number | null>(null)
-	const [isLoading, setIsLoading] = useState(false)
+	const address = escrowContractAddress ?? ''
+
+	const { data: onChainReleasedAmount, isPending: isLoadingOnChain } = useQuery({
+		queryKey: escrowReleasedQueryKey(address),
+		queryFn: async () => {
+			const getEscrow = getEscrowByContractIdsRef.current
+			if (!address || !getEscrow) {
+				return null
+			}
+
+			const response = await getEscrow({
+				contractIds: [address],
+				validateOnChain: true,
+			})
+			const escrowData = Array.isArray(response) ? response[0] : response
+			return calculateReleasedAmountFromEscrow(escrowData)
+		},
+		enabled: hasEscrow && Boolean(getEscrowByContractIds) && !preloadedEscrowData,
+		staleTime: ESCROW_QUERY_STALE_MS,
+		refetchInterval: ESCROW_QUERY_POLL_MS,
+		refetchOnWindowFocus: false,
+		placeholderData: (previousData) => previousData,
+	})
 
 	const effectiveOnChainAmount = useMemo(() => {
 		if (preloadedEscrowData) {
 			return calculateReleasedAmountFromEscrow(preloadedEscrowData)
 		}
-		return onChainReleasedAmount
+		return onChainReleasedAmount ?? null
 	}, [preloadedEscrowData, onChainReleasedAmount])
-
-	const fetchReleasedAmount = useCallback(
-		async (showLoading = true) => {
-			if (!escrowContractAddress || !getEscrowByContractIds || preloadedEscrowData) {
-				return
-			}
-
-			try {
-				if (showLoading) setIsLoading(true)
-				const response = await getEscrowByContractIds({
-					contractIds: [escrowContractAddress],
-					validateOnChain: true,
-				})
-				const escrowData = Array.isArray(response) ? response[0] : response
-				setOnChainReleasedAmount(calculateReleasedAmountFromEscrow(escrowData))
-			} catch {
-				setOnChainReleasedAmount(null)
-			} finally {
-				if (showLoading) setIsLoading(false)
-			}
-		},
-		[escrowContractAddress, getEscrowByContractIds, preloadedEscrowData],
-	)
-
-	useEffect(() => {
-		if (!hasEscrow || preloadedEscrowData) {
-			setOnChainReleasedAmount(null)
-			setIsLoading(false)
-			return
-		}
-
-		if (!getEscrowByContractIds) {
-			return
-		}
-
-		fetchReleasedAmount(true)
-
-		const intervalId = setInterval(() => {
-			fetchReleasedAmount(false)
-		}, 10000)
-
-		return () => {
-			clearInterval(intervalId)
-		}
-	}, [fetchReleasedAmount, getEscrowByContractIds, hasEscrow, preloadedEscrowData])
 
 	const displayReleased = useMemo(
 		() =>
@@ -93,7 +77,7 @@ export function useProjectReleasedDisplay({
 				dbReleasedAmount,
 				escrowContractAddress,
 				onChainReleasedAmount: hasEscrow ? effectiveOnChainAmount : null,
-				isLoadingOnChain: hasEscrow && isLoading && effectiveOnChainAmount === null,
+				isLoadingOnChain: hasEscrow && isLoadingOnChain && effectiveOnChainAmount === null,
 			}),
 		[
 			dbMilestones,
@@ -101,7 +85,7 @@ export function useProjectReleasedDisplay({
 			escrowContractAddress,
 			effectiveOnChainAmount,
 			hasEscrow,
-			isLoading,
+			isLoadingOnChain,
 		],
 	)
 

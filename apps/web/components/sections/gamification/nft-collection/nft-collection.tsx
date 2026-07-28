@@ -10,7 +10,7 @@ import { TierRoadmap } from './components/tier-roadmap'
 import type { Tier } from './constants'
 import { TIERS } from './constants'
 import { useNftCollection } from './hooks/use-nft-collection'
-import { findAttr, resolveDonationCount } from './utils/helpers'
+import { findAttr, resolveDonationCount, resolveNftImageUri } from './utils/helpers'
 
 export function NFTCollection() {
 	const [showMetadata, setShowMetadata] = useState(false)
@@ -34,6 +34,7 @@ export function NFTCollection() {
 	}
 
 	const nft = nfts[0]
+	const imageUri = resolveNftImageUri(nft, dbNft, tier)
 	const attrs = nft?.metadata?.attributes ?? []
 	const impactScoreOnChain = findAttr(attrs, 'Impact Score')
 	const questsOnChain = findAttr(attrs, 'Quests Completed')
@@ -60,6 +61,7 @@ export function NFTCollection() {
 			<NftHeroCard
 				nft={nft}
 				dbNft={dbNft}
+				imageUri={imageUri}
 				tier={tier}
 				currentPts={currentPts}
 				progressPct={progressPct}
@@ -78,6 +80,7 @@ export function NFTCollection() {
 			<NftMetadataPanel
 				nft={nft}
 				dbNft={dbNft}
+				imageUri={imageUri}
 				userStats={userStats}
 				tier={tier}
 				showMetadata={showMetadata}
@@ -86,7 +89,7 @@ export function NFTCollection() {
 				nftContractAddress={dbNft?.contract_address}
 			/>
 
-			<NftAdditionalList nfts={nfts} />
+			<NftAdditionalList nfts={nfts} dbTier={tier} />
 
 			<TierRoadmap tier={tier} />
 		</div>

@@ -3,11 +3,11 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { MapPin, Share2, Target, TrendingUp, Unlock, Users, Wallet } from 'lucide-react'
 import { type ReactNode, useMemo } from 'react'
-import { Badge } from '~/components/base/badge'
 import { AnimatedCounter } from '~/components/sections/projects/detail/animated-counter'
 import { ProjectHeroBanner } from '~/components/sections/projects/detail/project-hero-banner'
 import { SocialLinksDisplay } from '~/components/sections/projects/detail/social-links-display'
 import {
+	AcceptingDonationsBadge,
 	CategoryBadge,
 	CountryFlag,
 	ProjectTagList,
@@ -78,9 +78,9 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 		dbMilestones: project.milestones,
 	})
 
-	const releasedAmount = displayReleased ?? 0
-	const releasedPercentage = releasedProgressPercent ?? 0
-	const progressPercentage = progressPercent ?? 0
+	const progressPercentage = progressPercent
+	const isLoadingProgress = progressPercentage === null
+	const barProgressPercent = progressPercentage ?? 0
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
 	return (
@@ -97,11 +97,7 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 				) : (
 					<span />
 				)}
-				{hasEscrow ? (
-					<Badge className="shrink-0 rounded-full border-0 bg-emerald-600/95 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm backdrop-blur-sm">
-						{t('projects.acceptingDonations')}
-					</Badge>
-				) : null}
+				{hasEscrow ? <AcceptingDonationsBadge /> : null}
 			</ProjectHeroBanner>
 
 			<div className="relative -mt-8 rounded-t-3xl bg-white px-5 pb-6 pt-7 sm:px-6 md:-mt-10 md:px-8 md:pb-8 md:pt-9">
@@ -146,20 +142,23 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 						<div className="mb-2 flex items-center justify-between gap-3 text-sm">
 							<span className="font-medium text-slate-700">{raisedLabel}</span>
 							<span className="font-semibold tabular-nums text-emerald-700">
-								{progressPercentage}%
+								{isLoadingProgress ? '…' : `${barProgressPercent}%`}
 							</span>
 						</div>
 						<div
 							className="h-2 w-full overflow-hidden rounded-full bg-white shadow-inner"
 							role="progressbar"
-							aria-valuenow={progressPercentage}
+							aria-valuenow={barProgressPercent}
 							aria-valuemin={0}
 							aria-valuemax={100}
-							aria-label={`${progressPercentage}% funded`}
+							aria-busy={isLoadingProgress}
+							aria-label={
+								isLoadingProgress ? 'Loading funding progress' : `${barProgressPercent}% funded`
+							}
 						>
 							<motion.div
 								className="h-full rounded-full gradient-progress shadow-sm"
-								custom={progressPercentage}
+								custom={barProgressPercent}
 								variants={progressBarAnimation}
 								initial="initial"
 								animate="animate"
@@ -176,8 +175,8 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 					</div>
 
 					<ReleasedProgressBar
-						releasedAmount={releasedAmount}
-						progressPercentage={releasedPercentage}
+						releasedAmount={displayReleased}
+						progressPercentage={releasedProgressPercent}
 					/>
 				</section>
 
@@ -206,7 +205,7 @@ export function ProjectHero({ project, projectSlug }: ProjectHeroProps) {
 								'…'
 							) : (
 								<>
-									$<AnimatedCounter value={releasedAmount} />
+									$<AnimatedCounter value={displayReleased} />
 								</>
 							)
 						}

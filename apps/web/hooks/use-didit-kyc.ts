@@ -1,6 +1,7 @@
 // hooks/use-didit-kyc.ts
 
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 import { logger } from '@/lib/logger'
 
 interface KYCStatus {
@@ -16,60 +17,57 @@ interface CreateSessionResponse {
 	error?: string
 }
 
+type KycStatusData = {
+	status: KYCStatus['status']
+}
+
+const KYC_STATUS_QUERY_KEY = (userId: string) => ['kyc-status', userId] as const
+
+const fetchKycStatus = async (): Promise<KycStatusData> => {
+	const response = await fetch('/api/kyc/status')
+
+	if (!response.ok) {
+		throw new Error(`Failed to fetch KYC status: ${response.statusText}`)
+	}
+
+	const result = await response.json()
+	return { status: result.status || null }
+}
+
+type UseDiditKYCOptions = {
+	/** When false, skips the initial status fetch (e.g. section not visible). */
+	enabled?: boolean
+}
+
 /**
- * Hook for managing Didit KYC verification
+ * Hook for managing Didit KYC verification.
+ * Fetches status once when enabled; use refreshStatus / checkStatusFromDidit after user actions.
  */
-export function useDiditKYC(userId: string) {
-	const [kycStatus, setKycStatus] = useState<KYCStatus>({
-		status: null,
-		isLoading: true,
-		error: null,
+export function useDiditKYC(userId: string, options: UseDiditKYCOptions = {}) {
+	const { enabled = true } = options
+	const queryClient = useQueryClient()
+
+	const { data, isLoading, error } = useQuery({
+		queryKey: KYC_STATUS_QUERY_KEY(userId),
+		queryFn: fetchKycStatus,
+		enabled: Boolean(userId) && enabled,
+		staleTime: Number.POSITIVE_INFINITY,
+		gcTime: 5 * 60 * 1000,
+		refetchOnWindowFocus: false,
+		refetchOnReconnect: false,
+		refetchOnMount: false,
 	})
 
+	const kycStatus: KYCStatus = {
+		status: data?.status ?? null,
+		isLoading: Boolean(userId) && isLoading,
+		error: error instanceof Error ? error.message : error ? String(error) : null,
+	}
+
 	const loadKYCStatus = useCallback(async () => {
-		try {
-			// Use API route instead of direct Supabase query to avoid RLS issues
-			const response = await fetch('/api/kyc/status')
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch KYC status: ${response.statusText}`)
-			}
-
-			const result = await response.json()
-			const status = result.status || null
-
-			setKycStatus({
-				status,
-				isLoading: false,
-				error: null,
-			})
-		} catch (error) {
-			logger.error('❌ Failed to load KYC status:', error)
-			setKycStatus({
-				status: null,
-				isLoading: false,
-				error: error instanceof Error ? error.message : 'Failed to load KYC status',
-			})
-		}
-	}, [])
-
-	useEffect(() => {
-		if (!userId) {
-			setKycStatus({ status: null, isLoading: false, error: null })
-			return
-		}
-
-		loadKYCStatus()
-
-		// Poll for status updates every 5 seconds if status is pending or null
-		// This helps catch webhook updates that might be delayed
-		const pollInterval = setInterval(() => {
-			loadKYCStatus()
-		}, 5000)
-
-		// Cleanup interval on unmount
-		return () => clearInterval(pollInterval)
-	}, [userId, loadKYCStatus])
+		if (!userId) return
+		await queryClient.invalidateQueries({ queryKey: KYC_STATUS_QUERY_KEY(userId) })
+	}, [queryClient, userId])
 
 	const checkStatusFromDidit = useCallback(async () => {
 		try {
@@ -81,34 +79,29 @@ export function useDiditKYC(userId: string) {
 			})
 
 			if (!response.ok) {
-				// If 404 or other error, just reload from database
 				if (response.status === 404) {
 					await loadKYCStatus()
 					return { success: false, message: 'No KYC session found' }
 				}
-				const error = await response.json()
-				throw new Error(error.error || 'Failed to check status')
+				const errorResponse = await response.json()
+				throw new Error(errorResponse.error || 'Failed to check status')
 			}
 
 			const result = await response.json()
 
-			// If no session found, that's okay - just reload from database
 			if (!result.success) {
 				await loadKYCStatus()
 				return result
 			}
 
-			// Reload status from database after checking Didit
 			await loadKYCStatus()
-
 			return result
-		} catch (error) {
-			logger.error('Failed to check status from Didit:', error)
-			// Fallback to loading from database
+		} catch (checkError) {
+			logger.error('Failed to check status from Didit:', checkError)
 			await loadKYCStatus()
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: checkError instanceof Error ? checkError.message : 'Unknown error',
 			}
 		}
 	}, [loadKYCStatus])
@@ -124,20 +117,17 @@ export function useDiditKYC(userId: string) {
 			})
 
 			if (!response.ok) {
-				const error = await response.json()
-				throw new Error(error.error || 'Failed to create verification session')
+				const errorResponse = await response.json()
+				throw new Error(errorResponse.error || 'Failed to create verification session')
 			}
 
 			const result = await response.json()
-
-			// Reload status after creating session
 			await loadKYCStatus()
-
 			return result
-		} catch (error) {
+		} catch (createError) {
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Unknown error',
+				error: createError instanceof Error ? createError.message : 'Unknown error',
 			}
 		}
 	}

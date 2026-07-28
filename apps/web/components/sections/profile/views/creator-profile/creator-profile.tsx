@@ -8,11 +8,13 @@ import { CreatorOverview } from './creator-overview'
 import type { CreatorProfileProps } from './types'
 import { useCreatorProfileData } from './use-creator-profile-data'
 
-export function CreatorProfile({
+function CreatorProfileCampaigns({
 	userId,
-	displayName: _displayName,
-	showSection = 'overview',
-}: CreatorProfileProps) {
+	showSection,
+}: {
+	userId: string
+	showSection: 'overview' | 'campaigns'
+}) {
 	const {
 		projects,
 		projectsWithBalances,
@@ -22,18 +24,6 @@ export function CreatorProfile({
 		isLoading,
 		error,
 	} = useCreatorProfileData(userId)
-
-	if (showSection === 'gamification') {
-		return <GamificationSection />
-	}
-
-	if (showSection === 'foundations') {
-		return <FoundationsSection userId={userId} />
-	}
-
-	if (showSection === 'nfts') {
-		return <CreatorNftsSection />
-	}
 
 	if (showSection === 'campaigns') {
 		return (
@@ -58,6 +48,31 @@ export function CreatorProfile({
 			projectsWithBalances={projectsWithBalances}
 			isLoading={isLoading}
 			error={error}
+		/>
+	)
+}
+
+export function CreatorProfile({
+	userId,
+	displayName: _displayName,
+	showSection = 'overview',
+}: CreatorProfileProps) {
+	if (showSection === 'gamification') {
+		return <GamificationSection />
+	}
+
+	if (showSection === 'foundations') {
+		return <FoundationsSection userId={userId} />
+	}
+
+	if (showSection === 'nfts') {
+		return <CreatorNftsSection />
+	}
+
+	return (
+		<CreatorProfileCampaigns
+			userId={userId}
+			showSection={showSection === 'campaigns' ? 'campaigns' : 'overview'}
 		/>
 	)
 }

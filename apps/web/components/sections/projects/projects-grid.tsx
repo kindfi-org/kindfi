@@ -13,7 +13,7 @@ interface ProjectsGridProps {
 	 * Set of project IDs that were added in the latest page-load.
 	 * Only these IDs receive enter animations; already-rendered cards are static.
 	 */
-	newIds?: ReadonlySet<string>
+	newIds?: ReadonlySet<string | number>
 }
 
 export function ProjectsGrid({

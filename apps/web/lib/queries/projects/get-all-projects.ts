@@ -44,8 +44,8 @@ export type PaginatedProjectsResult = {
  */
 export async function getAllProjects(
 	client: TypedSupabaseClient,
-	categorySlugs: string[] = [],
-	sortSlug = 'most-popular',
+	categorySlugs?: string[],
+	sortSlug?: string,
 	limit?: number,
 	options?: GetAllProjectsOptions,
 ): Promise<ProjectListItem[]>

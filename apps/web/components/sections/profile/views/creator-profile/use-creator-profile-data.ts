@@ -19,15 +19,16 @@ export function useCreatorProfileData(userId: string) {
 	const { status } = useSession()
 	const {
 		data: projects,
-		isLoading,
+		isPending,
 		error,
 	} = useQuery({
 		queryKey: ['profile', 'user-projects', userId],
 		queryFn: fetchProfileProjects,
 		enabled: status === 'authenticated' && Boolean(userId),
+		staleTime: 60_000,
 	})
 
-	const { getDisplayRaised, isLoadingBalances } = useProjectsFundingBalances(projects)
+	const { getDisplayRaised } = useProjectsFundingBalances(projects ?? [])
 
 	const projectsWithBalances = useMemo((): CreatorProjectWithBalance[] => {
 		return (projects ?? []).map((project) => {
@@ -66,7 +67,7 @@ export function useCreatorProfileData(userId: string) {
 		activeProjects,
 		totalRaised,
 		formatCurrency,
-		isLoading: isLoading || isLoadingBalances,
+		isLoading: isPending,
 		error,
 	}
 }

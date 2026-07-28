@@ -4,8 +4,8 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Badge } from '~/components/base/badge'
 import {
+	AcceptingDonationsBadge,
 	CategoryBadge,
 	ProjectTagList,
 	ReleasedProgressBar,
@@ -38,9 +38,9 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 		dbReleasedAmount: project.releasedAmount,
 	})
 
-	const progressPercentage = progressPercent ?? 0
-	const releasedAmount = displayReleased ?? 0
-	const releasedPercentage = releasedProgressPercent ?? 0
+	const progressPercentage = progressPercent
+	const isLoadingProgress = progressPercentage === null
+	const barProgressPercent = progressPercentage ?? 0
 
 	const imageSrc = project.image || '/images/placeholder.png'
 
@@ -64,16 +64,11 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 						loading={index >= 6 ? 'lazy' : undefined}
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-					<div className="absolute top-3 left-3 flex flex-col gap-2 drop-shadow">
-						{project.category && <CategoryBadge category={project.category} variant="display" />}
-						{project.escrowContractAddress && (
-							<Badge
-								className="rounded-full border-0 bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-medium text-white"
-								aria-label={t('projects.acceptingDonations')}
-							>
-								{t('projects.acceptingDonations')}
-							</Badge>
-						)}
+					<div className="absolute top-3 left-3 right-3 flex max-w-full flex-wrap items-center gap-1.5 drop-shadow">
+						{project.category ? (
+							<CategoryBadge category={project.category} variant="display" />
+						) : null}
+						{project.escrowContractAddress ? <AcceptingDonationsBadge /> : null}
 					</div>
 					<div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 						<span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-900 shadow-sm backdrop-blur">
@@ -96,14 +91,17 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 					<div
 						className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2 shadow-inner"
 						role="progressbar"
-						aria-valuenow={progressPercentage}
+						aria-valuenow={barProgressPercent}
 						aria-valuemin={0}
 						aria-valuemax={100}
-						aria-label={`${progressPercentage}% funded`}
+						aria-busy={isLoadingProgress}
+						aria-label={
+							isLoadingProgress ? 'Loading funding progress' : `${barProgressPercent}% funded`
+						}
 					>
 						<motion.div
 							className="h-full rounded-full gradient-progress shadow-sm"
-							custom={progressPercentage}
+							custom={barProgressPercent}
 							variants={progressBarAnimation}
 							initial="initial"
 							animate="animate"
@@ -117,12 +115,12 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 								: formatCurrency(displayRaised, { maximumFractionDigits: 0 })}{' '}
 							{t('projects.raised').toLowerCase()}
 						</span>
-						<span>{progressPercentage}%</span>
+						<span>{isLoadingProgress ? '…' : `${barProgressPercent}%`}</span>
 					</div>
 
 					<ReleasedProgressBar
-						releasedAmount={releasedAmount}
-						progressPercentage={releasedPercentage}
+						releasedAmount={displayReleased}
+						progressPercentage={releasedProgressPercent}
 						className="mt-2"
 					/>
 

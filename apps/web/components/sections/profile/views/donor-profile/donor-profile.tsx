@@ -7,24 +7,18 @@ import { DonorOverview } from './donor-overview'
 import type { DonorProfileProps } from './types'
 import { useDonorProfileData } from './use-donor-profile-data'
 
-export function DonorProfile({
+function DonorProfileWithProjects({
 	userId,
-	displayName: _displayName,
-	showSection = 'overview',
-}: DonorProfileProps) {
+	showSection,
+}: {
+	userId: string
+	showSection: 'overview' | 'donations'
+}) {
 	const { supportedProjects, projectsWithBalances, stats, isLoading, error } =
 		useDonorProfileData(userId)
 
-	if (showSection === 'gamification') {
-		return <GamificationSection />
-	}
-
 	if (showSection === 'donations') {
 		return <DonorDonationsSection projectsWithBalances={projectsWithBalances} />
-	}
-
-	if (showSection === 'nfts') {
-		return <DonorNftsSection />
 	}
 
 	return (
@@ -34,6 +28,27 @@ export function DonorProfile({
 			stats={stats}
 			isLoading={isLoading}
 			error={error}
+		/>
+	)
+}
+
+export function DonorProfile({
+	userId,
+	displayName: _displayName,
+	showSection = 'overview',
+}: DonorProfileProps) {
+	if (showSection === 'gamification') {
+		return <GamificationSection />
+	}
+
+	if (showSection === 'nfts') {
+		return <DonorNftsSection />
+	}
+
+	return (
+		<DonorProfileWithProjects
+			userId={userId}
+			showSection={showSection === 'donations' ? 'donations' : 'overview'}
 		/>
 	)
 }
