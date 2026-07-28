@@ -1,6 +1,10 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { getUserStats } from '~/lib/services/user-stats'
-import type { MatchingCandidateProject } from './schemas'
+import {
+	MAX_PROMPT_CANDIDATES,
+	type MatchingCandidateProject,
+	type PromptCandidateProject,
+} from './schemas'
 
 type CategoryRef = { id: string; name: string; slug: string | null; color: string } | null
 
@@ -215,20 +219,64 @@ export async function fetchMatchingCandidates(
 		}))
 }
 
-export const buildMatchingPrompt = (
+/**
+ * Pre-ranks candidates by relevance to the user's derived preferences and
+ * returns a compact slice bounded to `limit` (default MAX_PROMPT_CANDIDATES).
+ *
+ * Scoring (additive):
+ *   +3  category matches a topCategory
+ *   +2  region matches a topRegion
+ *   +1  per tag matching a topTag (capped at 3)
+ *   +0.5 proportional to percentageComplete (momentum signal)
+ *
+ * Cold-start users (no preferences) get score 0 for all candidates, so the
+ * original Supabase kinder_count ordering is preserved.
+ */
+export function preRankCandidates(
 	userContext: UserMatchingContext,
 	candidates: MatchingCandidateProject[],
+	limit = MAX_PROMPT_CANDIDATES,
+): PromptCandidateProject[] {
+	const { topCategories, topRegions, topTags } = userContext.derivedPreferences
+	const categorySet = new Set(topCategories)
+	const regionSet = new Set(topRegions)
+	const tagSet = new Set(topTags)
+
+	const scored = candidates.map((project) => {
+		let score = 0
+		if (project.category?.name && categorySet.has(project.category.name)) score += 3
+		if (project.projectLocation && regionSet.has(project.projectLocation)) score += 2
+		const tagMatches = project.tags.filter((t) => tagSet.has(t.name)).length
+		score += Math.min(tagMatches, 3)
+		score += ((project.percentageComplete ?? 0) / 100) * 0.5
+		return { project, score }
+	})
+
+	return scored
+		.sort((a, b) => b.score - a.score)
+		.slice(0, limit)
+		.map(({ project }) => ({
+			id: project.id,
+			title: project.title,
+			description: project.description?.slice(0, 150) ?? '',
+			category: project.category?.name ?? 'Uncategorized',
+			region: project.projectLocation ?? null,
+			tags: project.tags.map((t) => t.name),
+			fundingProgress: project.percentageComplete ?? 0,
+			supporters: project.investors,
+		}))
+}
+
+export const buildMatchingPrompt = (
+	userContext: UserMatchingContext,
+	candidates: PromptCandidateProject[],
 ): string => {
-	const candidateList = candidates.map((project) => ({
-		id: project.id,
-		title: project.title,
-		description: project.description?.slice(0, 280) ?? '',
-		category: project.category?.name ?? 'Uncategorized',
-		region: project.projectLocation,
-		tags: project.tags.map((tag) => tag.name),
-		fundingProgress: project.percentageComplete ?? 0,
-		supporters: project.investors,
-	}))
+	const candidateLines = candidates
+		.map(
+			(p) =>
+				`[${p.id}] ${p.title} | ${p.category} | ${p.region ?? 'global'} | tags: ${p.tags.join(',') || 'none'} | ${p.fundingProgress}% funded | ${p.supporters} supporters | ${p.description}`,
+		)
+		.join('\n')
 
 	return `Recommend 3 to 5 projects from the candidate list that best match this KindFi user.
 
@@ -263,7 +311,7 @@ ${
 }
 
 ## Candidate projects (only recommend from this list)
-${JSON.stringify(candidateList, null, 2)}
+${candidateLines}
 
 Rules:
 - Only use project ids from the candidate list.
