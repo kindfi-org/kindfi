@@ -13,16 +13,23 @@ export async function getProjectDonationStream(
 	client: TypedSupabaseClient,
 	projectId: string,
 	limit = DEFAULT_LIMIT,
+	after?: string,
 ): Promise<DonationStreamItem[]> {
 	const safeLimit = Math.min(Math.max(1, limit), MAX_LIMIT)
 
-	const { data, error } = await client
+	let query = client
 		.from('contributions')
 		.select('id, amount, created_at')
 		.eq('project_id', projectId)
 		.gt('amount', 0)
 		.order('created_at', { ascending: false })
 		.limit(safeLimit)
+
+	if (after) {
+		query = query.gt('created_at', after)
+	}
+
+	const { data, error } = await query
 
 	if (error) throw error
 

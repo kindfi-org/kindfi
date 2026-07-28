@@ -1,9 +1,15 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import { unstable_cache } from 'next/cache'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
 import { getProjectIdBySlug } from '~/lib/api/authorize-project-manage'
 import { getProjectDonationStream } from '~/lib/queries/projects/get-project-donation-stream'
 import { validateProjectSlug } from '~/lib/validation/project-slug'
+
+const getProjectIdBySlugCached = unstable_cache(getProjectIdBySlug, ['project-id-by-slug'], {
+	revalidate: 300,
+	tags: ['project-slug'],
+})
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
@@ -13,7 +19,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
 			return NextResponse.json({ error: 'Invalid project slug' }, { status: 400 })
 		}
 
-		const projectId = await getProjectIdBySlug(slug)
+		const projectId = await getProjectIdBySlugCached(slug)
 		if (!projectId) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
@@ -21,8 +27,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
 		const url = new URL(req.url)
 		const limitParam = Number(url.searchParams.get('limit') ?? 15)
 		const limit = Number.isFinite(limitParam) ? limitParam : 15
+		const after = url.searchParams.get('after') ?? undefined
 
-		const data = await getProjectDonationStream(supabaseServiceRole, projectId, limit)
+		const data = await getProjectDonationStream(supabaseServiceRole, projectId, limit, after)
 
 		return NextResponse.json({ data })
 	} catch (error) {
