@@ -35,6 +35,22 @@ export const getVoteWeight = (tier: NftTier): number => TIER_VOTE_WEIGHTS[tier] 
 export const getTierLabel = (tier: NftTier): string => TIER_LABELS[tier] ?? tier
 
 /**
+ * Aggregates vote weights per option from a flat list of vote rows.
+ * Returns a map of option_id → { up, down } totals.
+ */
+export function buildOptionWeightMap(
+	votes: { option_id: string; vote_type: string; vote_weight: number }[],
+): Record<string, { up: number; down: number }> {
+	const map: Record<string, { up: number; down: number }> = {}
+	for (const v of votes) {
+		if (!map[v.option_id]) map[v.option_id] = { up: 0, down: 0 }
+		if (v.vote_type === 'up') map[v.option_id].up += v.vote_weight
+		else map[v.option_id].down += v.vote_weight
+	}
+	return map
+}
+
+/**
  * Given a list of options and the current user's vote,
  * calculate the projected fund allocation percentage per option.
  */
