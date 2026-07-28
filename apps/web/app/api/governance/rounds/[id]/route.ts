@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { buildOptionWeightMap } from '~/lib/governance/vote-weight'
 import { governanceRoundIdParamSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -44,19 +45,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 			return NextResponse.json({ error: 'Round not found' }, { status: 404 })
 		}
 
-		const weightMap: Record<string, { up: number; down: number }> = {}
+		const weightMap = buildOptionWeightMap(votes ?? [])
 		let userVote: { option_id: string; vote_type: string } | null = null
-
-		for (const v of votes ?? []) {
-			if (!weightMap[v.option_id]) {
-				weightMap[v.option_id] = { up: 0, down: 0 }
-			}
-			if (v.vote_type === 'up') weightMap[v.option_id].up += v.vote_weight
-			else weightMap[v.option_id].down += v.vote_weight
-
-			if (session?.user?.id && v.user_id === session.user.id) {
-				userVote = { option_id: v.option_id, vote_type: v.vote_type }
-			}
+		if (session?.user?.id) {
+			const uv = (votes ?? []).find((v) => v.user_id === session.user.id)
+			if (uv) userVote = { option_id: uv.option_id, vote_type: uv.vote_type }
 		}
 
 		const enrichedOptions = (round.options ?? []).map((opt: { id: string }) => ({
