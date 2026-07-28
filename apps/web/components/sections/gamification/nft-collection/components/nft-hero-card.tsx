@@ -11,6 +11,7 @@ import type { NFT, UserNFTRecord } from '../types'
 interface NftHeroCardProps {
 	nft: NFT | undefined
 	dbNft: UserNFTRecord | null
+	imageUri: string | null
 	tier: Tier
 	currentPts: number
 	progressPct: number
@@ -21,6 +22,7 @@ interface NftHeroCardProps {
 export function NftHeroCard({
 	nft,
 	dbNft,
+	imageUri,
 	tier,
 	currentPts,
 	progressPct,
@@ -34,10 +36,10 @@ export function NftHeroCard({
 		<Card className="overflow-hidden">
 			<div className="flex flex-col sm:flex-row">
 				<div className="relative w-full sm:w-56 h-56 sm:h-auto bg-muted shrink-0">
-					{nft?.metadata?.image_uri ? (
+					{imageUri ? (
 						<Image
-							src={nft.metadata.image_uri}
-							alt={nft.metadata.name}
+							src={imageUri}
+							alt={nft?.metadata?.name ?? `${tierConfig.label} Kinder`}
 							fill
 							className="object-cover"
 							unoptimized

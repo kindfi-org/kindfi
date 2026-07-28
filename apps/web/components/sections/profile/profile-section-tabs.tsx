@@ -223,50 +223,58 @@ const ProfileSectionTabsInner = ({
 			</div>
 
 			<TabsContent value="overview" className="mt-0">
-				{renderSection('overview')}
+				{activeSection === 'overview' ? renderSection('overview') : null}
 			</TabsContent>
 			<TabsContent value="ramps" className="mt-0">
-				<FiatRampsSection
-					userId={user.id}
-					walletAddress={effectiveWalletAddress}
-					isWalletReady={isWalletReady}
-					isPollarUser={isPollarUser}
-					onConnectKit={onConnectKit}
-				/>
+				{activeSection === 'ramps' ? (
+					<FiatRampsSection
+						userId={user.id}
+						walletAddress={effectiveWalletAddress}
+						isWalletReady={isWalletReady}
+						isPollarUser={isPollarUser}
+						onConnectKit={onConnectKit}
+					/>
+				) : null}
 			</TabsContent>
 			<TabsContent value="gamification" className="mt-0">
-				{renderSection('gamification')}
+				{activeSection === 'gamification' ? renderSection('gamification') : null}
 			</TabsContent>
 			<TabsContent value="referrals" className="mt-0">
-				<ReferralSection
-					profilePollarAddress={user.profile?.pollar_wallet_address}
-					profileExternalAddress={user.profile?.external_wallet_address}
-				/>
+				{activeSection === 'referrals' ? (
+					<ReferralSection
+						profilePollarAddress={user.profile?.pollar_wallet_address}
+						profileExternalAddress={user.profile?.external_wallet_address}
+					/>
+				) : null}
 			</TabsContent>
 			<TabsContent value="donations" className="mt-0">
-				{role === 'donor' ? renderSection('donations') : null}
+				{activeSection === 'donations' && role === 'donor' ? renderSection('donations') : null}
 			</TabsContent>
 			<TabsContent value="campaigns" className="mt-0">
-				{showCreatorProfile ? renderSection('campaigns') : null}
+				{activeSection === 'campaigns' && showCreatorProfile ? renderSection('campaigns') : null}
 			</TabsContent>
 			<TabsContent value="foundations" className="mt-0">
-				{showCreatorProfile ? renderSection('foundations') : null}
+				{activeSection === 'foundations' && showCreatorProfile
+					? renderSection('foundations')
+					: null}
 			</TabsContent>
 			<TabsContent value="settings" className="mt-0">
-				<div className="grid gap-6 lg:grid-cols-2">
-					<PersonalInfoCard
-						userId={user.id}
-						displayName={user.profile?.display_name ?? ''}
-						bio={user.profile?.bio ?? ''}
-						imageUrl={user.profile?.image_url ?? ''}
-						_email={user.email}
-					/>
-					<AccountInfoCard
-						userEmail={user.email}
-						createdAt={user.created_at}
-						slug={user.profile?.slug ?? ''}
-					/>
-				</div>
+				{activeSection === 'settings' ? (
+					<div className="grid gap-6 lg:grid-cols-2">
+						<PersonalInfoCard
+							userId={user.id}
+							displayName={user.profile?.display_name ?? ''}
+							bio={user.profile?.bio ?? ''}
+							imageUrl={user.profile?.image_url ?? ''}
+							_email={user.email}
+						/>
+						<AccountInfoCard
+							userEmail={user.email}
+							createdAt={user.created_at}
+							slug={user.profile?.slug ?? ''}
+						/>
+					</div>
+				) : null}
 			</TabsContent>
 		</Tabs>
 	)

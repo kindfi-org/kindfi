@@ -4,8 +4,8 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Badge } from '~/components/base/badge'
 import {
+	AcceptingDonationsBadge,
 	CategoryBadge,
 	ProjectTagList,
 	ReleasedProgressBar,
@@ -36,9 +36,9 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 		dbReleasedAmount: project.releasedAmount,
 	})
 
-	const progressPercentage = progressPercent ?? 0
-	const releasedAmount = displayReleased ?? 0
-	const releasedPercentage = releasedProgressPercent ?? 0
+	const progressPercentage = progressPercent
+	const isLoadingProgress = progressPercentage === null
+	const barProgressPercent = progressPercentage ?? 0
 
 	return (
 		<Link
@@ -48,9 +48,6 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 			<motion.article
 				className="flex h-full flex-row overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/80 hover:shadow-md"
 				whileHover={cardHover}
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.3 }}
 			>
 				<div className="relative w-1/4 min-w-[100px] max-w-[180px] overflow-hidden">
 					<Image
@@ -69,22 +66,11 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						<h3 className="text-base font-bold sm:text-lg md:text-xl line-clamp-1">
 							{project.title}
 						</h3>
-						<div className="flex shrink-0 flex-wrap gap-1.5">
-							{project.category && (
-								<CategoryBadge
-									category={project.category}
-									variant="display"
-									className="text-[10px] sm:text-[11px]"
-								/>
-							)}
-							{project.escrowContractAddress && (
-								<Badge
-									className="rounded-full border-0 bg-emerald-600/90 px-1.5 py-0.5 text-[9px] font-medium text-white"
-									aria-label={t('projects.acceptingDonations')}
-								>
-									{t('projects.acceptingDonations')}
-								</Badge>
-							)}
+						<div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-1.5">
+							{project.category ? (
+								<CategoryBadge category={project.category} variant="display" />
+							) : null}
+							{project.escrowContractAddress ? <AcceptingDonationsBadge /> : null}
 						</div>
 					</div>
 
@@ -96,14 +82,17 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						<div
 							className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2"
 							role="progressbar"
-							aria-valuenow={progressPercentage}
+							aria-valuenow={barProgressPercent}
 							aria-valuemin={0}
 							aria-valuemax={100}
-							aria-label={`${progressPercentage}% funded`}
+							aria-busy={isLoadingProgress}
+							aria-label={
+								isLoadingProgress ? 'Loading funding progress' : `${barProgressPercent}% funded`
+							}
 						>
 							<motion.div
 								className="h-full rounded-full gradient-progress"
-								custom={progressPercentage}
+								custom={barProgressPercent}
 								variants={progressBarAnimation}
 								initial="initial"
 								animate="animate"
@@ -117,12 +106,12 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 									: formatCurrency(displayRaised, { maximumFractionDigits: 0 })}{' '}
 								{t('projects.raised').toLowerCase()}
 							</span>
-							<span>{progressPercentage}%</span>
+							<span>{isLoadingProgress ? '…' : `${barProgressPercent}%`}</span>
 						</div>
 
 						<ReleasedProgressBar
-							releasedAmount={releasedAmount}
-							progressPercentage={releasedPercentage}
+							releasedAmount={displayReleased}
+							progressPercentage={releasedProgressPercent}
 							className="mt-2"
 						/>
 

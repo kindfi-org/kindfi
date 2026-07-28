@@ -6,10 +6,10 @@ import { progressBarAnimation } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
 
 interface ReleasedProgressBarProps {
-	/** Cumulative amount released via milestones with `released` status. */
-	releasedAmount: number
-	/** Released amount as a percent of goal (0–100). */
-	progressPercentage: number
+	/** Cumulative amount released via milestones with `released` status. Null while loading. */
+	releasedAmount: number | null
+	/** Released amount as a percent of goal (0–100). Null while loading. */
+	progressPercentage: number | null
 	className?: string
 }
 
@@ -29,19 +29,23 @@ export function ReleasedProgressBar({
 	progressPercentage,
 	className,
 }: ReleasedProgressBarProps) {
+	const barPercent = progressPercentage ?? 0
+	const isLoading = releasedAmount === null
+
 	return (
 		<div className={cn('w-full', className)}>
 			<div
 				className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2"
 				role="progressbar"
-				aria-valuenow={progressPercentage}
+				aria-valuenow={barPercent}
 				aria-valuemin={0}
 				aria-valuemax={100}
-				aria-label={`${progressPercentage}% released`}
+				aria-busy={isLoading}
+				aria-label={isLoading ? 'Loading released amount' : `${barPercent}% released`}
 			>
 				<motion.div
 					className="h-full rounded-full gradient-released"
-					custom={progressPercentage}
+					custom={barPercent}
 					variants={progressBarAnimation}
 					initial="initial"
 					animate="animate"
@@ -49,8 +53,8 @@ export function ReleasedProgressBar({
 			</div>
 
 			<div className="flex justify-between mt-1 text-sm text-gray-500 tabular-nums">
-				<span>{releasedFormatter.format(releasedAmount)} released</span>
-				<span>{progressPercentage}%</span>
+				<span>{isLoading ? '…' : releasedFormatter.format(releasedAmount)} released</span>
+				<span>{isLoading ? '…' : `${barPercent}%`}</span>
 			</div>
 		</div>
 	)

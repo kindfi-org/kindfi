@@ -59,35 +59,36 @@ export async function GET(req: NextRequest) {
 			return NextResponse.json({ error: 'Failed to fetch rounds' }, { status: 500 })
 		}
 
-		// For each round, fetch aggregated vote weights per option
-		const enrichedRounds = await Promise.all(
-			(rounds ?? []).map(async (round) => {
-				const { data: votes } = await supabase
-					.from('governance_votes')
-					.select('option_id, vote_type, vote_weight')
-					.eq('round_id', round.id)
+		// Single bounded query: fetch all votes for all rounds in this page at once
+		const roundIds = (rounds ?? []).map((r) => r.id)
+		const { data: allVotes } =
+			roundIds.length > 0
+				? await supabase
+						.from('governance_votes')
+						.select('round_id, option_id, vote_type, vote_weight')
+						.in('round_id', roundIds)
+				: { data: [] }
 
-				const weightMap: Record<string, { up: number; down: number }> = {}
-				for (const v of votes ?? []) {
-					if (!weightMap[v.option_id]) {
-						weightMap[v.option_id] = { up: 0, down: 0 }
-					}
-					if (v.vote_type === 'up') {
-						weightMap[v.option_id].up += v.vote_weight
-					} else {
-						weightMap[v.option_id].down += v.vote_weight
-					}
-				}
+		// Build nested weight map: { [roundId]: { [optionId]: { up, down } } }
+		const votesByRound: Record<string, Record<string, { up: number; down: number }>> = {}
+		for (const v of allVotes ?? []) {
+			if (!votesByRound[v.round_id]) votesByRound[v.round_id] = {}
+			const roundMap = votesByRound[v.round_id]
+			if (!roundMap[v.option_id]) roundMap[v.option_id] = { up: 0, down: 0 }
+			if (v.vote_type === 'up') roundMap[v.option_id].up += v.vote_weight
+			else roundMap[v.option_id].down += v.vote_weight
+		}
 
-				const enrichedOptions = (round.options ?? []).map((opt: { id: string }) => ({
-					...opt,
-					weighted_upvotes: weightMap[opt.id]?.up ?? 0,
-					weighted_downvotes: weightMap[opt.id]?.down ?? 0,
-				}))
-
-				return { ...round, options: enrichedOptions }
-			}),
-		)
+		// Enrich options synchronously from the pre-built map
+		const enrichedRounds = (rounds ?? []).map((round) => {
+			const weightMap = votesByRound[round.id] ?? {}
+			const enrichedOptions = (round.options ?? []).map((opt: { id: string }) => ({
+				...opt,
+				weighted_upvotes: weightMap[opt.id]?.up ?? 0,
+				weighted_downvotes: weightMap[opt.id]?.down ?? 0,
+			}))
+			return { ...round, options: enrichedOptions }
+		})
 
 		return NextResponse.json({
 			success: true,

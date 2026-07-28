@@ -45,9 +45,6 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 		signInHref,
 	} = useProjectSidebar(project, projectSlug)
 
-	const releasedAmount = displayReleased ?? 0
-	const releasedPercentage = releasedProgressPercent ?? 0
-
 	return (
 		<motion.div
 			className="overflow-hidden sticky top-16 rounded-xl shadow-md"
@@ -100,8 +97,8 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 				/>
 
 				<ReleasedProgressBar
-					releasedAmount={releasedAmount}
-					progressPercentage={releasedPercentage}
+					releasedAmount={displayReleased}
+					progressPercentage={releasedProgressPercent}
 					className="mb-3"
 				/>
 

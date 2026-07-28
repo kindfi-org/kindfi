@@ -1,5 +1,24 @@
 import { z } from 'zod'
 
+/** Maximum number of pre-ranked candidates sent to the AI model. */
+export const MAX_PROMPT_CANDIDATES = 20
+
+/**
+ * Compact representation of a candidate project used inside the AI prompt.
+ * Excludes fields not needed for matching (image, raised amounts, etc.)
+ * to keep prompt size bounded.
+ */
+export interface PromptCandidateProject {
+	id: string
+	title: string
+	description: string
+	category: string
+	region: string | null
+	tags: string[]
+	fundingProgress: number
+	supporters: number
+}
+
 export const matchingAiResponseSchema = z.object({
 	summary: z
 		.string()

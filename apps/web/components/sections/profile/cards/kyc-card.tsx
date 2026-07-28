@@ -26,10 +26,6 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 	const [showRedirectModal, setShowRedirectModal] = useState(false)
 	const [verificationUrl, setVerificationUrl] = useState<string | null>(null)
 
-	useEffect(() => {
-		refreshStatus()
-	}, [refreshStatus])
-
 	const refreshRef = useRef(refreshStatus)
 	refreshRef.current = refreshStatus
 

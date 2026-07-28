@@ -1,6 +1,5 @@
 'use client'
 
-import { AnimatePresence } from 'framer-motion'
 import { Heart, Trophy } from 'lucide-react'
 import { useI18n } from '~/lib/i18n'
 import { ProfileSectionHeader } from '../../profile-section-header'
@@ -56,27 +55,25 @@ export function DonorOverview({
 
 			<ProjectMatchingSection />
 
-			<AnimatePresence mode="wait">
-				{isLoading ? (
-					<p className="py-12 text-center text-muted-foreground">{t('profile.loadingProjects')}</p>
-				) : error ? (
-					<ProfileSurfaceCard>
-						<p className="py-8 text-center text-destructive">{t('profile.projectsError')}</p>
-					</ProfileSurfaceCard>
-				) : projectsWithBalances.length > 0 ? (
-					<div className="space-y-4">
-						<h3 className="flex items-center gap-2 text-lg font-semibold">
-							<Heart className="h-4 w-4 fill-emerald-600 text-emerald-600" />
-							{t('profile.supportedProjects')}
-						</h3>
-						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-							{projectsWithBalances.map((project) => (
-								<SupportedProjectCard key={project.id} project={project} t={t} />
-							))}
-						</div>
+			{isLoading && projectsWithBalances.length === 0 ? (
+				<p className="py-12 text-center text-muted-foreground">{t('profile.loadingProjects')}</p>
+			) : error ? (
+				<ProfileSurfaceCard>
+					<p className="py-8 text-center text-destructive">{t('profile.projectsError')}</p>
+				</ProfileSurfaceCard>
+			) : projectsWithBalances.length > 0 ? (
+				<div className="space-y-4">
+					<h3 className="flex items-center gap-2 text-lg font-semibold">
+						<Heart className="h-4 w-4 fill-emerald-600 text-emerald-600" />
+						{t('profile.supportedProjects')}
+					</h3>
+					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{projectsWithBalances.map((project) => (
+							<SupportedProjectCard key={project.id} project={project} t={t} />
+						))}
 					</div>
-				) : null}
-			</AnimatePresence>
+				</div>
+			) : null}
 		</div>
 	)
 }

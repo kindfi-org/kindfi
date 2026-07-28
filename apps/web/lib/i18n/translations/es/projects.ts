@@ -21,6 +21,7 @@ export const projects = {
 	filterHint: 'Toca una o más categorías para acotar la lista.',
 	resultsCountOne: '{count} causa encontrada',
 	resultsCountMany: '{count} causas encontradas',
+	resultsShowing: 'Mostrando {shown} de {total} proyectos',
 	emptyDescription: 'No hay proyectos disponibles por ahora. Crea una campaña o vuelve pronto.',
 	emptyFilteredDescription:
 		'Ningún proyecto coincide con las categorías seleccionadas. Prueba limpiar filtros o elegir otras categorías.',

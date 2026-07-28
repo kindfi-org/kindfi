@@ -6,7 +6,7 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
@@ -17,13 +17,17 @@ interface UseEscrowDataParams {
 	escrowType?: EscrowType
 }
 
-const INDEXER_SYNC_DELAYS_MS = [0, 2_000, 5_000] as const
+/** Single delayed refetch after writes — avoids hammering Trustless Work during indexer sync. */
+const POST_TRANSACTION_REFETCH_DELAY_MS = 3_000
 
 export function useEscrowData({
 	escrowContractAddress,
 	escrowType: _escrowType,
 }: UseEscrowDataParams) {
 	const { getEscrowByContractIds } = useEscrow()
+	const getEscrowByContractIdsRef = useRef(getEscrowByContractIds)
+	getEscrowByContractIdsRef.current = getEscrowByContractIds
+
 	const [escrowData, setEscrowData] = useState<GetEscrowsFromIndexerResponse | null>(null)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -89,7 +93,7 @@ export function useEscrowData({
 					setError(null)
 				}
 
-				const response = await getEscrowByContractIds({
+				const response = await getEscrowByContractIdsRef.current({
 					contractIds: [escrowContractAddress],
 					validateOnChain,
 				})
@@ -109,16 +113,12 @@ export function useEscrowData({
 				}
 			}
 		},
-		[escrowContractAddress, getEscrowByContractIds, normalizeEscrowResponse],
+		[escrowContractAddress, normalizeEscrowResponse],
 	)
 
 	const refetchAfterTransaction = useCallback(async () => {
-		for (const delayMs of INDEXER_SYNC_DELAYS_MS) {
-			if (delayMs > 0) {
-				await new Promise((resolve) => setTimeout(resolve, delayMs))
-			}
-			await fetchEscrowData({ validateOnChain: true, silent: true })
-		}
+		await new Promise((resolve) => setTimeout(resolve, POST_TRANSACTION_REFETCH_DELAY_MS))
+		await fetchEscrowData({ validateOnChain: true, silent: true })
 	}, [fetchEscrowData])
 
 	const patchMilestone = useCallback(

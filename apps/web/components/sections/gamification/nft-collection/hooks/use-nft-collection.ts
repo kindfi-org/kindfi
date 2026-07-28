@@ -1,18 +1,21 @@
 'use client'
 
+import { isValidStellarWalletAddress } from '@packages/lib/utils/wallet-address'
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
-import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
+import { resolveEffectiveGamificationAddress } from '~/lib/utils/wallet-address'
 import type { NFTCollectionResponse, UserNFTRecord, UserStats } from '../types'
 
 export function useNftCollection() {
 	const { data: session } = useSession()
 	const { address: effectiveAddress } = useEffectiveWalletAddress()
 
-	const smartAccountAddress =
-		resolveSmartAccountAddress(session?.device?.address || session?.user?.device?.address) ??
-		effectiveAddress
+	const walletAddress = resolveEffectiveGamificationAddress({
+		smartAccountAddress: session?.device?.address || session?.user?.device?.address,
+		sessionWalletAddress: session?.wallet?.address ?? session?.user?.wallet?.address,
+		kitWalletAddress: effectiveAddress,
+	})
 
 	const { data: userData, isLoading: dbLoading } = useQuery<{
 		nft: UserNFTRecord | null
@@ -38,21 +41,33 @@ export function useNftCollection() {
 		enabled: !!session?.user?.id,
 	})
 
+	const dbNft = userData?.nft ?? null
+
+	const onChainAddress =
+		dbNft?.stellar_address && isValidStellarWalletAddress(dbNft.stellar_address)
+			? dbNft.stellar_address
+			: walletAddress
+
+	const tokenIdHint =
+		dbNft && Number.isInteger(dbNft.token_id) && dbNft.token_id >= 0 ? dbNft.token_id : null
+
 	const { data: onChainData, isLoading: chainLoading } = useQuery<NFTCollectionResponse>({
-		queryKey: ['nfts', smartAccountAddress],
+		queryKey: ['nfts', onChainAddress, tokenIdHint],
 		queryFn: async () => {
-			if (!smartAccountAddress) throw new Error('No wallet')
-			const res = await fetch(`/api/nfts/${smartAccountAddress}`)
+			if (!onChainAddress) throw new Error('No wallet')
+			const query =
+				tokenIdHint !== null ? `?tokenId=${encodeURIComponent(String(tokenIdHint))}` : ''
+			const res = await fetch(`/api/nfts/${onChainAddress}${query}`)
 			if (!res.ok) throw new Error('Failed to fetch NFTs')
 			return res.json()
 		},
-		enabled: !!smartAccountAddress,
+		enabled: !!onChainAddress,
 	})
 
 	return {
 		session,
-		smartAccountAddress,
-		dbNft: userData?.nft ?? null,
+		smartAccountAddress: walletAddress,
+		dbNft,
 		userStats: userData?.stats,
 		onChainData,
 		isLoading: dbLoading || chainLoading,

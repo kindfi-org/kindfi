@@ -1,9 +1,14 @@
 'use client'
 
-import type { EscrowType } from '@trustless-work/escrow'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { logger } from '@/lib/logger'
+import { useQuery } from '@tanstack/react-query'
+import type {
+	EscrowType,
+	GetBalanceParams,
+	GetEscrowBalancesResponse,
+} from '@trustless-work/escrow'
+import { useCallback, useMemo, useRef } from 'react'
 import { useOptionalEscrow } from '~/hooks/contexts/use-escrow.context'
+import { ESCROW_QUERY_POLL_MS, ESCROW_QUERY_STALE_MS } from '~/lib/constants/escrow-query.constants'
 import {
 	getProjectDbRaised,
 	getProjectEscrowType,
@@ -14,76 +19,80 @@ import {
 
 const EMPTY_PROJECTS: ProjectFundingSource[] = []
 
-const buildProjectsEscrowKey = (projects: ProjectFundingSource[]): string =>
+export const projectsEscrowBalancesQueryKey = (escrowKey: string) =>
+	['projects-escrow-balances', escrowKey] as const
+
+export const buildProjectsEscrowKey = (projects: ProjectFundingSource[]): string =>
 	projects
 		.filter((project) => Boolean(project.escrowContractAddress))
 		.map((project) => `${project.escrowContractAddress as string}|${getProjectEscrowType(project)}`)
 		.sort()
 		.join(',')
 
+const fetchProjectsEscrowBalances = async (
+	projects: ProjectFundingSource[],
+	getBalances: (
+		payload: GetBalanceParams,
+		type: EscrowType,
+	) => Promise<GetEscrowBalancesResponse[]>,
+): Promise<Record<string, number>> => {
+	const projectsWithEscrow = projects.filter((project) => Boolean(project.escrowContractAddress))
+
+	if (projectsWithEscrow.length === 0) {
+		return {}
+	}
+
+	const byType = new Map<EscrowType, string[]>()
+	for (const project of projectsWithEscrow) {
+		const address = project.escrowContractAddress as string
+		const type = getProjectEscrowType(project)
+		const addresses = byType.get(type) ?? []
+		addresses.push(address)
+		byType.set(type, addresses)
+	}
+
+	const balanceMap: Record<string, number> = {}
+
+	for (const [type, addresses] of byType.entries()) {
+		const balances = await getBalances({ addresses }, type)
+		addresses.forEach((address, index) => {
+			const balanceResponse = balances[index]
+			if (balanceResponse?.balance !== undefined && balanceResponse.balance !== null) {
+				const numericBalance = Number(balanceResponse.balance)
+				if (Number.isFinite(numericBalance)) {
+					balanceMap[address] = numericBalance
+				}
+			}
+		})
+	}
+
+	return balanceMap
+}
+
 export function useProjectsFundingBalances(projects: ProjectFundingSource[] = EMPTY_PROJECTS) {
 	const escrow = useOptionalEscrow()
 	const getMultipleBalances = escrow?.getMultipleBalances
-	const [escrowBalances, setEscrowBalances] = useState<Record<string, number>>({})
-	const [isLoadingBalances, setIsLoadingBalances] = useState(false)
+	const getMultipleBalancesRef = useRef(getMultipleBalances)
+	getMultipleBalancesRef.current = getMultipleBalances
+
 	const projectsRef = useRef(projects)
 	projectsRef.current = projects
 
 	const projectsEscrowKey = useMemo(() => buildProjectsEscrowKey(projects), [projects])
 
-	const fetchBalances = useCallback(async () => {
-		const projectsWithEscrow = projectsRef.current.filter((project) =>
-			Boolean(project.escrowContractAddress),
-		)
-
-		if (projectsWithEscrow.length === 0 || !getMultipleBalances) {
-			setEscrowBalances((prev) => (Object.keys(prev).length === 0 ? prev : {}))
-			return
-		}
-
-		try {
-			setIsLoadingBalances(true)
-
-			const byType = new Map<EscrowType, string[]>()
-			for (const project of projectsWithEscrow) {
-				const address = project.escrowContractAddress as string
-				const type = getProjectEscrowType(project)
-				const addresses = byType.get(type) ?? []
-				addresses.push(address)
-				byType.set(type, addresses)
-			}
-
-			const balanceMap: Record<string, number> = {}
-
-			for (const [type, addresses] of byType.entries()) {
-				const balances = await getMultipleBalances({ addresses }, type)
-				addresses.forEach((address, index) => {
-					const balanceResponse = balances[index]
-					if (balanceResponse?.balance !== undefined && balanceResponse.balance !== null) {
-						const numericBalance = Number(balanceResponse.balance)
-						if (Number.isFinite(numericBalance)) {
-							balanceMap[address] = numericBalance
-						}
-					}
-				})
-			}
-
-			setEscrowBalances(balanceMap)
-		} catch (error) {
-			logger.error('Failed to fetch project escrow balances', error)
-		} finally {
-			setIsLoadingBalances(false)
-		}
-	}, [getMultipleBalances, projectsEscrowKey])
-
-	useEffect(() => {
-		void fetchBalances()
-		const intervalId = setInterval(() => {
-			void fetchBalances()
-		}, 10_000)
-
-		return () => clearInterval(intervalId)
-	}, [fetchBalances])
+	const { data: escrowBalances = {}, isLoading: isLoadingBalances } = useQuery({
+		queryKey: projectsEscrowBalancesQueryKey(projectsEscrowKey),
+		queryFn: () =>
+			fetchProjectsEscrowBalances(
+				projectsRef.current,
+				getMultipleBalancesRef.current as NonNullable<typeof getMultipleBalances>,
+			),
+		enabled: Boolean(projectsEscrowKey) && Boolean(getMultipleBalances),
+		staleTime: ESCROW_QUERY_STALE_MS,
+		refetchInterval: ESCROW_QUERY_POLL_MS,
+		refetchOnWindowFocus: false,
+		placeholderData: (previousData) => previousData,
+	})
 
 	const getDisplayRaised = useCallback(
 		(project: ProjectFundingSource): number | null => {
@@ -103,7 +112,7 @@ export function useProjectsFundingBalances(projects: ProjectFundingSource[] = EM
 
 	return {
 		escrowBalances,
-		isLoadingBalances,
+		isLoadingBalances: isLoadingBalances && Boolean(projectsEscrowKey),
 		getDisplayRaised,
 	}
 }

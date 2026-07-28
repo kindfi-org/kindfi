@@ -32,6 +32,8 @@ export interface UserNFTRecord {
 	contract_address: string
 	stellar_address: string
 	image_ipfs_hash: string | null
+	/** Resolved IPFS gateway URL (from /api/nfts/user). */
+	image_url?: string | null
 	minted_at: string
 	evolved_at: string | null
 }

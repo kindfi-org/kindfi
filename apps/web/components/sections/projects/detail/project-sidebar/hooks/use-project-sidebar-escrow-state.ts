@@ -1,7 +1,7 @@
 import type { EscrowType } from '@trustless-work/escrow'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { logger } from '@/lib/logger'
+import { useCallback, useMemo } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
+import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
@@ -11,11 +11,11 @@ import {
 	resolveDisplayReleasedAmount,
 } from '~/lib/utils/projects/milestone-funding'
 
-export function useProjectSidebarEscrowState(project: ProjectDetail) {
-	const { getMultipleBalances, getEscrowByContractIds } = useEscrow()
+/** Delay balance refetch after a donation so fund-escrow is not competing with reads. */
+const POST_DONATION_BALANCE_REFETCH_DELAY_MS = 2_500
 
-	const [onChainRaised, setOnChainRaised] = useState<number | null>(null)
-	const [isFetchingBalance, setIsFetchingBalance] = useState(false)
+export function useProjectSidebarEscrowState(project: ProjectDetail) {
+	const { getEscrowByContractIds } = useEscrow()
 
 	const { escrowData, isLoading: isEscrowDataLoading } = useEscrowData({
 		escrowContractAddress: project.escrowContractAddress || '',
@@ -27,6 +27,15 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	const effectiveEscrowType = resolveEscrowType({
 		indexerEscrow: escrowData,
 		projectEscrowType: project.escrowType,
+	})
+
+	const {
+		balance: onChainRaised,
+		isLoading: isFetchingBalance,
+		refetch: refetchEscrowBalance,
+	} = useEscrowBalance({
+		escrowContractAddress: project.escrowContractAddress ?? undefined,
+		escrowType: effectiveEscrowType ?? project.escrowType,
 	})
 
 	const isDonationReady = Boolean(hasEscrow && effectiveEscrowType && !isEscrowDataLoading)
@@ -48,7 +57,7 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 				dbMilestones: project.milestones,
 				escrowContractAddress: project.escrowContractAddress,
 				onChainReleasedAmount: escrowData ? calculateReleasedAmountFromEscrow(escrowData) : null,
-				isLoadingOnChain: hasEscrow && isEscrowDataLoading,
+				isLoadingOnChain: hasEscrow && isEscrowDataLoading && !escrowData,
 			}),
 		[escrowData, hasEscrow, isEscrowDataLoading, project.escrowContractAddress, project.milestones],
 	)
@@ -83,25 +92,9 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	}, [escrowData, getEscrowByContractIds, project.escrowContractAddress, project.escrowType])
 
 	const fetchEscrowBalance = useCallback(async () => {
-		if (!project.escrowContractAddress || !effectiveEscrowType) return
-		try {
-			setIsFetchingBalance(true)
-			const balances = await getMultipleBalances(
-				{ addresses: [project.escrowContractAddress] },
-				effectiveEscrowType,
-			)
-			const first = balances?.[0]
-			if (first) setOnChainRaised(first.balance)
-		} catch (error) {
-			logger.error('Failed to fetch escrow balance', error)
-		} finally {
-			setIsFetchingBalance(false)
-		}
-	}, [getMultipleBalances, project.escrowContractAddress, effectiveEscrowType])
-
-	useEffect(() => {
-		fetchEscrowBalance()
-	}, [fetchEscrowBalance])
+		await new Promise((resolve) => setTimeout(resolve, POST_DONATION_BALANCE_REFETCH_DELAY_MS))
+		await refetchEscrowBalance()
+	}, [refetchEscrowBalance])
 
 	return {
 		escrowData,
