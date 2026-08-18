@@ -81,12 +81,10 @@ const fetchEscrowOnChainFromTrustlessWork = async ({
 }): Promise<EscrowIndexerFetchResult> => {
 	const candidates = [
 		{
-			escrowType: 'single-release' as EscrowType,
 			path: `escrow/single-release/v2/${contractId}`,
 			map: mapSingleReleaseV2EscrowToIndexer,
 		},
 		{
-			escrowType: 'multi-release' as EscrowType,
 			path: `escrow/multi-release/v2/${contractId}`,
 			map: mapMultiReleaseV2EscrowToIndexer,
 		},
