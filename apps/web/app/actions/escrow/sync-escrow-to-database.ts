@@ -16,6 +16,7 @@ import {
 	updateIndexerFromTxHash,
 } from '~/lib/services/escrow-indexer.service'
 import { mapIndexerEscrowToSaveData } from '~/lib/utils/escrow/map-indexer-escrow-to-save-data'
+import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
 import { inferEscrowTypeFromSaveData } from '~/lib/utils/escrow/resolve-escrow-type'
 import { assertCanManageProjectEscrow, persistEscrowContract } from './persist-escrow-contract'
 import type { SaveEscrowContractParams } from './save-escrow-contract.types'
@@ -107,6 +108,7 @@ export async function syncEscrowToDatabaseAction(
 
 		let escrowData: SaveEscrowContractParams['escrowData']
 		let escrowType: EscrowType | undefined
+		let escrowApiVersion: EscrowApiVersion | undefined
 
 		if (validated.escrowSnapshot) {
 			escrowData = validated.escrowSnapshot
@@ -143,6 +145,7 @@ export async function syncEscrowToDatabaseAction(
 			try {
 				escrowData = mapIndexerEscrowToSaveData(indexerResult.escrow)
 				escrowType = indexerResult.escrow.type
+				escrowApiVersion = indexerResult.apiVersion
 			} catch (error) {
 				return {
 					success: false,
@@ -157,6 +160,7 @@ export async function syncEscrowToDatabaseAction(
 			contractId: validated.contractId,
 			escrowData,
 			escrowType,
+			escrowApiVersion,
 		})
 
 		if (!saveResult.success) {

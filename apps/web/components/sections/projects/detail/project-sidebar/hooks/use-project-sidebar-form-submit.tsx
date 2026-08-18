@@ -11,7 +11,9 @@ import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { zodResolver } from '~/lib/form/zod-resolver'
 import { trackOnboardingPath } from '~/lib/pollar/analytics'
+import { fundEscrowViaTrustlessProxy } from '~/lib/services/trustless-fund-escrow.client'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
 import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { buildFormSchema, type FormValues } from '../types'
 
@@ -20,7 +22,10 @@ interface UseProjectSidebarFormSubmitParams {
 	isGoalReached: boolean
 	escrowData: { trustline?: { address?: string } } | null | undefined
 	fetchEscrowBalance: () => Promise<void>
-	resolveEscrowTypeForFunding: () => Promise<EscrowType>
+	resolveEscrowTypeForFunding: () => Promise<{
+		escrowType: EscrowType
+		apiVersion: EscrowApiVersion
+	}>
 }
 
 export function useProjectSidebarFormSubmit({
@@ -30,7 +35,7 @@ export function useProjectSidebarFormSubmit({
 	fetchEscrowBalance,
 	resolveEscrowTypeForFunding,
 }: UseProjectSidebarFormSubmitParams) {
-	const { fundEscrow, sendTransaction } = useEscrow()
+	const { sendTransaction } = useEscrow()
 	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction, isPollarSigner } =
 		useTrustlessSigner()
 	const { user } = useAuth()
@@ -82,19 +87,20 @@ export function useProjectSidebarFormSubmit({
 				return
 			}
 
-			const escrowType = await resolveEscrowTypeForFunding()
+			const { escrowType, apiVersion } = await resolveEscrowTypeForFunding()
 
-			const fundResponse = await fundEscrow(
+			const fundResponse = await fundEscrowViaTrustlessProxy(
 				{
 					amount: data.investmentAmount,
 					contractId: project.escrowContractAddress,
 					signer,
 				},
 				escrowType,
+				apiVersion,
 			)
 
-			if (!fundResponse.unsignedTransaction) {
-				throw new Error('No unsigned transaction returned')
+			if (fundResponse.status !== 'SUCCESS' || !fundResponse.unsignedTransaction) {
+				throw new Error(fundResponse.error ?? 'No unsigned transaction returned')
 			}
 
 			const sendResult = await submitTrustlessEscrowXdr(
@@ -215,6 +221,12 @@ export function useProjectSidebarFormSubmit({
 			} else if (combinedMessage.includes("reading 'approved'")) {
 				userFriendlyMessage =
 					'Escrow configuration mismatch. This project may be using the wrong escrow type for donations. Please contact the project owner or try again after refreshing the page.'
+			} else if (
+				combinedMessage.includes('no escrow found') ||
+				combinedMessage.includes('not indexed')
+			) {
+				userFriendlyMessage =
+					'This escrow is still syncing with Trustless Work. Refresh in a minute and try again, or contact support if donations keep failing.'
 			} else if (apiErrorMessage) {
 				userFriendlyMessage = apiErrorMessage
 			}

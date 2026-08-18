@@ -40,7 +40,21 @@ export function useEscrowBalance({ escrowContractAddress, escrowType }: UseEscro
 			const first = balances?.[0]
 			if (first?.balance !== undefined && first.balance !== null) {
 				const numericBalance = Number(first.balance)
-				return Number.isFinite(numericBalance) ? numericBalance : null
+				if (Number.isFinite(numericBalance)) {
+					return numericBalance
+				}
+			}
+
+			const response = await fetch(
+				`/api/escrow/balance?contractId=${encodeURIComponent(escrowContractAddress)}`,
+				{ cache: 'no-store' },
+			)
+
+			if (response.ok) {
+				const payload = (await response.json()) as { balance?: number | null }
+				if (typeof payload.balance === 'number' && Number.isFinite(payload.balance)) {
+					return payload.balance
+				}
 			}
 
 			return null

@@ -7,6 +7,7 @@ describe('Trustless Work proxy path rules', () => {
 		expect(isAllowedTrustlessWorkPath('helper/get-multiple-escrow-balance')).toBe(true)
 		expect(isAllowedTrustlessWorkPath('deployer/multi-release')).toBe(true)
 		expect(isAllowedTrustlessWorkPath('escrow/single-release/fund-escrow')).toBe(true)
+		expect(isAllowedTrustlessWorkPath('stellar/send-transaction')).toBe(true)
 		expect(isAllowedTrustlessWorkPath('indexer/update-from-txHash')).toBe(true)
 	})
 

@@ -1,5 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import type { EscrowType } from '@trustless-work/escrow'
+import { readEscrowApiVersionFromMetadata } from '~/lib/utils/escrow/resolve-escrow-api-version'
 import { readEscrowTypeFromMetadata } from '~/lib/utils/escrow/resolve-escrow-type'
 
 export type ProjectEscrowsRelation =
@@ -17,6 +18,7 @@ export function getProjectEscrowRowId(relation: ProjectEscrowsRelation): string 
 export type ResolvedProjectEscrow = {
 	escrowContractAddress?: string
 	escrowType?: EscrowType
+	escrowApiVersion?: 'v1' | 'v2'
 }
 
 /** Resolve Stellar contract IDs (and escrow type) from project_escrows row UUIDs. */
@@ -44,6 +46,7 @@ export async function resolveProjectEscrowContracts(
 		resolved.set(row.id, {
 			escrowContractAddress: row.contract_id,
 			escrowType: readEscrowTypeFromMetadata(row.metadata),
+			escrowApiVersion: readEscrowApiVersionFromMetadata(row.metadata),
 		})
 	}
 

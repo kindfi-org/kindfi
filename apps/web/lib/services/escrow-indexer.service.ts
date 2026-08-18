@@ -5,12 +5,13 @@ import {
 	mapMultiReleaseV2EscrowToIndexer,
 	mapSingleReleaseV2EscrowToIndexer,
 } from '~/lib/utils/escrow/map-trustless-on-chain-escrow'
+import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
 
 const INDEXER_NOT_FOUND_ERROR =
 	'Trustless Work has not indexed this contract yet. Paste the deployment transaction hash and try again.'
 
 export type EscrowIndexerFetchResult =
-	| { ok: true; escrow: GetEscrowsFromIndexerResponse }
+	| { ok: true; escrow: GetEscrowsFromIndexerResponse; apiVersion: EscrowApiVersion }
 	| { ok: false; error: string }
 
 const parseIndexerPayload = (payload: unknown): GetEscrowsFromIndexerResponse | null => {
@@ -66,7 +67,7 @@ const fetchEscrowFromBaseUrl = async ({
 		return { ok: false, error: INDEXER_NOT_FOUND_ERROR }
 	}
 
-	return { ok: true, escrow }
+	return { ok: true, escrow, apiVersion: 'v1' }
 }
 
 const fetchEscrowOnChainFromTrustlessWork = async ({
@@ -107,7 +108,7 @@ const fetchEscrowOnChainFromTrustlessWork = async ({
 		try {
 			const escrow = candidate.map(payload as never)
 			if (escrow.engagementId) {
-				return { ok: true, escrow }
+				return { ok: true, escrow, apiVersion: 'v2' }
 			}
 		} catch (error) {
 			logger.warn('Failed to map on-chain Trustless Work escrow payload:', error)
@@ -218,7 +219,7 @@ export async function updateIndexerFromTxHash(txHash: string): Promise<EscrowInd
 
 				const escrow = parseIndexerUpdatePayload(await res.json())
 				if (escrow?.engagementId) {
-					return { ok: true, escrow }
+					return { ok: true, escrow, apiVersion: 'v1' }
 				}
 
 				receivedEmptySuccess = true
