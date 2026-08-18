@@ -4,6 +4,10 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import {
+	type EscrowApiVersion,
+	resolveEscrowApiVersion,
+} from '~/lib/utils/escrow/resolve-escrow-api-version'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import {
 	calculateReleasedAmountFromEscrow,
@@ -17,10 +21,23 @@ const POST_DONATION_BALANCE_REFETCH_DELAY_MS = 2_500
 export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	const { getEscrowByContractIds } = useEscrow()
 
-	const { escrowData, isLoading: isEscrowDataLoading } = useEscrowData({
+	const {
+		escrowData,
+		escrowApiVersion,
+		isLoading: isEscrowDataLoading,
+	} = useEscrowData({
 		escrowContractAddress: project.escrowContractAddress || '',
 		escrowType: project.escrowType,
 	})
+
+	const resolvedEscrowApiVersion = useMemo(
+		() =>
+			resolveEscrowApiVersion({
+				metadataVersion: project.escrowApiVersion,
+				detectedVersion: escrowApiVersion,
+			}),
+		[escrowApiVersion, project.escrowApiVersion],
+	)
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
@@ -70,12 +87,17 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 		[displayReleased, project.goal],
 	)
 
-	const resolveEscrowTypeForFunding = useCallback(async (): Promise<EscrowType> => {
+	const resolveEscrowTypeForFunding = useCallback(async (): Promise<{
+		escrowType: EscrowType
+		apiVersion: EscrowApiVersion
+	}> => {
 		const knownType = resolveEscrowType({
 			indexerEscrow: escrowData,
 			projectEscrowType: project.escrowType,
 		})
-		if (knownType) return knownType
+		if (knownType) {
+			return { escrowType: knownType, apiVersion: resolvedEscrowApiVersion }
+		}
 
 		if (!project.escrowContractAddress) {
 			throw new Error('Escrow is not configured for this project')
@@ -86,10 +108,22 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 			validateOnChain: false,
 		})
 		const indexerEscrow = Array.isArray(response) ? response[0] : response
-		if (indexerEscrow?.type) return indexerEscrow.type
+		if (indexerEscrow?.type) {
+			return { escrowType: indexerEscrow.type, apiVersion: resolvedEscrowApiVersion }
+		}
+
+		if (project.escrowType) {
+			return { escrowType: project.escrowType, apiVersion: resolvedEscrowApiVersion }
+		}
 
 		throw new Error('Unable to determine escrow configuration')
-	}, [escrowData, getEscrowByContractIds, project.escrowContractAddress, project.escrowType])
+	}, [
+		escrowData,
+		getEscrowByContractIds,
+		project.escrowContractAddress,
+		project.escrowType,
+		resolvedEscrowApiVersion,
+	])
 
 	const fetchEscrowBalance = useCallback(async () => {
 		await new Promise((resolve) => setTimeout(resolve, POST_DONATION_BALANCE_REFETCH_DELAY_MS))

@@ -28,6 +28,7 @@ type SingleReleaseV2Escrow = {
 	description: string
 	amount: number
 	platformFee: number
+	balance?: number
 	roles: V2RoleBundle
 	milestones?: unknown[]
 }
@@ -45,6 +46,7 @@ type MultiReleaseV2Escrow = {
 	title: string
 	description: string
 	platformFee: number
+	balance?: number
 	roles: V2RoleBundle
 	milestones?: MultiReleaseV2Milestone[]
 	amount?: number
@@ -63,6 +65,7 @@ export const mapSingleReleaseV2EscrowToIndexer = (
 		platformFee: escrow.platformFee,
 		roles: mapV2Roles(escrow.roles),
 		milestones: Array.isArray(escrow.milestones) ? escrow.milestones : [],
+		...(typeof escrow.balance === 'number' ? { balance: escrow.balance } : {}),
 	} as GetEscrowsFromIndexerResponse
 }
 
@@ -92,5 +95,6 @@ export const mapMultiReleaseV2EscrowToIndexer = (
 		platformFee: escrow.platformFee,
 		roles: mapV2Roles(escrow.roles),
 		milestones,
+		...(typeof escrow.balance === 'number' ? { balance: escrow.balance } : {}),
 	} as GetEscrowsFromIndexerResponse
 }

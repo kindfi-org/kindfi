@@ -6,11 +6,10 @@ import type {
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { useCallback, useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { patchMilestoneAtIndex } from '~/lib/utils/escrow/milestone-utils'
+import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
 
 interface UseEscrowDataParams {
 	escrowContractAddress: string
@@ -20,71 +19,63 @@ interface UseEscrowDataParams {
 /** Single delayed refetch after writes — avoids hammering Trustless Work during indexer sync. */
 const POST_TRANSACTION_REFETCH_DELAY_MS = 3_000
 
+type EscrowLookupResponse = {
+	escrow: GetEscrowsFromIndexerResponse
+	apiVersion?: EscrowApiVersion
+}
+
 export function useEscrowData({
 	escrowContractAddress,
 	escrowType: _escrowType,
 }: UseEscrowDataParams) {
-	const { getEscrowByContractIds } = useEscrow()
-	const getEscrowByContractIdsRef = useRef(getEscrowByContractIds)
-	getEscrowByContractIdsRef.current = getEscrowByContractIds
-
 	const [escrowData, setEscrowData] = useState<GetEscrowsFromIndexerResponse | null>(null)
+	const [escrowApiVersion, setEscrowApiVersion] = useState<EscrowApiVersion | undefined>(undefined)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
 	const normalizeEscrowResponse = useCallback(
-		(response: unknown): GetEscrowsFromIndexerResponse => {
-			let escrow: GetEscrowsFromIndexerResponse | null = null
-
-			if (Array.isArray(response)) {
-				if (response.length === 0) {
-					throw new Error('No escrow found for this contract ID')
-				}
-				escrow = response[0] as GetEscrowsFromIndexerResponse
-			} else if (response && typeof response === 'object') {
-				escrow = response as GetEscrowsFromIndexerResponse
-			} else {
-				throw new Error('Invalid response format from escrow API')
-			}
-
-			if (!escrow.engagementId) {
+		(response: GetEscrowsFromIndexerResponse): GetEscrowsFromIndexerResponse => {
+			if (!response.engagementId) {
 				throw new Error('Invalid response: missing engagementId')
 			}
 
 			return {
-				...escrow,
+				...response,
 				createdAt:
-					escrow.createdAt && typeof escrow.createdAt === 'object' && '_seconds' in escrow.createdAt
+					response.createdAt &&
+					typeof response.createdAt === 'object' &&
+					'_seconds' in response.createdAt
 						? (new Date(
 								(
-									escrow.createdAt as {
+									response.createdAt as {
 										_seconds: number
 										_nanoseconds?: number
 									}
 								)._seconds * 1000,
 							) as unknown as Date)
-						: escrow.createdAt,
+						: response.createdAt,
 				updatedAt:
-					escrow.updatedAt && typeof escrow.updatedAt === 'object' && '_seconds' in escrow.updatedAt
+					response.updatedAt &&
+					typeof response.updatedAt === 'object' &&
+					'_seconds' in response.updatedAt
 						? (new Date(
 								(
-									escrow.updatedAt as {
+									response.updatedAt as {
 										_seconds: number
 										_nanoseconds?: number
 									}
 								)._seconds * 1000,
 							) as unknown as Date)
-						: escrow.updatedAt,
+						: response.updatedAt,
 			} as unknown as GetEscrowsFromIndexerResponse
 		},
 		[],
 	)
 
 	const fetchEscrowData = useCallback(
-		async (options?: { validateOnChain?: boolean; silent?: boolean }) => {
+		async (options?: { silent?: boolean }) => {
 			if (!escrowContractAddress) return
 
-			const validateOnChain = options?.validateOnChain ?? false
 			const silent = options?.silent ?? false
 
 			try {
@@ -93,19 +84,26 @@ export function useEscrowData({
 					setError(null)
 				}
 
-				const response = await getEscrowByContractIdsRef.current({
-					contractIds: [escrowContractAddress],
-					validateOnChain,
-				})
+				const response = await fetch(
+					`/api/escrow/by-contract-id?contractId=${encodeURIComponent(escrowContractAddress)}`,
+					{ cache: 'no-store' },
+				)
 
-				setEscrowData(normalizeEscrowResponse(response))
+				if (!response.ok) {
+					const payload = (await response.json().catch(() => null)) as { error?: string } | null
+					throw new Error(payload?.error ?? 'No escrow found for this contract ID')
+				}
+
+				const payload = (await response.json()) as EscrowLookupResponse
+				setEscrowData(normalizeEscrowResponse(payload.escrow))
+				setEscrowApiVersion(payload.apiVersion)
 			} catch (err) {
 				logger.error('Failed to fetch escrow data:', err)
 				const errorMessage = err instanceof Error ? err.message : 'Failed to load escrow data'
 				if (!silent) {
 					setError(errorMessage)
-					toast.error(errorMessage)
 					setEscrowData(null)
+					setEscrowApiVersion(undefined)
 				}
 			} finally {
 				if (!silent) {
@@ -118,7 +116,7 @@ export function useEscrowData({
 
 	const refetchAfterTransaction = useCallback(async () => {
 		await new Promise((resolve) => setTimeout(resolve, POST_TRANSACTION_REFETCH_DELAY_MS))
-		await fetchEscrowData({ validateOnChain: true, silent: true })
+		await fetchEscrowData({ silent: true })
 	}, [fetchEscrowData])
 
 	const patchMilestone = useCallback(
@@ -150,6 +148,7 @@ export function useEscrowData({
 
 	return {
 		escrowData,
+		escrowApiVersion,
 		isLoading,
 		error,
 		refetch: fetchEscrowData,
