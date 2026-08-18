@@ -11,6 +11,14 @@ export class RateLimitExceededError extends Error {
 const logger = new Logger()
 const rateLimiter = new RateLimiter()
 
+/** Recovery sync is retried often when the Trustless Work indexer lags. */
+export const escrowSyncRateLimiter = new RateLimiter({
+	maxAttempts: 30,
+	windowSecs: 15 * 60,
+	blockSecs: 2 * 60,
+	configId: 'escrow-sync-v2',
+})
+
 const REDIS_TIMEOUT_MS = 3_000
 
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -30,9 +38,13 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
  * when the caller has exceeded the configured budget. When Redis is unavailable
  * or slow, logs a warning and allows the request so auth flows keep working.
  */
-export async function enforceRateLimit(identifier: string, action: string): Promise<void> {
+export async function enforceRateLimit(
+	identifier: string,
+	action: string,
+	limiter: RateLimiter = rateLimiter,
+): Promise<void> {
 	try {
-		const result = await withTimeout(rateLimiter.increment(identifier, action), REDIS_TIMEOUT_MS)
+		const result = await withTimeout(limiter.increment(identifier, action), REDIS_TIMEOUT_MS)
 
 		if (result.isBlocked) {
 			logger.warn({

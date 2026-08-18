@@ -123,6 +123,10 @@ export const syncEscrowToDatabaseInputSchema = z.object({
 	projectId: z.string().uuid('Invalid projectId'),
 	contractId: stellarContractIdSchema,
 	escrowSnapshot: escrowDataSchema.optional(),
+	txHash: z
+		.string()
+		.regex(/^[A-Fa-f0-9]{64}$/, 'Invalid transaction hash')
+		.optional(),
 })
 
 export const createFoundationInputSchema = z.object({

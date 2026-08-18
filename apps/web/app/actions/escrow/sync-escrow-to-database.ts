@@ -4,13 +4,17 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { EscrowType } from '@trustless-work/escrow'
 import {
 	enforceRateLimit,
+	escrowSyncRateLimiter,
 	requireAuthenticatedSession,
 	toServerActionFailure,
 	validateInput,
 } from '~/lib/auth/server-action-auth'
 import { Logger } from '~/lib/logger'
 import { syncEscrowToDatabaseInputSchema } from '~/lib/schemas/server-actions.schemas'
-import { getEscrowByContractIdFromIndexer } from '~/lib/services/escrow-indexer.service'
+import {
+	getEscrowByContractIdFromIndexer,
+	updateIndexerFromTxHash,
+} from '~/lib/services/escrow-indexer.service'
 import { mapIndexerEscrowToSaveData } from '~/lib/utils/escrow/map-indexer-escrow-to-save-data'
 import { inferEscrowTypeFromSaveData } from '~/lib/utils/escrow/resolve-escrow-type'
 import { assertCanManageProjectEscrow, persistEscrowContract } from './persist-escrow-contract'
@@ -22,6 +26,7 @@ type SyncEscrowParams = {
 	projectId: string
 	contractId: string
 	escrowSnapshot?: SaveEscrowContractParams['escrowData']
+	txHash?: string
 }
 
 export async function syncEscrowToDatabaseAction(
@@ -50,7 +55,7 @@ export async function syncEscrowToDatabaseAction(
 	}
 
 	try {
-		await enforceRateLimit(userId, 'sync_escrow_to_database')
+		await enforceRateLimit(userId, 'sync_escrow_to_database', escrowSyncRateLimiter)
 	} catch (error) {
 		const failure = toServerActionFailure(error, 'Too many requests. Please try again later.')
 		return { success: false, error: failure.error }
@@ -107,9 +112,26 @@ export async function syncEscrowToDatabaseAction(
 			escrowData = validated.escrowSnapshot
 			escrowType = inferEscrowTypeFromSaveData(escrowData)
 		} else {
-			const indexerResult = await getEscrowByContractIdFromIndexer(validated.contractId, {
-				validateOnChain: true,
+			let indexerResult = await getEscrowByContractIdFromIndexer(validated.contractId, {
+				validateOnChain: false,
 			})
+
+			if (!indexerResult.ok && validated.txHash) {
+				const refreshed = await updateIndexerFromTxHash(validated.txHash)
+				if (refreshed.ok) {
+					indexerResult = refreshed
+				} else {
+					indexerResult = await getEscrowByContractIdFromIndexer(validated.contractId, {
+						validateOnChain: false,
+					})
+					if (!indexerResult.ok) {
+						return {
+							success: false,
+							error: refreshed.error,
+						}
+					}
+				}
+			}
 
 			if (!indexerResult.ok) {
 				return {

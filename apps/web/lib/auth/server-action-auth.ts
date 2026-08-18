@@ -2,12 +2,16 @@ import type { Session } from 'next-auth'
 import { getServerSession } from 'next-auth'
 import { treeifyError, type ZodSchema } from 'zod'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { enforceRateLimit, RateLimitExceededError } from '~/lib/auth/rate-limit'
+import {
+	enforceRateLimit,
+	escrowSyncRateLimiter,
+	RateLimitExceededError,
+} from '~/lib/auth/rate-limit'
 import { Logger } from '~/lib/logger'
 
 const logger = new Logger()
 
-export { enforceRateLimit, RateLimitExceededError }
+export { enforceRateLimit, escrowSyncRateLimiter, RateLimitExceededError }
 
 export type ServerActionErrorCode =
 	| 'UNAUTHORIZED'

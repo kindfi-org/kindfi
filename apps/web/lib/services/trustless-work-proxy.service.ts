@@ -44,16 +44,28 @@ const notifyTrustlessWorkIndexer = async (txHash: string): Promise<void> => {
 	if (!apiKey) return
 
 	try {
-		await fetch(`${getTrustlessWorkApiBaseUrl()}/indexer/update-from-txHash`, {
-			method: 'POST',
-			headers: {
-				'x-api-key': apiKey,
-				'Content-Type': 'application/json',
-				Accept: 'application/json',
-			},
-			body: JSON.stringify({ txHash }),
-			cache: 'no-store',
-		})
+		const indexerHeaders = {
+			'x-api-key': apiKey,
+			'Content-Type': 'application/json',
+			Accept: 'application/json',
+		}
+		const indexerBody = JSON.stringify({ txHash })
+		const indexerPaths = ['/indexer/update-from-txHash', '/indexer/update-from-txhash']
+
+		for (const path of indexerPaths) {
+			for (const method of ['POST', 'PUT'] as const) {
+				const response = await fetch(`${getTrustlessWorkApiBaseUrl()}${path}`, {
+					method,
+					headers: indexerHeaders,
+					body: indexerBody,
+					cache: 'no-store',
+				})
+
+				if (response.ok) {
+					return
+				}
+			}
+		}
 	} catch (error) {
 		logger.error('Trustless Work indexer update failed after local submit:', error)
 	}
