@@ -1,6 +1,11 @@
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { logger } from '@/lib/logger'
-import { getTrustlessWorkApiConfig } from '~/lib/services/trustless-work-api.config'
+import {
+	getTrustlessWorkApiBaseUrl,
+	getTrustlessWorkApiKey,
+	getTrustlessWorkNetwork,
+	getTrustlessWorkUpstreamApiBaseUrl,
+} from '~/lib/config/trustless-work.config'
 import {
 	mapMultiReleaseV2EscrowToIndexer,
 	mapSingleReleaseV2EscrowToIndexer,
@@ -71,14 +76,20 @@ const fetchEscrowFromBaseUrl = async ({
 }
 
 const fetchEscrowOnChainFromTrustlessWork = async ({
-	baseUrl,
 	apiKey,
 	contractId,
 }: {
-	baseUrl: string
 	apiKey: string
 	contractId: string
 }): Promise<EscrowIndexerFetchResult> => {
+	if (getTrustlessWorkNetwork() === 'mainnet') {
+		return {
+			ok: false,
+			error:
+				'Trustless Work v2 read routes are not on mainnet yet. Sync the deploy transaction hash to refresh the indexer.',
+		}
+	}
+
 	const candidates = [
 		{
 			path: `escrow/single-release/v2/${contractId}`,
@@ -91,7 +102,8 @@ const fetchEscrowOnChainFromTrustlessWork = async ({
 	] as const
 
 	for (const candidate of candidates) {
-		const res = await fetch(`${baseUrl}/${candidate.path}`, {
+		const upstreamBase = getTrustlessWorkUpstreamApiBaseUrl(candidate.path)
+		const res = await fetch(`${upstreamBase}/${candidate.path}`, {
 			headers: { 'x-api-key': apiKey, Accept: 'application/json' },
 			cache: 'no-store',
 		})
@@ -126,7 +138,8 @@ export async function getEscrowByContractIdFromIndexer(
 	contractId: string,
 	options?: { validateOnChain?: boolean },
 ): Promise<EscrowIndexerFetchResult> {
-	const { apiKey, baseUrl } = getTrustlessWorkApiConfig()
+	const apiKey = getTrustlessWorkApiKey()
+	const baseUrl = getTrustlessWorkApiBaseUrl()
 	const validateOnChain = options?.validateOnChain ?? true
 
 	if (!contractId) {
@@ -163,7 +176,6 @@ export async function getEscrowByContractIdFromIndexer(
 		}
 
 		return await fetchEscrowOnChainFromTrustlessWork({
-			baseUrl,
 			apiKey,
 			contractId,
 		})
@@ -187,7 +199,8 @@ const parseIndexerUpdatePayload = (payload: unknown): GetEscrowsFromIndexerRespo
 }
 
 export async function updateIndexerFromTxHash(txHash: string): Promise<EscrowIndexerFetchResult> {
-	const { apiKey, baseUrl } = getTrustlessWorkApiConfig()
+	const apiKey = getTrustlessWorkApiKey()
+	const baseUrl = getTrustlessWorkApiBaseUrl()
 
 	if (!apiKey) {
 		return { ok: false, error: 'Trustless Work API key is not configured on the server' }

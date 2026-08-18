@@ -1,4 +1,5 @@
 import type { EscrowType } from '@trustless-work/escrow'
+import type { TrustlessWorkNetwork } from '~/lib/config/trustless-work.config'
 
 export type EscrowApiVersion = 'v1' | 'v2'
 
@@ -14,6 +15,7 @@ export const readEscrowApiVersionFromMetadata = (
 	return undefined
 }
 
+/** On-chain / metadata version (v2 factory contracts vs legacy v1 shape). */
 export const resolveEscrowApiVersion = ({
 	metadataVersion,
 	detectedVersion,
@@ -21,6 +23,21 @@ export const resolveEscrowApiVersion = ({
 	metadataVersion?: EscrowApiVersion
 	detectedVersion?: EscrowApiVersion
 }): EscrowApiVersion => metadataVersion ?? detectedVersion ?? 'v1'
+
+/**
+ * REST path version for fund-escrow. Mainnet TW still uses v1 routes on api.trustlesswork.com;
+ * v2 Core API routes are only on beta.api.trustlesswork.com (testnet).
+ */
+export const resolveFundEscrowApiVersion = (
+	network: TrustlessWorkNetwork,
+	contractApiVersion: EscrowApiVersion,
+): EscrowApiVersion => {
+	if (network === 'mainnet') {
+		return 'v1'
+	}
+
+	return contractApiVersion
+}
 
 export const buildFundEscrowApiPath = (
 	escrowType: EscrowType,
