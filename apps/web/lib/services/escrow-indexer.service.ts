@@ -1,6 +1,10 @@
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { logger } from '@/lib/logger'
 import { getTrustlessWorkApiConfig } from '~/lib/services/trustless-work-api.config'
+import {
+	mapMultiReleaseV2EscrowToIndexer,
+	mapSingleReleaseV2EscrowToIndexer,
+} from '~/lib/utils/escrow/map-trustless-on-chain-escrow'
 
 const INDEXER_NOT_FOUND_ERROR =
 	'Trustless Work has not indexed this contract yet. Paste the deployment transaction hash and try again.'
@@ -65,6 +69,58 @@ const fetchEscrowFromBaseUrl = async ({
 	return { ok: true, escrow }
 }
 
+const fetchEscrowOnChainFromTrustlessWork = async ({
+	baseUrl,
+	apiKey,
+	contractId,
+}: {
+	baseUrl: string
+	apiKey: string
+	contractId: string
+}): Promise<EscrowIndexerFetchResult> => {
+	const candidates = [
+		{
+			path: `escrow/single-release/v2/${contractId}`,
+			map: mapSingleReleaseV2EscrowToIndexer,
+		},
+		{
+			path: `escrow/multi-release/v2/${contractId}`,
+			map: mapMultiReleaseV2EscrowToIndexer,
+		},
+	] as const
+
+	for (const candidate of candidates) {
+		const res = await fetch(`${baseUrl}/${candidate.path}`, {
+			headers: { 'x-api-key': apiKey, Accept: 'application/json' },
+			cache: 'no-store',
+		})
+
+		if (!res.ok) {
+			continue
+		}
+
+		const payload = await res.json()
+		if (!payload || typeof payload !== 'object' || !('engagementId' in payload)) {
+			continue
+		}
+
+		try {
+			const escrow = candidate.map(payload as never)
+			if (escrow.engagementId) {
+				return { ok: true, escrow }
+			}
+		} catch (error) {
+			logger.warn('Failed to map on-chain Trustless Work escrow payload:', error)
+		}
+	}
+
+	return {
+		ok: false,
+		error:
+			'Could not read escrow state from Trustless Work. Confirm the contract ID is a deployed Trustless Work escrow on the active network.',
+	}
+}
+
 export async function getEscrowByContractIdFromIndexer(
 	contractId: string,
 	options?: { validateOnChain?: boolean },
@@ -88,15 +144,27 @@ export async function getEscrowByContractIdFromIndexer(
 			validateOnChain,
 		})
 
-		if (result.ok || !validateOnChain) {
+		if (result.ok) {
 			return result
 		}
 
-		return await fetchEscrowFromBaseUrl({
+		if (validateOnChain) {
+			const cachedResult = await fetchEscrowFromBaseUrl({
+				baseUrl,
+				apiKey,
+				contractId,
+				validateOnChain: false,
+			})
+
+			if (cachedResult.ok) {
+				return cachedResult
+			}
+		}
+
+		return await fetchEscrowOnChainFromTrustlessWork({
 			baseUrl,
 			apiKey,
 			contractId,
-			validateOnChain: false,
 		})
 	} catch (error) {
 		logger.error('Failed to fetch escrow from indexer:', error)
