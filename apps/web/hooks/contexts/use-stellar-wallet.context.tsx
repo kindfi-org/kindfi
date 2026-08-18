@@ -16,6 +16,11 @@ import {
 	safeLocalStorageRemove,
 	safeLocalStorageSet,
 } from '~/lib/utils/safe-storage'
+import {
+	getWalletSessionErrorMessage,
+	isStaleWalletSessionError,
+	WALLET_SESSION_EXPIRED_MESSAGE,
+} from '~/lib/utils/wallet/wallet-session-error'
 
 /** Loaded only in the browser so kit state does not touch Node's broken `localStorage` polyfill. */
 type StellarWalletsKitModules = {
@@ -296,25 +301,52 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 		if (!isInitialized || !StellarWalletsKit || !Networks) {
 			throw new Error('Wallet kit not initialized')
 		}
-		const signingAddress = signerAddress ?? address
-		if (!signingAddress) {
-			throw new Error('Wallet not connected')
-		}
 
-		const signerError = getTrustlessSignerError(signingAddress)
-		if (signerError) {
-			throw new Error(signerError)
-		}
+		const signWithAddress = async (activeAddress: string): Promise<string> => {
+			const signerError = getTrustlessSignerError(activeAddress)
+			if (signerError) {
+				throw new Error(signerError)
+			}
 
-		try {
 			const { signedTxXdr } = await StellarWalletsKit.signTransaction(unsignedXdr, {
-				address: signingAddress,
+				address: activeAddress,
 				networkPassphrase,
 			})
 			return signedTxXdr
+		}
+
+		const initialAddress = signerAddress ?? address
+		if (!initialAddress) {
+			throw new Error('Wallet not connected')
+		}
+
+		try {
+			return await signWithAddress(initialAddress)
 		} catch (error) {
-			logger.error('Failed to sign transaction:', error)
-			throw error
+			if (!isStaleWalletSessionError(error)) {
+				logger.error('Failed to sign transaction:', error)
+				throw new Error(getWalletSessionErrorMessage(error) ?? 'Failed to sign transaction')
+			}
+
+			logger.warn('Stale Stellar wallet session detected; prompting reconnect before retrying sign')
+			disconnect()
+
+			try {
+				await StellarWalletsKit.refreshSupportedWallets()
+				const { address: reconnectedAddress } = await StellarWalletsKit.authModal()
+				if (!reconnectedAddress || !isExternalStellarWalletAddress(reconnectedAddress)) {
+					throw new Error(WALLET_SESSION_EXPIRED_MESSAGE)
+				}
+
+				setAddress(reconnectedAddress)
+				safeLocalStorageSet('stellar_wallet_address', reconnectedAddress)
+				syncLinkedWalletIfAuthenticatedRef.current(reconnectedAddress)
+
+				return await signWithAddress(signerAddress ?? reconnectedAddress)
+			} catch (reconnectError) {
+				logger.error('Failed to reconnect wallet after stale session:', reconnectError)
+				throw new Error(WALLET_SESSION_EXPIRED_MESSAGE)
+			}
 		}
 	}
 

@@ -99,7 +99,7 @@ export const deployAndSign = async ({
 			sendResult = await sendTransaction(signedXdr)
 		}
 	} catch (error) {
-		const msg = error instanceof Error ? error.message : 'Failed to send transaction'
+		const msg = getTrustlessWorkApiErrorMessage(error, 'Failed to send transaction')
 		toast.error('Failed to send transaction', { description: msg })
 		throw new Error(msg)
 	}

@@ -1,3 +1,8 @@
+import {
+	getWalletSessionErrorMessage,
+	isStaleWalletSessionError,
+	WALLET_SESSION_EXPIRED_MESSAGE,
+} from '~/lib/utils/wallet/wallet-session-error'
 import { getTxBadAuthMessage } from './trustless-transaction-signing'
 
 type TrustlessWorkErrorBody = {
@@ -45,12 +50,13 @@ const formatTrustlessWorkErrorBody = (body: TrustlessWorkErrorBody | null): stri
 
 /** Extract a user-facing message from Trustless Work SDK / proxy errors. */
 export const getTrustlessWorkApiErrorMessage = (error: unknown, fallback: string): string => {
-	if (
-		error instanceof Error &&
-		error.message.trim().length > 0 &&
-		!error.message.startsWith('Request failed with status code')
-	) {
-		return error.message
+	if (error instanceof Error && error.message.trim().length > 0) {
+		if (isStaleWalletSessionError(error)) {
+			return WALLET_SESSION_EXPIRED_MESSAGE
+		}
+		if (!error.message.startsWith('Request failed with status code')) {
+			return error.message
+		}
 	}
 
 	if (!isRecord(error)) return fallback
@@ -67,7 +73,7 @@ export const getTrustlessWorkApiErrorMessage = (error: unknown, fallback: string
 			return 'Escrow data is out of sync with the blockchain. Refresh the page and try again. If it persists, contact support.'
 		}
 		if (axiosData.toLowerCase().includes('connection key is missing')) {
-			return 'Wallet session expired. Disconnect and reconnect your Stellar wallet (Freighter), then try again.'
+			return WALLET_SESSION_EXPIRED_MESSAGE
 		}
 		return axiosData
 	}
@@ -76,7 +82,7 @@ export const getTrustlessWorkApiErrorMessage = (error: unknown, fallback: string
 	if (directData) return directData
 
 	if (error instanceof Error && error.message.trim().length > 0) {
-		return error.message
+		return getWalletSessionErrorMessage(error) ?? error.message
 	}
 
 	return fallback
