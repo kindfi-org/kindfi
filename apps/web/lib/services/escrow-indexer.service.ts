@@ -198,6 +198,30 @@ const parseIndexerUpdatePayload = (payload: unknown): GetEscrowsFromIndexerRespo
 	return parseIndexerPayload(nested)
 }
 
+export async function ensureEscrowIndexedForContract(
+	contractId: string,
+	deployTxHash?: string,
+): Promise<EscrowIndexerFetchResult> {
+	const indexed = await getEscrowByContractIdFromIndexer(contractId, { validateOnChain: false })
+	if (indexed.ok) {
+		return indexed
+	}
+
+	if (!deployTxHash) {
+		return {
+			ok: false,
+			error: INDEXER_NOT_FOUND_ERROR,
+		}
+	}
+
+	const refreshed = await updateIndexerFromTxHash(deployTxHash)
+	if (refreshed.ok) {
+		return refreshed
+	}
+
+	return await getEscrowByContractIdFromIndexer(contractId, { validateOnChain: false })
+}
+
 export async function updateIndexerFromTxHash(txHash: string): Promise<EscrowIndexerFetchResult> {
 	const apiKey = getTrustlessWorkApiKey()
 	const baseUrl = getTrustlessWorkApiBaseUrl()

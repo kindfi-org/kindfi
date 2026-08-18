@@ -3,6 +3,16 @@ import type { TrustlessWorkNetwork } from '~/lib/config/trustless-work.config'
 
 export type EscrowApiVersion = 'v1' | 'v2'
 
+export const readDeployTxHashFromMetadata = (metadata: unknown): string | undefined => {
+	if (!metadata || typeof metadata !== 'object') return undefined
+
+	const hash = (metadata as { deploy_tx_hash?: unknown }).deploy_tx_hash
+	if (typeof hash !== 'string') return undefined
+
+	const trimmed = hash.trim().replace(/^0x/i, '')
+	return trimmed.length > 0 ? trimmed : undefined
+}
+
 export const readEscrowApiVersionFromMetadata = (
 	metadata: unknown,
 ): EscrowApiVersion | undefined => {

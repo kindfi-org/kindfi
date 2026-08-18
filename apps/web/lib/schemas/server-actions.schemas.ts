@@ -112,6 +112,10 @@ export const saveEscrowContractInputSchema = z.object({
 	contractId: z.string().min(1, 'contractId is required').max(120, 'contractId is too long'),
 	engagementId: z.string().min(1).optional(),
 	escrowData: escrowDataSchema,
+	deployTxHash: z
+		.string()
+		.regex(/^[A-Fa-f0-9]{64}$/, 'Invalid transaction hash')
+		.optional(),
 })
 
 const stellarContractIdSchema = z

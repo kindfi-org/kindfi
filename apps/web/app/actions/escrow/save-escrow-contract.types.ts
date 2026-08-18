@@ -22,4 +22,5 @@ export interface SaveEscrowContractParams {
 		receiver?: string
 		receiverMemo?: number
 	}
+	deployTxHash?: string
 }
