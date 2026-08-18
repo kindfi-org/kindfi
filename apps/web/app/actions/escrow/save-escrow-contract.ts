@@ -58,6 +58,7 @@ export async function saveEscrowContractAction(
 			projectId: validated.projectId,
 			contractId: validated.contractId,
 			escrowData: validated.escrowData,
+			deployTxHash: validated.deployTxHash,
 		})
 	} catch (error) {
 		logger.error({

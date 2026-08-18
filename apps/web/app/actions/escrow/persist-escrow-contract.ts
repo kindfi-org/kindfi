@@ -3,6 +3,7 @@ import type { EscrowType } from '@trustless-work/escrow'
 import { revalidatePath } from 'next/cache'
 import { Logger } from '~/lib/logger'
 import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
+import { readDeployTxHashFromMetadata } from '~/lib/utils/escrow/resolve-escrow-api-version'
 import { inferEscrowTypeFromSaveData } from '~/lib/utils/escrow/resolve-escrow-type'
 import type { SaveEscrowContractParams } from './save-escrow-contract.types'
 
@@ -52,6 +53,7 @@ export async function persistEscrowContract({
 	escrowData,
 	escrowType,
 	escrowApiVersion,
+	deployTxHash,
 }: {
 	userId: string
 	projectId: string
@@ -59,6 +61,7 @@ export async function persistEscrowContract({
 	escrowData: SaveEscrowContractParams['escrowData']
 	escrowType?: EscrowType
 	escrowApiVersion?: EscrowApiVersion
+	deployTxHash?: string
 }): Promise<{ success: boolean; error?: string }> {
 	const supabase = supabaseServiceRole
 	const engagementId = escrowData.engagementId
@@ -127,6 +130,20 @@ export async function persistEscrowContract({
 		contributionId = newContribution.id
 	}
 
+	const { data: existingEscrowRow } = await supabase
+		.from('escrow_contracts')
+		.select('metadata')
+		.eq('contract_id', contractId)
+		.maybeSingle()
+
+	const existingMetadata =
+		existingEscrowRow?.metadata && typeof existingEscrowRow.metadata === 'object'
+			? (existingEscrowRow.metadata as Record<string, unknown>)
+			: {}
+
+	const resolvedDeployTxHash =
+		deployTxHash?.trim().replace(/^0x/i, '') || readDeployTxHashFromMetadata(existingMetadata)
+
 	const { data: upsertedEscrow, error: escrowUpsertError } = await supabase
 		.from('escrow_contracts')
 		.upsert(
@@ -141,8 +158,10 @@ export async function persistEscrowContract({
 				platform_fee: platformFee,
 				current_state: 'NEW',
 				metadata: {
+					...existingMetadata,
 					escrow_type: resolvedEscrowType,
 					escrow_api_version: escrowApiVersion ?? 'v1',
+					...(resolvedDeployTxHash ? { deploy_tx_hash: resolvedDeployTxHash } : {}),
 				},
 				updated_at: new Date().toISOString(),
 			},

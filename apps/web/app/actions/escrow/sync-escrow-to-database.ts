@@ -161,6 +161,7 @@ export async function syncEscrowToDatabaseAction(
 			escrowData,
 			escrowType,
 			escrowApiVersion,
+			deployTxHash: validated.txHash,
 		})
 
 		if (!saveResult.success) {
