@@ -1,4 +1,4 @@
-import type { EscrowType, GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
+import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { logger } from '@/lib/logger'
 import { getTrustlessWorkApiConfig } from '~/lib/services/trustless-work-api.config'
 import {
