@@ -2,6 +2,9 @@ import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { logger } from '@/lib/logger'
 import { getTrustlessWorkApiConfig } from '~/lib/services/trustless-work-api.config'
 
+const INDEXER_NOT_FOUND_ERROR =
+	'Trustless Work has not indexed this contract yet. Paste the deployment transaction hash and try again.'
+
 export type EscrowIndexerFetchResult =
 	| { ok: true; escrow: GetEscrowsFromIndexerResponse }
 	| { ok: false; error: string }
@@ -56,7 +59,7 @@ const fetchEscrowFromBaseUrl = async ({
 
 	const escrow = parseIndexerPayload(await res.json())
 	if (!escrow?.engagementId) {
-		return { ok: false, error: 'Escrow not found for this contract ID' }
+		return { ok: false, error: INDEXER_NOT_FOUND_ERROR }
 	}
 
 	return { ok: true, escrow }
@@ -78,14 +81,93 @@ export async function getEscrowByContractIdFromIndexer(
 	}
 
 	try {
-		return await fetchEscrowFromBaseUrl({
+		const result = await fetchEscrowFromBaseUrl({
 			baseUrl,
 			apiKey,
 			contractId,
 			validateOnChain,
 		})
+
+		if (result.ok || !validateOnChain) {
+			return result
+		}
+
+		return await fetchEscrowFromBaseUrl({
+			baseUrl,
+			apiKey,
+			contractId,
+			validateOnChain: false,
+		})
 	} catch (error) {
 		logger.error('Failed to fetch escrow from indexer:', error)
+		return {
+			ok: false,
+			error: error instanceof Error ? error.message : 'Failed to reach Trustless Work',
+		}
+	}
+}
+
+const parseIndexerUpdatePayload = (payload: unknown): GetEscrowsFromIndexerResponse | null => {
+	if (!payload || typeof payload !== 'object') {
+		return null
+	}
+
+	const record = payload as Record<string, unknown>
+	const nested = record.escrow ?? record.data ?? payload
+	return parseIndexerPayload(nested)
+}
+
+export async function updateIndexerFromTxHash(txHash: string): Promise<EscrowIndexerFetchResult> {
+	const { apiKey, baseUrl } = getTrustlessWorkApiConfig()
+
+	if (!apiKey) {
+		return { ok: false, error: 'Trustless Work API key is not configured on the server' }
+	}
+
+	const headers = {
+		'x-api-key': apiKey,
+		'Content-Type': 'application/json',
+		Accept: 'application/json',
+	}
+	const body = JSON.stringify({ txHash })
+	const paths = ['/indexer/update-from-txHash', '/indexer/update-from-txhash']
+
+	try {
+		let receivedEmptySuccess = false
+
+		for (const path of paths) {
+			for (const method of ['POST', 'PUT'] as const) {
+				const res = await fetch(`${baseUrl}${path}`, {
+					method,
+					headers,
+					body,
+					cache: 'no-store',
+				})
+
+				if (!res.ok) {
+					continue
+				}
+
+				const escrow = parseIndexerUpdatePayload(await res.json())
+				if (escrow?.engagementId) {
+					return { ok: true, escrow }
+				}
+
+				receivedEmptySuccess = true
+			}
+		}
+
+		if (receivedEmptySuccess) {
+			return { ok: false, error: INDEXER_NOT_FOUND_ERROR }
+		}
+
+		return {
+			ok: false,
+			error:
+				'Could not refresh the Trustless Work indexer from this transaction hash. Confirm the hash is from the escrow deploy transaction.',
+		}
+	} catch (error) {
+		logger.error('Failed to update Trustless Work indexer from tx hash:', error)
 		return {
 			ok: false,
 			error: error instanceof Error ? error.message : 'Failed to reach Trustless Work',

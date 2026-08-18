@@ -29,6 +29,7 @@ export function SyncEscrowCard({
 	const router = useRouter()
 	const { getEscrowByContractIds } = useEscrow()
 	const [contractId, setContractId] = useState(initialContractId)
+	const [txHash, setTxHash] = useState('')
 	const [isSyncing, setIsSyncing] = useState(false)
 
 	const handleSync = async () => {
@@ -38,6 +39,8 @@ export function SyncEscrowCard({
 			return
 		}
 
+		const trimmedTxHash = txHash.trim().replace(/^0x/i, '')
+
 		setIsSyncing(true)
 		try {
 			let escrowSnapshot: ReturnType<typeof mapIndexerEscrowToSaveData> | undefined
@@ -45,7 +48,7 @@ export function SyncEscrowCard({
 			try {
 				const indexerResponse = await getEscrowByContractIds({
 					contractIds: [trimmedContractId],
-					validateOnChain: true,
+					validateOnChain: false,
 				})
 				const indexerEscrow = parseIndexerEscrowResponse(indexerResponse)
 				if (indexerEscrow?.engagementId) {
@@ -59,6 +62,7 @@ export function SyncEscrowCard({
 				projectId,
 				contractId: trimmedContractId,
 				escrowSnapshot,
+				...(trimmedTxHash ? { txHash: trimmedTxHash } : {}),
 			})
 
 			if (!result.success) {
@@ -88,14 +92,22 @@ export function SyncEscrowCard({
 				<div className="space-y-1">
 					<p className="text-sm font-medium">Already deployed on-chain?</p>
 					<p className="text-xs text-muted-foreground">
-						Paste the contract ID to link an existing escrow to this project.
+						Paste the contract ID to link an existing escrow to this project. If Trustless Work has
+						not indexed it yet, also paste the deploy transaction hash.
 					</p>
 				</div>
-				<div className="flex flex-col gap-2 sm:flex-row">
+				<div className="flex flex-col gap-2">
 					<Input
 						value={contractId}
 						onChange={(event) => setContractId(event.target.value)}
 						placeholder="C…"
+						className="font-mono text-sm"
+						disabled={isSyncing}
+					/>
+					<Input
+						value={txHash}
+						onChange={(event) => setTxHash(event.target.value)}
+						placeholder="Deploy transaction hash (optional)"
 						className="font-mono text-sm"
 						disabled={isSyncing}
 					/>
@@ -123,7 +135,8 @@ export function SyncEscrowCard({
 				<CardTitle>Link Existing Escrow</CardTitle>
 				<CardDescription>
 					If the contract was deployed on Stellar but KindFi failed to save it, paste the contract
-					ID below to fetch details from Trustless Work and link it to this project.
+					ID below. If Trustless Work still cannot find it, also paste the deploy transaction hash
+					so we can refresh the indexer and link it.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -134,6 +147,17 @@ export function SyncEscrowCard({
 						value={contractId}
 						onChange={(event) => setContractId(event.target.value)}
 						placeholder="CCOWXKJYIKVVC7D7VDI6ZDGBQWNLQWPMNUXLQLVKQNPMX4G5ZGW7M6BX"
+						className="font-mono text-sm"
+						disabled={isSyncing}
+					/>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="sync-escrow-tx-hash">Deploy transaction hash (optional)</Label>
+					<Input
+						id="sync-escrow-tx-hash"
+						value={txHash}
+						onChange={(event) => setTxHash(event.target.value)}
+						placeholder="64-character hex hash from Stellar Expert"
 						className="font-mono text-sm"
 						disabled={isSyncing}
 					/>
