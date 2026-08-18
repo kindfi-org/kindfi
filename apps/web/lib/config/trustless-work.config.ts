@@ -10,6 +10,9 @@ export const TRUSTLESS_WORK_STELLAR_RPC_URLS = {
 	mainnet: 'https://mainnet.sorobanrpc.com',
 } as const
 
+/** Trustless Work Core API (v2 REST) — testnet only per TW docs. */
+export const TRUSTLESS_WORK_CORE_V2_API_URL = 'https://beta.api.trustlesswork.com'
+
 export type TrustlessWorkNetwork = keyof typeof TRUSTLESS_WORK_API_URLS
 
 type TrustlessWorkApiBaseUrl = (typeof TRUSTLESS_WORK_API_URLS)[TrustlessWorkNetwork]
@@ -118,3 +121,14 @@ export const getTrustlessWorkStellarRpcUrl = (): string => {
  */
 export const getTrustlessWorkStellarRpcUrlForNetwork = (network: TrustlessWorkNetwork): string =>
 	TRUSTLESS_WORK_STELLAR_RPC_URLS[network]
+
+/** TW Core API v2 routes (paths containing /v2/) live on beta (testnet), not on mainnet v1 hosts. */
+export const isTrustlessWorkV2RestPath = (path: string): boolean => /\/v2(\/|$)/.test(path)
+
+export const getTrustlessWorkUpstreamApiBaseUrl = (path: string): string => {
+	if (isTrustlessWorkV2RestPath(path) && getTrustlessWorkNetwork() !== 'mainnet') {
+		return TRUSTLESS_WORK_CORE_V2_API_URL
+	}
+
+	return getTrustlessWorkApiBaseUrl()
+}

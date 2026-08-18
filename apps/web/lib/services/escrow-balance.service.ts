@@ -3,6 +3,8 @@ import { logger } from '@/lib/logger'
 import {
 	getTrustlessWorkApiBaseUrl,
 	getTrustlessWorkApiKey,
+	getTrustlessWorkNetwork,
+	getTrustlessWorkUpstreamApiBaseUrl,
 } from '~/lib/config/trustless-work.config'
 import { getEscrowByContractIdFromIndexer } from '~/lib/services/escrow-indexer.service'
 import {
@@ -24,8 +26,11 @@ const readBalanceFromV2EscrowPayload = (payload: unknown): number | null => {
 const fetchV2EscrowBalance = async (
 	contractAddress: string,
 	apiKey: string,
-	baseUrl: string,
 ): Promise<number | null> => {
+	if (getTrustlessWorkNetwork() === 'mainnet') {
+		return null
+	}
+
 	const candidates: Array<{ escrowType: EscrowType; apiVersion: EscrowApiVersion }> = [
 		{ escrowType: 'multi-release', apiVersion: 'v2' },
 		{ escrowType: 'single-release', apiVersion: 'v2' },
@@ -33,8 +38,9 @@ const fetchV2EscrowBalance = async (
 
 	for (const candidate of candidates) {
 		const path = buildReadEscrowApiPath(candidate.escrowType, candidate.apiVersion, contractAddress)
+		const upstreamBase = getTrustlessWorkUpstreamApiBaseUrl(path)
 		try {
-			const res = await fetch(`${baseUrl}/${path}`, {
+			const res = await fetch(`${upstreamBase}/${path}`, {
 				headers: { 'x-api-key': apiKey, Accept: 'application/json' },
 				cache: 'no-store',
 			})
@@ -95,5 +101,5 @@ export async function getEscrowBalance(contractAddress: string): Promise<number 
 		if (indexedBalance !== null) return indexedBalance
 	}
 
-	return await fetchV2EscrowBalance(contractAddress, apiKey, baseUrl)
+	return await fetchV2EscrowBalance(contractAddress, apiKey)
 }
