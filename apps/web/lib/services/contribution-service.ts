@@ -16,6 +16,7 @@ export {
 } from './contribution-side-effects.service'
 export type {
 	CheckDuplicateContributionResult,
+	ContributionAllowedResult,
 	FundraisingGoalCheckResult,
 	ResolveProjectIdInput,
 	ResolveProjectIdResult,
@@ -24,4 +25,5 @@ export {
 	checkDuplicateContribution,
 	checkFundraisingGoalNotReached,
 	resolveProjectId,
+	validateContributionAllowed,
 } from './contribution-validation.service'
