@@ -216,6 +216,13 @@ export const profile = {
 	bio: 'Biografía',
 	bioPlaceholder: 'Cuéntale a la comunidad sobre tu misión...',
 	avatarUrl: 'URL del avatar',
+	countryOfResidence: 'País de residencia',
+	countryOfResidenceDescription:
+		'Requerido para que KindFi evalúe el riesgo por país. Es tu país autodeclarado; la verificación KYC puede confirmarlo por separado.',
+	countryOfResidenceRequired: 'Selecciona tu país de residencia',
+	countryOfResidenceUpdated: 'País de residencia actualizado',
+	countryOfResidenceUpdateFailed: 'No se pudo actualizar el país de residencia',
+	selectCountryPlaceholder: 'Selecciona un país',
 	edit: 'Editar',
 	cancel: 'Cancelar',
 	saveChanges: 'Guardar cambios',
