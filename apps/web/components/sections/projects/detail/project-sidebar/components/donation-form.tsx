@@ -14,12 +14,15 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { TrustlessExternalWalletBanner } from '~/components/sections/projects/manage/escrow/components/trustless-external-wallet-banner'
+import { CAMPAIGN_COMPLETE_DONATION_MESSAGE } from '~/lib/projects/project-status'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import type { FormValues } from '../types'
 
 interface DonationFormProps {
 	project: ProjectDetail
 	hasEscrow: boolean
+	isCampaignComplete: boolean
+	isAcceptingDonations: boolean
 	isGoalReached: boolean
 	isDonationReady: boolean
 	isEscrowDataLoading: boolean
@@ -32,6 +35,8 @@ interface DonationFormProps {
 export function DonationForm({
 	project,
 	hasEscrow,
+	isCampaignComplete,
+	isAcceptingDonations,
 	isGoalReached,
 	isDonationReady,
 	isEscrowDataLoading,
@@ -40,10 +45,12 @@ export function DonationForm({
 	form,
 	onSubmit,
 }: DonationFormProps) {
-	const canDonate = isDonationReady && !isGoalReached && isAuthenticated
+	const canDonate =
+		isDonationReady && isAcceptingDonations && !isGoalReached && isAuthenticated
+
 	return (
 		<>
-			{hasEscrow && isAuthenticated && (
+			{hasEscrow && isAuthenticated && isAcceptingDonations && !isGoalReached && (
 				<div className="mb-4">
 					<TrustlessExternalWalletBanner compact />
 				</div>
@@ -66,17 +73,21 @@ export function DonationForm({
 											type="text"
 											inputMode="decimal"
 											placeholder={
-												!hasEscrow
-													? 'Donations coming soon'
-													: !isAuthenticated
-														? 'Sign in to donate'
-														: isEscrowDataLoading
-															? 'Loading escrow…'
-															: isGoalReached
-																? 'Funding goal reached'
-																: !isDonationReady
-																	? 'Preparing donations…'
-																	: `Min. $${project.minInvestment}…`
+												isCampaignComplete
+													? 'Campaign complete'
+													: !hasEscrow
+														? 'Donations coming soon'
+														: !isAuthenticated
+															? 'Sign in to donate'
+															: isEscrowDataLoading
+																? 'Loading escrow…'
+																: isGoalReached
+																	? 'Funding goal reached'
+																	: !isDonationReady
+																		? 'Preparing donations…'
+																		: !isAcceptingDonations
+																			? 'Donations unavailable'
+																			: `Min. $${project.minInvestment}…`
 											}
 											className="pl-6 disabled:opacity-60 disabled:cursor-not-allowed"
 											aria-label="Donation amount in USD"
@@ -128,7 +139,7 @@ export function DonationForm({
 							className="mt-4 w-full text-white gradient-btn"
 							size="lg"
 							asChild
-							disabled={!hasEscrow || isGoalReached}
+							disabled={!hasEscrow || isGoalReached || !isAcceptingDonations}
 						>
 							<Link href={signInHref}>Sign in to donate</Link>
 						</Button>
@@ -141,6 +152,8 @@ export function DonationForm({
 
 interface DonationNoticesProps {
 	hasEscrow: boolean
+	isCampaignComplete: boolean
+	isAcceptingDonations: boolean
 	isGoalReached: boolean
 	isAuthenticated: boolean
 	signInHref: string
@@ -148,13 +161,22 @@ interface DonationNoticesProps {
 
 export function DonationNotices({
 	hasEscrow,
+	isCampaignComplete,
+	isAcceptingDonations,
 	isGoalReached,
 	isAuthenticated,
 	signInHref,
 }: DonationNoticesProps) {
 	return (
 		<>
-			{hasEscrow && isGoalReached && (
+			{isCampaignComplete && (
+				<div className="p-3 my-4 text-sm text-blue-900 bg-blue-50 rounded-md border border-blue-200">
+					<p className="font-medium mb-1">Campaign complete</p>
+					<p className="text-blue-800">{CAMPAIGN_COMPLETE_DONATION_MESSAGE}</p>
+				</div>
+			)}
+
+			{hasEscrow && isGoalReached && !isCampaignComplete && (
 				<div className="p-3 my-4 text-sm text-green-900 bg-green-50 rounded-md border border-green-300">
 					<p className="font-medium mb-1">Funding goal reached</p>
 					<p className="text-green-800">
@@ -163,7 +185,7 @@ export function DonationNotices({
 				</div>
 			)}
 
-			{hasEscrow && !isGoalReached && !isAuthenticated && (
+			{hasEscrow && isAcceptingDonations && !isGoalReached && !isAuthenticated && (
 				<div className="p-3 my-4 text-sm text-blue-900 bg-blue-50 rounded-md border border-blue-200">
 					<p className="font-medium mb-1">Sign in to donate</p>
 					<p className="text-blue-800">

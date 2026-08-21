@@ -2,6 +2,20 @@ import type { Enums } from '@services/supabase'
 
 export type ProjectStatus = Enums<'project_status'>
 
+export const CAMPAIGN_COMPLETE_DONATION_MESSAGE =
+	'This campaign is complete and is no longer accepting donations.'
+
+export const PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE =
+	'This campaign is not currently accepting donations.'
+
+export function isProjectAcceptingDonations(status: ProjectStatus): boolean {
+	return status === 'active'
+}
+
+export function isProjectCampaignComplete(status: ProjectStatus): boolean {
+	return status === 'funded'
+}
+
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
 	draft: 'Draft',
 	review: 'Ready for review',

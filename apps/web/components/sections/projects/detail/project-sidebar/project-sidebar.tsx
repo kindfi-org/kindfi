@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { Badge } from '~/components/base/badge'
 import { ReleasedProgressBar } from '~/components/sections/projects/shared'
+import { CAMPAIGN_COMPLETE_DONATION_MESSAGE } from '~/lib/projects/project-status'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { DonationForm, DonationNotices } from './components/donation-form'
 import { EscrowContractInfo } from './components/escrow-contract-info'
@@ -23,6 +24,8 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 	const {
 		form,
 		hasEscrow,
+		isCampaignComplete,
+		isAcceptingDonations,
 		isGoalReached,
 		isDonationReady,
 		isEscrowDataLoading,
@@ -55,7 +58,15 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 			<div className="p-6">
 				<div className="flex items-center gap-2 mb-2">
 					<h2 className="text-xl font-bold">Support This Project</h2>
-					{hasEscrow && isGoalReached ? (
+					{isCampaignComplete ? (
+						<Badge
+							variant="secondary"
+							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-0"
+							aria-label="This campaign is complete"
+						>
+							Campaign complete
+						</Badge>
+					) : hasEscrow && isGoalReached ? (
 						<Badge
 							variant="secondary"
 							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-0"
@@ -63,7 +74,7 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 						>
 							Goal reached
 						</Badge>
-					) : hasEscrow ? (
+					) : hasEscrow && isAcceptingDonations ? (
 						<Badge
 							variant="secondary"
 							className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0"
@@ -82,11 +93,13 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 					)}
 				</div>
 				<p className="mb-4 text-muted-foreground">
-					{!hasEscrow
-						? 'This project is still setting up secure escrow. Donations will be available soon.'
-						: isGoalReached
-							? 'This project has reached its fundraising goal. Thank you for your support!'
-							: 'Your contribution matters. Join the change.'}
+					{isCampaignComplete
+						? CAMPAIGN_COMPLETE_DONATION_MESSAGE
+						: !hasEscrow
+							? 'This project is still setting up secure escrow. Donations will be available soon.'
+							: isGoalReached
+								? 'This project has reached its fundraising goal. Thank you for your support!'
+								: 'Your contribution matters. Join the change.'}
 				</p>
 
 				<ProjectProgressBar
@@ -105,6 +118,8 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 				<DonationForm
 					project={project}
 					hasEscrow={hasEscrow}
+					isCampaignComplete={isCampaignComplete}
+					isAcceptingDonations={isAcceptingDonations}
 					isGoalReached={isGoalReached}
 					isDonationReady={isDonationReady}
 					isEscrowDataLoading={isEscrowDataLoading}
@@ -116,14 +131,16 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 
 				<DonationNotices
 					hasEscrow={hasEscrow}
+					isCampaignComplete={isCampaignComplete}
+					isAcceptingDonations={isAcceptingDonations}
 					isGoalReached={isGoalReached}
 					isAuthenticated={isAuthenticated}
 					signInHref={signInHref}
 				/>
 
-				{project.escrowContractAddress && (
+				{isAcceptingDonations && !isGoalReached && project.escrowContractAddress ? (
 					<EscrowContractInfo escrowContractAddress={project.escrowContractAddress} />
-				)}
+				) : null}
 
 				<SidebarActions
 					isFollowing={isFollowing}

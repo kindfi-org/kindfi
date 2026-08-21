@@ -4,6 +4,11 @@ import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
+import {
+	isProjectAcceptingDonations,
+	isProjectCampaignComplete,
+	type ProjectStatus,
+} from '~/lib/projects/project-status'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import {
 	calculateReleasedAmountFromEscrow,
@@ -23,6 +28,9 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	})
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
+	const projectStatus = (project.status ?? 'draft') as ProjectStatus
+	const isCampaignComplete = isProjectCampaignComplete(projectStatus)
+	const isAcceptingDonations = isProjectAcceptingDonations(projectStatus)
 
 	const effectiveEscrowType = resolveEscrowType({
 		indexerEscrow: escrowData,
@@ -99,6 +107,8 @@ export function useProjectSidebarEscrowState(project: ProjectDetail) {
 	return {
 		escrowData,
 		hasEscrow,
+		isCampaignComplete,
+		isAcceptingDonations,
 		effectiveEscrowType,
 		isDonationReady,
 		isEscrowDataLoading,
