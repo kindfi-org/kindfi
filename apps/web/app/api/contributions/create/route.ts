@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { evaluateCountryRiskAuthorization } from '~/lib/compliance/authorization-service'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/development-only-access'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
@@ -45,6 +46,22 @@ async function createContributionHandler(req: NextRequest) {
 					error: `Amount exceeds maximum allowed ($${MAX_CONTRIBUTION_AMOUNT.toLocaleString()}).`,
 				},
 				{ status: 400 },
+			)
+		}
+
+		const countryRiskDecision = await evaluateCountryRiskAuthorization({
+			userId: session.user.id,
+			action: 'donate',
+			amount: numericAmount,
+		})
+		if (!countryRiskDecision.allowed) {
+			return NextResponse.json(
+				{
+					error:
+						'This donation is currently unavailable for your account. Please complete verification, wait for manual review, or contact support.',
+					requiredAction: countryRiskDecision.requiredAction,
+				},
+				{ status: 403 },
 			)
 		}
 

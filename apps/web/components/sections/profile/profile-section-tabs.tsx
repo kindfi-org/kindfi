@@ -11,6 +11,7 @@ import { useI18n } from '~/lib/i18n'
 import { isCreatorProfileRole } from '~/lib/profile/is-creator-profile-role'
 import { cn } from '~/lib/utils'
 import { AccountInfoCard } from './cards/account-info-card'
+import { CountryOfResidenceCard } from './cards/country-of-residence-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
 import { profileFadeUp } from './profile-motion'
 import { ProfileViewSkeleton } from './skeletons'
@@ -268,6 +269,7 @@ const ProfileSectionTabsInner = ({
 							imageUrl={user.profile?.image_url ?? ''}
 							_email={user.email}
 						/>
+						<CountryOfResidenceCard userId={user.id} />
 						<AccountInfoCard
 							userEmail={user.email}
 							createdAt={user.created_at}

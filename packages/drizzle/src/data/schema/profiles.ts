@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+	boolean,
 	char,
 	foreignKey,
 	index,
@@ -59,6 +60,7 @@ export const profiles = pgTable(
 			withTimezone: true,
 			mode: 'string',
 		}),
+		complianceAdmin: boolean('compliance_admin').default(false).notNull(),
 	},
 	(table) => [
 		index('idx_profiles_creator_entity_type').using(

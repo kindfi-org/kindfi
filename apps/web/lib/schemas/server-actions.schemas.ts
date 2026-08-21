@@ -152,4 +152,11 @@ export const updateProfileRoleInputSchema = z.object({
 	role: z.enum(['creator', 'donor']),
 })
 
+export const updateDeclaredCountryInputSchema = z.object({
+	countryCode: z
+		.string()
+		.length(2, 'Country code must be an ISO 3166-1 alpha-2 code')
+		.regex(/^[A-Za-z]{2}$/, 'Country code must be an ISO 3166-1 alpha-2 code'),
+})
+
 export { stellarAddressSchema }
