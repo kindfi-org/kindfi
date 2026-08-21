@@ -11,6 +11,7 @@ import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-a
 import { useI18n } from '~/lib/i18n'
 import { GovernanceCard } from './cards/governance-card'
 import { KYCCard } from './cards/kyc-card'
+import { SendAssetsCard } from './cards/send-assets/send-assets-card'
 import { WalletCard } from './cards/wallet-card'
 import { ProfileHeader } from './profile-header'
 import { profileFadeUp } from './profile-motion'
@@ -161,6 +162,10 @@ export function ProfileDashboard({
 						<div className="lg:col-span-2" data-tour-id="kyc-card">
 							<KYCCard userId={user.id} shouldRefresh={kycCompleted} />
 						</div>
+					</motion.div>
+
+					<motion.div {...profileFadeUp(0.09)} data-tour-id="send-assets-card">
+						<SendAssetsCard walletAddress={effectiveWalletAddress} isWalletReady={isWalletReady} />
 					</motion.div>
 
 					<motion.div {...profileFadeUp(0.1)} data-tour-id="governance-card">

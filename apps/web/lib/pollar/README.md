@@ -36,6 +36,16 @@ Pollar login (Google/GitHub/Email)
 - CSP `connect-src` must include `https://sdk.api.pollar.xyz`
 - Use `login({ provider: 'google' })` from `usePollar()`, not a raw fetch
 
+## Classic wallet send (profile)
+
+Profile **Send assets** builds unsigned classic payment XDR locally, verifies it pre-sign, then submits via `signAndSubmitTx`.
+
+1. **Treasury → Auth Policy**: Allow classic payment destinations used in QA (or broader payment policy if your org permits)
+2. Fund custodial G-address with XLM + USDC trustline on the target network
+3. Run `spike/classic-payment-spike.md` on testnet
+
+If Auth Policy rejects classic payments, the UI shows a `pollar_policy` error with setup guidance.
+
 ## Trustless Work signing spike
 
 Validate on testnet before mainnet:
