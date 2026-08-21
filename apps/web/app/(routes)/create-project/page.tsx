@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { CreateProjectContentWizard } from '~/components/sections/projects/create/create-project-content-wizard'
 import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireCompletedOnboarding } from '~/lib/onboarding/guard'
 
 export default async function CreateProjectPage({
 	searchParams,
@@ -16,6 +17,8 @@ export default async function CreateProjectPage({
 	if (!session?.user) {
 		redirect('/sign-in?callbackUrl=/create-project')
 	}
+
+	await requireCompletedOnboarding('/create-project')
 
 	const { foundationId } = await searchParams
 
