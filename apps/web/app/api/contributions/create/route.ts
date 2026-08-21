@@ -8,11 +8,11 @@ import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/developm
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkDuplicateContribution,
-	checkFundraisingGoalNotReached,
 	createContributionWithProjectUpdate,
 	resolveProjectId,
 	sendContributionNotifications,
 	triggerGamificationUpdates,
+	validateContributionAllowed,
 } from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -66,16 +66,16 @@ async function createContributionHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
-		const [goalCheck, duplicateCheck] = await Promise.all([
-			checkFundraisingGoalNotReached(finalProjectId, contractId),
+		const [contributionCheck, duplicateCheck] = await Promise.all([
+			validateContributionAllowed(finalProjectId, contractId),
 			checkDuplicateContribution({
 				transactionHash,
 				projectId: finalProjectId,
 				contributorId: session.user.id,
 			}),
 		])
-		if (!goalCheck.allowed) {
-			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
+		if (!contributionCheck.allowed) {
+			return NextResponse.json({ error: contributionCheck.error }, { status: 403 })
 		}
 
 		if (duplicateCheck.duplicate) {
