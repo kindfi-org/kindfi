@@ -23,6 +23,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	const {
 		escrowData,
 		hasEscrow,
+		isCampaignComplete,
+		isAcceptingDonations,
 		isDonationReady,
 		isEscrowDataLoading,
 		onChainRaised,
@@ -126,6 +128,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	return {
 		form,
 		hasEscrow,
+		isCampaignComplete,
+		isAcceptingDonations,
 		isGoalReached,
 		isDonationReady,
 		isEscrowDataLoading,

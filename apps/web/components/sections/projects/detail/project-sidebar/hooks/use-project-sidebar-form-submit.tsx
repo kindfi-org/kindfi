@@ -11,6 +11,13 @@ import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { zodResolver } from '~/lib/form/zod-resolver'
 import { trackOnboardingPath } from '~/lib/pollar/analytics'
+import {
+	CAMPAIGN_COMPLETE_DONATION_MESSAGE,
+	isProjectAcceptingDonations,
+	isProjectCampaignComplete,
+	PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE,
+	type ProjectStatus,
+} from '~/lib/projects/project-status'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { submitTrustlessEscrowXdr } from '~/lib/utils/escrow/trustless-submit'
 import { buildFormSchema, type FormValues } from '../types'
@@ -67,6 +74,18 @@ export function useProjectSidebarFormSubmit({
 			toast.error('Funding goal reached', {
 				description:
 					'This project has met its fundraising goal and is no longer accepting donations.',
+				icon: <CircleAlert className="text-destructive" />,
+			})
+			return
+		}
+
+		const projectStatus = (project.status ?? 'draft') as ProjectStatus
+		if (!isProjectAcceptingDonations(projectStatus)) {
+			const isComplete = isProjectCampaignComplete(projectStatus)
+			toast.error(isComplete ? 'Campaign complete' : 'Donations unavailable', {
+				description: isComplete
+					? CAMPAIGN_COMPLETE_DONATION_MESSAGE
+					: PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE,
 				icon: <CircleAlert className="text-destructive" />,
 			})
 			return
