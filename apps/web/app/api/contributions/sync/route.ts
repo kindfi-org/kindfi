@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkFundraisingGoalNotReached,
@@ -20,6 +21,14 @@ export async function POST(req: NextRequest) {
 		const [session, body] = await Promise.all([getServerSession(nextAuthOption), req.json()])
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const onboardingFailure = await requireOnboardingCompleteForAction(session.user.id)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
+				{ status: 403 },
+			)
 		}
 
 		const validation = validateRequest(syncContributionSchema, body)

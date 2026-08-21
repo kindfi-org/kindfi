@@ -6,6 +6,7 @@ import { CreateFoundationForm } from '~/components/sections/foundations/create/c
 import { UnauthorizedAccess } from '~/components/shared/unauthorized-access'
 import { CreateFoundationProvider } from '~/hooks/contexts/use-create-foundation.context'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireCompletedOnboarding } from '~/lib/onboarding/guard'
 
 export default async function CreateFoundationPage() {
 	const session = await getServerSession(nextAuthOption)
@@ -13,6 +14,8 @@ export default async function CreateFoundationPage() {
 	if (!session?.user) {
 		redirect('/sign-in?callbackUrl=/create-foundation')
 	}
+
+	await requireCompletedOnboarding('/create-foundation')
 
 	// Fetch user profile to check role
 	const supabase = await createSupabaseServerClient()

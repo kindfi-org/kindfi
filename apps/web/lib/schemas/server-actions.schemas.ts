@@ -56,6 +56,7 @@ export const resetPasswordInputSchema = z
 export const createSessionInputSchema = z.object({
 	userId: z.string().uuid('Invalid userId'),
 	email: z.string().email('A valid email is required'),
+	callbackUrl: z.string().optional(),
 })
 
 const stellarAddressSchema = z

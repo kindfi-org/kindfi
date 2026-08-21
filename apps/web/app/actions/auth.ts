@@ -12,11 +12,13 @@ import {
 	validateInput,
 } from '~/lib/auth/server-action-auth'
 import { Logger } from '~/lib/logger'
+import { getOnboardingStateForUser, ONBOARDING_PATH } from '~/lib/onboarding/guard'
 import {
 	createSessionInputSchema,
 	updateDeviceWithDeployeeInputSchema,
 } from '~/lib/schemas/server-actions.schemas'
 import type { AuthResponse } from '~/lib/types/auth'
+import { resolveSafeCallbackUrl } from '~/lib/utils/safe-redirect'
 
 const logger = new Logger()
 const errorHandler = new AuthErrorHandler(logger)
@@ -24,8 +26,9 @@ const errorHandler = new AuthErrorHandler(logger)
 export async function createSessionAction(input: {
 	userId: string
 	email: string
+	callbackUrl?: string
 }): Promise<AuthResponse> {
-	let validated: { userId: string; email: string }
+	let validated: { userId: string; email: string; callbackUrl?: string }
 	try {
 		validated = validateInput(createSessionInputSchema, input, 'createSessionAction')
 	} catch (error) {
@@ -82,10 +85,15 @@ export async function createSessionAction(input: {
 			email: validated.email,
 		})
 
+		const onboardingState = await getOnboardingStateForUser(validated.userId)
+		const redirectTarget = onboardingState?.isComplete
+			? resolveSafeCallbackUrl(validated.callbackUrl, '/profile')
+			: ONBOARDING_PATH
+
 		return {
 			success: true,
 			message: 'Session created successfully',
-			redirect: '/profile',
+			redirect: redirectTarget,
 			data: userData,
 		} as AuthResponse
 	} catch (error) {

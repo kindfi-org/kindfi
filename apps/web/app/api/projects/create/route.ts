@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	buildSocialLinks,
@@ -53,6 +54,14 @@ async function createProjectHandler(req: NextRequest) {
 					error: 'Forbidden',
 					message: 'Only creators and administrators can create projects',
 				},
+				{ status: 403 },
+			)
+		}
+
+		const onboardingFailure = await requireOnboardingCompleteForAction(userId)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
 				{ status: 403 },
 			)
 		}
