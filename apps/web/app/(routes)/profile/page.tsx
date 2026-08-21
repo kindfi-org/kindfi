@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireCompletedOnboarding } from '~/lib/onboarding/guard'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
@@ -34,6 +35,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 	if (!session?.user) {
 		redirect('/sign-in')
 	}
+
+	await requireCompletedOnboarding('/profile')
 
 	const params = await searchParams
 	const kycCompleted = params.kyc === 'completed'
@@ -115,7 +118,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 	const { data: profileData, error } = await supabase
 		.from('profiles')
 		.select(
-			'role, display_name, bio, image_url, slug, created_at, onboarding_provider, pollar_wallet_address, external_wallet_address',
+			'role, display_name, bio, image_url, slug, created_at, onboarding_provider, pollar_wallet_address, external_wallet_address, product_tour_completed_at',
 		)
 		.eq('id', session.user.id)
 		.single()

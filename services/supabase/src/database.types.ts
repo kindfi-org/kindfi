@@ -1275,10 +1275,14 @@ export type Database = {
           id: string
           image_url: string | null
           next_auth_user_id: string | null
+          onboarding_completed_at: string | null
           onboarding_provider: Database["public"]["Enums"]["onboarding_provider"]
+          onboarding_step: string
+          onboarding_version: number
           pollar_user_id: string | null
           pollar_wallet_activated_at: string | null
           pollar_wallet_address: string | null
+          product_tour_completed_at: string | null
           role: Database["public"]["Enums"]["user_role"]
           slug: string | null
           social_links: Json
@@ -1299,10 +1303,14 @@ export type Database = {
           id: string
           image_url?: string | null
           next_auth_user_id?: string | null
+          onboarding_completed_at?: string | null
           onboarding_provider?: Database["public"]["Enums"]["onboarding_provider"]
+          onboarding_step?: string
+          onboarding_version?: number
           pollar_user_id?: string | null
           pollar_wallet_activated_at?: string | null
           pollar_wallet_address?: string | null
+          product_tour_completed_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
           social_links?: Json
@@ -1323,10 +1331,14 @@ export type Database = {
           id?: string
           image_url?: string | null
           next_auth_user_id?: string | null
+          onboarding_completed_at?: string | null
           onboarding_provider?: Database["public"]["Enums"]["onboarding_provider"]
+          onboarding_step?: string
+          onboarding_version?: number
           pollar_user_id?: string | null
           pollar_wallet_activated_at?: string | null
           pollar_wallet_address?: string | null
+          product_tour_completed_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           slug?: string | null
           social_links?: Json
