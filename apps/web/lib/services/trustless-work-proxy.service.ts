@@ -12,6 +12,10 @@ import {
 	isPublicTrustlessWorkRead,
 } from '~/lib/config/trustless-work-proxy.paths'
 import {
+	isFundEscrowProxyPath,
+	validateFundEscrowProxyRequest,
+} from '~/lib/services/contribution-validation.service'
+import {
 	submitTrustlessSignedTransaction,
 	TrustlessStellarSubmitError,
 } from '~/lib/services/submit-trustless-signed-transaction.service'
@@ -206,6 +210,16 @@ export async function proxyTrustlessWorkRequest(
 
 	if (path === 'helper/send-transaction' && method === 'POST') {
 		return handleSendTransaction(headers, body)
+	}
+
+	if (isFundEscrowProxyPath(path, method)) {
+		const fundEscrowValidation = await validateFundEscrowProxyRequest(body)
+		if (!fundEscrowValidation.ok) {
+			return NextResponse.json(
+				{ error: fundEscrowValidation.error },
+				{ status: fundEscrowValidation.status },
+			)
+		}
 	}
 
 	try {
