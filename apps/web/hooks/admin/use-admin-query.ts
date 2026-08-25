@@ -1,22 +1,9 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import {
-	buildAdminListQueryString,
-	normalizeAdminListParams,
-} from '~/lib/validators/admin-list-params'
+import { adminQueryKey, buildAdminListQueryString } from '~/lib/validators/admin-list-params'
 
-/**
- * Builds the TanStack Query key for an admin surface. Shared by client hooks
- * and server prefetching so hydration always matches.
- */
-export function adminQueryKey(
-	surface: string,
-	params?: Record<string, unknown>,
-): [string, string, Record<string, string>] | [string, string] {
-	if (!params) return ['admin', surface]
-	return ['admin', surface, normalizeAdminListParams(params)]
-}
+export { adminQueryKey }
 
 async function fetchAdminApi<TData>(path: string, params?: Record<string, unknown>) {
 	const query = params ? buildAdminListQueryString(params) : ''

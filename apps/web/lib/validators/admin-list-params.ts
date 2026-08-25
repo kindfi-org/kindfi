@@ -181,3 +181,15 @@ export function buildAdminListQueryString(params: Record<string, unknown>): stri
 	const search = new URLSearchParams(normalized)
 	return search.toString()
 }
+
+/**
+ * TanStack Query key for an admin surface. Shared by the client hooks and
+ * server prefetching so hydration always matches.
+ */
+export function adminQueryKey(
+	surface: string,
+	params?: Record<string, unknown>,
+): [string, string, Record<string, string>] | [string, string] {
+	if (!params) return ['admin', surface]
+	return ['admin', surface, normalizeAdminListParams(params)]
+}
