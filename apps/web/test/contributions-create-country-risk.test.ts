@@ -61,6 +61,20 @@ mock.module('~/lib/compliance/authorization-service', () => ({
 	evaluateCountryRiskAuthorization: mockEvaluate,
 }))
 
+mock.module('~/lib/kyc/denial', () => ({
+	requireKycAuthorization: async () => ({
+		ok: true,
+		result: {
+			allowed: true,
+			enforced: false,
+			mode: 'disabled',
+			currentKycStatus: 'not_started',
+			policyResult: 'allow',
+			reasonCode: 'disabled',
+		},
+	}),
+}))
+
 // Once the compliance gate passes, force a controlled, distinguishable
 // failure downstream so we can prove the gate was crossed without having to
 // fully stub the rest of the contribution pipeline.

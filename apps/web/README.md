@@ -189,6 +189,11 @@ RESEND_API_KEY=your_resend_key
 DIDIT_API_KEY=your_didit_api_key
 DIDIT_WEBHOOK_SECRET=your_didit_webhook_secret
 
+# KYC enforcement (server-only; keep disabled in production)
+# Requires a redeploy / process restart to take effect.
+KYC_ENFORCEMENT_MODE=disabled
+KYC_ENFORCED_ACTIONS=send_assets,use_off_ramp
+
 # Other
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```

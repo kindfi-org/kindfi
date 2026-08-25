@@ -171,6 +171,23 @@ export const profile = {
 	kycUpdatedDeclined: 'KYC rechazado.',
 	kycUpdatedReview: 'KYC en revisión.',
 	kycUpdateFailed: 'No se pudo actualizar el KYC. Actualiza la página.',
+	kycExpired: 'Expirado',
+	kycExpiredMessage: 'Tu sesión de verificación expiró. Puedes iniciar una nueva.',
+	kycGateTitle: 'Se requiere verificación de identidad',
+	kycGateWhy:
+		'Esta acción está protegida por la verificación de identidad de KindFi, gestionada por Didit. Completa la verificación para continuar.',
+	kycGateNotStarted: 'Aún no has iniciado la verificación de identidad.',
+	kycGatePending: 'Tu verificación de Didit sigue en curso.',
+	kycGateInReview: 'Tu verificación de Didit está en revisión. Suele completarse en breve.',
+	kycGateRejected:
+		'Didit rechazó esta verificación. Contacta a soporte si necesitas ayuda para reintentar.',
+	kycGateExpired: 'Tu sesión de Didit expiró. Inicia una nueva verificación para continuar.',
+	kycGateUnavailable: 'No pudimos confirmar tu estado de Didit. Espera un momento y vuelve a comprobar.',
+	kycGateStart: 'Iniciar verificación Didit',
+	kycGateRecheck: 'Volver a comprobar',
+	kycGateRecheckDone: 'Estado actualizado.',
+	kycGateStillPending: 'La verificación aún no está aprobada. Puedes volver a comprobar en breve.',
+	kycGateContactSupport: 'Contactar soporte',
 	creatorOverviewTitle: 'Centro de',
 	creatorOverviewHighlight: 'campañas',
 	creatorOverviewDescription:

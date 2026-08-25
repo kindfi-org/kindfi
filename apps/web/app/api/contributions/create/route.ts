@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { evaluateCountryRiskAuthorization } from '~/lib/compliance/authorization-service'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/development-only-access'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
@@ -63,6 +64,15 @@ async function createContributionHandler(req: NextRequest) {
 				},
 				{ status: 403 },
 			)
+		}
+
+		const kycDecision = await requireKycAuthorization({
+			userId: session.user.id,
+			action: 'donate',
+			amount: numericAmount,
+		})
+		if (!kycDecision.ok) {
+			return kycDecision.response
 		}
 
 		const projectResolution = await resolveProjectId({ contractId, projectId })

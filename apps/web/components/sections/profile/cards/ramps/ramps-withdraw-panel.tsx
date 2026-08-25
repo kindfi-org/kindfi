@@ -14,8 +14,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { KycRequiredGate } from '~/components/sections/kyc/kyc-required-gate'
+import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
 import { isEtherfuseTermsError } from '~/lib/etherfuse/order-errors'
 import { useI18n } from '~/lib/i18n'
+import { isKycDenialPayload } from '~/lib/kyc/client'
 import { ProfileSurfaceCard } from '../../profile-surface-card'
 import { RAMP_CURRENCIES } from './constants'
 import { RampsAssetPicker } from './ramps-asset-picker'
@@ -45,6 +48,7 @@ export function RampsWithdrawPanel({
 	isStartingOnboarding,
 }: RampsWithdrawPanelProps) {
 	const { t } = useI18n()
+	const kycGate = useKycRequiredGate(userId)
 	const [amount, setAmount] = useState('')
 	const [currency, setCurrency] = useState('MXN')
 	const [sourceAsset, setSourceAsset] = useState('')
@@ -92,6 +96,10 @@ export function RampsWithdrawPanel({
 			const data = await response.json()
 
 			if (!response.ok) {
+				if (isKycDenialPayload(data)) {
+					kycGate.showDenial(data)
+					return
+				}
 				throw new Error(data.error || t('profile.rampsWithdrawFailed'))
 			}
 
@@ -131,91 +139,101 @@ export function RampsWithdrawPanel({
 	}
 
 	return (
-		<ProfileSurfaceCard padding="lg" className="h-full">
-			<div className="space-y-6">
-				<div className="space-y-1">
-					<h3 className="text-lg font-semibold text-gray-900">{t('profile.rampsWithdrawTitle')}</h3>
-					<p className="text-sm text-muted-foreground">{t('profile.rampsWithdrawDescription')}</p>
-				</div>
-
-				<RampsAssetPicker
-					currency={currency}
-					walletAddress={walletAddress}
-					value={sourceAsset}
-					onChange={setSourceAsset}
-					disabled={isProcessing}
-					label={t('profile.rampsSendAsset')}
-					loadingMessage={t('profile.rampsAssetsLoading')}
-					emptyMessage={t('profile.rampsAssetsEmpty')}
-				/>
-
-				<div className="space-y-2">
-					<Label htmlFor="ramp-withdraw-amount">{t('profile.rampsAmountLabel')}</Label>
-					<div className="flex overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100">
-						<Input
-							id="ramp-withdraw-amount"
-							type="number"
-							inputMode="decimal"
-							value={amount}
-							onChange={(event) => setAmount(event.target.value)}
-							placeholder={t('profile.rampsAmountPlaceholder')}
-							min="0"
-							step="0.01"
-							disabled={isProcessing}
-							className="h-14 border-0 bg-transparent text-2xl font-semibold tabular-nums shadow-none focus-visible:ring-0"
-						/>
-						<Select value={currency} onValueChange={setCurrency} disabled={isProcessing}>
-							<SelectTrigger
-								id="ramp-withdraw-currency"
-								className="h-14 w-[110px] shrink-0 rounded-none border-0 border-l bg-slate-50/80 px-3 shadow-none focus:ring-0"
-							>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{RAMP_CURRENCIES.map((item) => (
-									<SelectItem key={item.value} value={item.value}>
-										{t(item.labelKey)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+		<>
+			<ProfileSurfaceCard padding="lg" className="h-full">
+				<div className="space-y-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-gray-900">
+							{t('profile.rampsWithdrawTitle')}
+						</h3>
+						<p className="text-sm text-muted-foreground">{t('profile.rampsWithdrawDescription')}</p>
 					</div>
-					<p className="text-xs text-muted-foreground">{t('profile.rampsWithdrawAmountHint')}</p>
-				</div>
 
-				{isOnboardingReady ? (
-					<div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
-						<p className="text-sm font-medium text-emerald-900">{t('profile.rampsBankLinked')}</p>
-						<p className="mt-1 text-xs leading-relaxed text-emerald-800/90">
-							{t('profile.rampsBankLinkedDescription')}
-						</p>
+					<RampsAssetPicker
+						currency={currency}
+						walletAddress={walletAddress}
+						value={sourceAsset}
+						onChange={setSourceAsset}
+						disabled={isProcessing}
+						label={t('profile.rampsSendAsset')}
+						loadingMessage={t('profile.rampsAssetsLoading')}
+						emptyMessage={t('profile.rampsAssetsEmpty')}
+					/>
+
+					<div className="space-y-2">
+						<Label htmlFor="ramp-withdraw-amount">{t('profile.rampsAmountLabel')}</Label>
+						<div className="flex overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100">
+							<Input
+								id="ramp-withdraw-amount"
+								type="number"
+								inputMode="decimal"
+								value={amount}
+								onChange={(event) => setAmount(event.target.value)}
+								placeholder={t('profile.rampsAmountPlaceholder')}
+								min="0"
+								step="0.01"
+								disabled={isProcessing}
+								className="h-14 border-0 bg-transparent text-2xl font-semibold tabular-nums shadow-none focus-visible:ring-0"
+							/>
+							<Select value={currency} onValueChange={setCurrency} disabled={isProcessing}>
+								<SelectTrigger
+									id="ramp-withdraw-currency"
+									className="h-14 w-[110px] shrink-0 rounded-none border-0 border-l bg-slate-50/80 px-3 shadow-none focus:ring-0"
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{RAMP_CURRENCIES.map((item) => (
+										<SelectItem key={item.value} value={item.value}>
+											{t(item.labelKey)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<p className="text-xs text-muted-foreground">{t('profile.rampsWithdrawAmountHint')}</p>
 					</div>
-				) : null}
 
-				<div className="rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3 text-sm leading-relaxed text-amber-950">
-					{t('profile.rampsWithdrawNote')}
+					{isOnboardingReady ? (
+						<div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3">
+							<p className="text-sm font-medium text-emerald-900">{t('profile.rampsBankLinked')}</p>
+							<p className="mt-1 text-xs leading-relaxed text-emerald-800/90">
+								{t('profile.rampsBankLinkedDescription')}
+							</p>
+						</div>
+					) : null}
+
+					<div className="rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3 text-sm leading-relaxed text-amber-950">
+						{t('profile.rampsWithdrawNote')}
+					</div>
+
+					<Button
+						onClick={handleSubmit}
+						disabled={
+							!amount || Number(amount) <= 0 || !sourceAsset || isProcessing || isStartingOnboarding
+						}
+						className="gradient-btn h-12 w-full rounded-full text-base text-white"
+					>
+						{isProcessing ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+								{t('profile.rampsProcessing')}
+							</>
+						) : (
+							<>
+								<ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />
+								{t('profile.rampsWithdrawCta')}
+							</>
+						)}
+					</Button>
 				</div>
-
-				<Button
-					onClick={handleSubmit}
-					disabled={
-						!amount || Number(amount) <= 0 || !sourceAsset || isProcessing || isStartingOnboarding
-					}
-					className="gradient-btn h-12 w-full rounded-full text-base text-white"
-				>
-					{isProcessing ? (
-						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-							{t('profile.rampsProcessing')}
-						</>
-					) : (
-						<>
-							<ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />
-							{t('profile.rampsWithdrawCta')}
-						</>
-					)}
-				</Button>
-			</div>
-		</ProfileSurfaceCard>
+			</ProfileSurfaceCard>
+			<KycRequiredGate
+				open={kycGate.open}
+				onOpenChange={kycGate.setOpen}
+				userId={kycGate.userId}
+				denial={kycGate.denial}
+			/>
+		</>
 	)
 }

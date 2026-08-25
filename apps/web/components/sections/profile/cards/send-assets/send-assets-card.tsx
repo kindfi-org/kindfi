@@ -2,6 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
+import { KycRequiredGate } from '~/components/sections/kyc/kyc-required-gate'
+import { useAuth } from '~/hooks/use-auth'
+import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
 import { useWalletSendBalances } from '~/hooks/wallet-send/use-wallet-send-balances'
 import { useWalletSendFlow } from '~/hooks/wallet-send/use-wallet-send-flow'
 import { useI18n } from '~/lib/i18n'
@@ -19,6 +22,8 @@ interface SendAssetsCardProps {
 
 export const SendAssetsCard = ({ walletAddress, isWalletReady }: SendAssetsCardProps) => {
 	const { t } = useI18n()
+	const { user } = useAuth()
+	const kycGate = useKycRequiredGate(user?.id ?? '')
 	const {
 		step,
 		formInput,
@@ -79,6 +84,11 @@ export const SendAssetsCard = ({ walletAddress, isWalletReady }: SendAssetsCardP
 						estimatedFeeXlm="0.00001"
 						onBack={goBack}
 						onConfirm={async () => {
+							const allowed = await kycGate.preflight('send_assets', {
+								amount: Number(validatedPayment.amount),
+								asset: validatedPayment.asset,
+							})
+							if (!allowed) return
 							await confirmSend()
 							await refresh()
 						}}
@@ -97,6 +107,13 @@ export const SendAssetsCard = ({ walletAddress, isWalletReady }: SendAssetsCardP
 					<SendAssetsResult result={result} networkId={config.networkId} onReset={reset} />
 				) : null}
 			</ProfileSurfaceCard>
+
+			<KycRequiredGate
+				open={kycGate.open}
+				onOpenChange={kycGate.setOpen}
+				userId={kycGate.userId}
+				denial={kycGate.denial}
+			/>
 		</motion.div>
 	)
 }

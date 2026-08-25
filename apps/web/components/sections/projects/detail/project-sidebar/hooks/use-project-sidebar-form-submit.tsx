@@ -9,7 +9,9 @@ import { logger } from '@/lib/logger'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
+import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
 import { zodResolver } from '~/lib/form/zod-resolver'
+import { requestKycAuthorization } from '~/lib/kyc/client'
 import { trackOnboardingPath } from '~/lib/pollar/analytics'
 import {
 	CAMPAIGN_COMPLETE_DONATION_MESSAGE,
@@ -41,6 +43,7 @@ export function useProjectSidebarFormSubmit({
 	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction, isPollarSigner } =
 		useTrustlessSigner()
 	const { user } = useAuth()
+	const kycGate = useKycRequiredGate(user?.id ?? '')
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
@@ -92,6 +95,15 @@ export function useProjectSidebarFormSubmit({
 		}
 
 		try {
+			const kyc = await requestKycAuthorization({
+				action: 'donate',
+				amount: data.investmentAmount,
+			})
+			if (!kyc.allowed) {
+				kycGate.showDenial(kyc.denial)
+				return
+			}
+
 			const signer = await ensureTrustlessSigner()
 			if (data.investmentAmount > 1_000_000) {
 				toast.error('Amount too large', {
@@ -245,5 +257,5 @@ export function useProjectSidebarFormSubmit({
 		}
 	}
 
-	return { form, onSubmit }
+	return { form, onSubmit, kycGate }
 }

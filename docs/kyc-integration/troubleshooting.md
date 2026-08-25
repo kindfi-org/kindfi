@@ -229,9 +229,15 @@ console.log("✅ Successfully updated KYC status to:", kycStatus);
 ### 4. Database Queries
 
 ```sql
--- Check user's KYC records
-SELECT id, user_id, status, notes, created_at, updated_at
+-- Check user's KYC review records
+SELECT id, user_id, status, created_at, updated_at
 FROM kyc_reviews
+WHERE user_id = 'user-id-here'
+ORDER BY created_at DESC;
+
+-- Check dedicated Didit sessions (do not search notes)
+SELECT session_id, canonical_status, didit_status, last_provider_event_at
+FROM kyc.didit_sessions
 WHERE user_id = 'user-id-here'
 ORDER BY created_at DESC;
 

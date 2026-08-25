@@ -90,6 +90,20 @@ mock.module('~/lib/services/audit-logger', () => ({
 	},
 }))
 
+mock.module('~/lib/kyc/denial', () => ({
+	requireKycAuthorization: async () => ({
+		ok: true,
+		result: {
+			allowed: true,
+			enforced: false,
+			mode: 'disabled',
+			currentKycStatus: 'not_started',
+			policyResult: 'allow',
+			reasonCode: 'disabled',
+		},
+	}),
+}))
+
 // Schemas - import actual schemas to preserve methods for validation tests
 import {
 	etherfuseDepositRequestSchema,

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { authorizeProjectManage, getProjectIdBySlug } from '~/lib/api/authorize-project-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
 import {
 	isAllowedStatusTransition,
 	PROJECT_STATUS_LABELS,
@@ -45,6 +46,16 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 		}
 
 		const nextStatus = parsed.data.status as ProjectStatus
+
+		if (!auth.access.isPlatformAdmin && nextStatus === 'review') {
+			const kycDecision = await requireKycAuthorization({
+				userId,
+				action: 'submit_campaign',
+			})
+			if (!kycDecision.ok) {
+				return kycDecision.response
+			}
+		}
 
 		const { data: project, error: fetchError } = await supabaseServiceRole
 			.from('projects')

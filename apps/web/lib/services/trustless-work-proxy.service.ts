@@ -10,7 +10,9 @@ import {
 import {
 	isAllowedTrustlessWorkPath,
 	isPublicTrustlessWorkRead,
+	isReleaseEscrowProxyPath,
 } from '~/lib/config/trustless-work-proxy.paths'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
 import {
 	isFundEscrowProxyPath,
 	validateFundEscrowProxyRequest,
@@ -177,6 +179,7 @@ export async function proxyTrustlessWorkRequest(
 	}
 
 	const method = request.method.toUpperCase()
+	let userId: string | undefined
 
 	if (isPublicTrustlessWorkRead(method, path)) {
 		const rateLimit = await publicReadLimiter.increment(getClientIp(request), path)
@@ -191,6 +194,7 @@ export async function proxyTrustlessWorkRequest(
 		if (!session?.user) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
+		userId = session.user.id
 	}
 
 	const upstreamUrl = new URL(`${getTrustlessWorkApiBaseUrl()}/${path}`)
@@ -220,6 +224,18 @@ export async function proxyTrustlessWorkRequest(
 				{ status: fundEscrowValidation.status },
 			)
 		}
+		if (userId) {
+			const kycDecision = await requireKycAuthorization({ userId, action: 'donate' })
+			if (!kycDecision.ok) return kycDecision.response
+		}
+	}
+
+	if (userId && isReleaseEscrowProxyPath(path, method)) {
+		const kycDecision = await requireKycAuthorization({
+			userId,
+			action: 'release_escrow_funds',
+		})
+		if (!kycDecision.ok) return kycDecision.response
 	}
 
 	try {

@@ -37,7 +37,7 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		resolveEscrowTypeForFunding,
 	} = useProjectSidebarEscrowState(project)
 
-	const { form, onSubmit } = useProjectSidebarFormSubmit({
+	const { form, onSubmit, kycGate } = useProjectSidebarFormSubmit({
 		project,
 		isGoalReached,
 		escrowData,
@@ -148,6 +148,7 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		connect,
 		disconnect,
 		onSubmit,
+		kycGate,
 		handleToggleFollow,
 		shareUrl,
 	}
