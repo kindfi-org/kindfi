@@ -1564,6 +1564,23 @@ export const waitlistInterestsUpdateSchema = z.object({
   source: z.string().optional().nullable(),
 });
 
+export const adminUsersOverviewRowSchema = z.object({
+  created_at: z.string().nullable(),
+  display_name: z.string().nullable(),
+  email: z.string().nullable(),
+  external_wallet_address: z.string().nullable(),
+  id: z.string().nullable(),
+  image_url: z.string().nullable(),
+  kyc_status: z.string().nullable(),
+  kyc_updated_at: z.string().nullable(),
+  kyc_verification_level: z.string().nullable(),
+  onboarding_provider: onboardingProviderSchema.nullable(),
+  pollar_wallet_address: z.string().nullable(),
+  role: userRoleSchema.nullable(),
+  slug: z.string().nullable(),
+  updated_at: z.string().nullable(),
+});
+
 export const getAdminDashboardStatsReturnsSchema = jsonSchema;
 
 export const questStatusSchema = z.union([

@@ -809,6 +809,13 @@ export type Database = {
             foreignKeyName: "foundation_members_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foundation_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -982,6 +989,13 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "foundations_founder_id_fkey"
+            columns: ["founder_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "foundations_founder_id_fkey"
             columns: ["founder_id"]
@@ -1263,7 +1277,21 @@ export type Database = {
             foreignKeyName: "milestone_review_requests_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_review_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_review_requests_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
             referencedColumns: ["id"]
           },
           {
@@ -2037,7 +2065,21 @@ export type Database = {
             foreignKeyName: "user_follows_follower_id_fkey"
             columns: ["follower_id"]
             isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
             referencedColumns: ["id"]
           },
           {
@@ -2093,6 +2135,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_nfts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_nfts_user_id_fkey"
             columns: ["user_id"]
@@ -2231,7 +2280,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_users_overview: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          email: string | null
+          external_wallet_address: string | null
+          id: string | null
+          image_url: string | null
+          kyc_status: string | null
+          kyc_updated_at: string | null
+          kyc_verification_level: string | null
+          onboarding_provider:
+            | Database["public"]["Enums"]["onboarding_provider"]
+            | null
+          pollar_wallet_address: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       activate_governance_rounds: { Args: never; Returns: undefined }
