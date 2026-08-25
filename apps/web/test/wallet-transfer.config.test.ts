@@ -7,7 +7,10 @@ import {
 	getWalletTransferConfig,
 	WALLET_TRANSFER_HORIZON_URLS,
 } from '~/lib/config/wallet-transfer.config'
-import { MAINNET_USDC_TRUSTLINE_ADDRESS, TESTNET_USDC_TRUSTLINE_ADDRESS } from '~/lib/constants/escrow'
+import {
+	MAINNET_USDC_TRUSTLINE_ADDRESS,
+	TESTNET_USDC_TRUSTLINE_ADDRESS,
+} from '~/lib/constants/escrow'
 
 describe('getWalletTransferConfig', () => {
 	test('returns testnet config when Trustless Work network is development', async () => {

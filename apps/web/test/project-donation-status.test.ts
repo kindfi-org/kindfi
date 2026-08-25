@@ -5,14 +5,7 @@ import {
 	type ProjectStatus,
 } from '~/lib/projects/project-status'
 
-const ALL_STATUSES: ProjectStatus[] = [
-	'draft',
-	'review',
-	'active',
-	'paused',
-	'funded',
-	'rejected',
-]
+const ALL_STATUSES: ProjectStatus[] = ['draft', 'review', 'active', 'paused', 'funded', 'rejected']
 
 describe('isProjectAcceptingDonations', () => {
 	test('returns true only for active campaigns', () => {
