@@ -6,6 +6,9 @@ import { Alert, AlertDescription, AlertTitle } from '~/components/base/alert'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { TooltipProvider } from '~/components/base/tooltip'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
+import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useEscrowForm } from '../context/escrow-form-context'
 import {
 	ESCROW_WIZARD_STEPS,
@@ -57,8 +60,11 @@ const STEP_CONTENT: Record<
 export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationWizardProps) {
 	const { formData } = useEscrowForm()
 	const [currentStep, setCurrentStep] = useState<EscrowWizardStep>('type')
+	const [confirmDeployOpen, setConfirmDeployOpen] = useState(false)
 	const { steps, isFullyValid } = useEscrowStepValidation(formData, projectId)
 	const { handleCreateEscrow, isSubmitting } = useEscrowTransaction({ projectId, projectSlug })
+	const { networkId } = useStellarNetworkConfig()
+	const { address: signerAddress } = useTrustlessSigner()
 
 	useWalletSync()
 
@@ -151,7 +157,7 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 					{isReviewStep ? (
 						<Button
 							type="button"
-							onClick={() => handleCreateEscrow(formData)}
+							onClick={() => setConfirmDeployOpen(true)}
 							disabled={!isFullyValid || isSubmitting}
 							className="w-full sm:w-auto"
 							size="lg"
@@ -183,6 +189,29 @@ export function EscrowCreationWizard({ projectId, projectSlug }: EscrowCreationW
 			</div>
 
 			<SyncEscrowCard projectId={projectId} projectSlug={projectSlug} variant="compact" />
+
+			<ConfirmActionDialog
+				open={confirmDeployOpen}
+				onOpenChange={setConfirmDeployOpen}
+				title="Deploy escrow contract"
+				description="Deploying asks your connected wallet to sign an initialization transaction. Review the summary before continuing."
+				summary={[
+					{ label: 'Escrow type', value: formData.selectedEscrowType },
+					{ label: 'Title', value: formData.title },
+					...(formData.selectedEscrowType === 'single-release' && formData.amount !== ''
+						? [{ label: 'Amount', value: String(formData.amount) }]
+						: []),
+					{ label: 'Releases', value: String(formData.milestones.length) },
+				]}
+				blockchain={{ networkId, signerAddress }}
+				confirmLabel="Sign & deploy"
+				pendingLabel="Deploying…"
+				isPending={isSubmitting}
+				onConfirm={() => {
+					setConfirmDeployOpen(false)
+					void handleCreateEscrow(formData)
+				}}
+			/>
 		</TooltipProvider>
 	)
 }

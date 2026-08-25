@@ -1,9 +1,9 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
-import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireAdminApi } from '~/lib/auth/require-admin-api'
+import { recordAdminAudit } from '~/lib/services/admin-audit'
 import {
 	backfillDonationQuestProgressForUser,
 	listContributorIdsWithDonations,
@@ -16,12 +16,6 @@ const backfillQuestsSchema = z.object({
 	limit: z.coerce.number().int().min(1).max(500).optional().default(100),
 })
 
-async function requireAdminApiUser(userId: string): Promise<boolean> {
-	const { supabase } = await import('@packages/lib/supabase')
-	const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-	return profile?.role === 'admin'
-}
-
 /**
  * POST /api/admin/gamification/backfill-quests
  *
@@ -30,14 +24,8 @@ async function requireAdminApiUser(userId: string): Promise<boolean> {
  */
 export async function POST(req: NextRequest) {
 	try {
-		const session = await getServerSession(nextAuthOption)
-		if (!session?.user?.id) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-		}
-
-		if (!(await requireAdminApiUser(session.user.id))) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-		}
+		const auth = await requireAdminApi()
+		if (!auth.ok) return auth.response
 
 		const body = await req.json()
 		const validation = validateRequest(backfillQuestsSchema, body)
@@ -58,7 +46,7 @@ export async function POST(req: NextRequest) {
 		const userIds = userId ? [userId] : await listContributorIdsWithDonations(supabase, limit)
 
 		logger.info('[AdminQuestBackfill] Starting', {
-			adminId: session.user.id,
+			adminId: auth.userId,
 			userCount: userIds.length,
 			mode: userId ? 'single' : 'all',
 		})
@@ -76,6 +64,22 @@ export async function POST(req: NextRequest) {
 			chainFailed: results.reduce((sum, row) => sum + row.chainFailed, 0),
 			errors: results.flatMap((row) => row.errors),
 		}
+
+		await recordAdminAudit({
+			operation: 'admin_quest_backfill_run',
+			resourceType: 'quest',
+			resourceId: userId ?? 'all',
+			actorId: auth.userId,
+			status: summary.chainFailed > 0 ? 'failure' : 'success',
+			failureReason: summary.chainFailed > 0 ? `${summary.chainFailed} chain syncs failed` : null,
+			details: {
+				mode: userId ? 'single' : 'all',
+				users_processed: summary.usersProcessed,
+				quests_updated: summary.questsUpdated,
+				chain_synced: summary.chainSynced,
+				chain_failed: summary.chainFailed,
+			},
+		})
 
 		return NextResponse.json({ success: true, summary, results })
 	} catch (error) {

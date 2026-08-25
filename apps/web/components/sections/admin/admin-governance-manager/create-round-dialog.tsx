@@ -11,6 +11,8 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '~/components/base/dialog'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { EMPTY_ROW } from './constants'
 import { CreateRoundForm } from './create-round-form'
 import { CreateRoundSuccess } from './create-round-success'
@@ -36,6 +38,8 @@ interface CreateRoundDialogProps {
 
 export const CreateRoundDialog = ({ onCreated }: CreateRoundDialogProps) => {
 	const [open, setOpen] = useState(false)
+	const [confirmOpen, setConfirmOpen] = useState(false)
+	const { networkId } = useStellarNetworkConfig()
 	const [result, setResult] = useState<CreateRoundResult | null>(null)
 	const [form, setForm] = useState(INITIAL_FORM)
 	const [optionRows, setOptionRows] = useState<OptionRow[]>([{ ...EMPTY_ROW }])
@@ -55,6 +59,7 @@ export const CreateRoundDialog = ({ onCreated }: CreateRoundDialogProps) => {
 	}
 
 	const { mutate: createRound, isPending } = useCreateRound((data) => {
+		setConfirmOpen(false)
 		setResult(data)
 	})
 
@@ -118,7 +123,7 @@ export const CreateRoundDialog = ({ onCreated }: CreateRoundDialogProps) => {
 							<Button variant="outline" onClick={handleClose} disabled={isPending}>
 								Cancel
 							</Button>
-							<Button onClick={() => createRound({ form, optionRows })} disabled={!canSubmit}>
+							<Button onClick={() => setConfirmOpen(true)} disabled={!canSubmit}>
 								{isPending ? (
 									<>
 										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -132,6 +137,26 @@ export const CreateRoundDialog = ({ onCreated }: CreateRoundDialogProps) => {
 					)}
 				</DialogFooter>
 			</DialogContent>
+
+			<ConfirmActionDialog
+				open={confirmOpen}
+				onOpenChange={setConfirmOpen}
+				title="Create governance round"
+				description="This creates the round in the database and records it on-chain via the platform service account."
+				summary={[
+					{ label: 'Title', value: form.title },
+					{ label: 'Voting window', value: `${form.startsAt} → ${form.endsAt}` },
+					{ label: 'Options', value: String(validOptionCount) },
+					...(form.totalFundAmount
+						? [{ label: 'Fund', value: `${form.totalFundAmount} ${form.fundCurrency}` }]
+						: []),
+				]}
+				blockchain={{ networkId }}
+				confirmLabel="Create round"
+				pendingLabel="Creating…"
+				isPending={isPending}
+				onConfirm={() => createRound({ form, optionRows })}
+			/>
 		</Dialog>
 	)
 }

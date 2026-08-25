@@ -11,6 +11,7 @@ import {
 	PROJECT_STATUS_LABELS,
 	type ProjectStatus,
 } from '~/lib/projects/project-status'
+import { recordAdminAudit } from '~/lib/services/admin-audit'
 
 // Local Zod 4 enum — do not reuse @services/supabase projectStatusSchema (Zod 3).
 const updateStatusBodySchema = z.object({
@@ -96,6 +97,19 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 		if (updateError || !updated) {
 			logger.error(updateError)
 			return NextResponse.json({ error: 'Failed to update project status' }, { status: 500 })
+		}
+
+		// Campaign status changes made by platform admins are auditable.
+		if (auth.access.isPlatformAdmin) {
+			await recordAdminAudit({
+				operation: 'admin_project_status_changed',
+				resourceType: 'project',
+				resourceId: projectId,
+				actorId: userId,
+				status: 'success',
+				previousState: currentStatus,
+				newState: nextStatus,
+			})
 		}
 
 		return NextResponse.json({

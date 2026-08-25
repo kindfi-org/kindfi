@@ -7,10 +7,179 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.1"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  next_auth: {
+    Tables: {
+      accounts: {
+        Row: {
+          access_token: string | null
+          expires_at: number | null
+          id: string
+          id_token: string | null
+          oauth_token: string | null
+          oauth_token_secret: string | null
+          provider: string
+          provider_account_id: string
+          refresh_token: string | null
+          scope: string | null
+          session_state: string | null
+          token_type: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          expires_at?: number | null
+          id?: string
+          id_token?: string | null
+          oauth_token?: string | null
+          oauth_token_secret?: string | null
+          provider: string
+          provider_account_id: string
+          refresh_token?: string | null
+          scope?: string | null
+          session_state?: string | null
+          token_type?: string | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          expires_at?: number | null
+          id?: string
+          id_token?: string | null
+          oauth_token?: string | null
+          oauth_token_secret?: string | null
+          provider?: string
+          provider_account_id?: string
+          refresh_token?: string | null
+          scope?: string | null
+          session_state?: string | null
+          token_type?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          expires: string
+          id: string
+          session_token: string
+          user_id: string | null
+        }
+        Insert: {
+          expires: string
+          id?: string
+          session_token: string
+          user_id?: string | null
+        }
+        Update: {
+          expires?: string
+          id?: string
+          session_token?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          email: string | null
+          email_verified: string | null
+          emailVerified: string | null
+          id: string
+          image: string | null
+          name: string | null
+        }
+        Insert: {
+          email?: string | null
+          email_verified?: string | null
+          emailVerified?: string | null
+          id?: string
+          image?: string | null
+          name?: string | null
+        }
+        Update: {
+          email?: string | null
+          email_verified?: string | null
+          emailVerified?: string | null
+          id?: string
+          image?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      verification_tokens: {
+        Row: {
+          expires: string
+          identifier: string | null
+          token: string
+        }
+        Insert: {
+          expires: string
+          identifier?: string | null
+          token: string
+        }
+        Update: {
+          expires?: string
+          identifier?: string | null
+          token?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      uid: { Args: never; Returns: string }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -605,7 +774,7 @@ export type Database = {
           foundation_id: string
           id: string
           joined_at: string
-          role: Database["public"]["Enums"]["project_member_role"]
+          role: string
           title: string
           updated_at: string
           user_id: string
@@ -614,7 +783,7 @@ export type Database = {
           foundation_id: string
           id?: string
           joined_at?: string
-          role?: Database["public"]["Enums"]["project_member_role"]
+          role: string
           title?: string
           updated_at?: string
           user_id: string
@@ -623,7 +792,7 @@ export type Database = {
           foundation_id?: string
           id?: string
           joined_at?: string
-          role?: Database["public"]["Enums"]["project_member_role"]
+          role?: string
           title?: string
           updated_at?: string
           user_id?: string
@@ -634,6 +803,20 @@ export type Database = {
             columns: ["foundation_id"]
             isOneToOne: false
             referencedRelation: "foundations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foundation_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foundation_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -805,7 +988,22 @@ export type Database = {
           vision?: string | null
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "foundations_founder_id_fkey"
+            columns: ["founder_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "foundations_founder_id_fkey"
+            columns: ["founder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       governance_options: {
         Row: {
@@ -1079,7 +1277,21 @@ export type Database = {
             foreignKeyName: "milestone_review_requests_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_review_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestone_review_requests_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
             referencedColumns: ["id"]
           },
           {
@@ -1263,6 +1475,7 @@ export type Database = {
       profiles: {
         Row: {
           bio: string | null
+          compliance_admin: boolean
           country: string | null
           created_at: string
           creator_entity_type:
@@ -1291,6 +1504,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          compliance_admin?: boolean
           country?: string | null
           created_at?: string
           creator_entity_type?:
@@ -1319,6 +1533,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          compliance_admin?: boolean
           country?: string | null
           created_at?: string
           creator_entity_type?:
@@ -1736,6 +1951,33 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_profiles: {
+        Row: {
+          activated_at: string
+          created_at: string
+          on_chain_ready: boolean
+          referral_code: string
+          stellar_address: string | null
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          on_chain_ready?: boolean
+          referral_code: string
+          stellar_address?: string | null
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          on_chain_ready?: boolean
+          referral_code?: string
+          stellar_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       referral_records: {
         Row: {
           contract_address: string | null
@@ -1769,33 +2011,6 @@ export type Database = {
           referrer_id?: string
           status?: Database["public"]["Enums"]["referral_status"]
           total_donations?: number
-        }
-        Relationships: []
-      }
-      referral_profiles: {
-        Row: {
-          activated_at: string
-          created_at: string
-          on_chain_ready: boolean
-          referral_code: string
-          stellar_address: string | null
-          user_id: string
-        }
-        Insert: {
-          activated_at?: string
-          created_at?: string
-          on_chain_ready?: boolean
-          referral_code: string
-          stellar_address?: string | null
-          user_id: string
-        }
-        Update: {
-          activated_at?: string
-          created_at?: string
-          on_chain_ready?: boolean
-          referral_code?: string
-          stellar_address?: string | null
-          user_id?: string
         }
         Relationships: []
       }
@@ -1850,7 +2065,21 @@ export type Database = {
             foreignKeyName: "user_follows_follower_id_fkey"
             columns: ["follower_id"]
             isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
             referencedColumns: ["id"]
           },
           {
@@ -1886,7 +2115,7 @@ export type Database = {
           metadata_ipfs_hash?: string | null
           minted_at?: string
           stellar_address: string
-          tier?: string
+          tier: string
           token_id: number
           updated_at?: string
           user_id: string
@@ -1905,7 +2134,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_nfts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_nfts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_quest_progress: {
         Row: {
@@ -2036,7 +2280,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_users_overview: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          email: string | null
+          external_wallet_address: string | null
+          id: string | null
+          image_url: string | null
+          kyc_status: string | null
+          kyc_updated_at: string | null
+          kyc_verification_level: string | null
+          onboarding_provider:
+            | Database["public"]["Enums"]["onboarding_provider"]
+            | null
+          pollar_wallet_address: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       activate_governance_rounds: { Args: never; Returns: undefined }
@@ -2055,6 +2319,7 @@ export type Database = {
         Returns: string
       }
       current_auth_user_id: { Args: never; Returns: string }
+      get_admin_dashboard_stats: { Args: never; Returns: Json }
       get_current_user_profile: {
         Args: never
         Returns: {
@@ -2148,12 +2413,12 @@ export type Database = {
       streak_period: "weekly" | "monthly"
       translation_status: "pending" | "complete" | "failed" | "stale"
       user_role:
-        | "donor"
-        | "creator"
-        | "pending"
-        | "admin"
         | "kinder"
         | "kindler"
+        | "pending"
+        | "admin"
+        | "donor"
+        | "creator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2279,6 +2544,12 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  next_auth: {
+    Enums: {},
+  },
   public: {
     Enums: {
       backup_state: ["not_backed_up", "backed_up"],
@@ -2338,7 +2609,8 @@ export const Constants = {
       referral_status: ["pending", "onboarded", "first_donation", "active"],
       streak_period: ["weekly", "monthly"],
       translation_status: ["pending", "complete", "failed", "stale"],
-      user_role: ["donor", "creator", "pending", "admin", "kinder", "kindler"],
+      user_role: ["kinder", "kindler", "pending", "admin", "donor", "creator"],
     },
   },
 } as const
+
