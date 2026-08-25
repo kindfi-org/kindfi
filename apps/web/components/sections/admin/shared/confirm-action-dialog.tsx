@@ -136,7 +136,10 @@ export function ConfirmActionDialog({
 					>
 						{isPending ? (
 							<>
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+								<Loader2
+									className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none"
+									aria-hidden="true"
+								/>
 								{pendingLabel}
 							</>
 						) : (

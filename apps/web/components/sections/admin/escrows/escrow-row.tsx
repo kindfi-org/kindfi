@@ -154,7 +154,7 @@ export function EscrowRow({ escrow, from, onSynced }: EscrowRowProps) {
 					>
 						{expanded ? 'Hide detail' : 'On-chain detail'}
 						<ChevronDown
-							className={`ml-1 h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+							className={`ml-1 h-4 w-4 transition-transform motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`}
 							aria-hidden="true"
 						/>
 					</Button>

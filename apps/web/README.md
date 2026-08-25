@@ -257,6 +257,29 @@ The app supports WebAuthn passkeys for passwordless authentication:
 - Milestone-based releases require verification
 - Dispute resolution system for conflicts
 
+### Admin Operations Dashboard
+
+`/admin` is an action-oriented operations dashboard for platform admins:
+
+- **Action center**: pending-work queues (project reviews, missing escrows,
+  milestone reviews, KYC cases, disputed escrows, new users) with direct
+  resolution actions, plus platform metrics that link to pre-filtered views.
+- **Server-side lists**: projects, escrows, and users are searched, filtered,
+  sorted, and paginated in the database via `/api/admin/*` routes guarded by
+  `requireAdminApi()`. All list state lives in the URL so views can be
+  bookmarked and shared.
+- **Feature flag**: the redesigned interface is gated by
+  `NEXT_PUBLIC_ADMIN_OPS_DASHBOARD` (always on in development). Setting it to
+  `false` in production instantly restores the legacy admin UI — the legacy
+  components are untouched.
+- **Safety**: high-impact actions (milestone review decisions, campaign
+  status changes, escrow deploy/fund/release, gamification triggers,
+  governance round creation, backfills) require an explicit confirmation
+  dialog that shows the state change and, for blockchain mutations, the
+  active Stellar network and connected signer. Consequential admin actions
+  are recorded in `public.audit_logs` (operations prefixed `admin_*`) via the
+  server-only `recordAdminAudit()` helper.
+
 ### KYC Verification
 
 Identity verification powered by [Didit](https://didit.me/), an AI-native identity verification platform:
