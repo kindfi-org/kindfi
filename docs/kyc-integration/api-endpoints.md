@@ -34,9 +34,10 @@ All API endpoints require NextAuth session authentication. The user must be logg
 **Flow**:
 
 1. Validates NextAuth session
-2. Creates Didit session via Didit API
-3. Stores `session_id` and `session_token` in `kyc_reviews` table
-4. Returns `verification_url` for redirect
+2. Reuses an active Didit session when one already exists
+3. Creates a Didit session via the Didit API if needed
+4. Stores `session_id` on `kyc.didit_sessions` (not in `kyc_reviews.notes`)
+5. Returns `verificationUrl` for redirect
 
 **Error Handling**:
 
@@ -73,10 +74,9 @@ All API endpoints require NextAuth session authentication. The user must be logg
 **Flow**:
 
 1. Validates NextAuth session
-2. Maps Didit status to internal enum
-3. Finds KYC record by `verificationSessionId`
-4. Updates status in database
-5. Returns updated status
+2. Looks up the session in `kyc.didit_sessions` by `session_id`
+3. Applies the status update through `applyDiditStatusUpdate` (idempotent, monotonic)
+4. Returns the canonical status
 
 **Error Handling**:
 
@@ -119,11 +119,14 @@ All API endpoints require NextAuth session authentication. The user must be logg
 
 **Flow**:
 
-1. Verifies webhook signature (HMAC)
-2. Finds KYC record by `session_id` in notes
-3. Maps Didit status to internal enum
-4. Updates database record
-5. Returns success
+1. Verifies webhook signature (HMAC) before any payload is processed
+2. Looks up the session in `kyc.didit_sessions` by `session_id`
+3. Records the Didit event id for idempotency
+4. Skips delayed events that would regress a newer status
+5. Updates canonical status and Pollar-activates on `approved`
+6. Returns `{ received: true }`
+
+Decision payloads, documents, and biometrics are not stored or logged.
 
 **Security**:
 
@@ -157,11 +160,10 @@ All API endpoints require NextAuth session authentication. The user must be logg
 **Flow**:
 
 1. Validates NextAuth session
-2. Retrieves most recent KYC record from database
-3. Extracts `session_id` from notes
-4. Queries Didit API for current status
-5. Updates database with latest status
-6. Returns status
+2. Loads the latest row from `kyc.didit_sessions`
+3. Queries Didit for the current status
+4. Applies the update through `applyDiditStatusUpdate`
+5. Returns `canonicalStatus` (or `provider_unavailable` if Didit cannot be reached)
 
 **Error Handling**:
 
@@ -182,15 +184,24 @@ All API endpoints require NextAuth session authentication. The user must be logg
 ```typescript
 {
   status: "pending" | "approved" | "rejected" | "verified" | null;
+  canonicalStatus: string;
   updatedAt: string | null;
+  hasActiveSession: boolean;
+  enforcement: {
+    mode: "disabled" | "monitor" | "enforced";
+    enforcedActions: string[];
+  };
 }
 ```
+
+`enforcement` is a UI hint only. Authorization always happens on the server
+via `authorizeFinancialAction`.
 
 **Flow**:
 
 1. Validates NextAuth session
-2. Queries `kyc_reviews` table for user's most recent record
-3. Returns status and updated timestamp
+2. Resolves canonical Didit status from `kyc.didit_sessions` (falling back to `kyc_reviews`)
+3. Returns status plus a derived enforcement hint
 
 **Error Handling**:
 
@@ -198,3 +209,38 @@ All API endpoints require NextAuth session authentication. The user must be logg
 - `500`: Database query error
 
 **Note**: This endpoint uses the service role client to bypass RLS, but user authentication is validated via NextAuth first.
+
+---
+
+### 6. Preflight authorization
+
+**Endpoint**: `POST /api/kyc/authorize`
+
+**Description**: Server-side preflight for a financial action. The browser may
+use this to render the KYC gate; it is not the security boundary. API routes
+and server actions call `requireKycAuthorization` independently.
+
+**Request Body**:
+
+```typescript
+{
+  action: "donate" | "submit_campaign" | "release_escrow_funds" | "send_assets" | "use_on_ramp" | "use_off_ramp"
+  amount?: number
+  asset?: string
+  network?: string
+}
+```
+
+**Response** (200 when allowed, 403 when enforced and denied):
+
+```typescript
+{
+  allowed: boolean
+  enforced: boolean
+  mode: "disabled" | "monitor" | "enforced"
+  currentKycStatus: string
+  policyResult: "allow" | "deny"
+  reasonCode?: string
+  requiredAction?: "start_kyc" | "wait_for_review" | "contact_support"
+}
+```

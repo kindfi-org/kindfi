@@ -19,15 +19,15 @@
 1. `KYCCard` calls `createSession()` from `useDiditKYC` hook
 2. Hook calls `POST /api/kyc/didit/create-session`
 3. Server creates Didit session via Didit API
-4. Server stores `session_id` and `session_token` in `kyc_reviews` table with status `pending`
+4. Server stores `session_id` on `kyc.didit_sessions` and keeps `kyc_reviews.status` in sync
 5. Server returns `verification_url`
 6. Client shows `KYCRedirectModal` with 3-second countdown
 7. User can cancel or wait for auto-redirect
 
-**Database state**: New `kyc_reviews` record created with:
+**Database state**: New `kyc.didit_sessions` row plus a `kyc_reviews` record:
 
-- `status`: `pending`
-- `notes`: Contains `diditSessionId` and `diditSessionToken`
+- `kyc_reviews.status`: `pending`
+- `kyc.didit_sessions.session_id`: Didit session identifier
 
 ---
 
@@ -65,10 +65,10 @@ https://kindfi.org/profile?kyc=completed&status=Approved&verificationSessionId=x
 1. **Server-side (Profile Page)**:
 
    - Extracts `status` and `verificationSessionId` from URL params
-   - Maps Didit status to internal enum (`Approved` → `approved`)
-   - Finds KYC record by `verificationSessionId` in notes
-   - Updates database with new status
-   - Logs success message
+   - Maps Didit status to the canonical KindFi state (`Approved` / `Verified` → `approved`)
+   - Looks up `kyc.didit_sessions` by `verificationSessionId`
+   - Applies the update through `applyDiditStatusUpdate`
+   - Logs success without Didit decision payloads
 
 2. **Client-side (Profile Dashboard)**:
 
@@ -121,10 +121,10 @@ https://kindfi.org/profile?kyc=completed&status=Approved&verificationSessionId=x
 If webhooks are configured, status can also be updated via webhook:
 
 1. Didit sends webhook event to `/api/kyc/didit/webhook`
-2. Server verifies webhook signature (HMAC)
-3. Server finds KYC record by `session_id`
-4. Server updates status in database
-5. Status is reflected on next page load or polling refresh
+2. Server verifies webhook signature (HMAC) before processing
+3. Server looks up `kyc.didit_sessions` by `session_id`
+4. Duplicate and delayed events are recorded but cannot regress status
+5. Status is reflected on next page load or a user recheck
 
 **Note**: Webhooks are useful for real-time updates, but the callback flow is the primary method.
 

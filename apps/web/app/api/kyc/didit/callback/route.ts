@@ -1,35 +1,31 @@
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { mapDiditStatusToKYC } from '~/lib/services/didit'
+import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
 
 interface DiditCallbackBody {
 	verificationSessionId: string
 	status: string
 }
 
-function isValidCallbackBody(data: unknown): data is DiditCallbackBody {
-	return (
-		typeof data === 'object' &&
-		data !== null &&
-		typeof (data as DiditCallbackBody).verificationSessionId === 'string' &&
-		(data as DiditCallbackBody).verificationSessionId.length > 0 &&
-		typeof (data as DiditCallbackBody).status === 'string' &&
-		(data as DiditCallbackBody).status.length > 0
-	)
-}
+const isValidCallbackBody = (data: unknown): data is DiditCallbackBody =>
+	typeof data === 'object' &&
+	data !== null &&
+	typeof (data as DiditCallbackBody).verificationSessionId === 'string' &&
+	(data as DiditCallbackBody).verificationSessionId.length > 0 &&
+	typeof (data as DiditCallbackBody).status === 'string' &&
+	(data as DiditCallbackBody).status.length > 0
 
 /**
  * POST /api/kyc/didit/callback
  *
- * Handles callback from Didit with status update
- * Called when user is redirected back from Didit verification
+ * Handles callback from Didit with a status update after the user returns.
+ * The browser-supplied status is stored only after the session is bound to
+ * the authenticated user; Didit webhooks remain authoritative.
  */
 export async function POST(req: NextRequest) {
-	// Parse body first to return proper 400 for malformed JSON
 	let body: unknown
 	try {
 		body = await req.json()
@@ -52,95 +48,24 @@ export async function POST(req: NextRequest) {
 		}
 
 		const { verificationSessionId, status } = body
+		const result = await applyDiditStatusUpdate({
+			sessionId: verificationSessionId,
+			diditStatus: status,
+			userId: session.user.id,
+			source: 'callback',
+			providerEventAt: new Date(),
+		})
 
-		if (!verificationSessionId || !status) {
-			return NextResponse.json(
-				{ error: 'Missing verificationSessionId or status' },
-				{ status: 400 },
-			)
-		}
-
-		const kycStatus = mapDiditStatusToKYC(status)
-
-		// Find the KYC record by session ID
-		const { data: kycRecords, error: findError } = await supabaseServiceRole
-			.from('kyc_reviews')
-			.select('id, notes')
-			.eq('user_id', session.user.id)
-			.like('notes', `%${verificationSessionId}%`)
-			.order('created_at', { ascending: false })
-			.limit(1)
-
-		if (findError) {
-			logger.error('Error finding KYC record:', findError)
-			return NextResponse.json(
-				{ error: 'Failed to find KYC record', details: findError.message },
-				{ status: 500 },
-			)
-		}
-
-		if (!kycRecords || kycRecords.length === 0) {
-			// No record found - might be a new session, create one
-			const { error: insertError } = await supabaseServiceRole.from('kyc_reviews').insert({
-				user_id: session.user.id,
-				status: kycStatus,
-				verification_level: 'enhanced',
-				notes: JSON.stringify({
-					diditSessionId: verificationSessionId,
-					diditStatus: status,
-					callbackReceived: new Date().toISOString(),
-				}),
-			})
-
-			if (insertError) {
-				logger.error('Failed to create KYC record:', insertError)
-				return NextResponse.json({ error: 'Failed to create KYC record' }, { status: 500 })
-			}
-
-			return NextResponse.json({
-				success: true,
-				status: kycStatus,
-				diditStatus: status,
-			})
-		}
-
-		// Update existing record
-		const kycRecord = kycRecords[0]
-		const notes =
-			typeof kycRecord.notes === 'string' ? JSON.parse(kycRecord.notes) : kycRecord.notes
-
-		const { error: updateError } = await supabaseServiceRole
-			.from('kyc_reviews')
-			.update({
-				status: kycStatus,
-				notes: JSON.stringify({
-					...notes,
-					diditSessionId: verificationSessionId,
-					diditStatus: status,
-					callbackReceived: new Date().toISOString(),
-				}),
-				updated_at: new Date().toISOString(),
-			})
-			.eq('id', kycRecord.id)
-
-		if (updateError) {
-			logger.error('Failed to update KYC record:', updateError)
-			return NextResponse.json({ error: 'Failed to update KYC record' }, { status: 500 })
-		}
+		const canonicalStatus = result.canonicalStatus ?? 'pending'
 
 		return NextResponse.json({
 			success: true,
-			status: kycStatus,
+			status: canonicalStatus === 'approved' ? 'approved' : canonicalStatus,
+			canonicalStatus,
 			diditStatus: status,
 		})
 	} catch (error) {
 		logger.error('Error processing Didit callback:', error)
-		return NextResponse.json(
-			{
-				error: 'Failed to process callback',
-				details: error instanceof Error ? error.message : String(error),
-			},
-			{ status: 500 },
-		)
+		return NextResponse.json({ error: 'Failed to process callback' }, { status: 500 })
 	}
 }

@@ -72,6 +72,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
 			{ href: '/admin/governance', label: 'Governance', Icon: IoBarChartOutline },
 			{ href: '/admin/gamification', label: 'Gamification', Icon: IoGiftOutline },
 			{ href: '/admin/compliance', label: 'Compliance', Icon: IoEarthOutline },
+			{ href: '/admin/kyc', label: 'KYC enforcement', Icon: IoShieldCheckmarkOutline },
 			{ href: '/admin/analytics', label: 'Analytics', Icon: IoStatsChartOutline },
 		],
 	},

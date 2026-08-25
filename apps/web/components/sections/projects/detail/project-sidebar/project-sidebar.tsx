@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { Badge } from '~/components/base/badge'
+import { KycRequiredGate } from '~/components/sections/kyc/kyc-required-gate'
 import { ReleasedProgressBar } from '~/components/sections/projects/shared'
 import { CAMPAIGN_COMPLETE_DONATION_MESSAGE } from '~/lib/projects/project-status'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
@@ -42,6 +43,7 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 		connect,
 		disconnect,
 		onSubmit,
+		kycGate,
 		handleToggleFollow,
 		shareUrl,
 		isAuthenticated,
@@ -165,6 +167,13 @@ export function ProjectSidebar({ project, projectSlug }: ProjectSidebarProps) {
 			{project.foundation && <FoundationLink foundation={project.foundation} />}
 
 			<ProjectTagsPanel tags={project.tags} />
+
+			<KycRequiredGate
+				open={kycGate.open}
+				onOpenChange={kycGate.setOpen}
+				userId={kycGate.userId}
+				denial={kycGate.denial}
+			/>
 		</motion.div>
 	)
 }

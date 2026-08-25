@@ -14,5 +14,8 @@ export const isAllowedTrustlessWorkPath = (path: string): boolean =>
 export const isPublicTrustlessWorkRead = (method: string, path: string): boolean =>
 	method === 'GET' && TRUSTLESS_WORK_PUBLIC_GET_PATHS.has(path)
 
+export const isReleaseEscrowProxyPath = (path: string, method: string): boolean =>
+	method === 'POST' && path.startsWith('escrow/') && path.endsWith('/release-funds')
+
 export const requiresTrustlessWorkAuth = (method: string, path: string): boolean =>
 	!isPublicTrustlessWorkRead(method, path)

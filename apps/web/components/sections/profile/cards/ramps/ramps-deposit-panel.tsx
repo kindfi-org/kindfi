@@ -14,8 +14,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { KycRequiredGate } from '~/components/sections/kyc/kyc-required-gate'
+import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
 import { isEtherfuseTermsError } from '~/lib/etherfuse/order-errors'
 import { useI18n } from '~/lib/i18n'
+import { isKycDenialPayload } from '~/lib/kyc/client'
 import { ProfileSurfaceCard } from '../../profile-surface-card'
 import { RAMP_CURRENCIES } from './constants'
 import { RampsAssetPicker } from './ramps-asset-picker'
@@ -45,6 +48,7 @@ export function RampsDepositPanel({
 	isStartingOnboarding,
 }: RampsDepositPanelProps) {
 	const { t } = useI18n()
+	const kycGate = useKycRequiredGate(userId)
 	const [amount, setAmount] = useState('')
 	const [currency, setCurrency] = useState('MXN')
 	const [targetAsset, setTargetAsset] = useState('')
@@ -91,6 +95,10 @@ export function RampsDepositPanel({
 			const data = await response.json()
 
 			if (!response.ok) {
+				if (isKycDenialPayload(data)) {
+					kycGate.showDenial(data)
+					return
+				}
 				throw new Error(data.error || t('profile.rampsDepositFailed'))
 			}
 
@@ -125,81 +133,91 @@ export function RampsDepositPanel({
 	}
 
 	return (
-		<ProfileSurfaceCard padding="lg" className="h-full">
-			<div className="space-y-6">
-				<div className="space-y-1">
-					<h3 className="text-lg font-semibold text-gray-900">{t('profile.rampsDepositTitle')}</h3>
-					<p className="text-sm text-muted-foreground">{t('profile.rampsDepositDescription')}</p>
-				</div>
-
-				<div className="space-y-2">
-					<Label htmlFor="ramp-deposit-amount">{t('profile.rampsAmountLabel')}</Label>
-					<div className="flex overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100">
-						<Select value={currency} onValueChange={setCurrency} disabled={isProcessing}>
-							<SelectTrigger
-								id="ramp-deposit-currency"
-								className="h-14 w-[110px] shrink-0 rounded-none border-0 border-r bg-slate-50/80 px-3 shadow-none focus:ring-0"
-							>
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{RAMP_CURRENCIES.map((item) => (
-									<SelectItem key={item.value} value={item.value}>
-										{t(item.labelKey)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<Input
-							id="ramp-deposit-amount"
-							type="number"
-							inputMode="decimal"
-							value={amount}
-							onChange={(event) => setAmount(event.target.value)}
-							placeholder={t('profile.rampsAmountPlaceholder')}
-							min="0"
-							step="0.01"
-							disabled={isProcessing}
-							className="h-14 border-0 bg-transparent text-2xl font-semibold tabular-nums shadow-none focus-visible:ring-0"
-						/>
+		<>
+			<ProfileSurfaceCard padding="lg" className="h-full">
+				<div className="space-y-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-gray-900">
+							{t('profile.rampsDepositTitle')}
+						</h3>
+						<p className="text-sm text-muted-foreground">{t('profile.rampsDepositDescription')}</p>
 					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="ramp-deposit-amount">{t('profile.rampsAmountLabel')}</Label>
+						<div className="flex overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100">
+							<Select value={currency} onValueChange={setCurrency} disabled={isProcessing}>
+								<SelectTrigger
+									id="ramp-deposit-currency"
+									className="h-14 w-[110px] shrink-0 rounded-none border-0 border-r bg-slate-50/80 px-3 shadow-none focus:ring-0"
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{RAMP_CURRENCIES.map((item) => (
+										<SelectItem key={item.value} value={item.value}>
+											{t(item.labelKey)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<Input
+								id="ramp-deposit-amount"
+								type="number"
+								inputMode="decimal"
+								value={amount}
+								onChange={(event) => setAmount(event.target.value)}
+								placeholder={t('profile.rampsAmountPlaceholder')}
+								min="0"
+								step="0.01"
+								disabled={isProcessing}
+								className="h-14 border-0 bg-transparent text-2xl font-semibold tabular-nums shadow-none focus-visible:ring-0"
+							/>
+						</div>
+					</div>
+
+					<RampsAssetPicker
+						currency={currency}
+						walletAddress={walletAddress}
+						value={targetAsset}
+						onChange={setTargetAsset}
+						disabled={isProcessing}
+						label={t('profile.rampsReceiveAsset')}
+						loadingMessage={t('profile.rampsAssetsLoading')}
+						emptyMessage={t('profile.rampsAssetsEmpty')}
+					/>
+
+					<div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm leading-relaxed text-sky-950">
+						{t('profile.rampsDepositNote')}
+					</div>
+
+					<Button
+						onClick={handleSubmit}
+						disabled={
+							!amount || Number(amount) <= 0 || !targetAsset || isProcessing || isStartingOnboarding
+						}
+						className="gradient-btn h-12 w-full rounded-full text-base text-white"
+					>
+						{isProcessing ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+								{t('profile.rampsProcessing')}
+							</>
+						) : (
+							<>
+								<ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />
+								{t('profile.rampsContinueCta')}
+							</>
+						)}
+					</Button>
 				</div>
-
-				<RampsAssetPicker
-					currency={currency}
-					walletAddress={walletAddress}
-					value={targetAsset}
-					onChange={setTargetAsset}
-					disabled={isProcessing}
-					label={t('profile.rampsReceiveAsset')}
-					loadingMessage={t('profile.rampsAssetsLoading')}
-					emptyMessage={t('profile.rampsAssetsEmpty')}
-				/>
-
-				<div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm leading-relaxed text-sky-950">
-					{t('profile.rampsDepositNote')}
-				</div>
-
-				<Button
-					onClick={handleSubmit}
-					disabled={
-						!amount || Number(amount) <= 0 || !targetAsset || isProcessing || isStartingOnboarding
-					}
-					className="gradient-btn h-12 w-full rounded-full text-base text-white"
-				>
-					{isProcessing ? (
-						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-							{t('profile.rampsProcessing')}
-						</>
-					) : (
-						<>
-							<ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />
-							{t('profile.rampsContinueCta')}
-						</>
-					)}
-				</Button>
-			</div>
-		</ProfileSurfaceCard>
+			</ProfileSurfaceCard>
+			<KycRequiredGate
+				open={kycGate.open}
+				onOpenChange={kycGate.setOpen}
+				userId={kycGate.userId}
+				denial={kycGate.denial}
+			/>
+		</>
 	)
 }

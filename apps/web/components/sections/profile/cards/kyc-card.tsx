@@ -64,7 +64,11 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 	const statusConfig = getStatusConfig(kycStatus.status, kycStatus.isLoading, kycStatus.error, t)
 
 	const shouldShowButton =
-		!kycStatus.status || kycStatus.status === 'rejected' || kycStatus.error !== null
+		!kycStatus.status ||
+		kycStatus.status === 'not_started' ||
+		kycStatus.status === 'rejected' ||
+		kycStatus.status === 'expired' ||
+		kycStatus.error !== null
 
 	if (!userId) {
 		return (
@@ -125,6 +129,15 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 									: t('profile.kycStart')}
 						</Button>
 					) : null}
+					<Button
+						variant="outline"
+						size="sm"
+						className="mt-2 w-full rounded-full"
+						onClick={() => refreshStatus()}
+						disabled={kycStatus.isLoading}
+					>
+						{t('profile.kycGateRecheck')}
+					</Button>
 				</ProfileSurfaceCard>
 			</motion.div>
 
@@ -202,6 +215,25 @@ function getStatusConfig(
 				badgeClass: 'bg-red-50 text-red-700 hover:bg-red-50',
 				badgeLabel: t('profile.kycRejected'),
 				message: t('profile.kycRejectedMessage'),
+				benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
+			}
+		case 'expired':
+			return {
+				Icon: XCircle,
+				iconWrapClass: 'bg-orange-50 text-orange-600',
+				badgeClass: 'bg-orange-50 text-orange-700 hover:bg-orange-50',
+				badgeLabel: t('profile.kycExpired'),
+				message: t('profile.kycExpiredMessage'),
+				benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
+			}
+		case 'in_review':
+		case 'manual_review':
+			return {
+				Icon: Clock,
+				iconWrapClass: 'bg-amber-50 text-amber-700',
+				badgeClass: 'bg-amber-50 text-amber-800 hover:bg-amber-50',
+				badgeLabel: t('profile.kycPending'),
+				message: t('profile.kycPendingMessage'),
 				benefits: [t('profile.kycBenefit1'), t('profile.kycBenefit2')],
 			}
 		default:

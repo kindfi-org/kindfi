@@ -48,7 +48,11 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 
 						return (
 							<div
-								key={index}
+								key={
+									isSingle
+										? `single:${milestone.description}`
+										: `multi:${multiMilestone.amount}:${milestone.description}`
+								}
 								className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
 							>
 								<div className="flex-1 space-y-2">

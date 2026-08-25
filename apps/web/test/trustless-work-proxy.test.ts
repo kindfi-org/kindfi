@@ -10,6 +10,14 @@ describe('Trustless Work proxy path rules', () => {
 		expect(isAllowedTrustlessWorkPath('indexer/update-from-txHash')).toBe(true)
 	})
 
+	test('identifies escrow release-funds paths', async () => {
+		const { isReleaseEscrowProxyPath } = await import('../lib/config/trustless-work-proxy.paths')
+		expect(isReleaseEscrowProxyPath('escrow/single-release/release-funds', 'POST')).toBe(true)
+		expect(isReleaseEscrowProxyPath('escrow/multi-release/release-funds', 'POST')).toBe(true)
+		expect(isReleaseEscrowProxyPath('escrow/single-release/release-funds', 'GET')).toBe(false)
+		expect(isReleaseEscrowProxyPath('escrow/single-release/fund-escrow', 'POST')).toBe(false)
+	})
+
 	test('rejects unknown paths', async () => {
 		const { isAllowedTrustlessWorkPath } = await import('../lib/config/trustless-work-proxy.paths')
 

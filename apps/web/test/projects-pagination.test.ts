@@ -12,7 +12,7 @@
  * calculation logic only, not network I/O.
  */
 
-import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import type { PaginatedProjectsResult } from '~/lib/queries/projects/get-all-projects'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

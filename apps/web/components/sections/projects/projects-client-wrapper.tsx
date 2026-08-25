@@ -31,7 +31,6 @@ export function ProjectsClientWrapper() {
 	const { t, language } = useI18n()
 	const reducedMotion = useReducedMotion()
 	const categoryParams = searchParams.getAll('category')
-	const categoryFilterKey = categoryParams.join(',')
 	const sortParam = searchParams.get('sort') ?? 'most-popular'
 	const selectedCategories = categoryParams
 	const sortOption = sortSlugToOption(sortParam)

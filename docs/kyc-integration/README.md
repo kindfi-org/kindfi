@@ -13,3 +13,5 @@ This documentation covers the complete integration of Didit.me KYC (Know Your Cu
 - [Components](#components)
 - [User Flow](#user-flow)
 - [Troubleshooting](#troubleshooting)
+- [Status mapping](./status-mapping.md)
+- [Enforcement runbook](./enforcement-runbook.md)

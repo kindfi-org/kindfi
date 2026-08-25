@@ -10,6 +10,12 @@ DIDIT_API_KEY=your_didit_api_key
 DIDIT_WEBHOOK_SECRET_KEY=your_webhook_secret_key
 DIDIT_WORKFLOW_ID=your_workflow_id
 
+# KYC enforcement (server-only; default disabled)
+# Changing these requires a Vercel redeploy or process restart.
+KYC_ENFORCEMENT_MODE=disabled
+KYC_ENFORCED_ACTIONS=send_assets,use_off_ramp
+```
+
 # Supabase Configuration (already configured)
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -93,13 +99,10 @@ The Didit API client is configured in `/apps/web/lib/services/didit.ts`:
 
 ### Status Mapping
 
-Didit status values are mapped to internal enum values:
+Didit status values are mapped to canonical KindFi states in one place
+(`apps/web/lib/kyc/status.ts`). See [status-mapping.md](./status-mapping.md)
+for the full table. `Approved` and `Verified` both become canonical
+`approved`.
 
-| Didit Status  | Internal Status | Description               |
-| ------------- | --------------- | ------------------------- |
-| `Approved`    | `approved`      | Verification approved     |
-| `Declined`    | `rejected`      | Verification declined     |
-| `In Progress` | `pending`       | Verification in progress  |
-| `In Review`   | `pending`       | Verification under review |
-| `Not Started` | `pending`       | Verification not started  |
-| `Abandoned`   | `pending`       | Verification abandoned    |
+Enforcement stays **disabled** until `KYC_ENFORCEMENT_MODE` is changed and
+the application is redeployed. See [enforcement-runbook.md](./enforcement-runbook.md).

@@ -21,6 +21,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 	governance: 'Governance',
 	gamification: 'Gamification',
 	compliance: 'Compliance',
+	kyc: 'KYC enforcement',
 	analytics: 'Analytics',
 	settings: 'Settings',
 	create: 'Create',

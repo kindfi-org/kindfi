@@ -8,6 +8,10 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
 import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { KycRequiredGate } from '~/components/sections/kyc/kyc-required-gate'
+import { useAuth } from '~/hooks/use-auth'
+import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
+import { isKycDenialPayload } from '~/lib/kyc/client'
 import {
 	canManagerSubmitForReview,
 	getAdminStatusActions,
@@ -26,6 +30,8 @@ type ProjectStatusPanelProps = {
 export function ProjectStatusPanel({ slug, status, isPlatformAdmin }: ProjectStatusPanelProps) {
 	const queryClient = useQueryClient()
 	const router = useRouter()
+	const { user } = useAuth()
+	const kycGate = useKycRequiredGate(user?.id ?? '')
 	const [confirmStatus, setConfirmStatus] = useState<ProjectStatus | null>(null)
 
 	const updateStatus = useMutation({
@@ -43,6 +49,10 @@ export function ProjectStatusPanel({ slug, status, isPlatformAdmin }: ProjectSta
 			}
 
 			if (!response.ok) {
+				if (isKycDenialPayload(payload)) {
+					kycGate.showDenial(payload)
+					throw new Error(payload.error)
+				}
 				throw new Error(payload.error || 'Failed to update project status')
 			}
 
@@ -70,111 +80,119 @@ export function ProjectStatusPanel({ slug, status, isPlatformAdmin }: ProjectSta
 	const adminActions = getAdminStatusActions(status)
 
 	return (
-		<Card className="border-border/80 bg-card/80">
-			<CardHeader className="pb-3">
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<div className="space-y-1">
-						<CardTitle className="text-lg">Campaign status</CardTitle>
-						<CardDescription>
-							{isPlatformAdmin
-								? 'Update the project lifecycle for creators and the public campaign page.'
-								: 'Tell the KindFi team when your project is ready for campaign review.'}
-						</CardDescription>
-					</div>
-					<Badge
-						variant="outline"
-						className={cn('text-xs font-medium capitalize', PROJECT_STATUS_COLORS[status])}
-					>
-						{PROJECT_STATUS_LABELS[status]}
-					</Badge>
-				</div>
-			</CardHeader>
-			<CardContent className="space-y-4">
-				{showManagerSubmit ? (
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<p className="text-sm text-muted-foreground">
-							Finish your content, then mark the project ready so an admin can review and launch the
-							campaign.
-						</p>
-						<Button
-							onClick={() => updateStatus.mutate('review')}
-							disabled={updateStatus.isPending}
-							className="shrink-0"
+		<>
+			<Card className="border-border/80 bg-card/80">
+				<CardHeader className="pb-3">
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<div className="space-y-1">
+							<CardTitle className="text-lg">Campaign status</CardTitle>
+							<CardDescription>
+								{isPlatformAdmin
+									? 'Update the project lifecycle for creators and the public campaign page.'
+									: 'Tell the KindFi team when your project is ready for campaign review.'}
+							</CardDescription>
+						</div>
+						<Badge
+							variant="outline"
+							className={cn('text-xs font-medium capitalize', PROJECT_STATUS_COLORS[status])}
 						>
-							{updateStatus.isPending ? 'Submitting…' : 'Mark as ready to begin campaign'}
-						</Button>
+							{PROJECT_STATUS_LABELS[status]}
+						</Badge>
 					</div>
-				) : null}
-
-				{awaitingReview ? (
-					<p className="text-sm text-muted-foreground">
-						Your project is in review. An admin will activate the campaign when it is approved.
-					</p>
-				) : null}
-
-				{!isPlatformAdmin && status === 'active' ? (
-					<p className="text-sm text-muted-foreground">
-						Your campaign is live. Keep content and updates fresh for supporters.
-					</p>
-				) : null}
-
-				{!isPlatformAdmin && status === 'funded' ? (
-					<p className="text-sm text-muted-foreground">
-						This campaign is marked complete. You can still post updates for supporters.
-					</p>
-				) : null}
-
-				{!isPlatformAdmin && status === 'paused' ? (
-					<p className="text-sm text-muted-foreground">
-						This campaign is paused. Contact support if you need it reactivated.
-					</p>
-				) : null}
-
-				{isPlatformAdmin ? (
-					<div className="flex flex-wrap gap-2">
-						{adminActions.map((action) => (
+				</CardHeader>
+				<CardContent className="space-y-4">
+					{showManagerSubmit ? (
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+							<p className="text-sm text-muted-foreground">
+								Finish your content, then mark the project ready so an admin can review and launch
+								the campaign.
+							</p>
 							<Button
-								key={action.status}
-								variant={action.variant ?? 'outline'}
-								size="sm"
+								onClick={() => updateStatus.mutate('review')}
 								disabled={updateStatus.isPending}
-								onClick={() => setConfirmStatus(action.status)}
+								className="shrink-0"
 							>
-								{action.label}
+								{updateStatus.isPending ? 'Submitting…' : 'Mark as ready to begin campaign'}
 							</Button>
-						))}
-					</div>
-				) : null}
+						</div>
+					) : null}
 
-				{isPlatformAdmin ? (
-					<ConfirmActionDialog
-						open={confirmStatus !== null}
-						onOpenChange={(open) => {
-							if (!open) setConfirmStatus(null)
-						}}
-						title="Change campaign status"
-						description="This changes what creators and supporters see on the public campaign page."
-						summary={
-							confirmStatus
-								? [
-										{ label: 'Project', value: slug },
-										{
-											label: 'Status change',
-											value: `${PROJECT_STATUS_LABELS[status]} → ${PROJECT_STATUS_LABELS[confirmStatus]}`,
-										},
-									]
-								: undefined
-						}
-						confirmLabel="Change status"
-						pendingLabel="Updating…"
-						isPending={updateStatus.isPending}
-						destructive={confirmStatus === 'rejected' || confirmStatus === 'paused'}
-						onConfirm={() => {
-							if (confirmStatus) updateStatus.mutate(confirmStatus)
-						}}
-					/>
-				) : null}
-			</CardContent>
-		</Card>
+					{awaitingReview ? (
+						<p className="text-sm text-muted-foreground">
+							Your project is in review. An admin will activate the campaign when it is approved.
+						</p>
+					) : null}
+
+					{!isPlatformAdmin && status === 'active' ? (
+						<p className="text-sm text-muted-foreground">
+							Your campaign is live. Keep content and updates fresh for supporters.
+						</p>
+					) : null}
+
+					{!isPlatformAdmin && status === 'funded' ? (
+						<p className="text-sm text-muted-foreground">
+							This campaign is marked complete. You can still post updates for supporters.
+						</p>
+					) : null}
+
+					{!isPlatformAdmin && status === 'paused' ? (
+						<p className="text-sm text-muted-foreground">
+							This campaign is paused. Contact support if you need it reactivated.
+						</p>
+					) : null}
+
+					{isPlatformAdmin ? (
+						<div className="flex flex-wrap gap-2">
+							{adminActions.map((action) => (
+								<Button
+									key={action.status}
+									variant={action.variant ?? 'outline'}
+									size="sm"
+									disabled={updateStatus.isPending}
+									onClick={() => setConfirmStatus(action.status)}
+								>
+									{action.label}
+								</Button>
+							))}
+						</div>
+					) : null}
+
+					{isPlatformAdmin ? (
+						<ConfirmActionDialog
+							open={confirmStatus !== null}
+							onOpenChange={(open) => {
+								if (!open) setConfirmStatus(null)
+							}}
+							title="Change campaign status"
+							description="This changes what creators and supporters see on the public campaign page."
+							summary={
+								confirmStatus
+									? [
+											{ label: 'Project', value: slug },
+											{
+												label: 'Status change',
+												value: `${PROJECT_STATUS_LABELS[status]} → ${PROJECT_STATUS_LABELS[confirmStatus]}`,
+											},
+										]
+									: undefined
+							}
+							confirmLabel="Change status"
+							pendingLabel="Updating…"
+							isPending={updateStatus.isPending}
+							destructive={confirmStatus === 'rejected' || confirmStatus === 'paused'}
+							onConfirm={() => {
+								if (confirmStatus) updateStatus.mutate(confirmStatus)
+							}}
+						/>
+					) : null}
+				</CardContent>
+			</Card>
+			<KycRequiredGate
+				open={kycGate.open}
+				onOpenChange={kycGate.setOpen}
+				userId={kycGate.userId}
+				denial={kycGate.denial}
+			/>
+		</>
 	)
 }
