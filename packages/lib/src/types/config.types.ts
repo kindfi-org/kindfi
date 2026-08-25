@@ -31,6 +31,7 @@ export interface AppEnvInterface {
 		enableEscrowFeature: boolean
 		enableSmartAccountCreation: boolean
 		enablePollarOnboarding: boolean
+		enableAdminOpsDashboard: boolean
 	}
 	vapid: {
 		email: string
