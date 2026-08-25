@@ -572,7 +572,7 @@ export function AdminGamificationTriggers() {
 							]
 						: undefined
 				}
-				blockchain={{ networkId }}
+				blockchain={{ networkId, signerLabel: 'Platform service account (server-side)' }}
 				confirmLabel="Trigger contract"
 				pendingLabel="Submitting…"
 				isPending={form.isPending}

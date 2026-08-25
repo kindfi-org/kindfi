@@ -7,6 +7,7 @@ import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 
 type BackfillResponse = {
 	success: boolean
@@ -43,6 +44,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function QuestProgressBackfillPanel() {
+	const { networkId } = useStellarNetworkConfig()
 	const [userId, setUserId] = useState('')
 	const [limit, setLimit] = useState('100')
 	const [pendingRun, setPendingRun] = useState<{
@@ -138,6 +140,7 @@ export function QuestProgressBackfillPanel() {
 							]
 						: undefined
 				}
+				blockchain={{ networkId, signerLabel: 'Platform service account (server-side)' }}
 				confirmLabel="Run backfill"
 				pendingLabel="Running…"
 				isPending={mutation.isPending}

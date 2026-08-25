@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useRef } from 'react'
 import { Button } from '~/components/base/button'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import { AdminListShell } from '~/components/sections/admin/shared/admin-list-shell'
@@ -33,11 +32,7 @@ export function AdminProjectsPage() {
 		params: normalizedParams,
 	})
 
-	// filterOptions only ship with page 1; keep the last seen set.
-	const filterOptionsRef = useRef<AdminProjectFilterOptions | null>(null)
-	if (data?.filterOptions) {
-		filterOptionsRef.current = data.filterOptions
-	}
+	const filterOptions = data?.filterOptions ?? null
 
 	const hasActiveFilters = Object.keys(normalizedParams).some(
 		(key) => !['page', 'pageSize', 'sort'].includes(key),
@@ -68,7 +63,7 @@ export function AdminProjectsPage() {
 							devOnly: params.devOnly,
 							sort: params.sort,
 						}}
-						options={filterOptionsRef.current}
+						options={filterOptions}
 						onChange={setParam}
 					/>
 				}

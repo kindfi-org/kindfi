@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
 			logger.error('[Governance] on-chain recording error:', err)
 		}
 
-		void recordAdminAudit({
+		await recordAdminAudit({
 			operation: 'admin_governance_round_created',
 			resourceType: 'governance_round',
 			resourceId: round.id,

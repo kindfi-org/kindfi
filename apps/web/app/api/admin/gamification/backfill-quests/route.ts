@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 			errors: results.flatMap((row) => row.errors),
 		}
 
-		void recordAdminAudit({
+		await recordAdminAudit({
 			operation: 'admin_quest_backfill_run',
 			resourceType: 'quest',
 			resourceId: userId ?? 'all',

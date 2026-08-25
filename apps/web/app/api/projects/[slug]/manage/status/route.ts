@@ -90,7 +90,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 
 		// Campaign status changes made by platform admins are auditable.
 		if (auth.access.isPlatformAdmin) {
-			void recordAdminAudit({
+			await recordAdminAudit({
 				operation: 'admin_project_status_changed',
 				resourceType: 'project',
 				resourceId: projectId,

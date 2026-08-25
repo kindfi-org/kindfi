@@ -1,7 +1,9 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
 import { requireAdminApi } from '~/lib/auth/require-admin-api'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { getAdminUsers } from '~/lib/queries/admin/get-admin-users'
 import { adminUsersQuerySchema, parseAdminListParams } from '~/lib/validators/admin-list-params'
 
@@ -10,7 +12,7 @@ import { adminUsersQuerySchema, parseAdminListParams } from '~/lib/validators/ad
  * filters. Responses expose only operational fields — never KYC notes,
  * provider payloads, or documents.
  */
-export async function GET(request: Request) {
+async function handleUsers(request: NextRequest): Promise<NextResponse> {
 	const auth = await requireAdminApi()
 	if (!auth.ok) return auth.response
 
@@ -25,3 +27,11 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: 'Failed to load users' }, { status: 500 })
 	}
 }
+
+export const GET = withRateLimit(
+	{
+		preset: 'lenient',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	handleUsers,
+)

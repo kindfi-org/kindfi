@@ -27,7 +27,7 @@ function requireEnv(name: string, fallback?: string): string | null {
 	return process.env[name] || (fallback ? process.env[fallback] : undefined) || null
 }
 
-function buildResponse(
+async function buildResponse(
 	result: {
 		success: boolean
 		txHash?: string
@@ -41,7 +41,7 @@ function buildResponse(
 	const network = resolveNetworkId()
 	const explorerUrl = result.txHash ? getStellarExplorerTxUrl(result.txHash, network) : undefined
 
-	void recordAdminAudit({
+	await recordAdminAudit({
 		operation: 'admin_gamification_triggered',
 		resourceType: 'gamification_module',
 		resourceId: module,

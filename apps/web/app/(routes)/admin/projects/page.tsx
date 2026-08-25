@@ -36,9 +36,9 @@ export default async function AdminProjectsRoute({
 			async (client) => {
 				const [result, filterOptions] = await Promise.all([
 					getAdminProjects(client, params),
-					params.page === 1 ? getAdminProjectFilterOptions(client) : Promise.resolve(null),
+					getAdminProjectFilterOptions(client),
 				])
-				return filterOptions ? { ...result, filterOptions } : result
+				return { ...result, filterOptions }
 			},
 		)
 

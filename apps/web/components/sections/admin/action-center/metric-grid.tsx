@@ -12,6 +12,12 @@ interface MetricCard {
 	detail?: string
 }
 
+/** UTC date string N days ago, matching the users list `from` filter. */
+function isoDaysAgo(days: number): string {
+	const date = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+	return date.toISOString().slice(0, 10)
+}
+
 function buildMetricGroups(stats: AdminDashboardStats): Array<{
 	title: string
 	metrics: MetricCard[]
@@ -28,17 +34,17 @@ function buildMetricGroups(stats: AdminDashboardStats): Array<{
 				{
 					label: 'New today',
 					value: number(stats.users.new_today),
-					href: '/admin/users?sort=newest',
+					href: `/admin/users?sort=newest&from=${isoDaysAgo(0)}`,
 				},
 				{
 					label: 'New this week',
 					value: number(stats.users.new_week),
-					href: '/admin/users?sort=newest',
+					href: `/admin/users?sort=newest&from=${isoDaysAgo(7)}`,
 				},
 				{
 					label: 'New this month',
 					value: number(stats.users.new_month),
-					href: '/admin/users?sort=newest',
+					href: `/admin/users?sort=newest&from=${isoDaysAgo(30)}`,
 				},
 				{
 					label: 'KYC not started',

@@ -45,9 +45,11 @@ BEGIN
       ),
       'dev_only', (SELECT count(*) FROM public.projects WHERE development_only),
       'without_escrow', (
+        -- Active (live) campaigns only, matching the action-center queue and
+        -- the pre-filtered destination (/admin/projects?escrow=none&status=active).
         SELECT count(*)
         FROM public.projects p
-        WHERE p.status IN ('active', 'funded')
+        WHERE p.status = 'active'
           AND NOT EXISTS (
             SELECT 1 FROM public.project_escrows pe WHERE pe.project_id = p.id
           )

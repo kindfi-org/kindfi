@@ -30,10 +30,13 @@ interface ConfirmActionDialogProps {
 	/**
 	 * For blockchain mutations: the active Stellar network and the signer
 	 * that will be asked to sign, shown before anything is submitted.
+	 * `signerLabel` describes non-wallet signers (e.g. the platform service
+	 * account that signs server-side).
 	 */
 	blockchain?: {
 		networkId: string
 		signerAddress?: string | null
+		signerLabel?: string
 		requiredSigner?: string | null
 	}
 	confirmLabel: string
@@ -110,6 +113,11 @@ export function ConfirmActionDialog({
 							<div className="flex items-center justify-between gap-4">
 								<span className="text-muted-foreground">Connected signer</span>
 								<TruncatedId value={blockchain.signerAddress} />
+							</div>
+						) : blockchain.signerLabel ? (
+							<div className="flex items-center justify-between gap-4">
+								<span className="text-muted-foreground">Signer</span>
+								<span className="font-medium">{blockchain.signerLabel}</span>
 							</div>
 						) : null}
 						{blockchain.requiredSigner ? (

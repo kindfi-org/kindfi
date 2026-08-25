@@ -85,6 +85,8 @@ export function AdminListShell({
 
 	const pageCount = Math.max(1, Math.ceil(total / pageSize))
 	const isEmpty = !isLoading && !isError && total === 0
+	// A bookmarked URL can request a page beyond the current result set.
+	const isPageOutOfRange = !isLoading && !isError && total > 0 && page > pageCount
 
 	return (
 		<div className="space-y-4">
@@ -136,6 +138,16 @@ export function AdminListShell({
 						/>
 					))}
 				</output>
+			) : isPageOutOfRange ? (
+				<div className="flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
+					<p className="font-medium">Page {page} is out of range</p>
+					<p className="text-sm text-muted-foreground">
+						These results only have {pageCount} {pageCount === 1 ? 'page' : 'pages'}.
+					</p>
+					<Button type="button" variant="outline" size="sm" onClick={() => onPageChange(pageCount)}>
+						Go to page {pageCount}
+					</Button>
+				</div>
 			) : isEmpty ? (
 				<div className="flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
 					<p className="font-medium">{emptyTitle}</p>

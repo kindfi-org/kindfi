@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { Skeleton } from '~/components/base/skeleton'
 import { useAdminCounts } from '~/hooks/admin/use-admin-counts'
@@ -20,8 +21,28 @@ const BUCKETS = [
  * KYC status distribution. Each card toggles the corresponding list filter.
  */
 export function KycStatsBar({ activeKyc, onSelect }: KycStatsBarProps) {
-	const { data, isLoading } = useAdminCounts()
+	const { data, isLoading, isError, refetch } = useAdminCounts()
 	const kyc = data?.stats?.kyc
+	const countsUnavailable = isError || data?.statsError === true
+
+	const handleKycSelect = (bucketKey: string, isActive: boolean) => {
+		onSelect(isActive ? undefined : bucketKey)
+	}
+
+	if (countsUnavailable) {
+		return (
+			<div
+				role="alert"
+				className="flex items-center justify-between gap-3 rounded-lg border p-4"
+				aria-label="KYC status distribution"
+			>
+				<p className="text-sm text-muted-foreground">KYC counts could not be loaded.</p>
+				<Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
+					Retry
+				</Button>
+			</div>
+		)
+	}
 
 	return (
 		<section aria-label="KYC status distribution" className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -34,7 +55,7 @@ export function KycStatsBar({ activeKyc, onSelect }: KycStatsBarProps) {
 							<button
 								type="button"
 								className="block w-full rounded-xl p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-								onClick={() => onSelect(isActive ? undefined : bucket.key)}
+								onClick={() => handleKycSelect(bucket.key, isActive)}
 								aria-pressed={isActive}
 							>
 								{isLoading || value === undefined ? (

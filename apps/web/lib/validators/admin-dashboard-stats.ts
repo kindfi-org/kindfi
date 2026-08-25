@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-const countRecord = z.record(z.string(), z.number()).catch({})
+// No .catch() here: a malformed count record must fail the parse so the
+// dashboard reports statsError instead of silently rendering zeros.
+const countRecord = z.record(z.string(), z.number())
 
 /**
  * Shape of the `get_admin_dashboard_stats` RPC payload. Parsed with Zod so

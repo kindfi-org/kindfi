@@ -9,8 +9,12 @@ import { useSearchParams } from 'next/navigation'
  */
 export function sanitizeAdminBackLink(value: string | null): string | null {
 	if (!value) return null
-	if (!value.startsWith('/admin')) return null
-	if (value.startsWith('//')) return null
+	if (value.startsWith('//') || value.includes('\\')) return null
+	// Must be exactly /admin or a canonical path under /admin/ — this also
+	// rejects siblings like /administer and traversal like /admin/../x.
+	const [path] = value.split('?')
+	if (path !== '/admin' && !path.startsWith('/admin/')) return null
+	if (path.split('/').some((segment) => segment === '..' || segment === '.')) return null
 	return value
 }
 

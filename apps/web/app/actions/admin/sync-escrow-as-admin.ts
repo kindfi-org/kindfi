@@ -30,7 +30,7 @@ export async function syncEscrowAsAdminAction(input: {
 
 	const result = await syncEscrowToDatabaseAction(input)
 
-	void recordAdminAudit({
+	await recordAdminAudit({
 		operation: 'admin_escrow_synced',
 		resourceType: 'escrow',
 		resourceId: input.contractId,

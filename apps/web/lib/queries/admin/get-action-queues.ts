@@ -155,7 +155,7 @@ async function getMissingEscrowQueue(
 		.select('id, title, slug, status, created_at, updated_at, project_escrows!left(project_id)', {
 			count: 'exact',
 		})
-		.in('status', ['active', 'funded'])
+		.eq('status', 'active')
 		.is('project_escrows', null)
 		.order('updated_at', { ascending: true })
 		.limit(QUEUE_ITEM_LIMIT)
@@ -232,6 +232,8 @@ async function getEscrowAttentionQueue(client: TypedSupabaseClient): Promise<Adm
 			.limit(QUEUE_ITEM_LIMIT),
 		// escrow_contracts.project_id is NOT NULL, so a broken association
 		// manifests as a contract with no project_escrows join row.
+		// DISPUTED rows are excluded here so the two attention queries stay
+		// mutually exclusive and the queue total never double-counts an escrow.
 		client
 			.from('escrow_contracts')
 			.select(
@@ -241,6 +243,7 @@ async function getEscrowAttentionQueue(client: TypedSupabaseClient): Promise<Adm
 				},
 			)
 			.is('project_escrows', null)
+			.neq('current_state', 'DISPUTED')
 			.order('updated_at', { ascending: true })
 			.limit(QUEUE_ITEM_LIMIT),
 	])
@@ -322,7 +325,7 @@ async function getKycQueue(client: TypedSupabaseClient, now: Date): Promise<Admi
 		description: 'Verifications pending review or rejected.',
 		total: count ?? 0,
 		error: false,
-		viewAllHref: '/admin/users?kyc=pending',
+		viewAllHref: '/admin/users',
 		items: rows.map((row) => {
 			const profile = profilesById.get(row.user_id)
 			return {
@@ -476,7 +479,7 @@ const QUEUE_FALLBACKS: Record<
 		key: 'kyc_cases',
 		title: 'KYC cases',
 		description: 'Verifications pending review or rejected.',
-		viewAllHref: '/admin/users?kyc=pending',
+		viewAllHref: '/admin/users',
 	},
 	new_users: {
 		key: 'new_users',

@@ -1,7 +1,9 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
 import { requireAdminApi } from '~/lib/auth/require-admin-api'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import {
 	getAdminProjectFilterOptions,
 	getAdminProjects,
@@ -14,13 +16,14 @@ import { adminProjectsQuerySchema, parseAdminListParams } from '~/lib/validators
  *
  * With query params: paginated `{ items, total, page, pageSize }` response
  * with server-side search, filters, and sorting (the ops dashboard list).
- * Page 1 additionally includes `filterOptions` (categories/foundations).
+ * Every response includes `filterOptions` (categories/foundations) so
+ * bookmarked deep links render populated filter menus.
  *
  * Without query params: the legacy flat-array response consumed by the
  * pre-redesign AdminProjectsList, kept intact so the feature-flag-off path
  * behaves exactly as before.
  */
-export async function GET(request: Request) {
+async function handleProjects(request: NextRequest): Promise<NextResponse> {
 	const auth = await requireAdminApi()
 	if (!auth.ok) return auth.response
 
@@ -34,14 +37,24 @@ export async function GET(request: Request) {
 	const params = parseAdminListParams(adminProjectsQuerySchema, searchParams)
 
 	try {
+		// Filter options ship with every response (they are tiny lookup tables)
+		// so bookmarked deep links like ?page=2 render populated filter menus.
 		const [result, filterOptions] = await Promise.all([
 			getAdminProjects(supabaseServiceRole, params),
-			params.page === 1 ? getAdminProjectFilterOptions(supabaseServiceRole) : Promise.resolve(null),
+			getAdminProjectFilterOptions(supabaseServiceRole),
 		])
 
-		return NextResponse.json(filterOptions ? { ...result, filterOptions } : result)
+		return NextResponse.json({ ...result, filterOptions })
 	} catch (error) {
 		logger.error(error)
 		return NextResponse.json({ error: 'Failed to load projects' }, { status: 500 })
 	}
 }
+
+export const GET = withRateLimit(
+	{
+		preset: 'lenient',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	handleProjects,
+)

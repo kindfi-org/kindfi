@@ -3,6 +3,7 @@ import type { Enums } from '@services/supabase'
 import type { EscrowType } from '@trustless-work/escrow'
 import { readEscrowTypeFromMetadata } from '~/lib/utils/escrow/resolve-escrow-type'
 import type { AdminEscrowsQuery, AdminListResponse } from '~/lib/validators/admin-list-params'
+import { runPaginatedAdminQuery } from './run-paginated-query'
 
 export type AdminEscrowHealthIssue = 'missing_association' | 'orphaned_project'
 
@@ -37,7 +38,12 @@ function sanitizeSearchTerm(term: string): string {
 	return term.replace(/[,()%\\]/g, ' ').trim()
 }
 
-const RELATED_MATCH_LIMIT = 20
+/**
+ * PostgREST cannot ilike across embedded resources inside an or(), so
+ * project-title matches are pre-resolved to ids with a capped candidate
+ * list; beyond it, admins can narrow the term or use the project filter.
+ */
+const RELATED_MATCH_LIMIT = 50
 
 type EscrowRow = {
 	id: string
@@ -74,32 +80,23 @@ export async function getAdminEscrows(
 	client: TypedSupabaseClient,
 	params: AdminEscrowsQuery,
 ): Promise<AdminListResponse<AdminEscrowListItem>> {
-	let query = client.from('escrow_contracts').select(
-		`id, contract_id, engagement_id, current_state, amount, platform_fee, metadata,
-			 created_at, updated_at, completed_at,
-			 project:projects!escrow_contracts_project_id_fkey(id, title, slug, status, image_url),
-			 project_escrows!left(escrow_id),
-			 escrow_milestones(count)`,
-		{ count: 'exact' },
-	)
-
-	if (params.state) {
-		query = query.eq('current_state', params.state)
-	}
-
+	// Related-record lookups happen once, before the (re-runnable) builder.
+	let projectId: string | null | undefined
 	if (params.project) {
 		const { data: project } = await client
 			.from('projects')
 			.select('id')
 			.eq('slug', params.project)
 			.maybeSingle()
-		query = query.eq('project_id', project?.id ?? '00000000-0000-0000-0000-000000000000')
+		projectId = project?.id ?? '00000000-0000-0000-0000-000000000000'
 	}
 
+	let searchConditions: string | null = null
 	if (params.q) {
-		const term = sanitizeSearchTerm(params.q)
-		if (UUID_PATTERN.test(params.q.trim())) {
-			query = query.or(`id.eq.${params.q.trim()},project_id.eq.${params.q.trim()}`)
+		const raw = params.q.trim()
+		const term = sanitizeSearchTerm(raw)
+		if (UUID_PATTERN.test(raw)) {
+			searchConditions = `id.eq.${raw},project_id.eq.${raw}`
 		} else if (term) {
 			// Project-title matches are resolved to ids first (PostgREST cannot
 			// ilike across embedded resources inside an or()).
@@ -113,34 +110,47 @@ export async function getAdminEscrows(
 			if (projectIds.length > 0) {
 				conditions.push(`project_id.in.(${projectIds.join(',')})`)
 			}
-			query = query.or(conditions.join(','))
+			searchConditions = conditions.join(',')
 		}
 	}
 
-	switch (params.sort) {
-		case 'oldest':
-			query = query.order('created_at', { ascending: true })
-			break
-		case 'updated':
-			query = query.order('updated_at', { ascending: false, nullsFirst: false })
-			break
-		case 'amount':
-			query = query.order('amount', { ascending: false, nullsFirst: false })
-			break
-		default:
-			query = query.order('created_at', { ascending: false })
+	const runQuery = (from: number, to: number) => {
+		let query = client.from('escrow_contracts').select(
+			`id, contract_id, engagement_id, current_state, amount, platform_fee, metadata,
+				 created_at, updated_at, completed_at,
+				 project:projects!escrow_contracts_project_id_fkey(id, title, slug, status, image_url),
+				 project_escrows!left(escrow_id),
+				 escrow_milestones(count)`,
+			{ count: 'exact' },
+		)
+
+		if (params.state) query = query.eq('current_state', params.state)
+		if (projectId) query = query.eq('project_id', projectId)
+		if (searchConditions) query = query.or(searchConditions)
+
+		switch (params.sort) {
+			case 'oldest':
+				query = query.order('created_at', { ascending: true })
+				break
+			case 'updated':
+				query = query.order('updated_at', { ascending: false, nullsFirst: false })
+				break
+			case 'amount':
+				query = query.order('amount', { ascending: false, nullsFirst: false })
+				break
+			default:
+				query = query.order('created_at', { ascending: false })
+		}
+
+		return query.range(from, to)
 	}
 
-	const offset = (params.page - 1) * params.pageSize
-	query = query.range(offset, offset + params.pageSize - 1)
-
-	const { data, error, count } = await query
-
-	if (error) {
-		throw new Error(`Failed to load admin escrows: ${error.message}`)
-	}
-
-	const rows = (data ?? []) as unknown as EscrowRow[]
+	const { rows, total } = await runPaginatedAdminQuery<EscrowRow>(
+		runQuery,
+		params.page,
+		params.pageSize,
+		'admin escrows',
+	)
 
 	return {
 		items: rows.map((row) => {
@@ -172,7 +182,7 @@ export async function getAdminEscrows(
 				health: { healthy: issues.length === 0, issues },
 			}
 		}),
-		total: count ?? 0,
+		total,
 		page: params.page,
 		pageSize: params.pageSize,
 	}

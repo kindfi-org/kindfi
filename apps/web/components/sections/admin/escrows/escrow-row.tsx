@@ -14,6 +14,7 @@ import { TruncatedId } from '~/components/sections/admin/shared/truncated-id'
 import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { projectManageSectionHref } from '~/lib/admin/project-actions'
 import type { AdminEscrowListItem } from '~/lib/queries/admin/get-admin-escrows'
+import { cn } from '~/lib/utils'
 import { formatHumanPlatformFee } from '~/lib/utils/escrow/platform-fee'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { EscrowDetailExpand } from './escrow-detail-expand'
@@ -154,7 +155,10 @@ export function EscrowRow({ escrow, from, onSynced }: EscrowRowProps) {
 					>
 						{expanded ? 'Hide detail' : 'On-chain detail'}
 						<ChevronDown
-							className={`ml-1 h-4 w-4 transition-transform motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`}
+							className={cn(
+								'ml-1 h-4 w-4 transition-transform motion-reduce:transition-none',
+								expanded && 'rotate-180',
+							)}
 							aria-hidden="true"
 						/>
 					</Button>

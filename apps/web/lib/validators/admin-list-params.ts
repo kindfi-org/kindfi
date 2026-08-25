@@ -59,9 +59,19 @@ const optionalTrimmedString = z
 	.optional()
 	.catch(() => undefined)
 
+/** True only for real calendar dates (rejects e.g. 2026-02-30). */
+function isValidCalendarDate(value: string): boolean {
+	const [year, month, day] = value.split('-').map(Number)
+	const date = new Date(Date.UTC(year, month - 1, day))
+	return (
+		date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+	)
+}
+
 const optionalIsoDate = z
 	.string()
 	.regex(/^\d{4}-\d{2}-\d{2}$/)
+	.refine(isValidCalendarDate)
 	.optional()
 	.catch(() => undefined)
 

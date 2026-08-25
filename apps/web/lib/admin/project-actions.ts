@@ -28,7 +28,13 @@ export function getProjectPrimaryAction(project: {
 	slug: string | null
 	hasEscrow: boolean
 }): AdminAction {
-	const slug = project.slug ?? ''
+	// Without a slug there is no manage route to build — fall back to the
+	// admin list instead of producing a malformed /projects//manage link.
+	if (!project.slug) {
+		return { label: 'View projects', href: '/admin/projects' }
+	}
+
+	const slug = project.slug
 	const manageHref = projectManageSectionHref('overview', slug)
 
 	switch (project.status) {

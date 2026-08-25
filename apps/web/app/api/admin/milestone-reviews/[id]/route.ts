@@ -93,7 +93,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 			return NextResponse.json({ error: 'Failed to update review request' }, { status: 500 })
 		}
 
-		void recordAdminAudit({
+		await recordAdminAudit({
 			operation:
 				status === 'approved'
 					? 'admin_milestone_review_approved'

@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { z } from 'zod'
 import { normalizeAdminListParams, parseAdminListParams } from '~/lib/validators/admin-list-params'
 
@@ -22,9 +22,17 @@ export function useAdminListParams<Schema extends z.ZodType>(schema: Schema) {
 		[schema, searchParams],
 	)
 
+	// Patches are rebased on the latest query string (updated optimistically on
+	// every patch) so a debounced search callback cannot clobber a filter
+	// change that landed while the debounce timer was running.
+	const latestQueryRef = useRef(searchParams.toString())
+	useEffect(() => {
+		latestQueryRef.current = searchParams.toString()
+	}, [searchParams])
+
 	const applyPatch = useCallback(
 		(patch: ParamPatch) => {
-			const next = new URLSearchParams(searchParams.toString())
+			const next = new URLSearchParams(latestQueryRef.current)
 			for (const [key, value] of Object.entries(patch)) {
 				if (value === undefined || value === '') {
 					next.delete(key)
@@ -37,9 +45,10 @@ export function useAdminListParams<Schema extends z.ZodType>(schema: Schema) {
 				next.delete('page')
 			}
 			const query = next.toString()
+			latestQueryRef.current = query
 			router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
 		},
-		[pathname, router, searchParams],
+		[pathname, router],
 	)
 
 	const setParam = useCallback(
