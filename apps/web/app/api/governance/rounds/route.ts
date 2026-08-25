@@ -7,6 +7,7 @@ import {
 	createGovernanceRoundSchema,
 	governanceRoundsQuerySchema,
 } from '~/lib/schemas/governance.schemas'
+import { recordAdminAudit } from '~/lib/services/admin-audit'
 import { GovernanceContractService } from '~/lib/stellar/governance-contract'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -220,6 +221,20 @@ export async function POST(req: NextRequest) {
 		} catch (err) {
 			logger.error('[Governance] on-chain recording error:', err)
 		}
+
+		await recordAdminAudit({
+			operation: 'admin_governance_round_created',
+			resourceType: 'governance_round',
+			resourceId: round.id,
+			actorId: session.user.id,
+			status: 'success',
+			newState: status,
+			details: {
+				on_chain: contractRoundId !== null,
+				contract_round_id: contractRoundId,
+				option_count: insertedOptions.length,
+			},
+		})
 
 		return NextResponse.json(
 			{

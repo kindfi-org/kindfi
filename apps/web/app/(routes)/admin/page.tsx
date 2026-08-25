@@ -1,9 +1,13 @@
+import { isAdminOpsDashboardEnabled } from '@packages/lib/admin'
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
+import { AdminActionCenter } from '~/components/sections/admin/action-center/action-center'
 import { AdminOverviewSkeleton } from '~/components/sections/admin/skeletons'
+import { getActionQueuePayload } from '~/lib/queries/admin/get-action-queue-payload'
 import { getAdminStats } from '~/lib/queries/admin/get-admin-stats'
+import { prefetchAdminSurface } from '~/lib/supabase/prefetch-admin-query'
 
 const AdminOverview = dynamic(
 	() =>
@@ -17,6 +21,18 @@ const AdminOverview = dynamic(
 
 export default async function AdminDashboardPage() {
 	const queryClient = new QueryClient()
+
+	if (isAdminOpsDashboardEnabled()) {
+		await prefetchAdminSurface(queryClient, 'action-queue', undefined, getActionQueuePayload)
+
+		return (
+			<HydrationBoundary state={dehydrate(queryClient)}>
+				<Suspense fallback={<AdminOverviewSkeleton />}>
+					<AdminActionCenter />
+				</Suspense>
+			</HydrationBoundary>
+		)
+	}
 
 	await prefetchSupabaseQuery(queryClient, 'admin-stats', (client) => getAdminStats(client), [])
 

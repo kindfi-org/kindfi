@@ -70,6 +70,10 @@
 		"./pollar": {
 			"import": "./src/pollar/index.ts",
 			"require": "./src/pollar/index.ts"
+		},
+		"./admin": {
+			"import": "./src/admin/index.ts",
+			"require": "./src/admin/index.ts"
 		}
 	},
 	"main": "./src/index.ts",

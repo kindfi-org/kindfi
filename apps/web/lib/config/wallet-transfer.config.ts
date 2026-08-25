@@ -1,11 +1,11 @@
-import { getDefaultUsdcContractAddress } from '~/lib/constants/escrow'
 import {
+	type ClientStellarNetworkId,
 	getClientStellarNetworkId,
 	getClientStellarNetworkPassphrase,
 	STELLAR_MAINNET_PASSPHRASE,
 	STELLAR_TESTNET_PASSPHRASE,
-	type ClientStellarNetworkId,
 } from '~/lib/config/stellar-network.config'
+import { getDefaultUsdcContractAddress } from '~/lib/constants/escrow'
 
 const USDC_ISSUER_G_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/
 
@@ -31,10 +31,7 @@ export type WalletTransferConfigResult =
 	| { ok: true; config: WalletTransferConfig }
 	| WalletTransferConfigError
 
-const isPassphraseConsistent = (
-	networkId: ClientStellarNetworkId,
-	passphrase: string,
-): boolean => {
+const isPassphraseConsistent = (networkId: ClientStellarNetworkId, passphrase: string): boolean => {
 	if (networkId === 'mainnet') {
 		return passphrase === STELLAR_MAINNET_PASSPHRASE
 	}
