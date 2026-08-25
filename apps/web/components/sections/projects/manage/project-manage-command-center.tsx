@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 import {
+	IoArrowBackOutline,
 	IoDocumentTextOutline,
 	IoFlagOutline,
 	IoLockClosedOutline,
@@ -16,6 +17,7 @@ import {
 } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
+import { useAdminBackLink } from '~/hooks/admin/use-back-to-queue'
 import { PROJECT_STATUS_COLORS, PROJECT_STATUS_LABELS } from '~/lib/projects/project-status'
 import type { ProjectManageMeta } from '~/lib/queries/projects/get-project-manage-meta'
 import { cn } from '~/lib/utils'
@@ -56,6 +58,7 @@ export function ProjectManageCommandCenter({
 	isPlatformAdmin,
 }: ProjectManageCommandCenterProps) {
 	const pathname = usePathname()
+	const adminBackLink = useAdminBackLink()
 	const basePath = `/projects/${slug}/manage`
 	const navSections = useMemo(
 		() => getProjectManageNavSections(isPlatformAdmin, project.hasEscrow),
@@ -64,6 +67,15 @@ export function ProjectManageCommandCenter({
 
 	return (
 		<header className="sticky top-0 z-20 -mx-4 bg-background/95 px-4 py-4 shadow-[0_1px_0_0_hsl(var(--border))] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
+			{adminBackLink ? (
+				<Link
+					href={adminBackLink}
+					className="mb-2 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+				>
+					<IoArrowBackOutline className="h-4 w-4" aria-hidden />
+					Back to admin queue
+				</Link>
+			) : null}
 			<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 				<div className="flex min-w-0 items-start gap-3">
 					<div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
