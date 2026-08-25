@@ -3,12 +3,12 @@ import { useCallback, useMemo } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useEscrowBalance } from '~/hooks/escrow/use-escrow-balance'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
-import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import {
 	isProjectAcceptingDonations,
 	isProjectCampaignComplete,
 	type ProjectStatus,
 } from '~/lib/projects/project-status'
+import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import { resolveEscrowType } from '~/lib/utils/escrow/resolve-escrow-type'
 import {
 	calculateReleasedAmountFromEscrow,

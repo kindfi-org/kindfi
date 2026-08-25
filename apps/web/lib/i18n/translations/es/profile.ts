@@ -182,7 +182,8 @@ export const profile = {
 	kycGateRejected:
 		'Didit rechazó esta verificación. Contacta a soporte si necesitas ayuda para reintentar.',
 	kycGateExpired: 'Tu sesión de Didit expiró. Inicia una nueva verificación para continuar.',
-	kycGateUnavailable: 'No pudimos confirmar tu estado de Didit. Espera un momento y vuelve a comprobar.',
+	kycGateUnavailable:
+		'No pudimos confirmar tu estado de Didit. Espera un momento y vuelve a comprobar.',
 	kycGateStart: 'Iniciar verificación Didit',
 	kycGateRecheck: 'Volver a comprobar',
 	kycGateRecheckDone: 'Estado actualizado.',

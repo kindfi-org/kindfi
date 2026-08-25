@@ -17,6 +17,7 @@ import {
 	getMilestoneReleasePhase,
 	getMilestoneStatus,
 	getMilestoneWorkStatus,
+	isSingleReleaseMilestone,
 	normalizeWorkStatusForForm,
 	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
@@ -172,7 +173,11 @@ export function MilestonesTab({
 					<TooltipProvider delayDuration={200}>
 						{milestones.map((milestone, index) => (
 							<MilestoneListItem
-								key={index}
+								key={
+									isSingleReleaseMilestone(milestone)
+										? `single:${milestone.description}`
+										: `multi:${(milestone as MultiReleaseMilestone).amount}:${milestone.description}`
+								}
 								milestone={milestone}
 								index={index}
 								isSelected={selectedMilestoneIndex === String(index)}

@@ -45,8 +45,7 @@ export function DonationForm({
 	form,
 	onSubmit,
 }: DonationFormProps) {
-	const canDonate =
-		isDonationReady && isAcceptingDonations && !isGoalReached && isAuthenticated
+	const canDonate = isDonationReady && isAcceptingDonations && !isGoalReached && isAuthenticated
 
 	return (
 		<>

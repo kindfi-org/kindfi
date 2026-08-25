@@ -8,10 +8,7 @@ import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
 import { resolveEtherfuseOrderContext } from '~/lib/etherfuse/resolve-order-context'
 import { requireKycAuthorization } from '~/lib/kyc/denial'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
-import {
-	etherfuseDepositRequestSchema,
-	etherfuseDepositResponseSchema,
-} from '~/lib/schemas/etherfuse.schemas'
+import { etherfuseDepositRequestSchema } from '~/lib/schemas/etherfuse.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'

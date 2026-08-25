@@ -5,7 +5,7 @@ import { Supporter } from '../supporter'
 import { TitleCardDetail } from '../title-card-detail'
 
 export function FellowSupporter() {
-	const dataSupportersMaxToShow = dataSupporters.slice(0, 5)
+	const dataSupportersMaxToShow = dataSupporters.slice(0, 5).map((_, position) => position)
 	const supportersOverflow = dataSupporters.length - dataSupportersMaxToShow.length
 
 	return (
@@ -14,8 +14,8 @@ export function FellowSupporter() {
 
 			<div className="flex items-center gap-2 mt-1 mb-3">
 				<div>
-					{dataSupportersMaxToShow.map((item, index) => (
-						<Supporter key={`${item - index}`} offSet={index > 0 ? '-ml-3' : '0'} />
+					{dataSupportersMaxToShow.map((position) => (
+						<Supporter key={position} offSet={position > 0 ? '-ml-3' : '0'} />
 					))}
 				</div>
 				{supportersOverflow > 1 ? (

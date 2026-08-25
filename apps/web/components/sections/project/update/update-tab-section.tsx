@@ -2,7 +2,7 @@
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Loader2, Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { LoadMoreButton } from './load-more-button'
@@ -35,7 +35,7 @@ export function ProjectUpdatesTabSection() {
 	const isKindler = true // Placeholder - replace with actual auth logic
 
 	// Fetch project updates
-	const fetchUpdates = async () => {
+	const fetchUpdates = useCallback(async () => {
 		try {
 			setIsLoading(true)
 			const supabase = createSupabaseBrowserClient()
@@ -60,7 +60,7 @@ export function ProjectUpdatesTabSection() {
 		} finally {
 			setIsLoading(false)
 		}
-	}
+	}, [page])
 
 	// Create a new update
 	const handleCreateUpdate = async (data: { content: string }) => {
@@ -152,11 +152,9 @@ export function ProjectUpdatesTabSection() {
 		if (!isCreatingUpdate) {
 			fetchUpdates()
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates is stable; adding it causes unnecessary refetches
 	}, [isCreatingUpdate, fetchUpdates])
 
 	// Setup real-time subscription
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
 	useEffect(() => {
 		if (isCreatingUpdate) return
 
@@ -183,11 +181,7 @@ export function ProjectUpdatesTabSection() {
 		return () => {
 			supabase.removeChannel(channel)
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
-	}, [
-		isCreatingUpdate, // Refetch data when any change occurs
-		fetchUpdates,
-	])
+	}, [isCreatingUpdate, fetchUpdates])
 
 	return (
 		<section
