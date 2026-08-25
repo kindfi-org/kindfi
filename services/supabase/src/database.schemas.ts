@@ -419,20 +419,21 @@ export const foundationEscrowsUpdateSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export const projectMemberRoleSchema = z.union([
-  z.literal("admin"),
-  z.literal("editor"),
-  z.literal("advisor"),
-  z.literal("community"),
-  z.literal("core"),
-  z.literal("others"),
-]);
+export const foundationMembersRowSchema = z.object({
+  foundation_id: z.string(),
+  id: z.string(),
+  joined_at: z.string(),
+  role: z.string(),
+  title: z.string(),
+  updated_at: z.string(),
+  user_id: z.string(),
+});
 
 export const foundationMembersInsertSchema = z.object({
   foundation_id: z.string(),
   id: z.string().optional(),
   joined_at: z.string().optional(),
-  role: projectMemberRoleSchema.optional(),
+  role: z.string(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
   user_id: z.string(),
@@ -442,7 +443,7 @@ export const foundationMembersUpdateSchema = z.object({
   foundation_id: z.string().optional(),
   id: z.string().optional(),
   joined_at: z.string().optional(),
-  role: projectMemberRoleSchema.optional(),
+  role: z.string().optional(),
   title: z.string().optional(),
   updated_at: z.string().optional(),
   user_id: z.string().optional(),
@@ -954,16 +955,17 @@ export const onboardingProviderSchema = z.union([
 ]);
 
 export const userRoleSchema = z.union([
-  z.literal("donor"),
-  z.literal("creator"),
-  z.literal("pending"),
-  z.literal("admin"),
   z.literal("kinder"),
   z.literal("kindler"),
+  z.literal("pending"),
+  z.literal("admin"),
+  z.literal("donor"),
+  z.literal("creator"),
 ]);
 
 export const profilesInsertSchema = z.object({
   bio: z.string().optional().nullable(),
+  compliance_admin: z.boolean().optional(),
   country: z.string().optional().nullable(),
   created_at: z.string().optional(),
   creator_entity_type: creatorEntityTypeSchema.optional().nullable(),
@@ -991,6 +993,7 @@ export const profilesInsertSchema = z.object({
 
 export const profilesUpdateSchema = z.object({
   bio: z.string().optional().nullable(),
+  compliance_admin: z.boolean().optional(),
   country: z.string().optional().nullable(),
   created_at: z.string().optional(),
   creator_entity_type: creatorEntityTypeSchema.optional().nullable(),
@@ -1037,15 +1040,14 @@ export const projectEscrowsUpdateSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export const projectMembersRowSchema = z.object({
-  id: z.string(),
-  joined_at: z.string(),
-  project_id: z.string(),
-  role: projectMemberRoleSchema,
-  title: z.string(),
-  updated_at: z.string(),
-  user_id: z.string(),
-});
+export const projectMemberRoleSchema = z.union([
+  z.literal("admin"),
+  z.literal("editor"),
+  z.literal("advisor"),
+  z.literal("community"),
+  z.literal("core"),
+  z.literal("others"),
+]);
 
 export const projectMembersInsertSchema = z.object({
   id: z.string().optional(),
@@ -1307,6 +1309,33 @@ export const questDefinitionsUpdateSchema = z.object({
   updated_at: z.string().optional(),
 });
 
+export const referralProfilesRowSchema = z.object({
+  activated_at: z.string(),
+  created_at: z.string(),
+  on_chain_ready: z.boolean(),
+  referral_code: z.string(),
+  stellar_address: z.string().nullable(),
+  user_id: z.string(),
+});
+
+export const referralProfilesInsertSchema = z.object({
+  activated_at: z.string().optional(),
+  created_at: z.string().optional(),
+  on_chain_ready: z.boolean().optional(),
+  referral_code: z.string(),
+  stellar_address: z.string().optional().nullable(),
+  user_id: z.string(),
+});
+
+export const referralProfilesUpdateSchema = z.object({
+  activated_at: z.string().optional(),
+  created_at: z.string().optional(),
+  on_chain_ready: z.boolean().optional(),
+  referral_code: z.string().optional(),
+  stellar_address: z.string().optional().nullable(),
+  user_id: z.string().optional(),
+});
+
 export const referralStatusSchema = z.union([
   z.literal("pending"),
   z.literal("onboarded"),
@@ -1410,7 +1439,7 @@ export const userNftsInsertSchema = z.object({
   metadata_ipfs_hash: z.string().optional().nullable(),
   minted_at: z.string().optional(),
   stellar_address: z.string(),
-  tier: z.string().optional(),
+  tier: z.string(),
   token_id: z.number(),
   updated_at: z.string().optional(),
   user_id: z.string(),
@@ -1535,6 +1564,8 @@ export const waitlistInterestsUpdateSchema = z.object({
   source: z.string().optional().nullable(),
 });
 
+export const getAdminDashboardStatsReturnsSchema = jsonSchema;
+
 export const questStatusSchema = z.union([
   z.literal("active"),
   z.literal("completed"),
@@ -1585,16 +1616,6 @@ export const escrowContractsRowSchema = z.object({
   project_id: z.string(),
   receiver_address: z.string(),
   updated_at: z.string().nullable(),
-});
-
-export const foundationMembersRowSchema = z.object({
-  foundation_id: z.string(),
-  id: z.string(),
-  joined_at: z.string(),
-  role: projectMemberRoleSchema,
-  title: z.string(),
-  updated_at: z.string(),
-  user_id: z.string(),
 });
 
 export const foundationsRowSchema = z.object({
@@ -1682,6 +1703,7 @@ export const notificationsRowSchema = z.object({
 
 export const profilesRowSchema = z.object({
   bio: z.string().nullable(),
+  compliance_admin: z.boolean(),
   country: z.string().nullable(),
   created_at: z.string(),
   creator_entity_type: creatorEntityTypeSchema.nullable(),
@@ -1705,6 +1727,16 @@ export const profilesRowSchema = z.object({
   social_links: jsonSchema,
   updated_at: z.string(),
   website_url: z.string().nullable(),
+});
+
+export const projectMembersRowSchema = z.object({
+  id: z.string(),
+  joined_at: z.string(),
+  project_id: z.string(),
+  role: projectMemberRoleSchema,
+  title: z.string(),
+  updated_at: z.string(),
+  user_id: z.string(),
 });
 
 export const projectsRowSchema = z.object({
