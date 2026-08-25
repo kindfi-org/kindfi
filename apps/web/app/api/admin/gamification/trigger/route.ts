@@ -1,14 +1,14 @@
 import { Keypair } from '@stellar/stellar-sdk'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
-import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireAdminApi } from '~/lib/auth/require-admin-api'
 import {
 	type ClientStellarNetworkId,
 	STELLAR_MAINNET_PASSPHRASE,
 } from '~/lib/config/stellar-network.config'
 import { adminGamificationTriggerSchema } from '~/lib/schemas/admin-gamification-trigger.schemas'
+import { recordAdminAudit } from '~/lib/services/admin-audit'
 import { syncQuestProgressOnChain } from '~/lib/services/quest-chain-sync.service'
 import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { GovernanceContractService } from '~/lib/stellar/governance-contract'
@@ -27,12 +27,6 @@ function requireEnv(name: string, fallback?: string): string | null {
 	return process.env[name] || (fallback ? process.env[fallback] : undefined) || null
 }
 
-async function requireAdminApiUser(userId: string): Promise<boolean> {
-	const { supabase } = await import('@packages/lib/supabase')
-	const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-	return profile?.role === 'admin'
-}
-
 function buildResponse(
 	result: {
 		success: boolean
@@ -42,9 +36,21 @@ function buildResponse(
 	},
 	module: string,
 	action: string,
+	adminId: string,
 ) {
 	const network = resolveNetworkId()
 	const explorerUrl = result.txHash ? getStellarExplorerTxUrl(result.txHash, network) : undefined
+
+	void recordAdminAudit({
+		operation: 'admin_gamification_triggered',
+		resourceType: 'gamification_module',
+		resourceId: module,
+		actorId: adminId,
+		status: result.success ? 'success' : 'failure',
+		txHash: result.txHash ?? null,
+		failureReason: result.success ? null : (result.error ?? 'Contract call failed'),
+		details: { action, network },
+	})
 
 	if (!result.success) {
 		return NextResponse.json(
@@ -80,14 +86,8 @@ function buildResponse(
  */
 export async function POST(req: NextRequest) {
 	try {
-		const session = await getServerSession(nextAuthOption)
-		if (!session?.user?.id) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-		}
-
-		if (!(await requireAdminApiUser(session.user.id))) {
-			return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-		}
+		const auth = await requireAdminApi()
+		if (!auth.ok) return auth.response
 
 		if (!process.env.SOROBAN_PRIVATE_KEY) {
 			return NextResponse.json(
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
 
 		const input = validation.data
 		logger.info('[AdminGamificationTrigger] Invoking', {
-			adminId: session.user.id,
+			adminId: auth.userId,
 			module: input.module,
 			action: input.action,
 		})
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
 					period: input.period,
 					donationTimestamp: input.donationTimestamp ?? Math.floor(Date.now() / 1000),
 				})
-				return buildResponse(result, input.module, input.action)
+				return buildResponse(result, input.module, input.action, auth.userId)
 			}
 
 			case 'referral': {
@@ -161,20 +161,20 @@ export async function POST(req: NextRequest) {
 						referrerAddress,
 						referredAddress: input.referredAddress,
 					})
-					return buildResponse(result, input.module, input.action)
+					return buildResponse(result, input.module, input.action, auth.userId)
 				}
 
 				if (input.action === 'mark_onboarded') {
 					const result = await contractService.markOnboarded(address, {
 						referredAddress: input.referredAddress,
 					})
-					return buildResponse(result, input.module, input.action)
+					return buildResponse(result, input.module, input.action, auth.userId)
 				}
 
 				const result = await contractService.recordReferralDonation(address, {
 					referredAddress: input.referredAddress,
 				})
-				return buildResponse(result, input.module, input.action)
+				return buildResponse(result, input.module, input.action, auth.userId)
 			}
 
 			case 'quest': {
@@ -210,7 +210,7 @@ export async function POST(req: NextRequest) {
 							progressValue: input.progressValue,
 						})
 
-				return buildResponse(result, input.module, input.action)
+				return buildResponse(result, input.module, input.action, auth.userId)
 			}
 
 			case 'nft': {
@@ -242,7 +242,7 @@ export async function POST(req: NextRequest) {
 						toAddress: input.toAddress,
 						metadata,
 					})
-					return buildResponse(result, input.module, input.action)
+					return buildResponse(result, input.module, input.action, auth.userId)
 				}
 
 				if (input.tokenId == null) {
@@ -255,7 +255,7 @@ export async function POST(req: NextRequest) {
 					tokenId: input.tokenId,
 					metadata,
 				})
-				return buildResponse(result, input.module, input.action)
+				return buildResponse(result, input.module, input.action, auth.userId)
 			}
 
 			case 'reputation': {
@@ -274,7 +274,7 @@ export async function POST(req: NextRequest) {
 					eventType: input.eventType,
 					points: input.points,
 				})
-				return buildResponse(result, input.module, input.action)
+				return buildResponse(result, input.module, input.action, auth.userId)
 			}
 
 			case 'governance': {
@@ -292,7 +292,7 @@ export async function POST(req: NextRequest) {
 					voteType: input.voteType,
 					tier: input.tier,
 				})
-				return buildResponse(result, input.module, input.action)
+				return buildResponse(result, input.module, input.action, auth.userId)
 			}
 
 			default: {

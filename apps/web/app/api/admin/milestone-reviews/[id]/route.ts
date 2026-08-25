@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { mapMilestoneReviewRequestRow } from '~/lib/queries/milestone-reviews/map-milestone-review-request'
 import { isPlatformAdmin } from '~/lib/queries/projects/development-only-access'
+import { recordAdminAudit } from '~/lib/services/admin-audit'
 import { notifyOwnersOfMilestoneReviewDecision } from '~/lib/services/milestone-review-notification.service'
 import { updateMilestoneReviewRequestSchema } from '~/lib/validators/milestone-review-request'
 
@@ -91,6 +92,24 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 			logger.error(updateError)
 			return NextResponse.json({ error: 'Failed to update review request' }, { status: 500 })
 		}
+
+		void recordAdminAudit({
+			operation:
+				status === 'approved'
+					? 'admin_milestone_review_approved'
+					: 'admin_milestone_review_rejected',
+			resourceType: 'milestone',
+			resourceId: id,
+			actorId: adminId,
+			status: 'success',
+			previousState: 'pending',
+			newState: status,
+			details: {
+				project_id: existing.project_id,
+				escrow_contract_id: existing.escrow_contract_id,
+				milestone_index: existing.milestone_index,
+			},
+		})
 
 		const projectRelation = existing.project as
 			| { title: string; slug: string; kindler_id: string }

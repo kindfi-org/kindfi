@@ -2,10 +2,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
 import {
 	canManagerSubmitForReview,
 	getAdminStatusActions,
@@ -24,6 +26,7 @@ type ProjectStatusPanelProps = {
 export function ProjectStatusPanel({ slug, status, isPlatformAdmin }: ProjectStatusPanelProps) {
 	const queryClient = useQueryClient()
 	const router = useRouter()
+	const [confirmStatus, setConfirmStatus] = useState<ProjectStatus | null>(null)
 
 	const updateStatus = useMutation({
 		mutationFn: async (nextStatus: ProjectStatus) => {
@@ -51,7 +54,10 @@ export function ProjectStatusPanel({ slug, status, isPlatformAdmin }: ProjectSta
 					? `Project marked as ${payload.label.toLowerCase()}`
 					: 'Project status updated',
 			)
+			setConfirmStatus(null)
 			void queryClient.invalidateQueries({ queryKey: ['supabase', 'basic-project-info', slug] })
+			void queryClient.invalidateQueries({ queryKey: ['admin', 'nav-counts'] })
+			void queryClient.invalidateQueries({ queryKey: ['admin', 'action-queue'] })
 			router.refresh()
 		},
 		onError: (error: Error) => {
@@ -132,12 +138,41 @@ export function ProjectStatusPanel({ slug, status, isPlatformAdmin }: ProjectSta
 								variant={action.variant ?? 'outline'}
 								size="sm"
 								disabled={updateStatus.isPending}
-								onClick={() => updateStatus.mutate(action.status)}
+								onClick={() => setConfirmStatus(action.status)}
 							>
 								{action.label}
 							</Button>
 						))}
 					</div>
+				) : null}
+
+				{isPlatformAdmin ? (
+					<ConfirmActionDialog
+						open={confirmStatus !== null}
+						onOpenChange={(open) => {
+							if (!open) setConfirmStatus(null)
+						}}
+						title="Change campaign status"
+						description="This changes what creators and supporters see on the public campaign page."
+						summary={
+							confirmStatus
+								? [
+										{ label: 'Project', value: slug },
+										{
+											label: 'Status change',
+											value: `${PROJECT_STATUS_LABELS[status]} → ${PROJECT_STATUS_LABELS[confirmStatus]}`,
+										},
+									]
+								: undefined
+						}
+						confirmLabel="Change status"
+						pendingLabel="Updating…"
+						isPending={updateStatus.isPending}
+						destructive={confirmStatus === 'rejected' || confirmStatus === 'paused'}
+						onConfirm={() => {
+							if (confirmStatus) updateStatus.mutate(confirmStatus)
+						}}
+					/>
 				) : null}
 			</CardContent>
 		</Card>

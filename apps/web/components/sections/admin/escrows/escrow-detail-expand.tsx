@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { syncEscrowToDatabaseAction } from '~/app/actions/escrow/sync-escrow-to-database'
+import { syncEscrowAsAdminAction } from '~/app/actions/admin/sync-escrow-as-admin'
 import { Button } from '~/components/base/button'
 import { Skeleton } from '~/components/base/skeleton'
 import { useEscrowData } from '~/hooks/escrow/use-escrow-data'
@@ -50,7 +50,7 @@ export function EscrowDetailExpand({ escrow, onSynced }: EscrowDetailExpandProps
 		}
 		const projectId = escrow.project.id
 		startSync(async () => {
-			const result = await syncEscrowToDatabaseAction({
+			const result = await syncEscrowAsAdminAction({
 				projectId,
 				contractId: escrow.contractId,
 			})

@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
 
 type BackfillResponse = {
 	success: boolean
@@ -44,9 +45,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function QuestProgressBackfillPanel() {
 	const [userId, setUserId] = useState('')
 	const [limit, setLimit] = useState('100')
+	const [pendingRun, setPendingRun] = useState<{
+		userId?: string
+		all?: boolean
+		limit?: number
+	} | null>(null)
 
 	const mutation = useMutation({
 		mutationFn: runBackfill,
+		onSettled: () => setPendingRun(null),
 		onSuccess: (data) => {
 			const summary = data.summary
 			if (!summary) return
@@ -98,7 +105,7 @@ export function QuestProgressBackfillPanel() {
 					variant="secondary"
 					disabled={mutation.isPending || !userId.trim()}
 					onClick={() =>
-						mutation.mutate({ userId: userId.trim(), all: false, limit: Number(limit) || 100 })
+						setPendingRun({ userId: userId.trim(), all: false, limit: Number(limit) || 100 })
 					}
 				>
 					{mutation.isPending ? 'Running…' : 'Backfill one user'}
@@ -107,11 +114,37 @@ export function QuestProgressBackfillPanel() {
 					type="button"
 					variant="outline"
 					disabled={mutation.isPending}
-					onClick={() => mutation.mutate({ all: true, limit: Number(limit) || 100 })}
+					onClick={() => setPendingRun({ all: true, limit: Number(limit) || 100 })}
 				>
 					{mutation.isPending ? 'Running…' : 'Backfill all donors'}
 				</Button>
 			</div>
+
+			<ConfirmActionDialog
+				open={pendingRun !== null}
+				onOpenChange={(open) => {
+					if (!open && !mutation.isPending) setPendingRun(null)
+				}}
+				title="Run quest progress backfill"
+				description="Recomputes quest progress from contribution history and syncs it on-chain. This can take a while for many users."
+				summary={
+					pendingRun
+						? [
+								{
+									label: 'Scope',
+									value: pendingRun.all ? `All donors (max ${pendingRun.limit})` : 'Single user',
+								},
+								...(pendingRun.userId ? [{ label: 'User ID', value: pendingRun.userId }] : []),
+							]
+						: undefined
+				}
+				confirmLabel="Run backfill"
+				pendingLabel="Running…"
+				isPending={mutation.isPending}
+				onConfirm={() => {
+					if (pendingRun) mutation.mutate(pendingRun)
+				}}
+			/>
 		</div>
 	)
 }

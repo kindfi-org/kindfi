@@ -22,6 +22,8 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import {
@@ -71,9 +73,11 @@ export function ReleaseTab({
 	onSuccess,
 }: ReleaseTabProps) {
 	const { releaseFunds, sendTransaction } = useEscrow()
-	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction, address } = useTrustlessSigner()
+	const { networkId } = useStellarNetworkConfig()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
 	const [isProcessing, setIsProcessing] = useState(false)
+	const [confirmReleaseOpen, setConfirmReleaseOpen] = useState(false)
 
 	const isSingleRelease = escrowType === 'single-release'
 	const selectedIndex = Number(selectedMilestoneIndex)
@@ -281,7 +285,7 @@ export function ReleaseTab({
 
 						<Button
 							type="button"
-							onClick={handleReleaseFunds}
+							onClick={() => setConfirmReleaseOpen(true)}
 							disabled={isProcessing || !releaseReadiness.canRelease}
 							className="w-full"
 							size="lg"
@@ -314,6 +318,31 @@ export function ReleaseTab({
 						/>
 					</TabsContent>
 				</Tabs>
+
+				<ConfirmActionDialog
+					open={confirmReleaseOpen}
+					onOpenChange={setConfirmReleaseOpen}
+					title="Release escrow funds"
+					description="Releasing disburses funds from the escrow contract. Your connected wallet will be asked to sign the release transaction."
+					summary={[
+						{
+							label: 'Release',
+							value: isSingleRelease
+								? 'All funds (single release)'
+								: `Release ${selectedIndex + 1}`,
+						},
+						{ label: 'Escrow contract', value: `${escrowContractAddress.slice(0, 10)}…` },
+					]}
+					blockchain={{ networkId, signerAddress: address }}
+					confirmLabel="Sign & release"
+					pendingLabel="Releasing…"
+					isPending={isProcessing}
+					destructive
+					onConfirm={() => {
+						setConfirmReleaseOpen(false)
+						void handleReleaseFunds()
+					}}
+				/>
 			</CardContent>
 		</Card>
 	)
