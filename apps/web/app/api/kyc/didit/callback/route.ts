@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { mapDiditStatusToKYC } from '~/lib/services/didit'
 
 interface DiditCallbackBody {
@@ -27,7 +28,7 @@ function isValidCallbackBody(data: unknown): data is DiditCallbackBody {
  * Handles callback from Didit with status update
  * Called when user is redirected back from Didit verification
  */
-export async function POST(req: NextRequest) {
+async function diditCallbackHandler(req: NextRequest): Promise<NextResponse> {
 	// Parse body first to return proper 400 for malformed JSON
 	let body: unknown
 	try {
@@ -156,3 +157,14 @@ export async function POST(req: NextRequest) {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? req.ip ?? 'anonymous'
+		},
+	},
+	diditCallbackHandler,
+)
