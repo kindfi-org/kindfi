@@ -151,11 +151,31 @@ Decision payloads, documents, and biometrics are not stored or logged.
 ```typescript
 {
   success: boolean
-  status?: 'pending' | 'approved' | 'rejected' | 'verified'
+  status?: CanonicalKycStatus | null
+  canonicalStatus?: CanonicalKycStatus
+  storedCanonicalStatus?: CanonicalKycStatus
   diditStatus?: string
   message?: string
 }
+
+type CanonicalKycStatus =
+  | 'not_started'
+  | 'pending'
+  | 'in_review'
+  | 'approved'
+  | 'rejected'
+  | 'expired'
+  | 'manual_review'
+  | 'provider_unavailable'
 ```
+
+These HTTP 200 bodies are the contract clients should switch on:
+
+- **Didit reachable**: `success: true`. `status` and `canonicalStatus` are the mapped KindFi status. `diditStatus` is the raw Didit session value (for example `Approved`, `In Review`). `message` is omitted.
+- **No session**: `success: false`, `status: null`, `canonicalStatus: "not_started"`, `message: "No KYC session found"`.
+- **`provider_unavailable`**: `success: false` when the Didit API cannot be reached. `canonicalStatus` is `"provider_unavailable"`. `status` and `storedCanonicalStatus` are the last persisted canonical status. `message` is `"Didit status is temporarily unavailable"`. The stored session row is not overwritten.
+
+`storedCanonicalStatus` is present only on the `provider_unavailable` outcome. Use it (or `status`) to keep showing the last known decision; do not treat `canonicalStatus: "provider_unavailable"` as a new Didit result.
 
 **Flow**:
 
@@ -168,8 +188,8 @@ Decision payloads, documents, and biometrics are not stored or logged.
 **Error Handling**:
 
 - `401`: Unauthorized
-- `404`: No KYC session found
-- `500`: Didit API error or database error
+- `500`: Unexpected database or server error
+- Provider and missing-session cases above return HTTP 200 with `success: false` (not 4xx/5xx)
 
 ---
 
