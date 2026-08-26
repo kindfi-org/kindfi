@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 
 interface DiditCallbackBody {
 	verificationSessionId: string
