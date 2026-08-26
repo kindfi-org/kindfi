@@ -10,6 +10,22 @@ describe('isStaleProviderEvent', () => {
 		expect(isStaleProviderEvent('2026-08-25T10:00:00.000Z', '2026-08-25T11:00:00.000Z')).toBe(true)
 	})
 
+	test('treats equal timestamps as stale when an earlier status would regress a terminal state', () => {
+		expect(
+			isStaleProviderEvent(
+				'2026-08-25T11:00:00.000Z',
+				'2026-08-25T11:00:00.000Z',
+				'pending',
+				'approved',
+			),
+		).toBe(true)
+	})
+
+	test('blocks missing incoming timestamps from regressing a terminal state', () => {
+		expect(isStaleProviderEvent(null, '2026-08-25T11:00:00.000Z', 'pending', 'approved')).toBe(true)
+		expect(isStaleProviderEvent(null, '2026-08-25T11:00:00.000Z', 'pending', 'rejected')).toBe(true)
+	})
+
 	test('does not skip when either timestamp is missing', () => {
 		expect(isStaleProviderEvent(null, '2026-08-25T11:00:00.000Z')).toBe(false)
 		expect(isStaleProviderEvent('2026-08-25T11:00:00.000Z', null)).toBe(false)

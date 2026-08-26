@@ -116,14 +116,20 @@ export const applyDiditStatusUpdate = async (
 		return { applied: false, reason: 'error', canonicalStatus, userId }
 	}
 
-	if (existing?.lastProviderEventAt && providerEventAt) {
-		if (isStaleProviderEvent(providerEventAt, existing.lastProviderEventAt)) {
-			await getKycSchemaClient()
-				.from('webhook_events')
-				.update({ processing_result: 'stale' })
-				.eq('event_id', eventId)
-			return { applied: false, reason: 'stale', canonicalStatus, userId }
-		}
+	if (
+		existing &&
+		isStaleProviderEvent(
+			providerEventAt,
+			existing.lastProviderEventAt,
+			canonicalStatus,
+			existing.canonicalStatus,
+		)
+	) {
+		await getKycSchemaClient()
+			.from('webhook_events')
+			.update({ processing_result: 'stale' })
+			.eq('event_id', eventId)
+		return { applied: false, reason: 'stale', canonicalStatus, userId }
 	}
 
 	const reviewId = await upsertKycReviewStatus({
