@@ -1,10 +1,8 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import {
@@ -18,7 +16,10 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
+import { ContentLanguageSelector } from '~/components/shared/content-language-selector'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
+import { zodResolver } from '~/lib/form/zod-resolver'
+import { useI18n } from '~/lib/i18n/context'
 import { stepOneSchema } from '~/lib/schemas/create-project.schemas'
 import type { StepOneData } from '~/lib/types/project/create-project.types'
 
@@ -28,12 +29,13 @@ interface StepOneProps {
 
 export function StepOne({ onNext }: StepOneProps) {
 	const { formData, updateFormData } = useCreateProject()
+	const { language } = useI18n()
 
 	const form = useForm<StepOneData>({
 		resolver: zodResolver(stepOneSchema),
 		defaultValues: {
-			title: formData.title,
-			description: formData.description,
+			title: formData.title ?? '',
+			description: formData.description ?? '',
 			targetAmount: formData.targetAmount || undefined,
 			minimumInvestment: formData.minimumInvestment || undefined,
 		},
@@ -51,25 +53,31 @@ export function StepOne({ onNext }: StepOneProps) {
 			exit={{ opacity: 0, x: -50 }}
 			transition={{ duration: 0.3 }}
 		>
-			<Card className="bg-white">
+			<Card>
 				<CardContent className="pt-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 							<CSRFTokenField />
+							<ContentLanguageSelector
+								value={formData.sourceLocale ?? language}
+								onChange={(locale) => updateFormData({ sourceLocale: locale })}
+							/>
 							<FormField
 								control={form.control}
 								name="title"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											What is your project&apos;s title?{' '}
-											<span className="text-destructive">*</span>
+											What is your project&apos;s title? <span className="text-destructive">*</span>
 										</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="Enter your project title"
-												className="border-green-600 bg-white"
-												{...field}
+												value={field.value ?? ''}
+												onChange={field.onChange}
+												onBlur={field.onBlur}
+												name={field.name}
+												ref={field.ref}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -89,13 +97,16 @@ export function StepOne({ onNext }: StepOneProps) {
 										<FormControl>
 											<Textarea
 												placeholder="Describe your project in a few sentences"
-												className="min-h-[100px] border-green-600 bg-white"
-												{...field}
+												className="min-h-[100px]"
+												value={field.value ?? ''}
+												onChange={field.onChange}
+												onBlur={field.onBlur}
+												name={field.name}
+												ref={field.ref}
 											/>
 										</FormControl>
 										<p className="text-sm text-muted-foreground mt-2">
-											Just a quick summary is fine for now. You will be able to
-											edit it later.
+											Just a quick summary is fine for now. You will be able to edit it later.
 										</p>
 										<FormMessage />
 									</FormItem>
@@ -119,13 +130,11 @@ export function StepOne({ onNext }: StepOneProps) {
 												<Input
 													type="number"
 													placeholder="50000"
-													className="pl-7 border-green-600 bg-white"
+													className="pl-7"
 													value={field.value ?? ''}
 													onChange={(e) =>
 														field.onChange(
-															e.target.value === ''
-																? undefined
-																: Number(e.target.value),
+															e.target.value === '' ? undefined : Number(e.target.value),
 														)
 													}
 												/>
@@ -153,13 +162,11 @@ export function StepOne({ onNext }: StepOneProps) {
 												<Input
 													type="number"
 													placeholder="100"
-													className="pl-7 border-green-600 bg-white"
+													className="pl-7"
 													value={field.value ?? ''}
 													onChange={(e) =>
 														field.onChange(
-															e.target.value === ''
-																? undefined
-																: Number(e.target.value),
+															e.target.value === '' ? undefined : Number(e.target.value),
 														)
 													}
 												/>
@@ -175,16 +182,13 @@ export function StepOne({ onNext }: StepOneProps) {
 									type="button"
 									variant="outline"
 									disabled
-									className="flex items-center gap-2 gradient-border-btn bg-white"
+									className="flex items-center gap-2 gradient-border-btn"
 									aria-label="Previous step (disabled on first step)"
 								>
 									<ChevronLeft className="h-4 w-4" />
 									Previous
 								</Button>
-								<Button
-									type="submit"
-									className="flex items-center gap-2 gradient-btn text-white"
-								>
+								<Button type="submit" className="flex items-center gap-2 gradient-btn text-white">
 									Next
 									<ChevronRight className="h-4 w-4" />
 								</Button>

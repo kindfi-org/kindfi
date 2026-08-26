@@ -1,6 +1,7 @@
 // lib/services/didit.ts
 
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
+import { toCanonicalKycStatus, toKycDbStatus } from '~/lib/kyc/status'
 
 const DIDIT_API_BASE_URL = 'https://verification.didit.me'
 
@@ -35,13 +36,7 @@ interface CreateSessionResponse {
 
 interface SessionStatusResponse {
 	session_id: string
-	status:
-		| 'Not Started'
-		| 'In Progress'
-		| 'Approved'
-		| 'Declined'
-		| 'In Review'
-		| 'Abandoned'
+	status: 'Not Started' | 'In Progress' | 'Approved' | 'Declined' | 'In Review' | 'Abandoned'
 	created_at: string
 	updated_at?: string
 }
@@ -87,11 +82,8 @@ export async function createDiditSession(
 	})
 
 	if (!response.ok) {
-		const errorData = await response
-			.json()
-			.catch(() => ({ detail: 'Unknown error' }))
-		const errorMessage =
-			errorData.detail || errorData.message || response.statusText
+		const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+		const errorMessage = errorData.detail || errorData.message || response.statusText
 		throw new Error(`Failed to create Didit session: ${errorMessage}`)
 	}
 
@@ -101,29 +93,22 @@ export async function createDiditSession(
 /**
  * Retrieve session status from Didit
  */
-export async function getDiditSessionStatus(
-	sessionId: string,
-): Promise<SessionStatusResponse> {
+export async function getDiditSessionStatus(sessionId: string): Promise<SessionStatusResponse> {
 	const apiKey = process.env.DIDIT_API_KEY
 
 	if (!apiKey) {
 		throw new Error('DIDIT_API_KEY is not configured')
 	}
 
-	const response = await fetch(
-		`${DIDIT_API_BASE_URL}/v3/session/${sessionId}/decision/`,
-		{
-			method: 'GET',
-			headers: {
-				'x-api-key': apiKey,
-			},
+	const response = await fetch(`${DIDIT_API_BASE_URL}/v3/session/${sessionId}/decision/`, {
+		method: 'GET',
+		headers: {
+			'x-api-key': apiKey,
 		},
-	)
+	})
 
 	if (!response.ok) {
-		const error = await response
-			.json()
-			.catch(() => ({ detail: 'Unknown error' }))
+		const error = await response.json().catch(() => ({ detail: 'Unknown error' }))
 		const errorMessage = error.detail || error.message || response.statusText
 		throw new Error(`Failed to get Didit session status: ${errorMessage}`)
 	}
@@ -162,9 +147,7 @@ function sortKeysRecursive(data: unknown): unknown {
 			.sort()
 			.reduce(
 				(result, key) => {
-					result[key] = sortKeysRecursive(
-						(data as Record<string, unknown>)[key],
-					)
+					result[key] = sortKeysRecursive((data as Record<string, unknown>)[key])
 					return result
 				},
 				{} as Record<string, unknown>,
@@ -259,15 +242,9 @@ export function verifyDiditWebhookSignature(
 	secret: string,
 ): boolean {
 	try {
-		const expectedSignature = crypto
-			.createHmac('sha256', secret)
-			.update(payload)
-			.digest('hex')
+		const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
 
-		return crypto.timingSafeEqual(
-			Buffer.from(signature),
-			Buffer.from(expectedSignature),
-		)
+		return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
 	} catch {
 		return false
 	}
@@ -275,18 +252,11 @@ export function verifyDiditWebhookSignature(
 
 export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'verified'
 
-export const mapDiditStatusToKYC = (diditStatus: string): KYCStatus => {
-	switch (diditStatus) {
-		case 'Approved':
-			return 'approved'
-		case 'Declined':
-			return 'rejected'
-		case 'In Progress':
-		case 'In Review':
-			return 'pending'
-		case 'Not Started':
-		case 'Abandoned':
-		default:
-			return 'pending'
-	}
-}
+/**
+ * Maps a Didit status onto the existing `kyc_status_enum` for persistence.
+ * Canonical `approved` and Didit `Verified` both store as `approved`.
+ */
+export const mapDiditStatusToKYC = (diditStatus: string): KYCStatus =>
+	toKycDbStatus(toCanonicalKycStatus(diditStatus))
+
+export { toCanonicalKycStatus }

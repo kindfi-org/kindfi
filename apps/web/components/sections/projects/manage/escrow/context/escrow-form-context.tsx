@@ -1,13 +1,7 @@
 'use client'
 
 import type { EscrowType } from '@trustless-work/escrow'
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { DEFAULT_USDC_CONTRACT_ADDRESS } from '~/lib/constants/escrow'
 import type { EscrowFormData, MilestoneItem } from '../types'
 
@@ -17,36 +11,54 @@ function genId(): string {
 		: `m-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
+interface EscrowSuggestions {
+	suggestedTitle: string
+	suggestedEngagementId: string
+	suggestedDescription: string
+}
+
 interface EscrowFormContextValue {
 	formData: EscrowFormData
-	setField: <K extends keyof EscrowFormData>(
-		field: K,
-		value: EscrowFormData[K],
-	) => void
+	suggestions: EscrowSuggestions
+	setField: <K extends keyof EscrowFormData>(field: K, value: EscrowFormData[K]) => void
 	addMilestone: () => void
 	removeMilestone: (id: string) => void
 	updateMilestone: (index: number, patch: Partial<MilestoneItem>) => void
 	convertMilestones: (type: EscrowType) => void
+	fillRolesFromWallet: (address: string) => void
 }
 
-const EscrowFormContext = createContext<EscrowFormContextValue | undefined>(
-	undefined,
-)
+const EscrowFormContext = createContext<EscrowFormContextValue | undefined>(undefined)
 
 interface EscrowFormProviderProps {
 	children: React.ReactNode
 	initialData: Pick<
 		EscrowFormData,
 		'title' | 'engagementId' | 'description' | 'selectedEscrowType'
-	> & { walletAddress?: string | null }
+	> & {
+		walletAddress?: string | null
+		suggestedTitle?: string
+		suggestedEngagementId?: string
+		suggestedDescription?: string
+	}
 }
 
-export function EscrowFormProvider({
-	children,
-	initialData,
-}: EscrowFormProviderProps) {
-	const { walletAddress, selectedEscrowType, title, engagementId, description } =
-		initialData
+export function EscrowFormProvider({ children, initialData }: EscrowFormProviderProps) {
+	const {
+		walletAddress,
+		selectedEscrowType,
+		title,
+		engagementId,
+		description,
+		suggestedTitle = '',
+		suggestedEngagementId = '',
+		suggestedDescription = '',
+	} = initialData
+
+	const suggestions: EscrowSuggestions = useMemo(
+		() => ({ suggestedTitle, suggestedEngagementId, suggestedDescription }),
+		[suggestedTitle, suggestedEngagementId, suggestedDescription],
+	)
 
 	const [formData, setFormData] = useState<EscrowFormData>(() => ({
 		selectedEscrowType,
@@ -59,7 +71,6 @@ export function EscrowFormProvider({
 		disputeResolver: walletAddress ?? '',
 		platformAddress: walletAddress ?? '',
 		receiver: walletAddress ?? '',
-		platformFee: '',
 		amount: '',
 		receiverMemo: '',
 		description,
@@ -68,12 +79,12 @@ export function EscrowFormProvider({
 				? [
 						{
 							id: genId(),
-							description: 'Milestone 1',
+							description: 'Release 1',
 							amount: '',
 							receiver: walletAddress ?? '',
 						},
 					]
-				: [{ id: genId(), description: 'Milestone 1' }],
+				: [{ id: genId(), description: 'Release 1' }],
 	}))
 
 	const setField = useCallback(
@@ -89,11 +100,11 @@ export function EscrowFormProvider({
 				prev.selectedEscrowType === 'multi-release'
 					? {
 							id: genId(),
-							description: `Milestone ${prev.milestones.length + 1}`,
+							description: `Release ${prev.milestones.length + 1}`,
 							amount: '' as const,
 							receiver: '',
 						}
-					: { id: genId(), description: `Milestone ${prev.milestones.length + 1}` }
+					: { id: genId(), description: `Release ${prev.milestones.length + 1}` }
 			return { ...prev, milestones: [...prev.milestones, next] }
 		})
 	}, [])
@@ -105,17 +116,12 @@ export function EscrowFormProvider({
 		}))
 	}, [])
 
-	const updateMilestone = useCallback(
-		(index: number, patch: Partial<MilestoneItem>) => {
-			setFormData((prev) => ({
-				...prev,
-				milestones: prev.milestones.map((m, i) =>
-					i === index ? { ...m, ...patch } : m,
-				),
-			}))
-		},
-		[],
-	)
+	const updateMilestone = useCallback((index: number, patch: Partial<MilestoneItem>) => {
+		setFormData((prev) => ({
+			...prev,
+			milestones: prev.milestones.map((m, i) => (i === index ? { ...m, ...patch } : m)),
+		}))
+	}, [])
 
 	const convertMilestones = useCallback((type: EscrowType) => {
 		setFormData((prev) => ({
@@ -137,35 +143,50 @@ export function EscrowFormProvider({
 		}))
 	}, [])
 
+	const fillRolesFromWallet = useCallback((address: string) => {
+		setFormData((prev) => ({
+			...prev,
+			approver: address,
+			serviceProvider: address,
+			releaseSigner: address,
+			disputeResolver: address,
+			platformAddress: address,
+			receiver: address,
+			milestones:
+				prev.selectedEscrowType === 'multi-release'
+					? prev.milestones.map((m) => ('receiver' in m ? { ...m, receiver: address } : m))
+					: prev.milestones,
+		}))
+	}, [])
+
 	const value = useMemo(
 		() => ({
 			formData,
+			suggestions,
 			setField,
 			addMilestone,
 			removeMilestone,
 			updateMilestone,
 			convertMilestones,
+			fillRolesFromWallet,
 		}),
 		[
 			formData,
+			suggestions,
 			setField,
 			addMilestone,
 			removeMilestone,
 			updateMilestone,
 			convertMilestones,
+			fillRolesFromWallet,
 		],
 	)
 
-	return (
-		<EscrowFormContext.Provider value={value}>
-			{children}
-		</EscrowFormContext.Provider>
-	)
+	return <EscrowFormContext.Provider value={value}>{children}</EscrowFormContext.Provider>
 }
 
 export function useEscrowForm(): EscrowFormContextValue {
 	const ctx = useContext(EscrowFormContext)
-	if (!ctx)
-		throw new Error('useEscrowForm must be used within EscrowFormProvider')
+	if (!ctx) throw new Error('useEscrowForm must be used within EscrowFormProvider')
 	return ctx
 }

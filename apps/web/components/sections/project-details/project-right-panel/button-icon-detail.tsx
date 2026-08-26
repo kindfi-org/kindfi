@@ -7,11 +7,7 @@ type ButtonIconDetailProps = {
 	title?: string
 } & Omit<ButtonProps, 'size' | 'className'>
 
-export function ButtonIconDetail({
-	children,
-	title,
-	...props
-}: ButtonIconDetailProps) {
+export function ButtonIconDetail({ children, title, ...props }: ButtonIconDetailProps) {
 	return (
 		<Button
 			className="rounded-full hover:bg-gray-100 text-gray-900 flex-shrink-0"

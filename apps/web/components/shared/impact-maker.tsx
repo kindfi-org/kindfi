@@ -21,18 +21,11 @@ export function ImpactMakerCard({ maker, index }: ImpactMakerCardProps) {
 			className="rounded-2xl bg-white p-6 shadow-lg"
 		>
 			<div className="flex items-start gap-4">
-				<UserAvatar
-					src={maker.image}
-					alt={maker.name}
-					name={maker.name}
-					className="h-16 w-16"
-				/>
+				<UserAvatar src={maker.image} alt={maker.name} name={maker.name} className="h-16 w-16" />
 
 				<div className="flex-1">
 					<h3 className="text-xl font-semibold">{maker.name}</h3>
-					<p className={`text-sm ${levelColors[maker.level]}`}>
-						{maker.level} Impact Maker
-					</p>
+					<p className={`text-sm ${levelColors[maker.level]}`}>{maker.level} Impact Maker</p>
 				</div>
 			</div>
 
@@ -40,9 +33,7 @@ export function ImpactMakerCard({ maker, index }: ImpactMakerCardProps) {
 				<div className="grid grid-cols-2 gap-4">
 					<div>
 						<p className="text-sm text-gray-600">Total Impact</p>
-						<p className="text-lg font-semibold">
-							${maker.totalImpact.toLocaleString()}
-						</p>
+						<p className="text-lg font-semibold">${maker.totalImpact.toLocaleString()}</p>
 					</div>
 					<div>
 						<p className="text-sm text-gray-600">Projects Supported</p>

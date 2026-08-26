@@ -2,20 +2,8 @@
 
 import type { Enums } from '@services/supabase'
 import { Shield, User } from 'lucide-react'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
-import {
-	Table,
-	TableBody,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '~/components/base/table'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '~/components/base/table'
 import type { ProjectMember } from '~/lib/types/project/team-members.types'
 import { cn } from '~/lib/utils'
 import { MemberCard } from './member-card'
@@ -42,14 +30,10 @@ export function MemberList({
 		return (
 			<Card className={cn(className, 'bg-white')}>
 				<CardContent className="flex flex-col items-center justify-center py-12">
-					<User
-						className="h-12 w-12 text-muted-foreground mb-4"
-						aria-hidden="true"
-					/>
+					<User className="h-12 w-12 text-muted-foreground mb-4" aria-hidden="true" />
 					<h3 className="text-lg font-semibold mb-2">No team members yet</h3>
 					<p className="text-muted-foreground text-center">
-						Start building your team by inviting members to collaborate on your
-						project.
+						Start building your team by inviting members to collaborate on your project.
 					</p>
 				</CardContent>
 			</Card>
@@ -65,9 +49,7 @@ export function MemberList({
 						<Shield className="h-5 w-5" aria-hidden="true" />
 						Team Members ({members.length})
 					</CardTitle>
-					<CardDescription>
-						Manage your project team members and their roles.
-					</CardDescription>
+					<CardDescription>Manage your project team members and their roles.</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Table>
@@ -101,9 +83,7 @@ export function MemberList({
 			<div className="md:hidden space-y-4">
 				<div className="flex items-center gap-2">
 					<Shield className="h-5 w-5" aria-hidden="true" />
-					<h3 className="text-2xl font-semibold">
-						Team Members ({members.length})
-					</h3>
+					<h3 className="text-2xl font-semibold">Team Members ({members.length})</h3>
 				</div>
 				<p className="text-sm text-muted-foreground !mt-1.5">
 					Manage your project team members and their roles.

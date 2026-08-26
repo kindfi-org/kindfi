@@ -2,24 +2,12 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import {
-	Calendar,
-	Clock,
-	ExternalLink,
-	Loader2,
-	Users,
-	Vote,
-} from 'lucide-react'
+import { Calendar, Clock, ExternalLink, Loader2, Users, Vote } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { Badge } from '~/components/base/badge'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
 import type { EligibilityResult, GovernanceRound } from '~/lib/governance/types'
 import { calcAllocationPercents } from '~/lib/governance/vote-weight'
+import { useI18n } from '~/lib/i18n'
 import { cn } from '~/lib/utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 import { ResultsVisualization } from './results-visualization'
@@ -30,22 +18,18 @@ interface GovernanceRoundCardProps {
 	fundBalance?: number
 }
 
-const STATUS_CONFIG = {
+const STATUS_STYLES = {
 	upcoming: {
-		label: 'Upcoming',
-		className: 'border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950/30',
-		dot: 'bg-blue-400',
+		className: 'border-sky-200 bg-sky-50 text-sky-700',
+		dot: 'bg-sky-400',
 	},
 	active: {
-		label: 'Voting Open',
-		className:
-			'border-green-300 text-green-700 bg-green-50 dark:bg-green-950/30',
-		dot: 'bg-green-500 animate-pulse',
+		className: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+		dot: 'bg-emerald-500 animate-pulse',
 	},
 	ended: {
-		label: 'Ended',
-		className: 'border-gray-300 text-gray-600 bg-gray-50 dark:bg-gray-900/40',
-		dot: 'bg-gray-400',
+		className: 'border-slate-200 bg-slate-50 text-slate-600',
+		dot: 'bg-slate-400',
 	},
 } as const
 
@@ -66,10 +50,8 @@ function formatTimeRemaining(target: Date, now: Date): string {
 	return isPast ? `${label} ago` : `${label} left`
 }
 
-export function GovernanceRoundCard({
-	roundId,
-	fundBalance,
-}: GovernanceRoundCardProps) {
+export function GovernanceRoundCard({ roundId, fundBalance }: GovernanceRoundCardProps) {
+	const { t } = useI18n()
 	const { data: session } = useSession()
 
 	const { data: roundData, isLoading: roundLoading } = useQuery<{
@@ -101,11 +83,11 @@ export function GovernanceRoundCard({
 
 	if (roundLoading) {
 		return (
-			<Card className="border-border/60">
-				<CardContent className="py-16 flex items-center justify-center">
-					<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-				</CardContent>
-			</Card>
+			<div className="rounded-2xl border border-slate-200/70 bg-white/90 p-16 shadow-sm">
+				<div className="flex items-center justify-center">
+					<Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+				</div>
+			</div>
 		)
 	}
 
@@ -113,29 +95,27 @@ export function GovernanceRoundCard({
 	if (!round) return null
 
 	const options = round.options ?? []
-	const statusConfig = STATUS_CONFIG[round.status]
+	const statusStyles = STATUS_STYLES[round.status]
+	const statusLabel =
+		round.status === 'upcoming'
+			? t('governancePage.statusUpcoming')
+			: round.status === 'active'
+				? t('governancePage.statusActive')
+				: t('governancePage.statusEnded')
 	const isActive = round.status === 'active'
 	const isEnded = round.status === 'ended'
 	const endsAt = new Date(round.ends_at)
 	const startsAt = new Date(round.starts_at)
 	const now = new Date()
-	const contractAddress =
-		process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
+	const contractAddress = process.env.NEXT_PUBLIC_GOVERNANCE_CONTRACT_ADDRESS ?? ''
 
 	const allocationPercents = calcAllocationPercents(
 		options.map((o) => ({ id: o.id, weighted_upvotes: o.weighted_upvotes })),
 	)
 
-	const totalWeight = options.reduce(
-		(sum, o) => sum + (o.weighted_upvotes ?? 0),
-		0,
-	)
+	const totalWeight = options.reduce((sum, o) => sum + (o.weighted_upvotes ?? 0), 0)
 
-	const totalVoters =
-		options.reduce(
-			(sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0),
-			0,
-		)
+	const totalVoters = options.reduce((sum, o) => sum + (o.upvotes ?? 0) + (o.downvotes ?? 0), 0)
 
 	return (
 		<motion.div
@@ -144,45 +124,38 @@ export function GovernanceRoundCard({
 			transition={{ duration: 0.3 }}
 			className="space-y-4"
 		>
-			{/* Round header card */}
-			<Card className="overflow-hidden">
-				<CardHeader className="pb-4">
+			<div className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 shadow-sm shadow-slate-200/50">
+				<div className="border-b border-slate-100 px-6 py-5 sm:px-7">
 					<div className="flex items-start justify-between gap-3">
-						<div className="space-y-1 min-w-0">
-							<div className="flex items-center gap-2 flex-wrap">
-								<CardTitle className="text-xl leading-tight">
+						<div className="min-w-0 space-y-2">
+							<div className="flex flex-wrap items-center gap-2">
+								<h3 className="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
 									{round.title}
-								</CardTitle>
+								</h3>
 								<Badge
 									variant="outline"
-									className={cn(
-										'shrink-0 font-medium gap-1.5',
-										statusConfig.className,
-									)}
+									className={cn('shrink-0 gap-1.5 font-medium', statusStyles.className)}
 								>
-									<span
-										className={cn('h-1.5 w-1.5 rounded-full', statusConfig.dot)}
-									/>
-									{statusConfig.label}
+									<span className={cn('h-1.5 w-1.5 rounded-full', statusStyles.dot)} />
+									{statusLabel}
 								</Badge>
 							</div>
-							{round.description && (
-								<p className="text-sm text-muted-foreground leading-relaxed">
+							{round.description ? (
+								<p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
 									{round.description}
 								</p>
-							)}
+							) : null}
 						</div>
 					</div>
-				</CardHeader>
+				</div>
 
-				<CardContent className="pt-0 pb-5">
-					{/* Info row */}
-					<div className="flex items-center gap-x-5 gap-y-2 flex-wrap text-sm text-muted-foreground">
+				<div className="px-6 py-4 sm:px-7">
+					<div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
 						<span className="flex items-center gap-1.5">
 							{isEnded ? (
-								<Calendar className="h-3.5 w-3.5" />
+								<Calendar className="h-3.5 w-3.5" aria-hidden="true" />
 							) : (
-								<Clock className="h-3.5 w-3.5" />
+								<Clock className="h-3.5 w-3.5" aria-hidden="true" />
 							)}
 							{isEnded
 								? `Ended ${formatTimeRemaining(endsAt, now)}`
@@ -191,41 +164,41 @@ export function GovernanceRoundCard({
 									: formatTimeRemaining(endsAt, now)}
 						</span>
 						<span className="flex items-center gap-1.5">
-							<Vote className="h-3.5 w-3.5" />
-							{options.length} option{options.length !== 1 ? 's' : ''}
+							<Vote className="h-3.5 w-3.5" aria-hidden="true" />
+							{t('governancePage.optionsCount').replace('{count}', String(options.length))}
 						</span>
 						<span className="flex items-center gap-1.5">
-							<Users className="h-3.5 w-3.5" />
-							{totalVoters} vote{totalVoters !== 1 ? 's' : ''}
+							<Users className="h-3.5 w-3.5" aria-hidden="true" />
+							{t('governancePage.votesCount').replace('{count}', String(totalVoters))}
 						</span>
-						{round.total_fund_amount > 0 && (
-							<span className="font-semibold text-foreground">
+						{round.total_fund_amount > 0 ? (
+							<span className="font-semibold text-slate-900">
 								{Number(round.total_fund_amount).toLocaleString('en-US', {
 									maximumFractionDigits: 2,
 								})}{' '}
-								{round.fund_currency} at stake
+								{round.fund_currency} {t('governancePage.atStake')}
 							</span>
-						)}
-						{round.contract_round_id != null && contractAddress && (
+						) : null}
+						{round.contract_round_id != null && contractAddress ? (
 							<a
 								href={getStellarExplorerUrl(contractAddress)}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium"
+								className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:underline"
 							>
-								On-chain #{round.contract_round_id}
-								<ExternalLink className="h-3 w-3" />
+								{t('governancePage.onChain')} #{round.contract_round_id}
+								<ExternalLink className="h-3 w-3" aria-hidden="true" />
 							</a>
-						)}
+						) : null}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Options */}
-			{options.length > 0 && (
+			{options.length > 0 ? (
 				<div className="space-y-3">
-					<p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1">
-						Redistribution Options
+					<p className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/80">
+						{t('governancePage.redistributionOptions')}
 					</p>
 					{options.map((opt, i) => (
 						<VoteOptionCard
@@ -242,15 +215,11 @@ export function GovernanceRoundCard({
 						/>
 					))}
 				</div>
-			)}
+			) : null}
 
 			{/* Results */}
 			{(isActive || isEnded) && options.length > 0 && (
-				<ResultsVisualization
-					round={round}
-					totalVoters={totalVoters}
-					fundBalance={fundBalance}
-				/>
+				<ResultsVisualization round={round} totalVoters={totalVoters} fundBalance={fundBalance} />
 			)}
 		</motion.div>
 	)

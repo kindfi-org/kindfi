@@ -3,214 +3,276 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { ProjectCardGrid, ProjectCardList } from '~/components/sections/projects/cards'
+import { EmptyProject } from '~/components/sections/projects/empty-project'
+import { CategoryTicker, SortDropdown, ViewToggle } from '~/components/sections/projects/filters'
+import { LoadMoreSentinel } from '~/components/sections/projects/load-more-sentinel'
 import {
-	ProjectCardGrid,
-	ProjectCardList,
-} from '~/components/sections/projects/cards'
-import {
-	CategoryFilters,
-	SortDropdown,
-	ViewToggle,
-} from '~/components/sections/projects/filters'
-import {
-	CategoryBadgeSkeleton,
 	ProjectCardGridSkeleton,
 	ProjectCardListSkeleton,
 } from '~/components/sections/projects/skeletons'
-import { staggerContainer } from '~/lib/constants/animations'
+import { SectionContainer } from '~/components/shared/section-container'
+import { usePaginatedProjects } from '~/hooks/projects/use-paginated-projects'
 import { useI18n } from '~/lib/i18n'
-import { getAllCategories, getAllProjects } from '~/lib/queries/projects'
-import type { Project, SortOption } from '~/lib/types/project'
+import { getAllCategories } from '~/lib/queries/projects'
+import type { SortOption } from '~/lib/types/project'
+
+const sortSlugToOption = (sortParam: string): SortOption => {
+	if (sortParam === 'most-recent') return 'Most Recent'
+	if (sortParam === 'most-funded') return 'Most Funded'
+	if (sortParam === 'most-supporters') return 'Most Supporters'
+	return 'Most Popular'
+}
 
 export function ProjectsClientWrapper() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const { t } = useI18n()
+	const { t, language } = useI18n()
 	const reducedMotion = useReducedMotion()
-	const initialCategoryParams = searchParams.getAll('category')
+	const categoryParams = searchParams.getAll('category')
 	const sortParam = searchParams.get('sort') ?? 'most-popular'
+	const selectedCategories = categoryParams
+	const sortOption = sortSlugToOption(sortParam)
 
+	// ─── Paginated projects ───────────────────────────────────────────────────
 	const {
-		data: initialProjects = [],
+		data,
 		isLoading: isLoadingProjects,
 		error: projectError,
-	} = useSupabaseQuery(
-		'projects',
-		(client) => getAllProjects(client, initialCategoryParams, sortParam),
-		{
-			additionalKeyValues: [initialCategoryParams, sortParam],
-		},
-	)
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+	} = usePaginatedProjects({
+		categorySlugs: categoryParams,
+		sortSlug: sortParam,
+		language,
+	})
 
+	/**
+	 * Flatten all pages into a single ordered list.
+	 * Pages are stable references — React will not re-render already-rendered
+	 * cards when a new page is appended.
+	 */
+	const allProjects = useMemo(() => data?.pages.flatMap((p) => p.items) ?? [], [data])
+
+	/**
+	 * Track the IDs that appeared in the most-recently loaded page.
+	 * Only these cards will receive enter animations.
+	 */
+	const prevCountRef = useRef(0)
+	const newIds = useMemo<ReadonlySet<string>>(() => {
+		const lastPage = data?.pages[data.pages.length - 1]
+		if (!lastPage || data.pages.length === 1) {
+			// First load: animate all initial cards
+			prevCountRef.current = lastPage?.items.length ?? 0
+			return new Set(lastPage?.items.map((p) => p.id) ?? [])
+		}
+		// Subsequent pages: animate only the newly added IDs
+		const ids = new Set(lastPage.items.map((p) => p.id))
+		prevCountRef.current = allProjects.length
+		return ids
+	}, [data, allProjects.length])
+
+	const total = data?.pages[data.pages.length - 1]?.total ?? 0
+
+	// ─── Categories ───────────────────────────────────────────────────────────
 	const {
 		data: categories = [],
 		isLoading: isLoadingCategories,
 		error: categoryError,
 	} = useSupabaseQuery('categories', getAllCategories, {
-		staleTime: 1000 * 60 * 60, // 1 hour
-		gcTime: 1000 * 60 * 60, // 1 hour
+		staleTime: 1000 * 60 * 60,
+		gcTime: 1000 * 60 * 60,
 	})
 
-	const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
-	const [selectedCategories, setSelectedCategories] = useState<string[]>(
-		initialCategoryParams,
-	)
-	const [sortOption, setSortOption] = useState<SortOption>('Most Popular')
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
-	useEffect(() => {
-		if (sortParam === 'most-recent') setSortOption('Most Recent')
-		else if (sortParam === 'most-funded') setSortOption('Most Funded')
-		else if (sortParam === 'most-supporters') setSortOption('Most Supporters')
-		else if (sortParam === 'most-popular') setSortOption('Most Popular')
-	}, [sortParam])
+	// ─── URL-driven filter helpers ─────────────────────────────────────────────
+	const handleCategoryToggle = useCallback(
+		(categorySlug: string) => {
+			const next = selectedCategories.includes(categorySlug)
+				? selectedCategories.filter((slug) => slug !== categorySlug)
+				: [...selectedCategories, categorySlug]
 
-	useEffect(() => {
-		setFilteredProjects(initialProjects)
-	}, [initialProjects])
+			const params = new URLSearchParams(searchParams.toString())
+			params.delete('category')
+			for (const slug of next) {
+				params.append('category', slug)
+			}
+			router.push(`?${params.toString()}`, { scroll: false })
+		},
+		[selectedCategories, searchParams, router],
+	)
 
-	const handleCategoryToggle = (categorySlug: string) => {
-		const next = selectedCategories.includes(categorySlug)
-			? selectedCategories.filter((id) => id !== categorySlug)
-			: [...selectedCategories, categorySlug]
-
-		setSelectedCategories(next)
-
+	const handleResetCategories = useCallback(() => {
 		const params = new URLSearchParams(searchParams.toString())
 		params.delete('category')
-		for (const slug of next) {
-			params.append('category', slug)
+		router.push(`?${params.toString()}`, { scroll: false })
+	}, [searchParams, router])
+
+	const handleSortChange = useCallback(
+		(newSort: SortOption) => {
+			const params = new URLSearchParams(searchParams.toString())
+			params.set('sort', newSort.toLowerCase().replace(/ /g, '-'))
+			router.push(`?${params.toString()}`, { scroll: false })
+		},
+		[searchParams, router],
+	)
+
+	// ─── Results count label ───────────────────────────────────────────────────
+	const resultsLabel = useMemo(() => {
+		if (isLoadingProjects) return t('projects.loading')
+		const shown = allProjects.length
+		if (total > shown) {
+			return t('projects.resultsShowing')
+				.replace('{shown}', String(shown))
+				.replace('{total}', String(total))
 		}
-		router.push(`?${params.toString()}`)
-	}
+		return total === 1
+			? t('projects.resultsCountOne').replace('{count}', String(total))
+			: t('projects.resultsCountMany').replace('{count}', String(total))
+	}, [isLoadingProjects, allProjects.length, total, t])
 
-	const handleResetCategories = () => {
-		setSelectedCategories([])
-
-		const params = new URLSearchParams(searchParams.toString())
-		params.delete('category')
-		router.push(`?${params.toString()}`)
-	}
-
-	const handleSortChange = (newSort: SortOption) => {
-		setSortOption(newSort)
-		const params = new URLSearchParams(searchParams.toString())
-		params.set('sort', newSort.toLowerCase().replace(/ /g, '-'))
-		for (const slug of selectedCategories) {
-			params.append('category', slug)
-		}
-		router.push(`?${params.toString()}`)
-	}
-
+	// ─── Error state ───────────────────────────────────────────────────────────
 	if (projectError || categoryError) {
 		return (
-			<div className="text-center text-destructive py-12">
-				{t('common.error')}: {projectError?.message || categoryError?.message}
-			</div>
+			<SectionContainer className="py-16">
+				<div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-6 py-8 text-center text-destructive">
+					{t('common.error')}: {projectError?.message || categoryError?.message}
+				</div>
+			</SectionContainer>
 		)
 	}
 
 	return (
-		<div>
-			<motion.div
-				className="mb-6"
-				initial={reducedMotion ? false : { opacity: 0, y: 8 }}
-				animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-				transition={reducedMotion ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }}
-			>
-				{isLoadingCategories ? (
-					<div className="flex flex-wrap gap-2">
-						{Array.from({ length: 12 }).map((_, i) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-							<CategoryBadgeSkeleton key={i} />
-						))}
-					</div>
-				) : (
-					<CategoryFilters
-						categories={categories}
-						selectedCategories={selectedCategories}
-						onCategoryToggle={handleCategoryToggle}
-						onResetCategories={handleResetCategories}
-					/>
-				)}
+		<section id="projects-results" className="bg-white pb-10 pt-2 sm:pb-12 md:pb-14">
+			<SectionContainer withPadding={false} className="px-4 sm:px-6 lg:px-8">
+				<CategoryTicker
+					categories={categories}
+					selectedCategories={selectedCategories}
+					onCategoryToggle={handleCategoryToggle}
+					onResetCategories={handleResetCategories}
+					isLoading={isLoadingCategories}
+				/>
 
-				<div className="flex flex-col md:flex-row gap-4 justify-between">
-					<div className="flex flex-row items-center justify-between gap-2 md:gap-4">
-						<h2 className="text-xl font-semibold">
+				<div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div>
+						<p className="text-xs font-medium uppercase tracking-[0.14em] text-emerald-700/80">
 							{t('nav.exploreProjects')}
-						</h2>
-						<p className="text-sm text-gray-500 md:hidden">
-							{selectedCategories.length > 0
-								? `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`
-								: `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`}
 						</p>
+						<p className="mt-1 text-lg font-semibold text-slate-900">{resultsLabel}</p>
 					</div>
-
-					<div className="flex flex-row items-center gap-0 md:gap-4 justify-between md:justify-end">
-						<p className="hidden md:block text-sm text-gray-500">
-							{selectedCategories.length > 0
-								? `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`
-								: `${filteredProjects.length} ${filteredProjects.length === 1 ? t('projects.title').slice(0, -1) : t('projects.title')}`}
-						</p>
+					<div className="flex flex-wrap items-center gap-3">
 						<SortDropdown value={sortOption} onChange={handleSortChange} />
 						<ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
 					</div>
 				</div>
-			</motion.div>
-			<AnimatePresence mode="wait">
-				<motion.div
-					key={viewMode}
-					initial={reducedMotion ? false : { opacity: 0 }}
-					animate={reducedMotion ? false : { opacity: 1 }}
-					exit={reducedMotion ? undefined : { opacity: 0 }}
-					transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
-				>
-					{isLoadingProjects ? (
-						<div className="flex gap-4 flex-wrap">
-							{Array.from({ length: 8 }).map((_, i) =>
-								viewMode === 'grid' ? (
-									// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-									<ProjectCardGridSkeleton key={i} />
-								) : (
-									// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
-									<ProjectCardListSkeleton key={i} />
-								),
-							)}
-						</div>
-					) : viewMode === 'grid' ? (
-						<motion.div
-							className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-							variants={reducedMotion ? undefined : staggerContainer}
-							initial={reducedMotion ? false : 'initial'}
-							animate={reducedMotion ? false : 'animate'}
-							role="feed"
-							aria-label="Projects grid view"
-						>
-							{filteredProjects.map((project, index) => (
-								<ProjectCardGrid
-									key={project.id}
-									project={project}
-									index={index}
-								/>
-							))}
-						</motion.div>
-					) : (
-						<motion.div
-							className="flex flex-col gap-6"
-							variants={reducedMotion ? undefined : staggerContainer}
-							initial={reducedMotion ? false : 'initial'}
-							animate={reducedMotion ? false : 'animate'}
-							role="feed"
-							aria-label="Projects list view"
-						>
-							{filteredProjects.map((project) => (
-								<ProjectCardList key={project.id} project={project} />
-							))}
-						</motion.div>
-					)}
-				</motion.div>
-			</AnimatePresence>
-		</div>
+
+				<AnimatePresence mode="wait">
+					<motion.div
+						key={viewMode}
+						initial={reducedMotion ? false : { opacity: 0 }}
+						animate={reducedMotion ? false : { opacity: 1 }}
+						exit={reducedMotion ? undefined : { opacity: 0 }}
+						transition={reducedMotion ? { duration: 0 } : { duration: 0.2 }}
+					>
+						{isLoadingProjects ? (
+							/* ── Skeleton placeholders while first page loads ── */
+							<div
+								className={
+									viewMode === 'grid'
+										? 'grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3'
+										: 'flex flex-col gap-6'
+								}
+							>
+								{Array.from({ length: 6 }).map((_, i) =>
+									viewMode === 'grid' ? (
+										// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
+										<ProjectCardGridSkeleton key={i} />
+									) : (
+										// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
+										<ProjectCardListSkeleton key={i} />
+									),
+								)}
+							</div>
+						) : allProjects.length === 0 ? (
+							<EmptyProject
+								selectedCategories={selectedCategories}
+								onClearFilters={handleResetCategories}
+							/>
+						) : viewMode === 'grid' ? (
+							/* ── Grid view ── */
+							<div
+								className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+								role="feed"
+								aria-label="Projects grid view"
+								aria-busy={isFetchingNextPage}
+							>
+								{allProjects.map((project, index) => {
+									const isNew = newIds.has(project.id)
+									if (reducedMotion || !isNew) {
+										return (
+											<div key={project.id} className="long-list-item h-full">
+												<ProjectCardGrid project={project} index={index} />
+											</div>
+										)
+									}
+									return (
+										<motion.div
+											key={project.id}
+											initial={{ opacity: 0, y: 16 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+											className="long-list-item h-full"
+										>
+											<ProjectCardGrid project={project} index={index} />
+										</motion.div>
+									)
+								})}
+							</div>
+						) : (
+							/* ── List view ── */
+							<div
+								className="flex flex-col gap-6"
+								role="feed"
+								aria-label="Projects list view"
+								aria-busy={isFetchingNextPage}
+							>
+								{allProjects.map((project) => {
+									const isNew = newIds.has(project.id)
+									if (reducedMotion || !isNew) {
+										return (
+											<div key={project.id}>
+												<ProjectCardList project={project} />
+											</div>
+										)
+									}
+									return (
+										<motion.div
+											key={project.id}
+											initial={{ opacity: 0, y: 16 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+										>
+											<ProjectCardList project={project} />
+										</motion.div>
+									)
+								})}
+							</div>
+						)}
+					</motion.div>
+				</AnimatePresence>
+
+				{/* ── Load-more sentinel (auto-scroll + button fallback) ── */}
+				{!isLoadingProjects && (
+					<LoadMoreSentinel
+						onLoadMore={fetchNextPage}
+						isLoading={isFetchingNextPage}
+						hasMore={!!hasNextPage}
+					/>
+				)}
+			</SectionContainer>
+		</section>
 	)
 }

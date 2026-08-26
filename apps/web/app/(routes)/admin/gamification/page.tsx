@@ -1,15 +1,22 @@
 import { prefetchSupabaseQuery } from '@packages/lib/supabase-server'
-import {
-	dehydrate,
-	HydrationBoundary,
-	QueryClient,
-} from '@tanstack/react-query'
-import { AdminGamificationManager } from '~/components/sections/admin/admin-gamification-manager'
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query'
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
+import { AdminGamificationSkeleton } from '~/components/sections/admin/skeletons'
+
+const AdminGamificationManager = dynamic(
+	() =>
+		import('~/components/sections/admin/admin-gamification-manager').then((mod) => ({
+			default: mod.AdminGamificationManager,
+		})),
+	{
+		loading: () => <AdminGamificationSkeleton />,
+	},
+)
 
 export default async function AdminGamificationPage() {
 	const queryClient = new QueryClient()
 
-	// Prefetch quests
 	await prefetchSupabaseQuery(
 		queryClient,
 		'quests',
@@ -29,7 +36,9 @@ export default async function AdminGamificationPage() {
 
 	return (
 		<HydrationBoundary state={dehydratedState}>
-			<AdminGamificationManager />
+			<Suspense fallback={<AdminGamificationSkeleton />}>
+				<AdminGamificationManager />
+			</Suspense>
 		</HydrationBoundary>
 	)
 }

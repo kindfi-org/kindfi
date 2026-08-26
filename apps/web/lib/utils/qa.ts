@@ -16,14 +16,9 @@ export function getGuestUserId(): string | null {
 	return guestUserId
 }
 
-export function getGuestRemainingComments(
-	limit: number = DEFAULT_GUEST_LIMIT,
-): number {
+export function getGuestRemainingComments(limit: number = DEFAULT_GUEST_LIMIT): number {
 	if (typeof window === 'undefined') return limit
-	const count = Number.parseInt(
-		window.localStorage.getItem(GUEST_COMMENT_COUNT_KEY) || '0',
-		10,
-	)
+	const count = Number.parseInt(window.localStorage.getItem(GUEST_COMMENT_COUNT_KEY) || '0', 10)
 	return Math.max(0, limit - count)
 }
 
@@ -55,9 +50,7 @@ export function buildQuestionThreads(
 		const questionAnswers = answers
 			.filter((answer) => answer.parent_comment_id === question.id)
 			.map((answer) => {
-				const answerReplies = replies.filter(
-					(reply) => reply.parent_comment_id === answer.id,
-				)
+				const answerReplies = replies.filter((reply) => reply.parent_comment_id === answer.id)
 				const metadata = (question?.metadata || {}) as Record<string, unknown>
 				return { ...answer, replies: answerReplies, metadata }
 			})

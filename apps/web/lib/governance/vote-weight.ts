@@ -30,10 +30,25 @@ export const TIER_ACCENT: Record<NftTier, string> = {
 
 export const TIER_ORDER: NftTier[] = ['bronze', 'silver', 'gold', 'diamond']
 
-export const getVoteWeight = (tier: NftTier): number =>
-	TIER_VOTE_WEIGHTS[tier] ?? 1
+export const getVoteWeight = (tier: NftTier): number => TIER_VOTE_WEIGHTS[tier] ?? 1
 
 export const getTierLabel = (tier: NftTier): string => TIER_LABELS[tier] ?? tier
+
+/**
+ * Aggregates vote weights per option from a flat list of vote rows.
+ * Returns a map of option_id → { up, down } totals.
+ */
+export function buildOptionWeightMap(
+	votes: { option_id: string; vote_type: string; vote_weight: number }[],
+): Record<string, { up: number; down: number }> {
+	const map: Record<string, { up: number; down: number }> = {}
+	for (const v of votes) {
+		if (!map[v.option_id]) map[v.option_id] = { up: 0, down: 0 }
+		if (v.vote_type === 'up') map[v.option_id].up += v.vote_weight
+		else map[v.option_id].down += v.vote_weight
+	}
+	return map
+}
 
 /**
  * Given a list of options and the current user's vote,
@@ -45,9 +60,6 @@ export const calcAllocationPercents = (
 	const totalUp = options.reduce((sum, o) => sum + (o.weighted_upvotes ?? 0), 0)
 	if (totalUp === 0) return Object.fromEntries(options.map((o) => [o.id, 0]))
 	return Object.fromEntries(
-		options.map((o) => [
-			o.id,
-			Math.round(((o.weighted_upvotes ?? 0) / totalUp) * 100),
-		]),
+		options.map((o) => [o.id, Math.round(((o.weighted_upvotes ?? 0) / totalUp) * 100)]),
 	)
 }

@@ -28,16 +28,13 @@ export const FeaturedCreators = ({ creators }: FeatureCreatorsProps) => {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, delay: 0.4 }}
 				>
-					Meet our most successful and trusted project creators making real
-					change happen.
+					Meet our most successful and trusted project creators making real change happen.
 				</motion.p>
 				<div className="flex flex-wrap justify-center gap-8 mt-14">
 					{creators.length === 0 ? (
 						<p>No creators found</p>
 					) : (
-						creators.map((creator) => (
-							<FeatureCreatorCard key={creator.name} {...creator} />
-						))
+						creators.map((creator) => <FeatureCreatorCard key={creator.name} {...creator} />)
 					)}
 				</div>
 			</div>

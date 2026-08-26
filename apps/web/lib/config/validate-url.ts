@@ -15,9 +15,7 @@ export function isValidRedirectUrl(url: string): boolean {
 		const parsedUrl = new URL(url)
 		// Check if the hostname matches any allowed domain
 		return ALLOWED_DOMAINS.some((domain) =>
-			typeof domain === 'string'
-				? parsedUrl.hostname === domain
-				: domain.test(parsedUrl.hostname),
+			typeof domain === 'string' ? parsedUrl.hostname === domain : domain.test(parsedUrl.hostname),
 		)
 	} catch (error) {
 		logger.error({

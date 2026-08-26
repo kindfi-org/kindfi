@@ -11,8 +11,10 @@ import {
 	FormProvider,
 	useFormContext,
 } from 'react-hook-form'
+import { logger } from '@/lib/logger'
 import { getCsrfTokenFromCookie } from '~/app/actions/csrf'
 import { Label } from '~/components/base/label'
+import { formFieldClasses } from '~/lib/form/form-styles'
 import { cn } from '~/lib/utils'
 
 /**
@@ -33,9 +35,7 @@ type FormFieldContextValue<
 	name: TName
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-	{} as FormFieldContextValue,
-)
+const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
 /**
  * Wrapper for form fields with react-hook-form support.
@@ -92,27 +92,24 @@ type FormItemContextValue = {
 	id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-	{} as FormItemContextValue,
-)
+const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue)
 
 /**
  * Wrapper for form item elements.
  * @component
  * @param {React.HTMLAttributes<HTMLDivElement>} props - Component properties
  */
-const FormItem = React.forwardRef<
-	HTMLDivElement,
-	React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-	const id = React.useId()
+const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+	({ className, ...props }, ref) => {
+		const id = React.useId()
 
-	return (
-		<FormItemContext.Provider value={{ id }}>
-			<div ref={ref} className={cn('space-y-2', className)} {...props} />
-		</FormItemContext.Provider>
-	)
-})
+		return (
+			<FormItemContext.Provider value={{ id }}>
+				<div ref={ref} className={cn(formFieldClasses.item, className)} {...props} />
+			</FormItemContext.Provider>
+		)
+	},
+)
 FormItem.displayName = 'FormItem'
 
 /**
@@ -129,7 +126,7 @@ const FormLabel = React.forwardRef<
 	return (
 		<Label
 			ref={ref}
-			className={cn(error && 'text-destructive', className)}
+			className={cn(formFieldClasses.label, error && 'text-destructive', className)}
 			htmlFor={formItemId}
 			{...props}
 		/>
@@ -152,11 +149,7 @@ const FormControl = React.forwardRef<
 		<Slot
 			ref={ref}
 			id={formItemId}
-			aria-describedby={
-				!error
-					? `${formDescriptionId}`
-					: `${formDescriptionId} ${formMessageId}`
-			}
+			aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
 			aria-invalid={!!error}
 			{...props}
 		/>
@@ -179,7 +172,7 @@ const FormDescription = React.forwardRef<
 		<p
 			ref={ref}
 			id={formDescriptionId}
-			className={cn('text-[0.8rem] text-muted-foreground', className)}
+			className={cn(formFieldClasses.description, className)}
 			{...props}
 		/>
 	)
@@ -202,11 +195,7 @@ const FormMessage = React.forwardRef<
 		<p
 			ref={ref}
 			id={formMessageId}
-			className={cn(
-				'text-[0.8rem] font-medium text-destructive',
-				!body && 'hidden',
-				className,
-			)}
+			className={cn(formFieldClasses.error, !body && 'hidden', className)}
 			{...props}
 		>
 			{body}
@@ -227,9 +216,7 @@ export function CSRFTokenField(): React.ReactElement {
 		getCsrfTokenFromCookie().then((fetchedToken) => {
 			if (!active) return
 			if (!fetchedToken) {
-				console.warn(
-					'CSRF token not found in cookies. Ensure you have set it correctly.',
-				)
+				logger.warn('CSRF token not found in cookies. Ensure you have set it correctly.')
 				return
 			}
 			setToken(fetchedToken)

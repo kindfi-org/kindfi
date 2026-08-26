@@ -1,9 +1,61 @@
 import { z } from 'zod'
+import { isSupportedVideoUrl, SUPPORTED_VIDEO_PROVIDERS_LABEL } from '~/lib/utils/video-embed'
+import { sourceLocaleSchema } from './locale.schemas'
 
 const tagSchema = z.object({
 	name: z.string(),
 	color: z.string(),
 })
+
+const emptyToUndefined = (value: unknown) => {
+	if (typeof value !== 'string') return value
+	const trimmed = value.trim()
+	return trimmed === '' ? undefined : trimmed
+}
+
+const projectTranslationFieldsSchema = z.preprocess(
+	(value) => {
+		if (!value || typeof value !== 'object') return undefined
+
+		const obj = value as { title?: unknown; description?: unknown }
+		const title = emptyToUndefined(obj.title)
+		const description = emptyToUndefined(obj.description)
+
+		if (title === undefined && description === undefined) return undefined
+
+		return { title, description }
+	},
+	z
+		.object({
+			title: z.string().min(3, 'Title must be at least 3 characters').optional(),
+			description: z.string().min(10, 'Description must be at least 10 characters').optional(),
+		})
+		.optional(),
+)
+
+const projectPitchTranslationFieldsSchema = z.preprocess(
+	(value) => {
+		if (!value || typeof value !== 'object') return undefined
+
+		const obj = value as { title?: unknown; story?: unknown }
+		const title = emptyToUndefined(obj.title)
+		const story = emptyToUndefined(obj.story)
+
+		if (title === undefined && story === undefined) return undefined
+
+		return { title, story }
+	},
+	z
+		.object({
+			title: z
+				.string()
+				.min(1, 'Title is required')
+				.max(100, 'Title must be less than 100 characters')
+				.optional(),
+			story: z.string().min(50, 'Story must be at least 50 characters').optional(),
+		})
+		.optional(),
+)
 
 export const projectCreateFormSchema = z
 	.object({
@@ -11,13 +63,19 @@ export const projectCreateFormSchema = z
 		description: z.string().min(10, 'Description must be at least 10 characters'),
 		targetAmount: z.number().min(1, 'Target amount must be at least 1'),
 		minimumInvestment: z.number().min(1, 'Minimum investment must be at least 1'),
-		website: z.string().optional().default(''),
+		website: z
+			.string()
+			.nullable()
+			.optional()
+			.transform((v) => v ?? ''),
 		location: z.string().min(1, 'Location is required'),
 		category: z.string().min(1, 'Category is required'),
 		tags: z.array(tagSchema).optional().default([]),
 		socialLinks: z.array(z.string()).optional().default([]),
 		image: z.instanceof(File).nullable().optional(),
 		foundationId: z.string().uuid().optional().or(z.literal('')),
+		developmentOnly: z.boolean().optional().default(false),
+		sourceLocale: sourceLocaleSchema.optional().default('en'),
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',
@@ -32,13 +90,19 @@ export const projectUpdateFormSchema = z
 		description: z.string().min(10, 'Description must be at least 10 characters'),
 		targetAmount: z.number().min(1, 'Target amount must be at least 1'),
 		minimumInvestment: z.number().min(1, 'Minimum investment must be at least 1'),
-		website: z.string().optional().default(''),
+		website: z
+			.string()
+			.nullable()
+			.optional()
+			.transform((v) => v ?? ''),
 		location: z.string().min(1, 'Location is required'),
 		category: z.string().min(1, 'Category is required'),
 		tags: z.array(tagSchema).optional().default([]),
 		socialLinks: z.array(z.string()).optional().default([]),
 		image: z.instanceof(File).nullable().optional(),
 		removeImage: z.boolean().optional(),
+		sourceLocale: sourceLocaleSchema.optional().default('en'),
+		translation: projectTranslationFieldsSchema,
 	})
 	.refine((data) => data.minimumInvestment <= data.targetAmount, {
 		message: 'Minimum investment cannot exceed target amount',
@@ -50,23 +114,56 @@ export const projectPitchFormSchema = z.object({
 	projectSlug: z.string().min(1, 'Project slug is required'),
 	title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
 	story: z.string().min(50, 'Story must be at least 50 characters'),
-	videoUrl: z.string().nullable().optional(),
+	videoUrl: z
+		.string()
+		.nullable()
+		.optional()
+		.refine((url) => url == null || url === '' || isSupportedVideoUrl(url), {
+			message: `Please enter a valid HTTPS ${SUPPORTED_VIDEO_PROVIDERS_LABEL} URL`,
+		}),
 	pitchDeck: z.instanceof(File).nullable().optional(),
 	removePitchDeck: z.boolean().optional(),
+	translation: projectPitchTranslationFieldsSchema,
 })
 
 export const projectSlugParamSchema = z.object({
 	slug: z.string().min(1, 'Slug is required'),
 })
 
-export const teamMemberCreateSchema = z.object({
-	projectId: z.string().uuid('Project ID is required'),
-	fullName: z.string().min(1, 'Full name is required').transform((s) => s.trim()),
-	roleTitle: z.string().min(1, 'Role title is required').transform((s) => s.trim()),
-	bio: z.string().optional().transform((s) => s?.trim() || undefined),
-	photoUrl: z.string().optional().transform((s) => s?.trim() || undefined),
-	yearsInvolved: z.number().optional(),
-})
+const teamMemberRoleTitleSchema = z
+	.string()
+	.min(1, 'Role title is required')
+	.transform((s) => s.trim())
+
+const teamMemberBioSchema = z
+	.string()
+	.optional()
+	.transform((s) => s?.trim() || undefined)
+
+export const teamMemberCreateSchema = z.discriminatedUnion('type', [
+	z.object({
+		type: z.literal('manual'),
+		projectId: z.string().uuid('Project ID is required'),
+		fullName: z
+			.string()
+			.min(1, 'Full name is required')
+			.transform((s) => s.trim()),
+		roleTitle: teamMemberRoleTitleSchema,
+		bio: teamMemberBioSchema,
+		photoUrl: z
+			.string()
+			.optional()
+			.transform((s) => s?.trim() || undefined),
+		yearsInvolved: z.number().optional(),
+	}),
+	z.object({
+		type: z.literal('registered'),
+		projectId: z.string().uuid('Project ID is required'),
+		userId: z.string().uuid('User ID is required'),
+		roleTitle: teamMemberRoleTitleSchema,
+		bio: teamMemberBioSchema,
+	}),
+])
 
 export const teamMemberUpdateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
@@ -85,15 +182,54 @@ export const teamMemberDeleteQuerySchema = z.object({
 })
 
 const highlightItemSchema = z.object({
-	title: z.string().min(1, 'Title is required').transform((s) => s.trim()),
-	description: z.string().min(1, 'Description is required').transform((s) => s.trim()),
+	title: z
+		.string()
+		.min(1, 'Title is required')
+		.transform((s) => s.trim()),
+	description: z
+		.string()
+		.min(1, 'Description is required')
+		.transform((s) => s.trim()),
 })
 
 export const highlightsUpdateSchema = z.object({
 	projectId: z.string().uuid('Project ID is required'),
-	highlights: z
+	highlights: z.array(highlightItemSchema).min(2, 'At least 2 highlights are required'),
+	translationHighlights: z
 		.array(highlightItemSchema)
-		.min(2, 'At least 2 highlights are required'),
+		.min(2, 'At least 2 highlights are required')
+		.optional(),
+})
+
+export const projectUpdateCreateSchema = z.object({
+	projectId: z.string().uuid('Project ID is required'),
+	title: z
+		.string()
+		.max(100, 'Title must be 100 characters or less')
+		.optional()
+		.transform((value) => value?.trim() || undefined),
+	content: z
+		.string()
+		.min(1, 'Content is required')
+		.transform((value) => value.trim()),
+})
+
+export const projectUpdatePatchSchema = z.object({
+	projectId: z.string().uuid('Project ID is required'),
+	title: z
+		.string()
+		.max(100, 'Title must be 100 characters or less')
+		.optional()
+		.transform((value) => value?.trim() || undefined),
+	content: z
+		.string()
+		.min(1, 'Content is required')
+		.optional()
+		.transform((value) => value?.trim()),
+})
+
+export const projectUpdateDeleteSchema = z.object({
+	projectId: z.string().uuid('Project ID is required'),
 })
 
 export const projectMemberUpdateFormSchema = z
@@ -101,10 +237,7 @@ export const projectMemberUpdateFormSchema = z
 		projectId: z.string().uuid('Project ID is required'),
 		memberId: z.string().uuid('Member ID is required'),
 		role: z
-			.union([
-				z.enum(['admin', 'editor', 'advisor', 'community', 'core', 'others']),
-				z.literal(''),
-			])
+			.union([z.enum(['admin', 'editor', 'advisor', 'community', 'core', 'others']), z.literal('')])
 			.optional()
 			.transform((v) => (v === '' ? undefined : v)),
 		title: z.string().nullable().optional(),

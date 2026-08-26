@@ -7,11 +7,7 @@ interface SocialButtonProps {
 	onClick: () => void
 }
 
-export const SocialButton = ({
-	icon,
-	provider,
-	onClick,
-}: SocialButtonProps) => (
+export const SocialButton = ({ icon, provider, onClick }: SocialButtonProps) => (
 	<Button
 		variant="outline"
 		className="w-full flex items-center gap-2 mb-3"

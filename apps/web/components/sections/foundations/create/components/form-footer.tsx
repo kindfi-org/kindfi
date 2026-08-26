@@ -12,11 +12,7 @@ interface FormFooterProps {
 	cancelHref?: string
 }
 
-export function FormFooter({
-	isSubmitting,
-	variant = 'create',
-	cancelHref,
-}: FormFooterProps) {
+export function FormFooter({ isSubmitting, variant = 'create', cancelHref }: FormFooterProps) {
 	const router = useRouter()
 
 	const handleCancel = () => {

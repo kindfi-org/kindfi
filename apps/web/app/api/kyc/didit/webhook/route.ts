@@ -1,76 +1,81 @@
-// app/api/kyc/didit/webhook/route.ts
-
-import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
+import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
 import {
-	mapDiditStatusToKYC,
 	verifyDiditWebhookSignatureSimple,
 	verifyDiditWebhookSignatureV2,
 } from '~/lib/services/didit'
 
 interface DiditWebhookEvent extends Record<string, unknown> {
 	session_id: string
-	status:
-		| 'Not Started'
-		| 'In Progress'
-		| 'Approved'
-		| 'Declined'
-		| 'In Review'
-		| 'Abandoned'
-	webhook_type: 'status.updated' | 'data.updated'
+	status: string
+	webhook_type?: string
 	created_at?: number
-	timestamp: number
-	workflow_id?: string
+	timestamp?: number
+	webhook_id?: string
+	event_id?: string
+	id?: string
 	vendor_data?: string
-	metadata?: Record<string, unknown>
-	decision?: Record<string, unknown>
+}
+
+const parseProviderEventAt = (jsonBody: DiditWebhookEvent, headerTimestamp: string): Date => {
+	if (typeof jsonBody.timestamp === 'number') {
+		return new Date(jsonBody.timestamp * 1000)
+	}
+	if (typeof jsonBody.created_at === 'number') {
+		const value = jsonBody.created_at
+		return value > 1_000_000_000_000 ? new Date(value) : new Date(value * 1000)
+	}
+	const header = Number.parseInt(headerTimestamp, 10)
+	if (!Number.isNaN(header)) {
+		return new Date(header * 1000)
+	}
+	return new Date()
+}
+
+const resolveWebhookEventId = (jsonBody: DiditWebhookEvent): string | null => {
+	if (typeof jsonBody.webhook_id === 'string' && jsonBody.webhook_id.length > 0) {
+		return jsonBody.webhook_id
+	}
+	if (typeof jsonBody.event_id === 'string' && jsonBody.event_id.length > 0) {
+		return jsonBody.event_id
+	}
+	if (typeof jsonBody.id === 'string' && jsonBody.id.length > 0) {
+		return jsonBody.id
+	}
+	return null
 }
 
 /**
  * POST /api/kyc/didit/webhook
  *
- * Handles Didit webhook events for verification status updates
+ * Handles Didit webhook events for verification status updates.
+ * Signatures are verified before any payload is processed.
  */
 export async function POST(req: NextRequest) {
 	try {
 		const webhookSecret = process.env.DIDIT_WEBHOOK_SECRET_KEY
 
 		if (!webhookSecret) {
-			console.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
-			return NextResponse.json(
-				{ error: 'Webhook secret not configured' },
-				{ status: 500 },
-			)
+			logger.error('DIDIT_WEBHOOK_SECRET_KEY is not configured')
+			return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 })
 		}
 
-		// Get raw body and parse JSON
 		const rawBody = await req.text()
 		const jsonBody: DiditWebhookEvent = JSON.parse(rawBody)
 
-		// Get signature headers (try V2 first, then Simple)
 		const signatureV2 = req.headers.get('x-signature-v2')
 		const signatureSimple = req.headers.get('x-signature-simple')
 		const timestamp = req.headers.get('x-timestamp')
 
 		if (!timestamp) {
-			return NextResponse.json(
-				{ error: 'Missing timestamp header' },
-				{ status: 401 },
-			)
+			return NextResponse.json({ error: 'Missing timestamp header' }, { status: 401 })
 		}
 
-		// Verify signature - try V2 first (recommended), then Simple (fallback)
 		let isValid = false
 		if (signatureV2) {
-			isValid = verifyDiditWebhookSignatureV2(
-				jsonBody,
-				signatureV2,
-				timestamp,
-				webhookSecret,
-			)
-			if (isValid) {
-			}
+			isValid = verifyDiditWebhookSignatureV2(jsonBody, signatureV2, timestamp, webhookSecret)
 		}
 
 		if (!isValid && signatureSimple) {
@@ -80,70 +85,36 @@ export async function POST(req: NextRequest) {
 				timestamp,
 				webhookSecret,
 			)
-			if (isValid) {
-			}
 		}
 
 		if (!isValid) {
 			return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
 		}
 
-		const supabase = await createSupabaseServerClient()
-
-		// Find user by session ID stored in notes
-		const { data: kycRecords, error: findError } = await supabase
-			.from('kyc_reviews')
-			.select('user_id, notes')
-			.like('notes', `%${jsonBody.session_id}%`)
-
-		if (findError || !kycRecords || kycRecords.length === 0) {
-			console.error('KYC record not found for session:', jsonBody.session_id)
-			// Return 200 to prevent retries for sessions we don't have
+		if (!jsonBody.session_id || !jsonBody.status) {
 			return NextResponse.json({ received: true })
 		}
 
-		const kycRecord = kycRecords[0]
-		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+		const result = await applyDiditStatusUpdate({
+			sessionId: jsonBody.session_id,
+			diditStatus: jsonBody.status,
+			userId: typeof jsonBody.vendor_data === 'string' ? jsonBody.vendor_data : undefined,
+			source: 'webhook',
+			eventId: resolveWebhookEventId(jsonBody),
+			webhookType: jsonBody.webhook_type,
+			providerEventAt: parseProviderEventAt(jsonBody, timestamp),
+		})
 
-		const kycStatus = mapDiditStatusToKYC(jsonBody.status)
-		// Update KYC record
-		const { error: updateError } = await supabase
-			.from('kyc_reviews')
-			.update({
-				status: kycStatus,
-				notes: JSON.stringify({
-					...notes,
-					diditSessionId: jsonBody.session_id,
-					diditStatus: jsonBody.status,
-					lastUpdated: new Date(jsonBody.timestamp * 1000).toISOString(),
-					webhookEvent: jsonBody.webhook_type,
-					...(jsonBody.decision && { decision: jsonBody.decision }),
-				}),
-				updated_at: new Date().toISOString(),
+		if (!result.applied && result.reason === 'not_found') {
+			logger.warn('[kyc] Webhook for unknown Didit session', {
+				sessionId: jsonBody.session_id,
+				webhookType: jsonBody.webhook_type,
 			})
-			.eq('user_id', kycRecord.user_id)
-
-		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
-			// Return 500 to trigger retry
-			return NextResponse.json(
-				{ error: 'Failed to update KYC record' },
-				{ status: 500 },
-			)
 		}
 
 		return NextResponse.json({ received: true })
 	} catch (error) {
-		console.error('Error processing Didit webhook:', error)
-		return NextResponse.json(
-			{
-				error: 'Failed to process webhook',
-				details: error instanceof Error ? error.message : String(error),
-			},
-			{ status: 500 },
-		)
+		logger.error('Error processing Didit webhook:', error)
+		return NextResponse.json({ error: 'Failed to process webhook' }, { status: 500 })
 	}
 }

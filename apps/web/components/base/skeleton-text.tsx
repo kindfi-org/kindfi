@@ -3,19 +3,19 @@ import { Skeleton } from '~/components/base/skeleton'
 import { cn } from '~/lib/utils'
 
 interface SkeletonTextProps {
-	width: number[]
+	width?: number[]
 	className?: string
 }
 
 export const SkeletonText: FC<SkeletonTextProps> = ({ width, className }) => {
+	if (!width?.length) {
+		return <Skeleton className={cn('h-4', className)} />
+	}
+
 	return (
 		<div className="space-y-2">
 			{width.map((w) => (
-				<Skeleton
-					key={w}
-					className={cn('h-4', className)}
-					style={{ width: `${w}%` }}
-				/>
+				<Skeleton key={w} className={cn('h-4', className)} style={{ width: `${w}%` }} />
 			))}
 		</div>
 	)

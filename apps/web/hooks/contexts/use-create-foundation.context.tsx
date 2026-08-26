@@ -1,11 +1,13 @@
 'use client'
 
-import { createContext, type ReactNode, useContext, useState } from 'react'
+import { createContext, type ReactNode, useContext } from 'react'
 import { useSetState } from 'react-use'
 
 export interface CreateFoundationFormData {
 	name: string
 	description: string
+	story?: string
+	impactHighlights: string[]
 	slug: string
 	foundedYear: number
 	mission?: string
@@ -21,13 +23,13 @@ interface CreateFoundationContextType {
 	updateFormData: (data: Partial<CreateFoundationFormData>) => void
 }
 
-const CreateFoundationContext = createContext<
-	CreateFoundationContextType | undefined
->(undefined)
+const CreateFoundationContext = createContext<CreateFoundationContextType | undefined>(undefined)
 
 const initialFormData: CreateFoundationFormData = {
 	name: '',
 	description: '',
+	story: '',
+	impactHighlights: [],
 	slug: '',
 	foundedYear: new Date().getFullYear(),
 	mission: '',
@@ -38,13 +40,8 @@ const initialFormData: CreateFoundationFormData = {
 	coverImageUrl: '',
 }
 
-export function CreateFoundationProvider({
-	children,
-}: {
-	children: ReactNode
-}) {
-	const [formData, setFormData] =
-		useSetState<CreateFoundationFormData>(initialFormData)
+export function CreateFoundationProvider({ children }: { children: ReactNode }) {
+	const [formData, setFormData] = useSetState<CreateFoundationFormData>(initialFormData)
 
 	const updateFormData = (data: Partial<CreateFoundationFormData>) => {
 		setFormData((prev) => ({ ...prev, ...data }))
@@ -65,9 +62,7 @@ export function CreateFoundationProvider({
 export function useCreateFoundation() {
 	const context = useContext(CreateFoundationContext)
 	if (context === undefined) {
-		throw new Error(
-			'useCreateFoundation must be used within a CreateFoundationProvider',
-		)
+		throw new Error('useCreateFoundation must be used within a CreateFoundationProvider')
 	}
 	return context
 }

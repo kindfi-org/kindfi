@@ -1,9 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 
-export async function getProjectQuestions(
-	client: TypedSupabaseClient,
-	projectId: string,
-) {
+export async function getProjectQuestions(client: TypedSupabaseClient, projectId: string) {
 	// Fetch all comments for the given project (Q&A type)
 	const { data: comments, error: commentsError } = await client
 		.from('comments')

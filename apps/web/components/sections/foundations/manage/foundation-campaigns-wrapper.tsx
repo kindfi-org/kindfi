@@ -3,7 +3,7 @@
 import { useSupabaseQuery } from '@packages/lib/hooks'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Building2, CheckCircle2, XCircle } from 'lucide-react'
+import { Building2, CheckCircle2, Plus, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useMemo, useState } from 'react'
@@ -73,12 +73,7 @@ export function FoundationCampaignsWrapper({
 	)
 
 	const assignedCampaignIds = useMemo(
-		() =>
-			new Set(
-				campaigns
-					.filter((c) => c.foundationId === foundationId)
-					.map((c) => c.id),
-			),
+		() => new Set(campaigns.filter((c) => c.foundationId === foundationId).map((c) => c.id)),
 		[campaigns, foundationId],
 	)
 
@@ -95,21 +90,12 @@ export function FoundationCampaignsWrapper({
 
 	// Mutation to assign/unassign campaigns
 	const assignMutation = useMutation({
-		mutationFn: async ({
-			projectId,
-			assign,
-		}: {
-			projectId: string
-			assign: boolean
-		}) => {
-			const response = await fetch(
-				`/api/foundations/${foundationSlug}/campaigns`,
-				{
-					method: 'PATCH',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ projectId, assign }),
-				},
-			)
+		mutationFn: async ({ projectId, assign }: { projectId: string; assign: boolean }) => {
+			const response = await fetch(`/api/foundations/${foundationSlug}/campaigns`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ projectId, assign }),
+			})
 
 			if (!response.ok) {
 				const error = await response.json()
@@ -132,10 +118,7 @@ export function FoundationCampaignsWrapper({
 		},
 	})
 
-	const handleToggleAssignment = (
-		projectId: string,
-		currentlyAssigned: boolean,
-	) => {
+	const handleToggleAssignment = (projectId: string, currentlyAssigned: boolean) => {
 		assignMutation.mutate({
 			projectId,
 			assign: !currentlyAssigned,
@@ -145,9 +128,7 @@ export function FoundationCampaignsWrapper({
 	if (!session?.user?.id) {
 		return (
 			<div className="text-center py-12">
-				<p className="text-muted-foreground">
-					Please sign in to manage campaigns.
-				</p>
+				<p className="text-muted-foreground">Please sign in to manage campaigns.</p>
 			</div>
 		)
 	}
@@ -158,18 +139,13 @@ export function FoundationCampaignsWrapper({
 				<ManageSectionHeader
 					title="Campaigns"
 					description="Assign your campaigns to this foundation to organize them under one umbrella."
-					icon={
-						<Building2 size={24} className="relative z-10" aria-hidden="true" />
-					}
+					icon={<Building2 size={24} className="relative z-10" aria-hidden="true" />}
 				/>
 				<div className="space-y-4">
 					<div className="h-10 bg-muted animate-pulse rounded-lg w-1/3" />
 					<div className="grid gap-4">
 						{['a', 'b', 'c'].map((id) => (
-							<div
-								key={`skeleton-${id}`}
-								className="h-32 bg-muted animate-pulse rounded-lg"
-							/>
+							<div key={`skeleton-${id}`} className="h-32 bg-muted animate-pulse rounded-lg" />
 						))}
 					</div>
 				</div>
@@ -183,14 +159,10 @@ export function FoundationCampaignsWrapper({
 				<ManageSectionHeader
 					title="Campaigns"
 					description="Assign your campaigns to this foundation to organize them under one umbrella."
-					icon={
-						<Building2 size={24} className="relative z-10" aria-hidden="true" />
-					}
+					icon={<Building2 size={24} className="relative z-10" aria-hidden="true" />}
 				/>
 				<div className="text-center py-12">
-					<p className="text-destructive">
-						Error loading campaigns. Please try again.
-					</p>
+					<p className="text-destructive">Error loading campaigns. Please try again.</p>
 				</div>
 			</>
 		)
@@ -198,20 +170,22 @@ export function FoundationCampaignsWrapper({
 
 	return (
 		<>
-			<ManageSectionHeader
-				title="Campaigns"
-				description="Assign your campaigns to this foundation to organize them under one umbrella."
-				icon={
-					<Building2 size={24} className="relative z-10" aria-hidden="true" />
-				}
-			/>
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-2">
+				<ManageSectionHeader
+					title="Campaigns"
+					description="Create and assign campaigns linked to this foundation."
+					icon={<Building2 size={24} className="relative z-10" aria-hidden="true" />}
+				/>
+				<Button asChild className="shrink-0 w-full sm:w-auto">
+					<Link href={`/create-project?foundationId=${foundationId}`}>
+						<Plus className="h-4 w-4 mr-1.5" aria-hidden="true" />
+						Create campaign
+					</Link>
+				</Button>
+			</div>
 
 			{/* Filter Tabs */}
-			<div
-				className="flex gap-2 mb-6 border-b"
-				role="tablist"
-				aria-label="Filter campaigns"
-			>
+			<div className="flex gap-2 mb-6 border-b" role="tablist" aria-label="Filter campaigns">
 				<button
 					type="button"
 					role="tab"
@@ -259,10 +233,7 @@ export function FoundationCampaignsWrapper({
 			{/* Campaigns List */}
 			{filteredCampaigns.length === 0 ? (
 				<div className="text-center py-12">
-					<Building2
-						className="h-16 w-16 text-muted-foreground mx-auto mb-4"
-						aria-hidden="true"
-					/>
+					<Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
 					<h3 className="text-xl font-semibold mb-2">
 						{filter === 'assigned'
 							? 'No Assigned Campaigns'
@@ -270,21 +241,28 @@ export function FoundationCampaignsWrapper({
 								? 'All Campaigns Assigned'
 								: 'No Campaigns Found'}
 					</h3>
-					<p className="text-muted-foreground">
+					<p className="text-muted-foreground mb-6">
 						{filter === 'all'
-							? 'Create your first campaign to get started.'
+							? 'Create your first campaign to link it to this foundation.'
 							: filter === 'assigned'
 								? 'Assign campaigns using the buttons below.'
 								: 'All your campaigns are already assigned to this foundation.'}
 					</p>
+					{filter === 'all' && (
+						<Button asChild>
+							<Link href={`/create-project?foundationId=${foundationId}`}>
+								<Plus className="h-4 w-4 mr-1.5" aria-hidden="true" />
+								Create campaign
+							</Link>
+						</Button>
+					)}
 				</div>
 			) : (
 				<div className="space-y-4">
 					{filteredCampaigns.map((campaign, index) => {
 						const isAssigned = assignedCampaignIds.has(campaign.id)
 						const isUpdating =
-							assignMutation.isPending &&
-							assignMutation.variables?.projectId === campaign.id
+							assignMutation.isPending && assignMutation.variables?.projectId === campaign.id
 
 						return (
 							<motion.div
@@ -294,7 +272,6 @@ export function FoundationCampaignsWrapper({
 								transition={{
 									duration: shouldReduceMotion ? 0 : 0.3,
 									delay: index * 0.05,
-									transitionProperty: 'opacity, transform',
 								}}
 								className="border rounded-lg p-4 bg-card hover:shadow-md transition-[box-shadow]"
 							>
@@ -308,14 +285,8 @@ export function FoundationCampaignsWrapper({
 												{campaign.title}
 											</Link>
 											{isAssigned && (
-												<Badge
-													variant="default"
-													className="bg-green-100 text-green-700"
-												>
-													<CheckCircle2
-														className="h-3 w-3 mr-1"
-														aria-hidden="true"
-													/>
+												<Badge variant="default" className="bg-green-100 text-green-700">
+													<CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
 													Assigned
 												</Badge>
 											)}
@@ -345,9 +316,7 @@ export function FoundationCampaignsWrapper({
 									<Button
 										variant={isAssigned ? 'outline' : 'default'}
 										size="sm"
-										onClick={() =>
-											handleToggleAssignment(campaign.id, isAssigned)
-										}
+										onClick={() => handleToggleAssignment(campaign.id, isAssigned)}
 										disabled={isUpdating}
 										className="shrink-0"
 									>
@@ -355,18 +324,12 @@ export function FoundationCampaignsWrapper({
 											<>Updating…</>
 										) : isAssigned ? (
 											<>
-												<XCircle
-													className="h-4 w-4 mr-1.5"
-													aria-hidden="true"
-												/>
+												<XCircle className="h-4 w-4 mr-1.5" aria-hidden="true" />
 												Unassign
 											</>
 										) : (
 											<>
-												<CheckCircle2
-													className="h-4 w-4 mr-1.5"
-													aria-hidden="true"
-												/>
+												<CheckCircle2 className="h-4 w-4 mr-1.5" aria-hidden="true" />
 												Assign
 											</>
 										)}

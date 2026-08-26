@@ -25,18 +25,13 @@ export function CommunityVoices() {
 						viewport={{ once: true }}
 						className="mx-auto max-w-2xl text-lg text-gray-600"
 					>
-						Real stories from the people and communities impacted by KindFi
-						projects.
+						Real stories from the people and communities impacted by KindFi projects.
 					</motion.p>
 				</div>
 
 				<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 					{testimonials.map((testimonial, index) => (
-						<TestimonialCard
-							key={testimonial.id}
-							testimonial={testimonial}
-							index={index}
-						/>
+						<TestimonialCard key={testimonial.id} testimonial={testimonial} index={index} />
 					))}
 				</div>
 			</div>

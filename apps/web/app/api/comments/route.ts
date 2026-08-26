@@ -1,12 +1,10 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import type { TablesInsert } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-import {
-	commentsQuerySchema,
-	createCommentSchema,
-	validateParentComment,
-} from './validation'
+import { logger } from '@/lib/logger'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { validateRequest } from '~/lib/utils/validation'
+import { commentsQuerySchema, createCommentSchema, validateParentComment } from './validation'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
 	try {
@@ -34,8 +32,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		if (!validation.success) {
 			return validation.response
 		}
-		const { project_id: projectId, project_update_id: projectUpdateId, type } =
-			validation.data
+		const { project_id: projectId, project_update_id: projectUpdateId, type } = validation.data
 		const limit = validation.data.limit ?? 50
 		const offset = validation.data.offset ?? 0
 
@@ -52,7 +49,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
 		const { data, error, count } = await query.range(offset, offset + limit - 1)
 		if (error) {
-			console.error('GET /api/comments fetch failed:', error)
+			logger.error('GET /api/comments fetch failed:', error)
 			return NextResponse.json(
 				{
 					success: false,
@@ -69,7 +66,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 		})
 	} catch (error) {
 		// Keep parity with POST logging
-		console.error('Unexpected error in GET /api/comments:', error)
+		logger.error('Unexpected error in GET /api/comments:', error)
 		return NextResponse.json(
 			{
 				success: false,
@@ -80,7 +77,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 	}
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+async function createCommentHandler(req: NextRequest): Promise<NextResponse> {
 	try {
 		const supabase = await createSupabaseServerClient()
 
@@ -129,14 +126,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			)
 		}
 
-		const {
-			content,
-			parent_comment_id,
-			project_id,
-			project_update_id,
-			type,
-			metadata,
-		} = parsed.data
+		const { content, parent_comment_id, project_id, project_update_id, type, metadata } =
+			parsed.data
 
 		// Validate parent comment relationships if parent_comment_id is provided
 		if (parent_comment_id) {
@@ -202,7 +193,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			.single()
 
 		if (insertError) {
-			console.error('Error inserting comment:', insertError)
+			logger.error('Error inserting comment:', insertError)
 			return NextResponse.json(
 				{
 					success: false,
@@ -224,7 +215,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Unexpected error in POST /api/comments:', error)
+		logger.error('Unexpected error in POST /api/comments:', error)
 		return NextResponse.json(
 			{
 				success: false,
@@ -237,3 +228,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: (req) => req.headers.get('x-forwarded-for') ?? 'anonymous',
+	},
+	createCommentHandler,
+)

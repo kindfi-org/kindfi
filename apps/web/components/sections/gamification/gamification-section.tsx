@@ -2,20 +2,44 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { Trophy } from 'lucide-react'
-import { useState } from 'react'
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from '~/components/base/tabs'
-import { NFTCollection } from './nft-collection'
-import { QuestEngine } from './quest-engine'
-import { ReferralEngine } from './referral-engine'
-import { StreakTracker } from './streak-tracker'
+import dynamic from 'next/dynamic'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+
+const QuestEngine = dynamic(() => import('./quest-engine').then((mod) => mod.QuestEngine), {
+	loading: () => null,
+})
+const StreakTracker = dynamic(() => import('./streak-tracker').then((mod) => mod.StreakTracker), {
+	loading: () => null,
+})
+const ReferralEngine = dynamic(
+	() => import('./referral-engine').then((mod) => mod.ReferralEngine),
+	{ loading: () => null },
+)
+const NFTCollection = dynamic(
+	() => import('./nft-collection').then((mod) => ({ default: mod.NFTCollection })),
+	{
+		loading: () => null,
+		ssr: false,
+	},
+)
 
 export function GamificationSection() {
+	const searchParams = useSearchParams()
+	const tabFromUrl = searchParams?.get('tab')
 	const [activeTab, setActiveTab] = useState('quests')
+
+	useEffect(() => {
+		if (
+			tabFromUrl === 'referrals' ||
+			tabFromUrl === 'streaks' ||
+			tabFromUrl === 'nfts' ||
+			tabFromUrl === 'quests'
+		) {
+			setActiveTab(tabFromUrl)
+		}
+	}, [tabFromUrl])
 
 	return (
 		<div className="space-y-4">

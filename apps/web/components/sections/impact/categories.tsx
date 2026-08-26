@@ -25,8 +25,7 @@ export function ImpactCategories() {
 						viewport={{ once: true }}
 						className="mx-auto max-w-2xl text-lg text-gray-600"
 					>
-						Explore the diverse areas where KindFi projects are creating
-						positive change.
+						Explore the diverse areas where KindFi projects are creating positive change.
 					</motion.p>
 				</div>
 

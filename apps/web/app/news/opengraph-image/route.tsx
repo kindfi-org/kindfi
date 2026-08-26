@@ -29,15 +29,9 @@ export async function GET(req: Request) {
 				fontFamily: 'Inter, Arial',
 			}}
 		>
-			<div style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.1 }}>
-				{title}
-			</div>
-			<div style={{ marginTop: 24, fontSize: 28, opacity: 0.9 }}>
-				{description}
-			</div>
-			<div style={{ marginTop: 'auto', fontSize: 24, opacity: 0.8 }}>
-				kindfi.org/news/{slug}
-			</div>
+			<div style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.1 }}>{title}</div>
+			<div style={{ marginTop: 24, fontSize: 28, opacity: 0.9 }}>{description}</div>
+			<div style={{ marginTop: 'auto', fontSize: 24, opacity: 0.8 }}>kindfi.org/news/{slug}</div>
 		</div>,
 		{
 			width: 1200,

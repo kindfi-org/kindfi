@@ -2,8 +2,10 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectPitchFormSchema } from '~/lib/schemas/project.schemas'
+import { upsertManualTranslation } from '~/lib/services/content-translation/server'
 import {
 	deleteFolderFromBucket,
 	transformToEmbedUrl,
@@ -11,10 +13,16 @@ import {
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(
-	req: Request,
-	{ params }: { params: Promise<{ slug: string }> },
-) {
+function safeJsonParse<T>(raw: string | null, fallback: T): T {
+	if (!raw) return fallback
+	try {
+		return JSON.parse(raw) as T
+	} catch {
+		return fallback
+	}
+}
+
+export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -33,17 +41,27 @@ export async function POST(
 			videoUrl: (formData.get('videoUrl') as string) || null,
 			pitchDeck: formData.get('pitchDeck') as File | null,
 			removePitchDeck: formData.get('removePitchDeck') === 'true',
+			translation: safeJsonParse(formData.get('translation') as string | null, undefined),
 		}
 		const validation = validateRequest(projectPitchFormSchema, formPayload)
 		if (!validation.success) return validation.response
-		const { projectId, projectSlug: validatedSlug, title, story, videoUrl: rawVideoUrl, pitchDeck, removePitchDeck } = validation.data
+		const {
+			projectId,
+			projectSlug: validatedSlug,
+			title,
+			story,
+			videoUrl: rawVideoUrl,
+			pitchDeck,
+			removePitchDeck,
+			translation,
+		} = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
 		const [projectResult, memberResult] = await Promise.all([
 			supabaseServiceRole
 				.from('projects')
-				.select('id, kindler_id')
+				.select('id, kindler_id, source_locale')
 				.eq('id', projectId)
 				.single(),
 			supabaseServiceRole
@@ -96,16 +114,9 @@ export async function POST(
 
 			try {
 				// Delete all files in the project's pitch deck folder
-				await deleteFolderFromBucket(
-					supabase,
-					'project_pitch_decks',
-					validatedSlug,
-				)
+				await deleteFolderFromBucket(supabase, 'project_pitch_decks', validatedSlug)
 			} catch (e) {
-				console.warn(
-					'Failed to cleanup pitch deck folder:',
-					(e as Error).message,
-				)
+				logger.warn('Failed to cleanup pitch deck folder:', (e as Error).message)
 			}
 		}
 
@@ -114,15 +125,29 @@ export async function POST(
 			.upsert(projectPitchData, { onConflict: 'project_id' })
 
 		if (error) {
-			console.error(error)
+			logger.error(error)
 			return NextResponse.json({ error: error.message }, { status: 500 })
 		}
 
+		const { data: pitchRow, error: pitchFetchError } = await supabase
+			.from('project_pitch')
+			.select('id')
+			.eq('project_id', projectId)
+			.single()
+
+		if (pitchFetchError || !pitchRow) {
+			logger.error('Failed to load pitch id after upsert', pitchFetchError)
+		} else if (translation) {
+			const sourceLocale =
+				((project as { source_locale?: string }).source_locale as 'en' | 'es' | undefined) ?? 'en'
+			await upsertManualTranslation('project_pitch', pitchRow.id, sourceLocale, translation)
+		}
+
 		return NextResponse.json({
-			message: 'Project pitch upserted successfully',
+			message: 'Project story saved successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

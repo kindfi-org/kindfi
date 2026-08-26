@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import {
-	createCommentSchema,
-	validateParentComment,
-} from '../app/api/comments/validation'
+import { createCommentSchema, validateParentComment } from '../app/api/comments/validation'
 
 // Mock Supabase client for validation testing
 const mockSupabase: {
@@ -40,9 +37,7 @@ interface MockQuery {
 
 // Helper to cast mock to proper Supabase type for testing
 const typedMockSupabase = mockSupabase as unknown as Awaited<
-	ReturnType<
-		typeof import('@packages/lib/supabase-server').createSupabaseServerClient
-	>
+	ReturnType<typeof import('@packages/lib/supabase-server').createSupabaseServerClient>
 >
 
 describe('Comments API Validation Logic', () => {
@@ -79,11 +74,9 @@ describe('Comments API Validation Logic', () => {
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(
-					result.error.issues.some(
-						(issue) => issue.message === 'Content is required',
-					),
-				).toBe(true)
+				expect(result.error.issues.some((issue) => issue.message === 'Content is required')).toBe(
+					true,
+				)
 			}
 		})
 
@@ -95,11 +88,7 @@ describe('Comments API Validation Logic', () => {
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(
-					result.error.issues.some(
-						(issue) => issue.message === 'Content too long',
-					),
-				).toBe(true)
+				expect(result.error.issues.some((issue) => issue.message === 'Content too long')).toBe(true)
 			}
 		})
 
@@ -108,11 +97,9 @@ describe('Comments API Validation Logic', () => {
 			const result = createCommentSchema.safeParse(invalidData)
 			expect(result.success).toBe(false)
 			if (!result.success) {
-				expect(
-					result.error.issues.some(
-						(issue) => issue.message === 'Content is required',
-					),
-				).toBe(true)
+				expect(result.error.issues.some((issue) => issue.message === 'Content is required')).toBe(
+					true,
+				)
 			}
 		})
 
@@ -127,8 +114,7 @@ describe('Comments API Validation Logic', () => {
 				expect(
 					result.error.issues.some(
 						(issue) =>
-							issue.message ===
-							'Only one of project_id or project_update_id can be provided',
+							issue.message === 'Only one of project_id or project_update_id can be provided',
 					),
 				).toBe(true)
 			}
@@ -144,9 +130,7 @@ describe('Comments API Validation Logic', () => {
 			if (!result.success) {
 				expect(
 					result.error.issues.some(
-						(issue) =>
-							issue.message ===
-							'Either project_id or project_update_id must be provided',
+						(issue) => issue.message === 'Either project_id or project_update_id must be provided',
 					),
 				).toBe(true)
 			}
@@ -259,9 +243,7 @@ describe('Comments API Validation Logic', () => {
 			})
 
 			expect(result.valid).toBe(false)
-			expect(result.error).toBe(
-				'Parent comment belongs to a different project update',
-			)
+			expect(result.error).toBe('Parent comment belongs to a different project update')
 		})
 
 		test('should accept when parent comment belongs to same project', async () => {
@@ -498,9 +480,7 @@ describe('Comments API Validation Logic', () => {
 			const result = createCommentSchema.safeParse(validUpdateCommentData)
 			expect(result.success).toBe(true)
 			if (result.success) {
-				expect(result.data.project_update_id).toBe(
-					validUpdateCommentData.project_update_id,
-				)
+				expect(result.data.project_update_id).toBe(validUpdateCommentData.project_update_id)
 				expect(result.data.project_id).toBeUndefined()
 			}
 		})

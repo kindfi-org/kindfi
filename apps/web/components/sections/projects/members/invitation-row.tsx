@@ -24,12 +24,7 @@ interface InvitationRowProps {
 	onCancel?: (id: string) => void
 }
 
-export function InvitationRow({
-	invitation,
-	index,
-	onResend,
-	onCancel,
-}: InvitationRowProps) {
+export function InvitationRow({ invitation, index, onResend, onCancel }: InvitationRowProps) {
 	const isExpired = isAfter(new Date(), new Date(invitation.expiresAt))
 	const menuAria = `Open actions menu for ${invitation.email}`
 	const resendAria = `Resend invitation to ${invitation.email}`
@@ -67,10 +62,7 @@ export function InvitationRow({
 				</span>
 			</TableCell>
 			<TableCell>
-				<Badge
-					variant={isExpired ? 'destructive' : 'secondary'}
-					className="capitalize"
-				>
+				<Badge variant={isExpired ? 'destructive' : 'secondary'} className="capitalize">
 					{isExpired ? 'Expired' : invitation.status}
 				</Badge>
 			</TableCell>

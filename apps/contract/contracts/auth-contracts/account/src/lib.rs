@@ -44,6 +44,7 @@ struct ClientDataJson<'a> {
 const STORAGE_KEY_DEVICES: Symbol = symbol_short!("devices");
 const RECOVERY_ADDRESS: Symbol = symbol_short!("recovery");
 const AUTH_CONTRACT: Symbol = symbol_short!("auth");
+const NATIVE_TOKEN: Symbol = symbol_short!("native");
 
 #[contractimpl]
 impl AccountContract {
@@ -52,6 +53,7 @@ impl AccountContract {
         device_id: BytesN<32>,
         public_key: BytesN<65>,
         auth_contract: Address,
+        native_token: Address,
     ) {
         let mut devices = Vec::new(&env);
         devices.push_back(DevicePublicKey {
@@ -60,6 +62,7 @@ impl AccountContract {
         });
         env.storage().instance().set(&STORAGE_KEY_DEVICES, &devices);
         env.storage().instance().set(&AUTH_CONTRACT, &auth_contract);
+        env.storage().instance().set(&NATIVE_TOKEN, &native_token);
     }
 
     pub fn add_device(env: Env, device_id: BytesN<32>, public_key: BytesN<65>) {

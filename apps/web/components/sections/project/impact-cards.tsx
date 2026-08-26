@@ -17,9 +17,7 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
 	textColor = 'text-blue-800',
 }) => {
 	return (
-		<div
-			className={`rounded-lg p-4 shadow-sm ${bgColor} flex flex-col items-start`}
-		>
+		<div className={`rounded-lg p-4 shadow-sm ${bgColor} flex flex-col items-start`}>
 			<div className="flex items-center mb-2">
 				<span className={`text-lg mr-2 ${textColor}`}>{icon}</span>
 				<p className="text-sm font-medium text-gray-600">{label}</p>

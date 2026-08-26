@@ -12,10 +12,7 @@ interface CountryFlagProps {
 	className?: string
 }
 
-export function CountryFlag({
-	countryCode,
-	className = 'w-6',
-}: CountryFlagProps) {
+export function CountryFlag({ countryCode, className = 'w-6' }: CountryFlagProps) {
 	const alpha2 = getAlpha2FromAlpha3(countryCode)
 	const [error, setError] = useState(false)
 
@@ -33,12 +30,7 @@ export function CountryFlag({
 	}
 
 	return (
-		<div
-			className={cn(
-				className,
-				'aspect-[3/2] flex-shrink-0 overflow-hidden relative',
-			)}
-		>
+		<div className={cn(className, 'aspect-[3/2] flex-shrink-0 overflow-hidden relative')}>
 			<Image
 				src={`https://flagcdn.com/${alpha2.toLowerCase()}.svg`}
 				alt={`${countryCode} flag`}

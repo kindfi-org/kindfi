@@ -1,21 +1,21 @@
 'use client'
 
+import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/base/card'
+import { AboutSectionHeader } from '~/components/sections/about-us/about-section-header'
 import { SectionContainer } from '~/components/shared/section-container'
 import { useI18n } from '~/lib/i18n'
 
 const ROADMAP_KEYS = ['ai', 'partnerships', 'soroban', 'rails'] as const
 
+const cardClassName =
+	'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200/60 hover:shadow-md'
+
 const Roadmap = () => {
 	const { t } = useI18n()
 
-	const containerVariants = {
+	const containerVariants: Variants = {
 		hidden: { opacity: 0 },
 		visible: {
 			opacity: 1,
@@ -26,38 +26,26 @@ const Roadmap = () => {
 		},
 	}
 
-	const cardVariants = {
+	const cardVariants: Variants = {
 		hidden: { opacity: 0, y: 28 },
 		visible: {
 			opacity: 1,
 			y: 0,
-			transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+			transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
 		},
 	}
 
 	return (
 		<section
-			className="relative bg-background py-16 sm:py-20 lg:py-24"
+			className="relative bg-[#fafbfc] py-16 sm:py-20 lg:py-24"
 			aria-labelledby="roadmap-heading"
 		>
 			<SectionContainer maxWidth="6xl">
-				<motion.div
-					className="mx-auto mb-10 max-w-3xl text-center sm:mb-14"
-					initial={{ opacity: 0, y: 16 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-					viewport={{ once: true, amount: 0.2 }}
-				>
-					<h2
-						id="roadmap-heading"
-						className="mb-3 text-3xl font-bold tracking-tight gradient-text sm:text-4xl"
-					>
-						{t('about.roadmapSectionTitle')}
-					</h2>
-					<p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-						{t('about.roadmapSectionSubtitle')}
-					</p>
-				</motion.div>
+				<AboutSectionHeader
+					id="roadmap-heading"
+					title={t('about.roadmapSectionTitle')}
+					subtitle={t('about.roadmapSectionSubtitle')}
+				/>
 
 				<motion.div
 					className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
@@ -68,10 +56,9 @@ const Roadmap = () => {
 				>
 					{ROADMAP_KEYS.map((key) => (
 						<motion.div key={key} variants={cardVariants} className="h-full">
-							<Card className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-								<div className="h-1 w-full bg-gradient-to-r from-emerald-500 to-indigo-500" />
+							<Card className={cardClassName}>
 								<CardHeader className="px-6 pb-2 pt-6">
-									<CardTitle className="text-lg font-semibold text-foreground">
+									<CardTitle className="text-lg font-semibold text-slate-900">
 										{t(`about.roadmapItems.${key}.title`)}
 									</CardTitle>
 								</CardHeader>

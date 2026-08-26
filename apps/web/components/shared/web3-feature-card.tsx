@@ -37,9 +37,7 @@ export const Web3FeatureCard = ({
 
 		{stats && (
 			<div className="bg-gradient-to-r from-purple-50 to-purple-50/50 rounded-xl p-4 mb-4">
-				<div className="text-2xl font-bold gradient-text mb-1">
-					{stats.value}
-				</div>
+				<div className="text-2xl font-bold gradient-text mb-1">{stats.value}</div>
 				<div className="text-sm gradient-text">{stats.label}</div>
 			</div>
 		)}
@@ -48,10 +46,7 @@ export const Web3FeatureCard = ({
 			<ul className="space-y-3">
 				{checkList.map((item) => (
 					<li key={item.id} className="flex items-center gap-3 text-gray-600">
-						<span
-							className="w-1.5 h-1.5 rounded-full bg-blue-500"
-							aria-hidden="true"
-						/>
+						<span className="w-1.5 h-1.5 rounded-full bg-blue-500" aria-hidden="true" />
 						<span className="sr-only">List item:</span>
 						{item.text}
 					</li>

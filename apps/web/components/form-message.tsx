@@ -1,4 +1,4 @@
-import { cn } from '~/lib/utils'
+import { FormAlert } from '~/components/shared/form/form-alert'
 
 export type Message =
 	| { type: 'success'; message: string }
@@ -29,16 +29,5 @@ export function FormMessage({ message }: { message: Message }) {
 
 	if (!type || !text) return null
 
-	return (
-		<div
-			className={cn(
-				'p-3 rounded-md text-sm',
-				type === 'error' && 'bg-destructive/15 text-destructive',
-				type === 'success' &&
-					'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-500',
-			)}
-		>
-			{text}
-		</div>
-	)
+	return <FormAlert variant={type}>{text}</FormAlert>
 }

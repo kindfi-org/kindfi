@@ -1,17 +1,11 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import {
-	AlertCircle,
-	Bot,
-	CheckCircle2,
-	Loader2,
-	RefreshCw,
-	Sparkles,
-	X,
-} from 'lucide-react'
+import { AlertCircle, Bot, CheckCircle2, Copy, Loader2, X } from 'lucide-react'
+import { useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
 import { Card } from '~/components/base/card'
 import { ScrollArea } from '~/components/base/scroll-area'
@@ -21,10 +15,8 @@ import type { AnalysisStatus } from '~/hooks/projects/use-pitch-analysis'
 interface PitchAIAnalysisProps {
 	analysis: string
 	status: AnalysisStatus
-	onAnalyze: () => void
+	errorMessage?: string | null
 	onReset: () => void
-	isLoading: boolean
-	hasContent: boolean
 }
 
 const StatusIndicator = ({ status }: { status: AnalysisStatus }) => {
@@ -66,16 +58,24 @@ const StatusIndicator = ({ status }: { status: AnalysisStatus }) => {
 export const PitchAIAnalysis = ({
 	analysis,
 	status,
-	onAnalyze,
+	errorMessage,
 	onReset,
-	isLoading,
-	hasContent,
 }: PitchAIAnalysisProps) => {
 	const shouldReduceMotion = useReducedMotion()
 
+	const handleCopyResult = useCallback(async () => {
+		if (!analysis.trim()) return
+
+		try {
+			await navigator.clipboard.writeText(analysis)
+			toast.success('Analysis copied to clipboard')
+		} catch {
+			toast.error('Failed to copy analysis')
+		}
+	}, [analysis])
+
 	const showResults = status === 'streaming' || status === 'done'
 	const showError = status === 'error'
-	const showIdle = status === 'idle'
 
 	return (
 		<Card className="p-6 shadow-md hover:shadow-lg transition-shadow bg-white border-purple-100">
@@ -86,9 +86,7 @@ export const PitchAIAnalysis = ({
 						<Bot className="h-4 w-4" aria-hidden="true" />
 					</div>
 					<div>
-						<h3 className="text-base font-semibold leading-tight">
-							AI Pitch Advisor
-						</h3>
+						<h3 className="text-base font-semibold leading-tight">AI Story Advisor</h3>
 						<StatusIndicator status={status} />
 					</div>
 				</div>
@@ -107,59 +105,18 @@ export const PitchAIAnalysis = ({
 
 			<Separator className="mb-4" />
 
-			{/* Idle state */}
-			{showIdle && (
-				<motion.div
-					initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.3 }}
-					className="space-y-3"
-				>
-					<p className="text-sm text-muted-foreground leading-relaxed">
-						Get personalized feedback and recommendations from our AI advisor
-						to strengthen your pitch before publishing.
-					</p>
-					<ul className="space-y-1.5 text-sm text-muted-foreground">
-						{[
-							'Clarity & compelling hook',
-							'Impact & storytelling quality',
-							'Call-to-action effectiveness',
-							'Concrete improvement suggestions',
-						].map((item) => (
-							<li key={item} className="flex items-center gap-2">
-								<Sparkles className="h-3.5 w-3.5 text-purple-500 shrink-0" />
-								<span>{item}</span>
-							</li>
-						))}
-					</ul>
-					<Button
-						type="button"
-						onClick={onAnalyze}
-						disabled={!hasContent}
-						className="w-full mt-2 gradient-btn text-white"
-						size="sm"
-					>
-						<Sparkles className="h-3.5 w-3.5 mr-2" />
-						Analyze My Pitch
-					</Button>
-					{!hasContent && (
-						<p className="text-xs text-muted-foreground text-center">
-							Fill in the title and story first
-						</p>
-					)}
-				</motion.div>
-			)}
-
 			{/* Loading skeleton */}
 			{status === 'loading' && (
 				<div className="space-y-2" aria-live="polite" aria-busy="true">
-					{([
-						{ w: 80, id: 'sk-a' },
-						{ w: 60, id: 'sk-b' },
-						{ w: 90, id: 'sk-c' },
-						{ w: 50, id: 'sk-d' },
-						{ w: 70, id: 'sk-e' },
-					] as const).map(({ w, id }) => (
+					{(
+						[
+							{ w: 80, id: 'sk-a' },
+							{ w: 60, id: 'sk-b' },
+							{ w: 90, id: 'sk-c' },
+							{ w: 50, id: 'sk-d' },
+							{ w: 70, id: 'sk-e' },
+						] as const
+					).map(({ w, id }) => (
 						<div
 							key={id}
 							className="h-3 rounded-full bg-gradient-to-r from-muted to-muted/40 animate-pulse"
@@ -186,9 +143,7 @@ export const PitchAIAnalysis = ({
 								prose-p:text-muted-foreground prose-p:leading-relaxed"
 							aria-live="polite"
 						>
-							<ReactMarkdown remarkPlugins={[remarkGfm]}>
-								{analysis}
-							</ReactMarkdown>
+							<ReactMarkdown remarkPlugins={[remarkGfm]}>{analysis}</ReactMarkdown>
 						</div>
 					</ScrollArea>
 
@@ -196,14 +151,13 @@ export const PitchAIAnalysis = ({
 						<div className="mt-4 pt-3 border-t border-border">
 							<Button
 								type="button"
-								onClick={onAnalyze}
+								onClick={handleCopyResult}
 								variant="outline"
 								size="sm"
 								className="w-full text-purple-600 border-purple-200 hover:bg-purple-50"
-								disabled={isLoading}
 							>
-								<RefreshCw className="h-3.5 w-3.5 mr-2" />
-								Re-analyze
+								<Copy className="h-3.5 w-3.5 mr-2" />
+								Copy result
 							</Button>
 						</div>
 					)}
@@ -219,20 +173,12 @@ export const PitchAIAnalysis = ({
 				>
 					<div className="rounded-md bg-destructive/10 border border-destructive/20 p-3">
 						<p className="text-sm text-destructive">
-							The analysis could not be completed. Please try again.
+							{errorMessage ?? 'The analysis could not be completed.'}
 						</p>
 					</div>
-					<Button
-						type="button"
-						onClick={onAnalyze}
-						variant="outline"
-						size="sm"
-						className="w-full"
-						disabled={isLoading}
-					>
-						<RefreshCw className="h-3.5 w-3.5 mr-2" />
-						Try Again
-					</Button>
+					<p className="text-xs text-muted-foreground text-center">
+						Dismiss and activate the advisor again if you want to retry.
+					</p>
 				</motion.div>
 			)}
 		</Card>

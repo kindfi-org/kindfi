@@ -29,6 +29,9 @@ export interface AppEnvInterface {
 	}
 	features: {
 		enableEscrowFeature: boolean
+		enableSmartAccountCreation: boolean
+		enablePollarOnboarding: boolean
+		enableAdminOpsDashboard: boolean
 	}
 	vapid: {
 		email: string
@@ -66,6 +69,16 @@ export interface AppEnvInterface {
 		}
 		kyc: {
 			baseUrl: string
+		}
+		etherfuse: {
+			apiKey: string
+			baseUrl: string
+			customerId: string
+		}
+		pollar: {
+			publishableKey: string
+			secretKey: string
+			apiBaseUrl: string
 		}
 	}
 	analytics: {

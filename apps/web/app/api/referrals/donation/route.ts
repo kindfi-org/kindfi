@@ -1,9 +1,11 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { referralDonationSchema } from '~/lib/schemas/referral.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -32,32 +34,13 @@ export async function POST(req: NextRequest) {
 		const { supabase } = await import('@packages/lib/supabase')
 
 		// Run independent queries in parallel
-		const [devicesResult, referralResult] = await Promise.all([
-			// Get user's Stellar address if not provided
-			referred_address
-				? Promise.resolve({ data: null })
-				: supabase
-						.from('devices')
-						.select('address')
-						.eq('user_id', referred_id)
-						.not('address', 'eq', '0x')
-						.not('address', 'is', null)
-						.limit(1),
+		const [stellarAddress, referralResult] = await Promise.all([
+			resolveUserStellarAddress(supabase, referred_id, {
+				overrideAddress: referred_address,
+			}),
 			// Get referral record
-			supabase
-				.from('referral_records')
-				.select('*')
-				.eq('referred_id', referred_id)
-				.single(),
+			supabase.from('referral_records').select('*').eq('referred_id', referred_id).single(),
 		])
-
-		let stellarAddress = referred_address
-		if (!stellarAddress) {
-			const devices = devicesResult.data
-			if (devices && devices.length > 0 && devices[0]?.address) {
-				stellarAddress = devices[0].address
-			}
-		}
 
 		const { data: referral, error: refError } = referralResult
 		if (refError || !referral) {
@@ -75,26 +58,19 @@ export async function POST(req: NextRequest) {
 			error?: string
 		} | null = null
 
-
 		if (stellarAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			try {
 				const contractService = new GamificationContractService()
 				const referralContractAddress =
-					process.env.REFERRAL_CONTRACT_ADDRESS ||
-					process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
-
+					process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 				if (referralContractAddress) {
-					contractResult = await contractService.recordReferralDonation(
-						referralContractAddress,
-						{
-							referredAddress: stellarAddress,
-						},
-					)
-
+					contractResult = await contractService.recordReferralDonation(referralContractAddress, {
+						referredAddress: stellarAddress,
+					})
 
 					if (!contractResult.success) {
-						console.error(
+						logger.error(
 							'[Referral API] Failed to record referral donation on-chain:',
 							contractResult.error,
 						)
@@ -102,12 +78,10 @@ export async function POST(req: NextRequest) {
 					} else {
 					}
 				} else {
-					console.warn(
-						'[Referral API] Referral contract address not configured',
-					)
+					logger.warn('[Referral API] Referral contract address not configured')
 				}
 			} catch (error) {
-				console.error('[Referral API] Error calling referral contract:', error)
+				logger.error('[Referral API] Error calling referral contract:', error)
 				// Continue with database update even if contract call fails
 			}
 		} else {
@@ -148,11 +122,8 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (updateError) {
-			console.error('Error updating referral:', updateError)
-			return NextResponse.json(
-				{ error: 'Failed to update referral' },
-				{ status: 500 },
-			)
+			logger.error('Error updating referral:', updateError)
+			return NextResponse.json({ error: 'Failed to update referral' }, { status: 500 })
 		}
 
 		// Award reward points if first donation
@@ -186,10 +157,7 @@ export async function POST(req: NextRequest) {
 			status_changed: new_status !== old_status,
 		})
 	} catch (error) {
-		console.error('Error in POST /api/referrals/donation:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in POST /api/referrals/donation:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

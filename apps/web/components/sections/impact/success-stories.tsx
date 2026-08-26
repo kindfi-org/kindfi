@@ -25,8 +25,7 @@ export function SuccessStories() {
 						viewport={{ once: true }}
 						className="mx-auto max-w-2xl text-lg text-gray-600"
 					>
-						Discover how KindFi projects are making a real difference in
-						communities worldwide.
+						Discover how KindFi projects are making a real difference in communities worldwide.
 					</motion.p>
 				</div>
 

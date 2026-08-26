@@ -4,6 +4,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export CARGO_TARGET_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/target"
+
 echo "========================================"
 echo "  KindFi Streak Contract Deployment"
 echo "========================================"
@@ -133,10 +136,12 @@ fi
 # Step 1: Build Streak contract
 echo ""
 echo "=== Step 1: Building Streak Contract ==="
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/streak/Cargo.toml || {
+cd contracts/streak
+stellar contract build || {
     echo "🔴 Failed to build Streak Contract"
     exit 1
 }
+cd ../..
 echo "✅ Streak Contract built successfully!"
 
 # Step 2: Upload WASM
@@ -145,7 +150,7 @@ echo "=== Step 2: Uploading WASM ==="
 STREAK_WASM_HASH=$(stellar contract upload \
     --network "$NETWORK" \
     --source "$SOURCE" \
-    --wasm target/wasm32-unknown-unknown/release/streak.wasm)
+    --wasm target/wasm32v1-none/release/streak.wasm)
 
 echo "WASM Hash: $STREAK_WASM_HASH"
 

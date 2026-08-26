@@ -34,6 +34,7 @@ mod contract {
 fn test_deploy() {
     let env = Env::default();
     let auth_contract = Address::generate(&env);
+    let native_token = Address::generate(&env);
 
     env.cost_estimate().budget().reset_unlimited();
     env.mock_all_auths();
@@ -44,7 +45,7 @@ fn test_deploy() {
 
     let factory_client = AccountFactoryClient::new(
         &env,
-        &env.register(AccountFactory, (&auth_contract, &wasm_hash)),
+        &env.register(AccountFactory, (&auth_contract, &wasm_hash, &native_token)),
     );
 
     let id = gen_random_bytes::<32>(&env);
@@ -82,11 +83,12 @@ fn test_duplicate_deployment() {
     env.mock_all_auths();
 
     let auth_contract = Address::generate(&env);
+    let native_token = Address::generate(&env);
     let wasm_hash = env.deployer().upload_contract_wasm(contract::WASM);
 
     let factory_client = AccountFactoryClient::new(
         &env,
-        &env.register(AccountFactory, (&auth_contract, &wasm_hash)),
+        &env.register(AccountFactory, (&auth_contract, &wasm_hash, &native_token)),
     );
 
     let id = gen_random_bytes::<32>(&env);

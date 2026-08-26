@@ -2,21 +2,31 @@ import { updateSession } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { type NextRequestWithAuth, withAuth } from 'next-auth/middleware'
+import { logger } from '@/lib/logger'
 import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
 
 // Auth protected path prefixes / exact matches
-const AUTH_PROTECTED_PATHS = ['/create-project', '/profile']
+const AUTH_PROTECTED_PATHS = ['/create-project', '/create-foundation', '/profile', '/onboarding']
 // const AUTH_PROTECTED_PATHS: string[] = []
 
 function isProtectedPath(pathname: string) {
-	return (
-		AUTH_PROTECTED_PATHS.includes(pathname) ||
-		// /projects/[slug]/manage pattern
-		(pathname.startsWith('/projects/') && pathname.endsWith('/manage'))
-	)
+	if (AUTH_PROTECTED_PATHS.includes(pathname)) {
+		return true
+	}
+
+	// Project and foundation manage areas (including sub-routes)
+	if (pathname.startsWith('/projects/') && pathname.includes('/manage')) {
+		return true
+	}
+
+	if (pathname.startsWith('/foundations/') && pathname.includes('/manage')) {
+		return true
+	}
+
+	return false
 }
 
 const AUTH_PAGES = ['/sign-in', '/sign-up', '/reset-password', '/reset-account']
@@ -39,7 +49,6 @@ export default withAuth(
 						: 'next-auth.session-token',
 			})
 
-			// console.log('🔑 Middleware token check:', {
 			// 	hasToken: !!token,
 			// 	tokenSub: token?.sub,
 			// 	pathname,
@@ -48,7 +57,7 @@ export default withAuth(
 
 			// Redirect unauthenticated access to protected paths only
 			if (isProtectedPath(pathname) && !token?.sub) {
-				console.warn('⚠️ Unauthorized access attempt to:', pathname)
+				logger.warn('⚠️ Unauthorized access attempt to:', pathname)
 				const url = req.nextUrl.clone()
 				url.pathname = '/sign-in'
 				url.searchParams.set('callbackUrl', pathname)
@@ -58,7 +67,7 @@ export default withAuth(
 			// Pass through Supabase session refresh logic
 			return await updateSession(req as unknown as ExpectedRequestType, null)
 		} catch (error) {
-			console.error('Middleware error:', error)
+			logger.error('Middleware error:', error)
 			return NextResponse.next({
 				request: { headers: req.headers },
 			})

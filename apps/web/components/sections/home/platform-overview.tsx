@@ -19,15 +19,10 @@ export function PlatformOverview() {
 
 			<SectionContainer className="relative">
 				{/* Header */}
-				<motion.div
-					{...fadeInUpAnimation}
-					className="text-center mb-12 max-w-3xl mx-auto sm:mb-16"
-				>
+				<motion.div {...fadeInUpAnimation} className="text-center mb-12 max-w-3xl mx-auto sm:mb-16">
 					<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl sm:mb-6">
 						<span className="block">{t('home.platformTitle1')}</span>
-						<span className="block gradient-text">
-							{t('home.platformTitle2')}
-						</span>
+						<span className="block gradient-text">{t('home.platformTitle2')}</span>
 					</h2>
 					<p className="text-base text-muted-foreground leading-relaxed sm:text-lg">
 						{t('home.platformSubtitle')}

@@ -12,16 +12,9 @@ interface StepperIndicatorProps {
 	totalSteps: number
 }
 
-const stepLabels = [
-	'Basic Information',
-	'Media and Links',
-	'Location and Classification',
-]
+const stepLabels = ['Basic Information', 'Media and Links', 'Location and Classification']
 
-export function StepperIndicator({
-	currentStep,
-	totalSteps,
-}: StepperIndicatorProps) {
+export function StepperIndicator({ currentStep, totalSteps }: StepperIndicatorProps) {
 	const { formData } = useCreateProject()
 
 	// Checks if a step's required fields are valid
@@ -38,8 +31,7 @@ export function StepperIndicator({
 
 			case 2: {
 				const websiteValid = !formData.website || isValidUrl(formData.website)
-				const socialLinksValid =
-					formData.socialLinks?.every((link) => isValidUrl(link)) ?? true
+				const socialLinksValid = formData.socialLinks?.every((link) => isValidUrl(link)) ?? true
 				return websiteValid && socialLinksValid
 			}
 
@@ -58,8 +50,7 @@ export function StepperIndicator({
 				{Array.from({ length: totalSteps }, (_, index) => {
 					const stepNumber = index + 1
 					const isCurrent = currentStep === stepNumber
-					const isCompleted =
-						stepNumber < currentStep && isStepValid(stepNumber)
+					const isCompleted = stepNumber < currentStep && isStepValid(stepNumber)
 					const isConnected = index < totalSteps - 1
 
 					return (
@@ -71,8 +62,7 @@ export function StepperIndicator({
 									{
 										'bg-green-500 border-green-500 text-white': isCompleted,
 										'bg-indigo-950 border-indigo-950 text-white': isCurrent,
-										'bg-white border-gray-300 text-gray-500':
-											!isCurrent && !isCompleted,
+										'bg-white border-gray-300 text-gray-500': !isCurrent && !isCompleted,
 									},
 								)}
 								initial={{ scale: 0.8 }}
@@ -112,9 +102,7 @@ export function StepperIndicator({
 				transition={{ duration: 0.3 }}
 				className="text-center"
 			>
-				<p className="text-lg font-medium text-gray-900">
-					{stepLabels[currentStep - 1]}
-				</p>
+				<p className="text-lg font-medium text-gray-900">{stepLabels[currentStep - 1]}</p>
 			</motion.div>
 		</div>
 	)

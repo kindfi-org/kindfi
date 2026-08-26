@@ -3,9 +3,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { CreateProjectFormData } from '~/lib/types/project/create-project.types'
+import { sanitizeProjectTranslationForApi } from '~/lib/utils/project-utils'
 
 type CreateProjectResponse = {
 	slug: string
+	id: string
 }
 
 type UpdateProjectResponse = {
@@ -14,17 +16,17 @@ type UpdateProjectResponse = {
 
 type UseProjectMutationOptions = {
 	projectId?: string // If present, triggers update; otherwise, create
+	developmentOnly?: boolean
 }
 
-export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
+export function useProjectMutation({
+	projectId,
+	developmentOnly = false,
+}: UseProjectMutationOptions) {
 	const queryClient = useQueryClient()
 	const isUpdate = Boolean(projectId)
 
-	return useMutation<
-		CreateProjectResponse | UpdateProjectResponse,
-		Error,
-		CreateProjectFormData
-	>({
+	return useMutation<CreateProjectResponse | UpdateProjectResponse, Error, CreateProjectFormData>({
 		mutationFn: async (formData: CreateProjectFormData) => {
 			const fd = new FormData()
 
@@ -57,19 +59,24 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 			fd.append('socialLinks', JSON.stringify(formData.socialLinks))
 
 			if ((formData as { foundationId?: string }).foundationId) {
-				fd.append(
-					'foundationId',
-					(formData as { foundationId: string }).foundationId,
-				)
+				fd.append('foundationId', (formData as { foundationId: string }).foundationId)
 			}
 
-			const res = await fetch(
-				isUpdate ? '/api/projects/update' : '/api/projects/create',
-				{
-					method: isUpdate ? 'PATCH' : 'POST',
-					body: fd,
-				},
-			)
+			if (developmentOnly) {
+				fd.append('developmentOnly', 'true')
+			}
+
+			fd.append('sourceLocale', formData.sourceLocale ?? 'en')
+
+			const translation = sanitizeProjectTranslationForApi(formData.translation)
+			if (translation) {
+				fd.append('translation', JSON.stringify(translation))
+			}
+
+			const res = await fetch(isUpdate ? '/api/projects/update' : '/api/projects/create', {
+				method: isUpdate ? 'PATCH' : 'POST',
+				body: fd,
+			})
 
 			if (!res.ok) {
 				// Read response as text first, then try to parse as JSON
@@ -89,9 +96,7 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 		},
 		onSuccess: (_data, variables) => {
 			toast.success(
-				isUpdate
-					? 'Project Updated Successfully! 🎉'
-					: 'Project Created Successfully! 🎉',
+				isUpdate ? 'Project Updated Successfully! 🎉' : 'Project Created Successfully! 🎉',
 				{
 					description: isUpdate
 						? 'Your changes have been saved.'
@@ -109,12 +114,9 @@ export function useProjectMutation({ projectId }: UseProjectMutationOptions) {
 			queryClient.invalidateQueries({ queryKey: ['projects'] })
 		},
 		onError: (error: Error) => {
-			toast.error(
-				isUpdate ? 'Failed to update project' : 'Failed to create project',
-				{
-					description: error.message,
-				},
-			)
+			toast.error(isUpdate ? 'Failed to update project' : 'Failed to create project', {
+				description: error.message,
+			})
 		},
 	})
 }

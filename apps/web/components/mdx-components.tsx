@@ -8,8 +8,7 @@ type HProps = React.HTMLAttributes<HTMLHeadingElement>
 
 export const mdxComponents = {
 	img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-		const src =
-			typeof props.src === 'string' ? props.src : '/images/placeholder.png'
+		const src = typeof props.src === 'string' ? props.src : '/images/placeholder.png'
 		const alt = props.alt ?? ''
 		const width = props.width ? Number(props.width) : 1200
 		const height = props.height ? Number(props.height) : 630
@@ -35,10 +34,7 @@ export const mdxComponents = {
 	h1: (props: HProps) => (
 		<h1
 			{...props}
-			className={cn(
-				'mt-2 scroll-m-20 text-4xl font-bold tracking-tight',
-				props.className,
-			)}
+			className={cn('mt-2 scroll-m-20 text-4xl font-bold tracking-tight', props.className)}
 		/>
 	),
 	h2: (props: HProps) => (
@@ -53,23 +49,14 @@ export const mdxComponents = {
 	h3: (props: HProps) => (
 		<h3
 			{...props}
-			className={cn(
-				'mt-8 scroll-m-20 text-2xl font-semibold tracking-tight',
-				props.className,
-			)}
+			className={cn('mt-8 scroll-m-20 text-2xl font-semibold tracking-tight', props.className)}
 		/>
 	),
 	p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-		<p
-			{...props}
-			className={cn('leading-7 [&:not(:first-child)]:mt-6', props.className)}
-		/>
+		<p {...props} className={cn('leading-7 [&:not(:first-child)]:mt-6', props.className)} />
 	),
 	ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-		<ul
-			{...props}
-			className={cn('my-6 ml-6 list-disc [&>li]:mt-2', props.className)}
-		/>
+		<ul {...props} className={cn('my-6 ml-6 list-disc [&>li]:mt-2', props.className)} />
 	),
 	Callout: ({
 		title,
@@ -87,6 +74,7 @@ export const mdxComponents = {
 	),
 	Tweet: ({ id }: { id: string }) => (
 		<iframe
+			title={`Tweet ${id}`}
 			src={`https://twitframe.com/show?url=${encodeURIComponent(`https://twitter.com/x/status/${id}`)}`}
 			className="w-full min-h-[200px] border-0"
 		/>

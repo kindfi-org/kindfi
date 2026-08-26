@@ -40,9 +40,7 @@ export const FinalCTA = () => {
 				>
 					<h2 className="text-3xl font-bold text-gray-900 mb-4 sm:text-4xl sm:mb-6">
 						{t('home.finalCtaTitle')}
-						<span className="block gradient-text">
-							{t('home.finalCtaSubtitle')}
-						</span>
+						<span className="block gradient-text">{t('home.finalCtaSubtitle')}</span>
 					</h2>
 					<p className="text-base text-muted-foreground leading-relaxed sm:text-lg">
 						{t('home.finalCtaDescription')}
@@ -62,13 +60,9 @@ export const FinalCTA = () => {
 						>
 							<div className="flex items-center gap-4 mb-4">
 								<div className="p-2 rounded-xl bg-teal-50">{feature.icon}</div>
-								<h3 className="text-xl font-semibold text-gray-900">
-									{feature.title}
-								</h3>
+								<h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
 							</div>
-							<p className="text-gray-600 leading-relaxed pl-14 flex-1">
-								{feature.description}
-							</p>
+							<p className="text-gray-600 leading-relaxed pl-14 flex-1">{feature.description}</p>
 						</motion.div>
 					))}
 				</div>

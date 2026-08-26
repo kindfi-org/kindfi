@@ -1,29 +1,50 @@
-/**
- * Default escrow configuration constants
- */
+import { getTrustlessWorkNetwork } from '~/lib/config/trustless-work.config'
 
 /**
- * Default USDC address for Stellar testnet
- *
- * Based on Trustless Work documentation, they use Soroban-wrapped USDC contract address:
- * GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
- *
- * For mainnet, this should be updated to the mainnet USDC contract address
+ * Testnet USDC issuer (KindFi / Trustless Work configuration).
  */
-export const DEFAULT_USDC_CONTRACT_ADDRESS =
-	process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS ||
-	process.env.USDC_CONTRACT_ADDRESS ||
-	// Soroban-wrapped USDC contract address (from Trustless Work docs)
+export const TESTNET_USDC_TRUSTLINE_ADDRESS =
 	'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'
 
 /**
- * Traditional Stellar asset issuer format (G-address)
- * May be needed if Trustless Work API requires issuer format instead of contract address
- *
- * Testnet USDC Issuer: GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
+ * Circle USDC issuer on Stellar mainnet (KindFi / Trustless Work configuration).
  */
-export const DEFAULT_USDC_ISSUER_ADDRESS =
-	process.env.NEXT_PUBLIC_USDC_ISSUER_ADDRESS ||
-	process.env.USDC_ISSUER_ADDRESS ||
-	// Testnet USDC issuer address (G-address)
-	'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'
+export const MAINNET_USDC_TRUSTLINE_ADDRESS =
+	'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN'
+
+const readExplicitUsdcAddress = (): string | undefined => {
+	const address =
+		process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS?.trim() ||
+		process.env.USDC_CONTRACT_ADDRESS?.trim()
+
+	return address || undefined
+}
+
+const readNetworkUsdcAddress = (): string => {
+	const network = getTrustlessWorkNetwork()
+
+	if (network === 'mainnet') {
+		return (
+			process.env.NEXT_PUBLIC_MAINNET_USDC_CONTRACT_ADDRESS?.trim() ||
+			process.env.MAINNET_PUBLIC_USDC_ISSUER?.trim() ||
+			MAINNET_USDC_TRUSTLINE_ADDRESS
+		)
+	}
+
+	return (
+		process.env.NEXT_PUBLIC_TESTNET_USDC_CONTRACT_ADDRESS?.trim() ||
+		process.env.NEXT_PUBLIC_TESTNET_USDC_ISSUER_ADDRESS?.trim() ||
+		process.env.TESTNET_PUBLIC_USDC_ISSUER?.trim() ||
+		TESTNET_USDC_TRUSTLINE_ADDRESS
+	)
+}
+
+/** Default USDC trustline for the active Trustless Work network. */
+export const getDefaultUsdcContractAddress = (): string =>
+	readExplicitUsdcAddress() ?? readNetworkUsdcAddress()
+
+/**
+ * Default USDC trustline used in escrow forms.
+ * Follows `NEXT_PUBLIC_TRUSTLESS_WORK_NETWORK` unless overridden via USDC env vars.
+ */
+export const DEFAULT_USDC_CONTRACT_ADDRESS = getDefaultUsdcContractAddress()

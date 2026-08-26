@@ -60,11 +60,7 @@ export function HowItWorks() {
 
 				<div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
 					{translatedModels.map((model) => (
-						<InvestmentModelCard
-							key={model.id}
-							{...model}
-							onLearnMore={handleLearnMore}
-						/>
+						<InvestmentModelCard key={model.id} {...model} onLearnMore={handleLearnMore} />
 					))}
 				</div>
 			</SectionContainer>

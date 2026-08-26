@@ -4,15 +4,10 @@ export function validateEnvVars(requiredEnvVars: string[]) {
 			throw new Error(`Missing required environment variable: ${envVar}`)
 		}
 	})
-
 }
 
 export function validateSupabaseEnvVars() {
-	const requiredEnvVars = [
-		'SUPABASE_URL',
-		'SUPABASE_ANON_KEY',
-		'SUPABASE_SERVICE_ROLE_KEY',
-	]
+	const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY']
 
 	validateEnvVars(requiredEnvVars)
 }
@@ -20,7 +15,7 @@ export function validateSupabaseEnvVars() {
 export function validatePasskeyEnvVars() {
 	const requiredEnvVars = ['RP_ID', 'RP_NAME', 'EXPECTED_ORIGIN']
 
-	const optionalEnvVars = [
+	const _optionalEnvVars = [
 		'REDIS_URL',
 		'CHALLENGE_TTL_SECONDS',
 		'NETWORK_PASSPHRASE',

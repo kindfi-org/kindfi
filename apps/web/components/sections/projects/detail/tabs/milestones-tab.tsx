@@ -7,17 +7,11 @@ import type {
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
 import { motion, useInView } from 'framer-motion'
-import { AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { AlertCircle, CheckCircle, Clock, Send } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import type {
-	Milestone,
-	MilestoneStatus,
-} from '~/lib/types/project/project-detail.types'
-import {
-	getMilestoneStatus,
-	isSingleReleaseMilestone,
-} from '~/lib/utils/escrow/milestone-utils'
+import type { Milestone } from '~/lib/types/project/project-detail.types'
+import { mapEscrowMilestoneToPublicStatus } from '~/lib/utils/escrow/milestone-utils'
 
 interface MilestonesTabProps {
 	milestones: Milestone[]
@@ -31,9 +25,7 @@ export function MilestonesTab({
 	escrowType: _escrowType,
 }: MilestonesTabProps) {
 	const { getEscrowByContractIds } = useEscrow()
-	const [onChainMilestones, setOnChainMilestones] = useState<
-		Milestone[] | null
-	>(null)
+	const [onChainMilestones, setOnChainMilestones] = useState<Milestone[] | null>(null)
 	const [isLoadingOnChain, setIsLoadingOnChain] = useState(false)
 
 	useEffect(() => {
@@ -43,37 +35,23 @@ export function MilestonesTab({
 				setIsLoadingOnChain(true)
 				const resp = await getEscrowByContractIds({
 					contractIds: [escrowContractAddress],
-					validateOnChain: false,
+					validateOnChain: true,
 				})
 				// Handle both object and array responses from the indexer
 				const escrow = Array.isArray(resp) ? resp[0] : resp
+				const escrowReleased = escrow?.flags?.released ?? false
 				const ms =
-					(escrow?.milestones as
-						| (SingleReleaseMilestone | MultiReleaseMilestone)[]
-						| undefined) || []
-			const mapped: Milestone[] = ms.map((m, idx) => {
-				const isApproved = getMilestoneStatus(m)
-				const isSingle = isSingleReleaseMilestone(m)
-				let status: MilestoneStatus
-
-				if (isApproved) {
-					status = 'approved'
-				} else if (!isSingle && m.status) {
-					status = (m.status as MilestoneStatus) ?? 'pending'
-				} else {
-					status = 'pending'
-				}
-
-				return {
+					(escrow?.milestones as (SingleReleaseMilestone | MultiReleaseMilestone)[] | undefined) ||
+					[]
+				const mapped: Milestone[] = ms.map((m, idx) => ({
 					id: String(idx),
-					title: m.description || `Milestone ${idx + 1}`,
+					title: m.description || `Release ${idx + 1}`,
 					description: m.description || '',
 					amount: (m as MultiReleaseMilestone).amount ?? 0,
 					deadline: new Date().toISOString(),
-					status,
+					status: mapEscrowMilestoneToPublicStatus(m, { escrowReleased }),
 					orderIndex: idx,
-				}
-			})
+				}))
 				setOnChainMilestones(mapped)
 			} finally {
 				setIsLoadingOnChain(false)
@@ -87,21 +65,20 @@ export function MilestonesTab({
 		if (escrowContractAddress) return onChainMilestones ?? []
 		return milestones
 	}, [escrowContractAddress, onChainMilestones, milestones])
-	const sortedMilestones = [...effectiveMilestones].sort(
-		(a, b) => a.orderIndex - b.orderIndex,
-	)
+	const sortedMilestones = [...effectiveMilestones].sort((a, b) => a.orderIndex - b.orderIndex)
+	const releasedCount = sortedMilestones.filter((m) => m.status === 'released').length
 
 	if (sortedMilestones.length === 0) {
 		if (escrowContractAddress && isLoadingOnChain) {
 			return (
 				<div className="p-6 text-center text-gray-500 bg-white rounded-xl shadow-sm">
-					Loading milestones from escrow...
+					Loading releases from escrow...
 				</div>
 			)
 		}
 		return (
 			<div className="p-6 text-center text-gray-500 bg-white rounded-xl shadow-sm">
-				No milestones available for this project.
+				No releases available for this project.
 			</div>
 		)
 	}
@@ -113,7 +90,15 @@ export function MilestonesTab({
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3 }}
 		>
-			<h2 className="mb-8 text-2xl font-bold">Project Milestones</h2>
+			<h2 className="mb-2 text-2xl font-bold">Releases</h2>
+			{escrowContractAddress && releasedCount > 0 ? (
+				<p className="mb-8 text-sm text-muted-foreground">
+					{releasedCount} of {sortedMilestones.length} release
+					{sortedMilestones.length === 1 ? '' : 's'} have had funds released on-chain.
+				</p>
+			) : (
+				<div className="mb-8" />
+			)}
 
 			<div className="relative">
 				{/* Vertical timeline line */}
@@ -124,11 +109,7 @@ export function MilestonesTab({
 
 				<div className="space-y-12">
 					{sortedMilestones.map((milestone, index) => (
-						<MilestoneCard
-							key={milestone.id}
-							milestone={milestone}
-							index={index}
-						/>
+						<MilestoneCard key={milestone.id} milestone={milestone} index={index} />
 					))}
 				</div>
 			</div>
@@ -152,35 +133,42 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 				return (
 					<>
 						<CheckCircle {...iconProps} className="text-green-500" />
-						<span className="sr-only">Milestone completed</span>
+						<span className="sr-only">Release completed</span>
 					</>
 				)
 			case 'pending':
 				return (
 					<>
 						<Clock {...iconProps} className="text-amber-500" />
-						<span className="sr-only">Milestone pending</span>
+						<span className="sr-only">Release pending</span>
 					</>
 				)
 			case 'approved':
 				return (
 					<>
 						<CheckCircle {...iconProps} className="text-blue-500" />
-						<span className="sr-only">Milestone approved</span>
+						<span className="sr-only">Release approved</span>
+					</>
+				)
+			case 'released':
+				return (
+					<>
+						<Send {...iconProps} className="text-emerald-600" />
+						<span className="sr-only">Release disbursed — funds released on-chain</span>
 					</>
 				)
 			case 'rejected':
 				return (
 					<>
 						<AlertCircle {...iconProps} className="text-red-500" />
-						<span className="sr-only">Milestone rejected</span>
+						<span className="sr-only">Release rejected</span>
 					</>
 				)
 			case 'disputed':
 				return (
 					<>
 						<AlertCircle {...iconProps} className="text-yellow-600" />
-						<span className="sr-only">Milestone disputed</span>
+						<span className="sr-only">Release disputed</span>
 					</>
 				)
 			default:
@@ -196,6 +184,8 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 				return 'bg-amber-100 text-amber-800'
 			case 'approved':
 				return 'bg-blue-100 text-blue-800'
+			case 'released':
+				return 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200'
 			case 'rejected':
 				return 'bg-red-100 text-red-800'
 			case 'disputed':
@@ -204,15 +194,6 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 				return 'bg-gray-100 text-gray-800'
 		}
 	}
-
-	const formattedDate = new Date(milestone.deadline).toLocaleDateString(
-		'en-US',
-		{
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-		},
-	)
 
 	return (
 		<div ref={cardRef} className="relative">
@@ -239,23 +220,15 @@ function MilestoneCard({ milestone, index }: MilestoneCardProps) {
 						className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(milestone.status)}`}
 						aria-label={`Status: ${milestone.status}`}
 					>
-						{milestone.status
-							.replace('-', ' ')
-							.replace(/\b\w/g, (l) => l.toUpperCase())}
+						{milestone.status.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
 					</span>
 				</div>
 
 				<p className="mb-6 text-muted-foreground">{milestone.description}</p>
 
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<div className="p-3 bg-gray-50 rounded-lg">
-						<p className="mb-1 text-sm text-gray-500">Funding Required</p>
-						<p className="font-bold">${milestone.amount.toLocaleString()}</p>
-					</div>
-					<div className="p-3 bg-gray-50 rounded-lg">
-						<p className="mb-1 text-sm text-gray-500">Deadline</p>
-						<p className="font-bold">{formattedDate}</p>
-					</div>
+				<div className="p-3 bg-gray-50 rounded-lg">
+					<p className="mb-1 text-sm text-gray-500">Funding Required</p>
+					<p className="font-bold">${milestone.amount.toLocaleString()}</p>
 				</div>
 			</motion.div>
 		</div>

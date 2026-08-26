@@ -3,11 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Button } from '~/components/base/button'
 
-export default async function PublicProfilePage({
-	params,
-}: {
-	params: Promise<{ slug: string }>
-}) {
+export default async function PublicProfilePage({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params
 	const supabase = await createSupabaseServerClient()
 
@@ -32,9 +28,7 @@ export default async function PublicProfilePage({
 					/>
 				) : null}
 				<div>
-					<h1 className="text-2xl font-semibold">
-						{profile.display_name || slug}
-					</h1>
+					<h1 className="text-2xl font-semibold">{profile.display_name || slug}</h1>
 					<p className="text-muted-foreground">{profile.bio}</p>
 				</div>
 				<div className="ml-auto">

@@ -1,18 +1,16 @@
 'use client'
 
 import { ReactQueryClientProvider } from '@packages/lib/providers'
-import { development, TrustlessWorkConfig } from '@trustless-work/escrow'
 import type { Session } from 'next-auth'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { useEffect } from 'react'
-import { StellarProvider } from '~/hooks/contexts/stellar-context'
-import { EscrowProvider } from '~/hooks/contexts/use-escrow.context'
+import { logger } from '@/lib/logger'
 import { WalletProvider } from '~/hooks/contexts/use-stellar-wallet.context'
 import { WaitlistProvider } from '~/hooks/contexts/use-waitlist.context'
 import { AuthProvider } from '~/hooks/use-auth'
 import { I18nProvider } from '~/lib/i18n/context'
-import { translations } from '~/lib/i18n/translations'
+import { KindfiPollarProvider } from '~/lib/pollar/provider'
 
 interface ProvidersProps {
 	children: React.ReactNode
@@ -33,7 +31,6 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					scope: '/',
 				})
 				.then((registration) => {
-
 					// Request notification permission
 					if ('Notification' in window) {
 						Notification.requestPermission().then((permission) => {
@@ -46,55 +43,46 @@ export function Providers({ children, initSession }: ProvidersProps) {
 					try {
 						const reg = registration as ServiceWorkerRegistrationWithSync
 						if (reg.periodicSync) {
-							// TODO: Fix registration, crashing on some MacOs due lack of permissions on browsers by default...
 							// reg.periodicSync
 							// 	.register('notification-sync', {
 							// 		minInterval: 24 * 60 * 60 * 1000, // 24 hours
 							// 	})
 							// 	.catch((error) => {
-							// 		console.error('Periodic sync registration failed:', error)
 							// 	})
 						}
 					} catch (error) {
-						console.error('Periodic sync not supported:', error)
+						logger.error('Periodic sync not supported:', error)
 					}
 				})
 				.catch((error) => {
-					console.error('Service worker registration failed:', error)
+					logger.error('Service worker registration failed:', error)
 				})
 		}
 	}, [])
 
-	// Use development API until mainnet release (post-Stellar audit).
-	// When ready for mainnet: import mainNet, then use:
-	// trustlessBaseUrl = process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'mainnet' ? mainNet : development
-	const trustlessBaseUrl = development
-
 	return (
 		<ReactQueryClientProvider>
-			<I18nProvider translations={translations}>
+			<I18nProvider>
 				<NextThemesProvider
 					attribute="class"
 					defaultTheme="light"
 					forcedTheme="light"
 					disableTransitionOnChange
 				>
-					<SessionProvider session={initSession}>
-						<AuthProvider initSession={initSession}>
-							<WaitlistProvider>
-								<TrustlessWorkConfig
-									baseURL={trustlessBaseUrl}
-									apiKey={process.env.NEXT_PUBLIC_TRUSTLESS_WORK_API_KEY || ''}
-								>
-									<WalletProvider>
-										<EscrowProvider>
-											<StellarProvider>{children}</StellarProvider>
-										</EscrowProvider>
-									</WalletProvider>
-								</TrustlessWorkConfig>
-							</WaitlistProvider>
-						</AuthProvider>
-					</SessionProvider>
+					{/* Keep Pollar outside SessionProvider so session key changes do not remount the SDK (avoids session/resume 429s). */}
+					<KindfiPollarProvider>
+						<SessionProvider
+							key={initSession?.user?.id ?? 'guest'}
+							session={initSession ?? undefined}
+							refetchOnWindowFocus
+						>
+							<AuthProvider initSession={initSession}>
+								<WalletProvider>
+									<WaitlistProvider>{children}</WaitlistProvider>
+								</WalletProvider>
+							</AuthProvider>
+						</SessionProvider>
+					</KindfiPollarProvider>
 				</NextThemesProvider>
 			</I18nProvider>
 		</ReactQueryClientProvider>

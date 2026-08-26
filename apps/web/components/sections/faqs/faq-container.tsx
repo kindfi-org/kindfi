@@ -6,12 +6,7 @@ import { FaqSupport } from './faq-support'
 import { FaqTabs } from './faq-tabs'
 
 export function FaqContainer() {
-	const {
-		activeTab,
-		selectedQuestion,
-		handleActiveFaq,
-		handleSelectedQuestion,
-	} = useFaqs()
+	const { activeTab, selectedQuestion, handleActiveFaq, handleSelectedQuestion } = useFaqs()
 
 	return (
 		<section className="w-full flex flex-col justify-center items-center bg-gradient-to-b from-white to-gray-50 py-24 md:py-32">

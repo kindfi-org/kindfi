@@ -12,11 +12,7 @@ type ManageSectionHeaderProps = {
  * Shared header for foundation manage sub-pages.
  * Single component to avoid duplicated layout and copy.
  */
-export function ManageSectionHeader({
-	icon,
-	title,
-	description,
-}: ManageSectionHeaderProps) {
+export function ManageSectionHeader({ icon, title, description }: ManageSectionHeaderProps) {
 	return (
 		<header className="flex flex-col items-center justify-center mb-8">
 			<div className="flex items-center gap-3">

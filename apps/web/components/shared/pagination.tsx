@@ -16,11 +16,7 @@ interface PaginationProps {
 	onPageChange: (page: number) => void
 }
 
-export function Paginations({
-	currentPage,
-	totalPages,
-	onPageChange,
-}: PaginationProps) {
+export function Paginations({ currentPage, totalPages, onPageChange }: PaginationProps) {
 	const generatePageNumbers = () => {
 		const pages = []
 		const maxVisiblePages = 5
@@ -64,9 +60,7 @@ export function Paginations({
 							e.preventDefault()
 							if (currentPage > 1) onPageChange(currentPage - 1)
 						}}
-						className={
-							currentPage === 1 ? 'pointer-events-none opacity-50' : ''
-						}
+						className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
 					/>
 				</PaginationItem>
 
@@ -91,11 +85,7 @@ export function Paginations({
 									onPageChange(page)
 								}}
 								isActive={page === currentPage}
-								className={
-									page === currentPage
-										? 'bg-blue-100 text-blue-600'
-										: 'hover:bg-blue-50'
-								}
+								className={page === currentPage ? 'bg-blue-100 text-blue-600' : 'hover:bg-blue-50'}
 							>
 								{page}
 							</PaginationLink>
@@ -110,9 +100,7 @@ export function Paginations({
 							e.preventDefault()
 							if (currentPage < totalPages) onPageChange(currentPage + 1)
 						}}
-						className={
-							currentPage === totalPages ? 'pointer-events-none opacity-50' : ''
-						}
+						className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
 					/>
 				</PaginationItem>
 			</PaginationContent>

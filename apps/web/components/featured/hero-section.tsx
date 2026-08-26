@@ -5,12 +5,7 @@ interface HeroSectionProps {
 	badge?: string
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({
-	title,
-	highlight,
-	subtitle,
-	badge,
-}) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ title, highlight, subtitle, badge }) => {
 	return (
 		<section className="relative overflow-hidden bg-[#FAFAFA] py-24 lg:py-32">
 			<div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-transparent" />

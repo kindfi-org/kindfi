@@ -1,6 +1,5 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import type { Editor } from '@tiptap/react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,6 +22,7 @@ import {
 	FormMessage,
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import { cn } from '~/lib/utils'
 
 const linkSchema = z.object({
@@ -120,7 +120,7 @@ export function LinkDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className={cn('sm:max-w-md bg-white', className)}>
+			<DialogContent className={cn('sm:max-w-md', className)}>
 				<DialogHeader>
 					<DialogTitle>{initialUrl ? 'Edit Link' : 'Insert Link'}</DialogTitle>
 					<DialogDescription>
@@ -137,12 +137,7 @@ export function LinkDialog({
 								<FormItem>
 									<FormLabel>URL</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="https://example.com"
-											autoFocus
-											{...field}
-											className="bg-white border-green-600"
-										/>
+										<Input placeholder="https://example.com" autoFocus {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -156,15 +151,10 @@ export function LinkDialog({
 								<FormItem>
 									<FormLabel>Display text (optional)</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="Link text"
-											{...field}
-											className="bg-white border-green-600"
-										/>
+										<Input placeholder="Link text" {...field} />
 									</FormControl>
 									<p className="text-xs text-muted-foreground">
-										If left empty and no text is selected, the URL will be used
-										as the link text.
+										If left empty and no text is selected, the URL will be used as the link text.
 									</p>
 								</FormItem>
 							)}
@@ -176,7 +166,7 @@ export function LinkDialog({
 									type="button"
 									variant="outline"
 									onClick={handleRemove}
-									className="mr-auto flex items-center gap-2 gradient-border-btn bg-white"
+									className="mr-auto flex items-center gap-2 gradient-border-btn"
 								>
 									Remove Link
 								</Button>

@@ -48,8 +48,7 @@ export const comments: Comment[] = [
 		id: 'comment-1',
 		name: 'Sarah M.',
 		badge: 'Early Supporter',
-		comment:
-			'Amazing to see the project reach its goal! The community really came together. 🎉',
+		comment: 'Amazing to see the project reach its goal! The community really came together. 🎉',
 		likes: 24,
 	},
 	{
@@ -80,8 +79,7 @@ export const faqData: Record<string, FAQ[]> = {
 		},
 		{
 			id: '3',
-			question:
-				'What makes KindFi different from traditional crowdfunding platforms?',
+			question: 'What makes KindFi different from traditional crowdfunding platforms?',
 			answer:
 				'KindFi eliminates intermediaries, reduces fees, and introduces blockchain-powered accountability. It offers gamified rewards, open-source development, and AI-driven campaign optimization—all with a focus on social good.',
 			category: 'platform',
@@ -263,10 +261,7 @@ export const faqData: Record<string, FAQ[]> = {
 	],
 }
 
-export const categoryTitles: Record<
-	string,
-	{ title: string; subtitle: string }
-> = {
+export const categoryTitles: Record<string, { title: string; subtitle: string }> = {
 	platform: {
 		title: 'Platform FAQs',
 		subtitle: 'General questions about KindFi',

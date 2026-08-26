@@ -1,6 +1,6 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
+import { useQuery } from '@tanstack/react-query'
 import { notFound } from 'next/navigation'
 import { ProjectHero } from '~/components/sections/projects/detail/project-hero'
 import { ProjectSidebar } from '~/components/sections/projects/detail/project-sidebar'
@@ -12,26 +12,33 @@ import {
 	ProjectTabsSkeleton,
 } from '~/components/sections/projects/detail/skeletons'
 import { BreadcrumbContainer } from '~/components/sections/projects/shared'
-import { getProjectBySlug } from '~/lib/queries/projects'
+import { useI18n } from '~/lib/i18n'
+import type { getProjectBySlug } from '~/lib/queries/projects/get-project-by-slug'
 
 interface ProjectClientWrapperProps {
 	projectSlug: string
 }
 
-export function ProjectClientWrapper({
-	projectSlug,
-}: ProjectClientWrapperProps) {
-	const {
-		data: project,
-		isLoading,
-		error,
-	} = useSupabaseQuery(
-		'project',
-		(client) => getProjectBySlug(client, projectSlug),
-		{
-			additionalKeyValues: [projectSlug],
-		},
-	)
+async function fetchProjectDetail(
+	projectSlug: string,
+): Promise<Awaited<ReturnType<typeof getProjectBySlug>>> {
+	const response = await fetch(`/api/projects/${projectSlug}`)
+	if (response.status === 404) {
+		return null
+	}
+	if (!response.ok) {
+		throw new Error('Failed to load project')
+	}
+	return response.json()
+}
+
+export function ProjectClientWrapper({ projectSlug }: ProjectClientWrapperProps) {
+	const { language } = useI18n()
+	const { data: project, isLoading } = useQuery({
+		queryKey: ['project', projectSlug, language],
+		queryFn: () => fetchProjectDetail(projectSlug),
+		staleTime: 60_000,
+	})
 
 	if (isLoading) {
 		return (
@@ -52,7 +59,13 @@ export function ProjectClientWrapper({
 		)
 	}
 
-	if (error || !project) notFound()
+	if (!isLoading && !project) {
+		notFound()
+	}
+
+	if (!project) {
+		return null
+	}
 
 	const category = project.category?.slug
 		? { name: project.category.name, slug: project.category.slug }
@@ -65,11 +78,11 @@ export function ProjectClientWrapper({
 			</div>
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2">
-					<ProjectHero project={project} />
-					<ProjectTabs project={project} />
+					<ProjectHero project={project} projectSlug={projectSlug} />
+					<ProjectTabs project={project} projectSlug={projectSlug} />
 				</div>
 				<div className="lg:col-span-1">
-					<ProjectSidebar project={project} />
+					<ProjectSidebar project={project} projectSlug={projectSlug} />
 				</div>
 			</div>
 		</>

@@ -1,6 +1,5 @@
 'use client'
 
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -24,6 +23,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { Textarea } from '~/components/base/textarea'
+import { zodResolver } from '~/lib/form/zod-resolver'
 
 const addMilestoneSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
@@ -112,15 +112,11 @@ export function AddMilestoneDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
-			<DialogContent
-				className="sm:max-w-md"
-				aria-describedby="add-milestone-description"
-			>
+			<DialogContent className="sm:max-w-md" aria-describedby="add-milestone-description">
 				<DialogHeader>
 					<DialogTitle>Add milestone</DialogTitle>
 					<DialogDescription id="add-milestone-description">
-						Record a key achievement for your foundation. This will be shown on
-						your public profile.
+						Record a key achievement for your foundation. This will be shown on your public profile.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>

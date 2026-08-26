@@ -7,10 +7,7 @@ interface AnimatedCounterProps {
 	duration?: number
 }
 
-export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
-	value,
-	duration = 2000,
-}) => {
+export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ value, duration = 2000 }) => {
 	const [count, setCount] = useState(0)
 	const _countRef = useRef<number | null>(null)
 

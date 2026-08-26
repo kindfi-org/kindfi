@@ -1,18 +1,17 @@
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import {
-	getDiditSessionStatus,
-	mapDiditStatusToKYC,
-} from '~/lib/services/didit'
+import { findLatestDiditSessionForUser } from '~/lib/kyc/session-service'
+import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
+import { getDiditSessionStatus } from '~/lib/services/didit'
 
 /**
  * POST /api/kyc/didit/check-status
  *
- * Checks the current KYC status by querying Didit API directly
- * This is useful when webhooks are delayed or haven't fired yet
+ * Checks the current KYC status by querying Didit API directly.
+ * Useful when webhooks are delayed or have not fired yet.
  */
 export async function POST(_req: NextRequest) {
 	try {
@@ -22,89 +21,49 @@ export async function POST(_req: NextRequest) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		// Use service role client since we've already validated the user via NextAuth
-		// Get the most recent KYC record for this user
-		const { data: kycRecord, error: findError } = await supabaseServiceRole
-			.from('kyc_reviews')
-			.select('notes')
-			.eq('user_id', session.user.id)
-			.order('created_at', { ascending: false })
-			.limit(1)
-			.maybeSingle()
+		const diditSession = await findLatestDiditSessionForUser(session.user.id)
 
-		if (findError) {
-			console.error('Error finding KYC record:', findError)
-			return NextResponse.json(
-				{ error: 'Failed to find KYC record', details: findError.message },
-				{ status: 500 },
-			)
-		}
-
-		if (!kycRecord || !kycRecord.notes) {
-			// No KYC session found - this is okay, user just hasn't started KYC yet
+		if (!diditSession) {
 			return NextResponse.json({
 				success: false,
 				status: null,
+				canonicalStatus: 'not_started',
 				message: 'No KYC session found',
 			})
 		}
 
-		// Parse notes to get session ID
-		const notes =
-			typeof kycRecord.notes === 'string'
-				? JSON.parse(kycRecord.notes)
-				: kycRecord.notes
+		try {
+			const diditStatus = await getDiditSessionStatus(diditSession.sessionId)
+			const result = await applyDiditStatusUpdate({
+				sessionId: diditSession.sessionId,
+				diditStatus: diditStatus.status,
+				userId: session.user.id,
+				source: 'check_status',
+				providerEventAt: diditStatus.updated_at ? new Date(diditStatus.updated_at) : new Date(),
+			})
 
-		const sessionId = notes.diditSessionId
+			const canonicalStatus = result.canonicalStatus ?? diditSession.canonicalStatus
 
-		if (!sessionId) {
-			// No session ID in notes - this is okay, might be an old record format
+			return NextResponse.json({
+				success: true,
+				status: canonicalStatus === 'approved' ? 'approved' : canonicalStatus,
+				canonicalStatus,
+				diditStatus: diditStatus.status,
+			})
+		} catch (providerError) {
+			logger.error('Error checking KYC status from Didit:', {
+				error: providerError instanceof Error ? providerError.message : 'provider_unavailable',
+			})
 			return NextResponse.json({
 				success: false,
-				status: null,
-				message: 'No session ID found in KYC record',
+				status: diditSession.canonicalStatus,
+				canonicalStatus: 'provider_unavailable',
+				storedCanonicalStatus: diditSession.canonicalStatus,
+				message: 'Didit status is temporarily unavailable',
 			})
 		}
-
-		// Check status directly from Didit
-		const diditStatus = await getDiditSessionStatus(sessionId)
-
-		const kycStatus = mapDiditStatusToKYC(diditStatus.status)
-
-		// Update our database with the latest status
-		const { error: updateError } = await supabaseServiceRole
-			.from('kyc_reviews')
-			.update({
-				status: kycStatus,
-				notes: JSON.stringify({
-					...notes,
-					diditSessionId: sessionId,
-					diditStatus: diditStatus.status,
-					lastChecked: new Date().toISOString(),
-					lastUpdated: diditStatus.updated_at || new Date().toISOString(),
-				}),
-				updated_at: new Date().toISOString(),
-			})
-			.eq('user_id', session.user.id)
-
-		if (updateError) {
-			console.error('Failed to update KYC record:', updateError)
-			// Still return the status even if update fails
-		}
-
-		return NextResponse.json({
-			success: true,
-			status: kycStatus,
-			diditStatus: diditStatus.status,
-		})
 	} catch (error) {
-		console.error('Error checking KYC status:', error)
-		return NextResponse.json(
-			{
-				error: 'Failed to check KYC status',
-				details: error instanceof Error ? error.message : String(error),
-			},
-			{ status: 500 },
-		)
+		logger.error('Error checking KYC status:', error)
+		return NextResponse.json({ error: 'Failed to check KYC status' }, { status: 500 })
 	}
 }

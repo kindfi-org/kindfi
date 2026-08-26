@@ -8,19 +8,13 @@ import {
 	SkeletonSuccessStories,
 } from '~/components/sections/impact/skeletons'
 
-const Hero = dynamic(
-	() => import('~/components/sections/impact/hero').then((mod) => mod.Hero),
-	{
-		ssr: true,
-		loading: SkeletonHero,
-	},
-)
+const Hero = dynamic(() => import('~/components/sections/impact/hero').then((mod) => mod.Hero), {
+	ssr: true,
+	loading: SkeletonHero,
+})
 
 const SuccessStories = dynamic(
-	() =>
-		import('~/components/sections/impact/success-stories').then(
-			(mod) => mod.SuccessStories,
-		),
+	() => import('~/components/sections/impact/success-stories').then((mod) => mod.SuccessStories),
 	{
 		ssr: true,
 		loading: SkeletonSuccessStories,
@@ -28,10 +22,7 @@ const SuccessStories = dynamic(
 )
 
 const Testimonials = dynamic(
-	() =>
-		import('~/components/sections/impact/testimonials').then(
-			(mod) => mod.CommunityVoices,
-		),
+	() => import('~/components/sections/impact/testimonials').then((mod) => mod.CommunityVoices),
 	{
 		ssr: true,
 		loading: SkeletonCommunityVoices,
@@ -39,10 +30,7 @@ const Testimonials = dynamic(
 )
 
 const TopImpactMakers = dynamic(
-	() =>
-		import('~/components/sections/impact/impact-makers').then(
-			(mod) => mod.TopImpactMakers,
-		),
+	() => import('~/components/sections/impact/impact-makers').then((mod) => mod.TopImpactMakers),
 	{
 		ssr: true,
 		loading: SkeletonImpactMakers,
@@ -50,10 +38,7 @@ const TopImpactMakers = dynamic(
 )
 
 const Categories = dynamic(
-	() =>
-		import('~/components/sections/impact/categories').then(
-			(mod) => mod.ImpactCategories,
-		),
+	() => import('~/components/sections/impact/categories').then((mod) => mod.ImpactCategories),
 	{
 		ssr: true,
 		loading: SkeletonImpactCategories,
@@ -61,10 +46,7 @@ const Categories = dynamic(
 )
 
 const MakeImpact = dynamic(
-	() =>
-		import('~/components/sections/impact/get-involved').then(
-			(mod) => mod.MakeImpact,
-		),
+	() => import('~/components/sections/impact/get-involved').then((mod) => mod.MakeImpact),
 	{
 		ssr: true,
 		loading: SkeletonMakeImpact,

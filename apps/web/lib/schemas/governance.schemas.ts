@@ -1,6 +1,7 @@
 import { z } from 'zod'
+import { limitOffsetQuerySchema } from './common.schemas'
 
-export const governanceRoundsQuerySchema = z.object({
+export const governanceRoundsQuerySchema = limitOffsetQuerySchema.extend({
 	status: z.enum(['upcoming', 'active', 'ended']).optional(),
 })
 

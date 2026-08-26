@@ -26,11 +26,7 @@ export function useMembersMutation() {
 	const queryClient = useQueryClient()
 
 	// PATCH role
-	const updateRole = useMutation<
-		MemberMutationResponse,
-		Error,
-		UpdateRolePayload
-	>({
+	const updateRole = useMutation<MemberMutationResponse, Error, UpdateRolePayload>({
 		mutationFn: async (payload) => {
 			const fd = new FormData()
 			fd.append('projectId', payload.projectId)
@@ -68,11 +64,7 @@ export function useMembersMutation() {
 	})
 
 	// PATCH title
-	const updateTitle = useMutation<
-		MemberMutationResponse,
-		Error,
-		UpdateTitlePayload
-	>({
+	const updateTitle = useMutation<MemberMutationResponse, Error, UpdateTitlePayload>({
 		mutationFn: async (payload) => {
 			const fd = new FormData()
 			fd.append('projectId', payload.projectId)
@@ -110,11 +102,7 @@ export function useMembersMutation() {
 	})
 
 	// DELETE member
-	const removeMember = useMutation<
-		MemberMutationResponse,
-		Error,
-		RemoveMemberPayload
-	>({
+	const removeMember = useMutation<MemberMutationResponse, Error, RemoveMemberPayload>({
 		mutationFn: async (payload) => {
 			const fd = new FormData()
 			fd.append('projectId', payload.projectId)

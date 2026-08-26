@@ -2,162 +2,97 @@
 
 import type {
 	EscrowType,
+	GetEscrowsFromIndexerResponse,
 	MultiReleaseMilestone,
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
-import { CheckCircle2, FileText, Loader2, TrendingUp } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { FileText, Loader2, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Alert, AlertDescription } from '~/components/base/alert'
 import { Button } from '~/components/base/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import { TooltipProvider } from '~/components/base/tooltip'
+import { MAX_ESCROW_RELEASES } from '~/lib/utils/escrow/build-update-escrow-payload'
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
-import { Input } from '~/components/base/input'
-import { Label } from '~/components/base/label'
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '~/components/base/select'
-import { useEscrow } from '~/hooks/contexts/use-escrow.context'
-import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
-import {
+	getMilestoneReleasePhase,
 	getMilestoneStatus,
+	getMilestoneWorkStatus,
 	isSingleReleaseMilestone,
+	normalizeWorkStatusForForm,
+	truncateAddress,
 } from '~/lib/utils/escrow/milestone-utils'
+import { AddReleaseDialog } from '../components/add-release-dialog'
+import { MilestoneEditForm } from '../components/milestone-edit-form'
+import { MilestoneListItem } from '../components/milestone-list-item'
+import { useMilestonePatch } from '../hooks/use-milestone-patch'
 
 interface MilestonesTabProps {
 	escrowContractAddress: string
 	escrowType: EscrowType
+	escrowData: GetEscrowsFromIndexerResponse | null
 	milestones: (SingleReleaseMilestone | MultiReleaseMilestone)[]
 	isLoading: boolean
 	onSuccess: () => void
+	onPatchMilestone?: (
+		index: number,
+		patch: { kind: 'approve' } | { kind: 'status'; status: string; evidence?: string },
+	) => void
+	onGoToRelease?: () => void
 }
 
 export function MilestonesTab({
 	escrowContractAddress,
 	escrowType,
+	escrowData,
 	milestones,
 	isLoading,
 	onSuccess,
+	onPatchMilestone,
+	onGoToRelease,
 }: MilestonesTabProps) {
-	const { approveMilestone, changeMilestoneStatus, sendTransaction } =
-		useEscrow()
-	const { isConnected, connect, address, signTransaction } = useWallet()
 	const [selectedMilestoneIndex, setSelectedMilestoneIndex] = useState('0')
-	const [milestoneStatus, setMilestoneStatus] = useState('approved')
+	const [milestoneStatus, setMilestoneStatus] = useState('in_progress')
 	const [milestoneEvidence, setMilestoneEvidence] = useState('')
-	const [isProcessing, setIsProcessing] = useState(false)
+	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+	const [editingMilestoneIndex, setEditingMilestoneIndex] = useState<number | null>(null)
 
-	const ensureWallet = async () => {
-		if (!isConnected) await connect()
-		if (!address) throw new Error('Wallet address missing')
-		return address
-	}
+	const {
+		processingOperation,
+		isProcessing,
+		handleApproveMilestone,
+		handleChangeMilestoneStatus,
+		handleAddRelease,
+		handleEditRelease,
+		getReleaseFormValues,
+	} = useMilestonePatch({
+		escrowContractAddress,
+		escrowType,
+		onSuccess,
+		onPatchMilestone,
+	})
 
-	const handleApproveMilestone = async () => {
-		try {
-			setIsProcessing(true)
-			const signer = await ensureWallet()
+	const selectedIndex = Number(selectedMilestoneIndex)
+	const selectedMilestone = milestones[selectedIndex]
+	const selectedPhase = selectedMilestone ? getMilestoneReleasePhase(selectedMilestone) : null
+	const canAddRelease = milestones.length < MAX_ESCROW_RELEASES && !escrowData?.flags?.disputed
+	const editingMilestone = editingMilestoneIndex !== null ? milestones[editingMilestoneIndex] : null
 
-			const approveResponse = await approveMilestone(
-				{
-					contractId: escrowContractAddress,
-					milestoneIndex: selectedMilestoneIndex,
-					approver: signer,
-				},
-				escrowType,
-			)
+	useEffect(() => {
+		const milestone = milestones[selectedIndex]
+		if (!milestone) return
 
-			if (
-				approveResponse.status !== 'SUCCESS' ||
-				!approveResponse.unsignedTransaction
-			) {
-				throw new Error('Failed to prepare approval transaction')
-			}
-
-			const signedXdr = await signTransaction(
-				approveResponse.unsignedTransaction,
-			)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
-
-			toast.success('Milestone approved successfully!')
-			onSuccess()
-		} catch (error) {
-			console.error(error)
-			const errorMessage =
-				error instanceof Error ? error.message : 'Failed to approve milestone'
-			toast.error(errorMessage)
-		} finally {
-			setIsProcessing(false)
-		}
-	}
-
-	const handleChangeMilestoneStatus = async () => {
-		try {
-			setIsProcessing(true)
-			const signer = await ensureWallet()
-
-			const changeResponse = await changeMilestoneStatus(
-				{
-					contractId: escrowContractAddress,
-					milestoneIndex: selectedMilestoneIndex,
-					newStatus: milestoneStatus,
-					newEvidence: milestoneEvidence || undefined,
-					serviceProvider: signer,
-				},
-				escrowType,
-			)
-
-			if (
-				changeResponse.status !== 'SUCCESS' ||
-				!changeResponse.unsignedTransaction
-			) {
-				throw new Error('Failed to prepare status change transaction')
-			}
-
-			const signedXdr = await signTransaction(
-				changeResponse.unsignedTransaction,
-			)
-			const sendResult = await sendTransaction(signedXdr)
-			if (sendResult?.status !== 'SUCCESS') {
-				throw new Error('Transaction failed')
-			}
-
-			toast.success('Milestone status updated successfully!')
-			setMilestoneEvidence('')
-			onSuccess()
-		} catch (error) {
-			console.error(error)
-			const errorMessage =
-				error instanceof Error
-					? error.message
-					: 'Failed to update milestone status'
-			toast.error(errorMessage)
-		} finally {
-			setIsProcessing(false)
-		}
-	}
+		setMilestoneStatus(normalizeWorkStatusForForm(getMilestoneWorkStatus(milestone)))
+		setMilestoneEvidence(milestone.evidence ?? '')
+	}, [milestones, selectedIndex])
 
 	if (isLoading) {
 		return (
 			<Card>
-				<CardContent className="py-12">
-					<div className="flex flex-col items-center justify-center space-y-4">
-						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">
-							Loading milestones...
-						</p>
-					</div>
+				<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
+					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden="true" />
+					<p className="text-sm text-muted-foreground" aria-live="polite">
+						Loading releases…
+					</p>
 				</CardContent>
 			</Card>
 		)
@@ -165,230 +100,161 @@ export function MilestonesTab({
 
 	if (milestones.length === 0) {
 		return (
-			<Card>
-				<CardContent className="py-12">
-					<div className="flex flex-col items-center justify-center space-y-4">
-						<FileText className="h-8 w-8 text-muted-foreground" />
+			<div className="space-y-4">
+				<Card>
+					<CardContent className="flex flex-col items-center justify-center gap-4 py-12">
+						<FileText className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
 						<p className="text-sm text-muted-foreground">
-							No milestones found. Milestones are defined when creating the
-							escrow.
+							No releases found yet. Add one to get started.
 						</p>
-					</div>
-				</CardContent>
-			</Card>
+						{escrowData ? (
+							<Button
+								type="button"
+								onClick={() => setIsAddDialogOpen(true)}
+								disabled={isProcessing || !canAddRelease}
+							>
+								<Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+								Add release
+							</Button>
+						) : null}
+					</CardContent>
+				</Card>
+				<AddReleaseDialog
+					open={isAddDialogOpen}
+					onOpenChange={setIsAddDialogOpen}
+					escrowType={escrowType}
+					isSubmitting={isProcessing}
+					onSubmit={(release) =>
+						handleAddRelease({ release, onComplete: () => setIsAddDialogOpen(false) })
+					}
+				/>
+			</div>
 		)
 	}
 
+	const isSelectedApproved = selectedMilestone ? getMilestoneStatus(selectedMilestone) : false
+	const platformAddress = escrowData?.roles.platformAddress
+
 	return (
-		<>
+		<div className="space-y-6">
+			{platformAddress ? (
+				<Alert>
+					<AlertDescription>
+						Adding or editing releases requires the escrow platform wallet{' '}
+						<span className="font-mono">{truncateAddress(platformAddress)}</span> connected in
+						Freighter or another external Stellar wallet on the same network as this escrow.
+					</AlertDescription>
+				</Alert>
+			) : null}
 			<Card>
 				<CardHeader>
-					<CardTitle>Milestones</CardTitle>
-					<CardDescription>
-						View and manage all escrow milestones
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-4">
-						{milestones.map((milestone, index) => {
-							const isApproved = getMilestoneStatus(milestone)
-							const isSingle = isSingleReleaseMilestone(milestone)
-
-							return (
-								<div
-									key={index}
-									className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-								>
-									<div className="flex-shrink-0">
-										<div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-semibold">
-											{index + 1}
-										</div>
-									</div>
-									<div className="flex-1 space-y-2">
-										<div className="flex items-center gap-2">
-											<h4 className="font-semibold">Milestone {index + 1}</h4>
-											{isApproved ? (
-												<span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-													Approved
-												</span>
-											) : (
-												<span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-													Pending
-												</span>
-											)}
-										</div>
-										<p className="text-sm text-muted-foreground">
-											{milestone.description}
-										</p>
-										{!isSingle && (
-											<div className="flex items-center gap-4 text-sm">
-												<span>
-													Amount:{' '}
-													<span className="font-semibold">
-														$
-														{(
-															milestone as MultiReleaseMilestone
-														).amount?.toLocaleString()}
-													</span>
-												</span>
-												{milestone.evidence && (
-													<span className="text-muted-foreground flex items-center gap-1">
-														<FileText className="w-3 h-3" />
-														Evidence provided
-													</span>
-												)}
-											</div>
-										)}
-										{milestone.status && (
-											<span className="text-xs text-muted-foreground">
-												Status: {milestone.status}
-											</span>
-										)}
-									</div>
-								</div>
-							)
-						})}
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+						<div>
+							<CardTitle>Select a Release</CardTitle>
+							<CardDescription>
+								Choose a release to update its status or approve it. Approver and Service Provider
+								roles sign with their connected wallet.
+							</CardDescription>
+						</div>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => setIsAddDialogOpen(true)}
+							disabled={isProcessing || !canAddRelease || !escrowData}
+							className="shrink-0"
+						>
+							<Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+							Add release
+						</Button>
 					</div>
+				</CardHeader>
+				<CardContent className="space-y-3">
+					<TooltipProvider delayDuration={200}>
+						{milestones.map((milestone, index) => (
+							<MilestoneListItem
+								key={
+									isSingleReleaseMilestone(milestone)
+										? `single:${milestone.description}`
+										: `multi:${(milestone as MultiReleaseMilestone).amount}:${milestone.description}`
+								}
+								milestone={milestone}
+								index={index}
+								isSelected={selectedMilestoneIndex === String(index)}
+								isProcessing={isProcessing}
+								hasEscrowData={!!escrowData}
+								onSelect={(i) => setSelectedMilestoneIndex(String(i))}
+								onEdit={(i) => setEditingMilestoneIndex(i)}
+							/>
+						))}
+					</TooltipProvider>
 				</CardContent>
 			</Card>
 
-			{/* Milestone Actions */}
-			<div className="grid gap-6 md:grid-cols-2">
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<CheckCircle2 className="w-5 h-5" />
-							Approve Milestone
-						</CardTitle>
-						<CardDescription>
-							Approve a milestone as completed (Approver role required)
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-2">
-							<Label htmlFor="approve-milestone-select">Select Milestone</Label>
-							<Select
-								value={selectedMilestoneIndex}
-								onValueChange={setSelectedMilestoneIndex}
-								disabled={isProcessing}
-							>
-								<SelectTrigger id="approve-milestone-select">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{milestones.map((_, index) => (
-										<SelectItem key={index} value={String(index)}>
-											Milestone {index + 1}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-						<Button
-							onClick={handleApproveMilestone}
-							disabled={isProcessing}
-							className="w-full"
-							size="lg"
-						>
-							{isProcessing ? (
-								<>
-									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-									Processing...
-								</>
-							) : (
-								<>
-									<CheckCircle2 className="w-4 h-4 mr-2" />
-									Approve Milestone
-								</>
-							)}
-						</Button>
-					</CardContent>
-				</Card>
+			{!canAddRelease && milestones.length >= MAX_ESCROW_RELEASES ? (
+				<Alert>
+					<AlertDescription>
+						This escrow has reached the maximum of {MAX_ESCROW_RELEASES} releases.
+					</AlertDescription>
+				</Alert>
+			) : null}
 
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<TrendingUp className="w-5 h-5" />
-							Update Status
-						</CardTitle>
-						<CardDescription>
-							Update milestone status and add evidence (Service Provider role
-							required)
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-4">
-							<div className="space-y-2">
-								<Label htmlFor="status-milestone-select">
-									Select Milestone
-								</Label>
-								<Select
-									value={selectedMilestoneIndex}
-									onValueChange={setSelectedMilestoneIndex}
-									disabled={isProcessing}
-								>
-									<SelectTrigger id="status-milestone-select">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{milestones.map((_, index) => (
-											<SelectItem key={index} value={String(index)}>
-												Milestone {index + 1}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-2">
-								<Label htmlFor="milestone-status">Status</Label>
-								<Select
-									value={milestoneStatus}
-									onValueChange={setMilestoneStatus}
-									disabled={isProcessing}
-								>
-									<SelectTrigger id="milestone-status">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="approved">Approved</SelectItem>
-										<SelectItem value="in_progress">In Progress</SelectItem>
-										<SelectItem value="pending">Pending</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-2">
-								<Label htmlFor="milestone-evidence">Evidence (Optional)</Label>
-								<Input
-									id="milestone-evidence"
-									value={milestoneEvidence}
-									onChange={(e) => setMilestoneEvidence(e.target.value)}
-									placeholder="Add evidence or notes"
-									disabled={isProcessing}
-								/>
-							</div>
-						</div>
-						<Button
-							onClick={handleChangeMilestoneStatus}
-							variant="outline"
-							disabled={isProcessing}
-							className="w-full"
-							size="lg"
-						>
-							{isProcessing ? (
-								<>
-									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-									Processing...
-								</>
-							) : (
-								<>
-									<TrendingUp className="w-4 h-4 mr-2" />
-									Update Status
-								</>
-							)}
-						</Button>
-					</CardContent>
-				</Card>
-			</div>
-		</>
+			<MilestoneEditForm
+				selectedIndex={selectedIndex}
+				isSelectedApproved={!!isSelectedApproved}
+				selectedPhase={selectedPhase}
+				escrowType={escrowType}
+				milestoneStatus={milestoneStatus}
+				milestoneEvidence={milestoneEvidence}
+				processingOperation={processingOperation}
+				onMilestoneStatusChange={setMilestoneStatus}
+				onMilestoneEvidenceChange={setMilestoneEvidence}
+				onChangeMilestoneStatus={() =>
+					handleChangeMilestoneStatus({
+						milestoneIndex: selectedMilestoneIndex,
+						status: milestoneStatus,
+						evidence: milestoneEvidence,
+						onComplete: () => setMilestoneEvidence(''),
+					})
+				}
+				onApproveMilestone={() =>
+					handleApproveMilestone({ milestoneIndex: selectedMilestoneIndex })
+				}
+				onGoToRelease={onGoToRelease}
+			/>
+
+			<AddReleaseDialog
+				open={isAddDialogOpen}
+				onOpenChange={setIsAddDialogOpen}
+				escrowType={escrowType}
+				isSubmitting={isProcessing}
+				onSubmit={(release) =>
+					handleAddRelease({ release, onComplete: () => setIsAddDialogOpen(false) })
+				}
+			/>
+
+			{editingMilestone ? (
+				<AddReleaseDialog
+					open={editingMilestoneIndex !== null}
+					onOpenChange={(open) => {
+						if (!open) {
+							setEditingMilestoneIndex(null)
+						}
+					}}
+					escrowType={escrowType}
+					isSubmitting={isProcessing}
+					mode="edit"
+					releaseLabel={`Release ${(editingMilestoneIndex ?? 0) + 1}`}
+					initialValues={getReleaseFormValues(editingMilestone)}
+					onSubmit={(release) =>
+						handleEditRelease({
+							milestoneIndex: editingMilestoneIndex,
+							release,
+							onComplete: () => setEditingMilestoneIndex(null),
+						})
+					}
+				/>
+			) : null}
+		</div>
 	)
 }

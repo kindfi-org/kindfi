@@ -26,16 +26,8 @@ import { cn } from '~/lib/utils'
  *
  * @returns {JSX.Element} The Skeleton component.
  */
-function Skeleton({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-	return (
-		<div
-			className={cn('animate-pulse rounded-md bg-primary/10', className)}
-			{...props}
-		/>
-	)
+function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+	return <div className={cn('animate-pulse rounded-md bg-primary/10', className)} {...props} />
 }
 
 export { Skeleton }

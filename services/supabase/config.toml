@@ -135,23 +135,29 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
-# [auth.email.smtp]
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Custom SMTP via Resend (required for production — configure in Supabase Dashboard too).
+# See services/supabase/README.md for hosted project setup.
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 587
+user = "resend"
+pass = "env(RESEND_SMTP_API_KEY)"
+admin_email = "noreply@kindfi.org"
+sender_name = "KindFi Notifications"
 
 # Customize email templates
 [auth.email.template.magic_link]
 subject = "Your verification code"
-content_path = "./supabase/templates/magic_link.html"
+content_path = "./templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "Your verification code"
+content_path = "./templates/confirmation.html"
 
 [auth.email.template.email_change]
 subject = "Account recovery — confirm your email change"
-content_path = "./supabase/templates/email_change.html"
+content_path = "./templates/email_change.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.

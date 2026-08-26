@@ -3,20 +3,15 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-	IoCalendarOutline,
 	IoMegaphoneOutline,
 	IoOpenOutline,
 	IoPencilOutline,
 	IoPeopleOutline,
-	IoSettingsOutline,
 	IoSpeedometerOutline,
 } from 'react-icons/io5'
 import { Button } from '~/components/base/button'
 import { cn } from '~/lib/utils'
-import {
-	FOUNDATION_MANAGE_SECTIONS,
-	type FoundationManageSectionKey,
-} from './constants'
+import { FOUNDATION_MANAGE_SECTIONS, type FoundationManageSectionKey } from './constants'
 
 const SECTION_ICONS: Record<
 	FoundationManageSectionKey,
@@ -25,9 +20,7 @@ const SECTION_ICONS: Record<
 	overview: IoSpeedometerOutline,
 	edit: IoPencilOutline,
 	campaigns: IoMegaphoneOutline,
-	milestones: IoCalendarOutline,
 	members: IoPeopleOutline,
-	settings: IoSettingsOutline,
 }
 
 type FoundationManageCommandCenterProps = {
@@ -78,10 +71,7 @@ export function FoundationManageCommandCenter({
 			</div>
 
 			{/* Horizontal tabs */}
-			<nav
-				className="mt-4 flex gap-0 border-b border-border"
-				aria-label="Manage sections"
-			>
+			<nav className="mt-4 flex gap-0 border-b border-border" aria-label="Manage sections">
 				{FOUNDATION_MANAGE_SECTIONS.map((section) => {
 					const url = section.href(slug)
 					const isActive =

@@ -1,14 +1,14 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { IoMegaphoneOutline } from 'react-icons/io5'
 import { Button } from '~/components/base/button'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
 import { usePitchAnalysis } from '~/hooks/projects/use-pitch-analysis'
-import { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
+import type { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
 import { PitchAIAnalysis } from './ai/pitch-ai-analysis'
 import { ProjectPitchForm } from './project-pitch-form'
 import { ProjectPitchFormSkeleton } from './skeleton'
@@ -21,45 +21,38 @@ interface ProjectPitchWrapperProps {
 export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const [aiEnabled, setAiEnabled] = useState(false)
-	const [pitchSnapshot, setPitchSnapshot] = useState<{
-		title: string
-		story: string
-	} | null>(null)
 
-	const { analysis, status, analyze, reset, isLoading } = usePitchAnalysis()
+	const { analysis, status, errorMessage, analyze, reset } = usePitchAnalysis()
 
 	const {
 		data: project,
 		isLoading: isProjectLoading,
 		error,
-	} = useSupabaseQuery(
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getProjectPitchDataBySlug>>>(
 		'project-pitch',
-		(client) => getProjectPitchDataBySlug(client, projectSlug),
+		projectSlug,
+		'pitch',
 		{ additionalKeyValues: [projectSlug] },
 	)
 
-	if (error || !project) notFound()
-
 	const handleActivateAI = useCallback(
 		(title: string, story: string) => {
-			setPitchSnapshot({ title, story })
 			setAiEnabled(true)
 			analyze(title, story)
 		},
 		[analyze],
 	)
 
-	const handleReanalyze = useCallback(() => {
-		if (pitchSnapshot) {
-			analyze(pitchSnapshot.title, pitchSnapshot.story)
-		}
-	}, [pitchSnapshot, analyze])
-
 	const handleDismiss = useCallback(() => {
 		reset()
 		setAiEnabled(false)
-		setPitchSnapshot(null)
 	}, [reset])
+
+	if (isProjectLoading) {
+		return <ProjectPitchFormSkeleton />
+	}
+
+	if (error || !project) notFound()
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
@@ -88,11 +81,11 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 						</div>
 						<div>
 							<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
-								Project Pitch
+								Project Story
 							</h1>
 							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-								Create a compelling pitch that showcases your project&apos;s
-								impact and inspires supporters to join your mission
+								Share your project narrative, the problem you solve, and the impact you aim to
+								achieve
 							</p>
 						</div>
 					</div>
@@ -115,6 +108,7 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 							<ProjectPitchForm
 								projectId={project.id}
 								projectSlug={project.slug}
+								sourceLocale={project.sourceLocale}
 								pitch={project.pitch}
 							/>
 						)}
@@ -123,28 +117,20 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 					<aside className="lg:col-span-1 space-y-6">
 						{aiEnabled ? (
 							<motion.div
-								initial={
-									prefersReducedMotion ? false : { opacity: 0, y: -8 }
-								}
+								initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.3 }}
 							>
 								<PitchAIAnalysis
 									analysis={analysis}
 									status={status}
-									onAnalyze={handleReanalyze}
+									errorMessage={errorMessage}
 									onReset={handleDismiss}
-									isLoading={isLoading}
-									hasContent={
-										!!(pitchSnapshot?.title && pitchSnapshot?.story)
-									}
 								/>
 							</motion.div>
 						) : (
 							<motion.div
-								initial={
-									prefersReducedMotion ? false : { opacity: 0, y: 8 }
-								}
+								initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.3, delay: 0.2 }}
 								className="rounded-xl border border-dashed border-purple-200 bg-purple-50/50 p-5 text-center space-y-3"
@@ -155,23 +141,17 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 									</div>
 								</div>
 								<div>
-									<p className="text-sm font-medium text-foreground">
-										AI Pitch Advisor
-									</p>
+									<p className="text-sm font-medium text-foreground">AI Story Advisor</p>
 									<p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-										Get personalized feedback on your pitch once you&apos;ve
-										filled in the title and story.
+										Get personalized feedback on your story once you&apos;ve filled in the title and
+										narrative.
 									</p>
 								</div>
 								<Button
 									type="button"
 									size="sm"
 									variant="outline"
-									disabled={
-										isProjectLoading ||
-										!project?.pitch?.title ||
-										!project?.pitch?.story
-									}
+									disabled={isProjectLoading || !project?.pitch?.title || !project?.pitch?.story}
 									onClick={() => {
 										const title = project?.pitch?.title ?? ''
 										const story = project?.pitch?.story ?? ''
@@ -184,7 +164,7 @@ export function ProjectPitchWrapper({ projectSlug }: ProjectPitchWrapperProps) {
 								</Button>
 								{(!project?.pitch?.title || !project?.pitch?.story) && (
 									<p className="text-xs text-muted-foreground">
-										Save your pitch first to enable this feature
+										Save your story first to enable this feature
 									</p>
 								)}
 							</motion.div>

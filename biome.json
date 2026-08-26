@@ -1,23 +1,46 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.5/schema.json",
 	"vcs": {
-		"enabled": false,
+		"enabled": true,
 		"clientKind": "git",
-		"useIgnoreFile": false
+		"useIgnoreFile": true
 	},
 	"files": {
-		"ignoreUnknown": false,
+		"ignoreUnknown": true,
 		"includes": [
 			"**",
-			"!apps/web/.next",
-			"!apps/academy-wep/.next",
+			"!.agents",
+			"!.claude/skills",
+			"!.codex/skills",
+			"!.cursor/skills",
 			"!apps/indexer/src/types/models",
-			"!apps/kyc-server/public"
+			"!apps/kyc-server/public",
+			"!services/supabase/templates",
+			"!!services/supabase/src/database.types.ts",
+			"!!services/supabase/src/database.schemas.ts"
 		]
 	},
-	"formatter": { "enabled": true, "indentStyle": "tab", "indentWidth": 2 },
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 100
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
+		"domains": {
+			"react": "recommended",
+			"next": "recommended",
+			"test": "recommended",
+			"tailwind": "recommended"
+		},
 		"rules": {
 			"recommended": true,
 			"style": {
@@ -30,28 +53,97 @@
 			},
 			"correctness": {
 				"recommended": true,
-				"noEmptyPattern": "warn"
+				"noEmptyPattern": "warn",
+				"useExhaustiveDependencies": "warn"
 			},
 			"suspicious": {
 				"recommended": true,
 				"noExplicitAny": "error",
-				"noConsole": {
-					"level": "error",
-					"options": { "allow": ["warn", "error"] }
-				}
+				"noConsole": "error",
+				"noArrayIndexKey": "warn"
 			}
 		}
 	},
 	"javascript": {
-		"formatter": { "quoteStyle": "single", "semicolons": "asNeeded" }
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
 	},
 	"overrides": [
 		{
-			"includes": ["**/scripts/**"],
+			"includes": ["**/scripts/**", "**/lib/logger.ts", "**/logger/index.ts"],
 			"linter": {
 				"rules": {
 					"suspicious": {
 						"noConsole": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["apps/indexer/src/mappings/**", "packages/drizzle/src/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off",
+						"noExplicitAny": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.css"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noUnknownAtRules": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*skeleton*", "**/skeletons.tsx"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noArrayIndexKey": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.test.ts", "**/*.test.tsx", "**/test/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noExplicitAny": "off",
+						"noThenProperty": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/*.d.ts"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noExplicitAny": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["packages/lib/src/stellar/**", "apps/web/lib/stellar/**"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noExplicitAny": "off"
 					}
 				}
 			}

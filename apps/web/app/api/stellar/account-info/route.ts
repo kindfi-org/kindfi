@@ -1,7 +1,9 @@
 import { appEnvConfig } from '@packages/lib/config'
-import { StellarPasskeyService } from '@packages/lib/stellar'
+import { createSmartAccountDeployer } from '@packages/lib/smart-account/server'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
+import { requireSmartAccountFeature } from '@/lib/smart-account/guards/require-smart-account-feature'
 import { accountInfoQuerySchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -13,6 +15,9 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function GET(req: NextRequest) {
 	try {
+		const featureGuard = requireSmartAccountFeature()
+		if (featureGuard) return featureGuard
+
 		const { searchParams } = new URL(req.url)
 		const query = { address: searchParams.get('address') }
 		const validation = validateRequest(accountInfoQuerySchema, query)
@@ -21,21 +26,20 @@ export async function GET(req: NextRequest) {
 
 		const config = appEnvConfig('web')
 
-		// Initialize Stellar service
-		const stellarService = new StellarPasskeyService(
+		const deployer = createSmartAccountDeployer(
 			config.stellar.networkPassphrase,
 			config.stellar.rpcUrl,
 			config.stellar.fundingAccount,
 		)
 
-		const accountInfo = await stellarService.getAccountInfo(address)
+		const accountInfo = await deployer.getAccountInfo(address)
 
 		return NextResponse.json({
 			success: true,
 			data: accountInfo,
 		})
 	} catch (error) {
-		console.error('❌ Error getting account info:', error)
+		logger.error('❌ Error getting account info:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to get account information',

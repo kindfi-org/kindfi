@@ -8,15 +8,14 @@ import type { WaitlistFormData } from '~/lib/types/waitlist.types'
 interface WaitlistContextType {
 	formData: WaitlistFormData
 	updateFormData: (data: Partial<WaitlistFormData>) => void
+	resetWaitlist: () => void
 	currentStep: number
 	setCurrentStep: (step: number) => void
 	isOpen: boolean
 	setIsOpen: (open: boolean) => void
 }
 
-const WaitlistContext = createContext<WaitlistContextType | undefined>(
-	undefined,
-)
+const WaitlistContext = createContext<WaitlistContextType | undefined>(undefined)
 
 const initialFormData: WaitlistFormData = {
 	name: '',
@@ -38,11 +37,17 @@ export function WaitlistProvider({ children }: { children: ReactNode }) {
 		setFormData((prev) => ({ ...prev, ...data }))
 	}
 
+	const resetWaitlist = () => {
+		setFormData(initialFormData)
+		setCurrentStep(1)
+	}
+
 	return (
 		<WaitlistContext.Provider
 			value={{
 				formData,
 				updateFormData,
+				resetWaitlist,
 				currentStep,
 				setCurrentStep,
 				isOpen,

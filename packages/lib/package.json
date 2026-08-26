@@ -7,6 +7,10 @@
 			"import": "./src/index.ts",
 			"require": "./src/index.ts"
 		},
+		"./logger": {
+			"import": "./src/logger/index.ts",
+			"require": "./src/logger/index.ts"
+		},
 		"./config": {
 			"import": "./src/config/index.ts",
 			"require": "./src/config/index.ts"
@@ -50,10 +54,33 @@
 		"./types": {
 			"import": "./src/types/index.ts",
 			"require": "./src/types/index.ts"
+		},
+		"./utils/wallet-address": {
+			"import": "./src/utils/wallet-address.ts",
+			"require": "./src/utils/wallet-address.ts"
+		},
+		"./smart-account": {
+			"import": "./src/smart-account/index.ts",
+			"require": "./src/smart-account/index.ts"
+		},
+		"./smart-account/server": {
+			"import": "./src/smart-account/server.ts",
+			"require": "./src/smart-account/server.ts"
+		},
+		"./pollar": {
+			"import": "./src/pollar/index.ts",
+			"require": "./src/pollar/index.ts"
+		},
+		"./admin": {
+			"import": "./src/admin/index.ts",
+			"require": "./src/admin/index.ts"
 		}
 	},
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
+	"scripts": {
+		"test": "bun test"
+	},
 	"license": "MIT",
 	"dependencies": {
 		"@openzeppelin/relayer-plugin-channels": "^0.5.0",
@@ -70,16 +97,18 @@
 		"cbor-x": "^1.6.0",
 		"drizzle-orm": "^0.44.7",
 		"lodash": "^4.17.21",
+		"react": "^19.2.1",
 		"sonner": "^1.7.1",
 		"tesseract.js": "^6.0.0",
-		"zod": "^4.3.6",
-		"react": "^19.2.1"
+		"zod": "^4.3.6"
 	},
 	"peerDependencies": {
+		"next": "^16.0.0",
 		"next-auth": "^4.24.11"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.17.21"
+		"@types/lodash": "^4.17.21",
+		"next": "16.0.10"
 	},
 	"type": "module"
 }

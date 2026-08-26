@@ -15,13 +15,7 @@ const formatCurrency = (value: number) =>
 		maximumFractionDigits: 0,
 	}).format(value)
 
-const SKELETON_KEYS = [
-	'fdn-sk-1',
-	'fdn-sk-2',
-	'fdn-sk-3',
-	'fdn-sk-4',
-	'fdn-sk-5',
-] as const
+const SKELETON_KEYS = ['fdn-sk-1', 'fdn-sk-2', 'fdn-sk-3', 'fdn-sk-4', 'fdn-sk-5'] as const
 
 export function AdminFoundationsList() {
 	const {
@@ -43,10 +37,7 @@ export function AdminFoundationsList() {
 				</div>
 				<div className="space-y-2">
 					{SKELETON_KEYS.map((key) => (
-						<div
-							key={key}
-							className="h-20 rounded-lg bg-muted/60 animate-pulse"
-						/>
+						<div key={key} className="h-20 rounded-lg bg-muted/60 animate-pulse" />
 					))}
 				</div>
 			</div>
@@ -62,9 +53,7 @@ export function AdminFoundationsList() {
 				/>
 				<Card className="border-destructive/50">
 					<CardContent className="py-12 text-center">
-						<p className="font-medium text-destructive">
-							Error loading foundations.
-						</p>
+						<p className="font-medium text-destructive">Error loading foundations.</p>
 						<p className="mt-1 text-sm text-muted-foreground">
 							Refresh the page or try again later.
 						</p>
@@ -83,14 +72,10 @@ export function AdminFoundationsList() {
 
 			<div className="space-y-2">
 				{foundations?.map((foundation) => {
-					const yearFounded =
-						foundation.foundedYear > 0 ? foundation.foundedYear : null
+					const yearFounded = foundation.foundedYear > 0 ? foundation.foundedYear : null
 
 					return (
-						<Card
-							key={foundation.id}
-							className="hover:shadow-md transition-shadow"
-						>
+						<Card key={foundation.id} className="hover:shadow-md transition-shadow">
 							<CardContent className="p-4">
 								<div className="flex items-center justify-between">
 									<div className="flex-1">
@@ -109,10 +94,7 @@ export function AdminFoundationsList() {
 													<span>•</span>
 												</>
 											) : null}
-											<span>
-												{formatCurrency(foundation.totalDonationsReceived)}{' '}
-												donations
-											</span>
+											<span>{formatCurrency(foundation.totalDonationsReceived)} donations</span>
 											<span>•</span>
 											<span>
 												{foundation.totalCampaignsCompleted} completed,{' '}
@@ -127,8 +109,7 @@ export function AdminFoundationsList() {
 										</div>
 										{foundation.founder && (
 											<div className="text-xs text-muted-foreground mt-1">
-												Founded by:{' '}
-												{foundation.founder.displayName || 'Anonymous'}
+												Founded by: {foundation.founder.displayName || 'Anonymous'}
 											</div>
 										)}
 									</div>

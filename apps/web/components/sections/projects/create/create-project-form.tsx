@@ -4,19 +4,18 @@ import { AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 
 import { StepperIndicator } from '~/components/sections/projects/create/stepper-indicator'
-import {
-	StepOne,
-	StepThree,
-	StepTwo,
-} from '~/components/sections/projects/create/steps'
+import { StepOne, StepThree, StepTwo } from '~/components/sections/projects/create/steps'
 import { useCreateProject } from '~/hooks/contexts/use-create-project.context'
 import { useProjectMutation } from '~/hooks/projects/use-project-mutation'
 import type { StepThreeData } from '~/lib/types/project/create-project.types'
 
-export function CreateProjectForm() {
-	const { currentStep, setCurrentStep, formData, updateFormData } =
-		useCreateProject()
-	const { mutateAsync: createProject, isPending } = useProjectMutation({})
+type CreateProjectFormProps = {
+	developmentOnly?: boolean
+}
+
+export function CreateProjectForm({ developmentOnly = false }: CreateProjectFormProps) {
+	const { currentStep, setCurrentStep, formData, updateFormData } = useCreateProject()
+	const { mutateAsync: createProject, isPending } = useProjectMutation({ developmentOnly })
 	const router = useRouter()
 
 	const handleNext = () => {
@@ -43,7 +42,7 @@ export function CreateProjectForm() {
 		if ('slug' in result && result.slug) {
 			router.push(`/projects/${result.slug}/manage`)
 		} else {
-			router.push('/projects')
+			router.push(developmentOnly ? '/admin/projects' : '/projects')
 		}
 	}
 
@@ -54,13 +53,7 @@ export function CreateProjectForm() {
 			case 2:
 				return <StepTwo onNext={handleNext} onBack={handleBack} />
 			case 3:
-				return (
-					<StepThree
-						onBack={handleBack}
-						onSubmit={handleSubmit}
-						isPending={isPending}
-					/>
-				)
+				return <StepThree onBack={handleBack} onSubmit={handleSubmit} isPending={isPending} />
 			default:
 				return <StepOne onNext={handleNext} />
 		}

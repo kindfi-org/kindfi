@@ -4,6 +4,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export CARGO_TARGET_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/target"
+
 echo "========================================"
 echo "  KindFi Reputation Contract Deployment"
 echo "========================================"

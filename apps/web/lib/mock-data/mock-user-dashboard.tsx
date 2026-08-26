@@ -26,8 +26,7 @@ export const mockProjects: Project[] = [
 		image_url: '/images/healthcare.webp',
 		categories: ['Healthcare'],
 		title: 'Mobile Clinics',
-		description:
-			'Bring essential healthcare services to remote areas through mobile clinics.',
+		description: 'Bring essential healthcare services to remote areas through mobile clinics.',
 		current_amount: 32000,
 		target_amount: 45000,
 		kinder_count: 30,

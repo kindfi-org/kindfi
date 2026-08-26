@@ -1,25 +1,14 @@
-import { appEnvConfig } from '@packages/lib/config'
-import {
-	buildWebAuthnSignatureScVal,
-	computeDeviceIdFromCoseKey,
-	type verifyAuthentication,
-	type WebAuthnAssertionResponse,
-} from '@packages/lib/passkey'
-import {
-	Keypair,
-	type Transaction,
-	TransactionBuilder,
-	xdr,
-} from '@stellar/stellar-sdk'
-import { type Api, Server } from '@stellar/stellar-sdk/rpc'
-import isEqual from 'lodash/isEqual'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
+import { requireSmartAccountFeature } from '@/lib/smart-account/guards/require-smart-account-feature'
+import { submitSmartAccountTransferWithWebAuthn } from '@/lib/smart-account/transactions/submit-with-webauthn.service'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
+import { getKycEnforcementMode } from '~/lib/kyc/enforcement-config'
 import { transferSubmitSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
-
-// Don't initialize services at module level - do it inside the route handler
-// This prevents build-time errors when environment variables are not available
 
 /**
  * POST /api/stellar/transfer/submit
@@ -28,206 +17,43 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function POST(req: NextRequest) {
 	try {
-		// Initialize config and services inside the route handler
-		// This prevents build-time errors when environment variables are not available
-		const appConfig = appEnvConfig('web')
+		const featureGuard = requireSmartAccountFeature()
+		if (featureGuard) return featureGuard
+
+		const session = await getServerSession(nextAuthOption)
+		if (session?.user?.id) {
+			const kycDecision = await requireKycAuthorization({
+				userId: session.user.id,
+				action: 'send_assets',
+			})
+			if (!kycDecision.ok) return kycDecision.response
+		} else if (getKycEnforcementMode() === 'enforced') {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
 
 		const body = await req.json()
 		const validation = validateRequest(transferSubmitSchema, body)
 		if (!validation.success) return validation.response
 		const { transactionData, authResponse, userDevice, verificationJSON } = validation.data
 		const { transactionXDR, hash: _hash } = transactionData
-		const smartWalletAddress = userDevice.address
-		const verificationJSONTyped = verificationJSON as Awaited<
-			ReturnType<typeof verifyAuthentication>
-		>
 
-		// Get configuration
-		const server = new Server(appConfig.stellar.rpcUrl)
-
-		// Validate funding account secret before creating keypair
-		if (!appConfig.stellar.fundingAccount) {
-			return NextResponse.json(
-				{
-					error: 'Funding account not configured',
-				},
-				{ status: 500 },
-			)
-		}
-
-		let fundingKeypair: Keypair
-		try {
-			fundingKeypair = Keypair.fromSecret(appConfig.stellar.fundingAccount)
-		} catch (error) {
-			console.error('❌ Invalid funding account secret:', error)
-			return NextResponse.json(
-				{
-					error: 'Invalid funding account configuration',
-					details: error instanceof Error ? error.message : String(error),
-				},
-				{ status: 500 },
-			)
-		}
-
-
-		// Parse the prepared transaction
-		// CRITICAL: The transaction from prepare is ALREADY assembled after simulation
-		// DO NOT re-simulate or re-assemble, as that would change the auth entry structure
-		// and invalidate the WebAuthn signature which was signed against the original auth entry
-		// ALSO: DO NOT re-sign with funding account - it was already signed in prepare!
-		let transaction: Transaction
-		try {
-			transaction = TransactionBuilder.fromXDR(
-				transactionXDR,
-				appConfig.stellar.networkPassphrase,
-			) as Transaction
-		} catch (error) {
-			console.error('❌ Invalid transactionXDR:', error)
-			return NextResponse.json(
-				{
-					error: 'Invalid transactionXDR format',
-					details: error instanceof Error ? error.message : String(error),
-				},
-				{ status: 400 },
-			)
-		}
-
-
-		const authEntries =
-			(transaction.operations[0] as unknown as Api.SimulateHostFunctionResult)
-				.auth || []
-
-
-		if (authEntries.length) {
-			const publicKeyArray =
-				verificationJSON.device.pubKey instanceof Uint8Array
-					? verificationJSON.device.pubKey
-					: new Uint8Array(
-							Object.values(
-								verificationJSON.device.pubKey as Record<string, number>,
-							),
-						)
-			const publicKey = Buffer.from(publicKeyArray).toString('base64')
-			const credentialId = verificationJSON.device.id
-			const deviceIdHex = computeDeviceIdFromCoseKey(publicKey)
-			const signatureResult = buildWebAuthnSignatureScVal({
-				assertion: authResponse as WebAuthnAssertionResponse,
-				userData: {
-					credential_id: String(credentialId ?? ''),
-					public_key: publicKey,
-					device_id_hex: deviceIdHex,
-				},
-			})
-			const {
-				signatureScVal: signatureScValRaw,
-				// signature,
-				// authenticatorData,
-				// clientData,
-				// webauthnPayload,
-				// webauthnPayloadHash,
-				// challenge,
-				// challengeBytes,
-			} = signatureResult
-
-			// ! Keeping logs commented out for now. Deactivating signature verification on-chain, verifying device existence on contract only
-			// Logging WebAuthn Signature Details
-			// console.log('🔏 WebAuthn Signature Details:')
-			// console.log('   Signature (base64):', signature.toString('base64'))
-			// console.log(
-			// 	'   Authenticator Data (base64):',
-			// 	authenticatorData.toString('base64'),
-			// )
-			// console.log('   Client Data (object):', clientData)
-			// console.log(
-			// 	'   WebAuthn Payload (base64):',
-			// 	webauthnPayload.toString('base64'),
-			// )
-			// console.log(
-			// 	'   WebAuthn Payload Hash (hex):',
-			// 	webauthnPayloadHash.toString('hex'),
-			// )
-			// console.log('   Challenge (utf8):', challenge)
-			// console.log('   Challenge Bytes (hex):', challengeBytes?.toString('hex'))
-
-			// TODO: If the attestation can be verified here, then it should go through the stellar blockchain
-			// ! Strategy still not the same... simplify. A verification already happening, but is not "preparing" the signature to on-chain verification
-			// const verificationResults = await stellarService.verifyPasskeySignature(
-			// 	verificationJSON.device.address,
-			// 	JSON.stringify(authResponse.response),
-			// 	hash,
-			// )
-
-			// console.log('🔐 Contract will verify signature', { verificationResults })
-
-			// Find and update the auth entry for the smart wallet
-			const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
-
-			for (const authEntry of authEntries) {
-				// ? Since both are Sets, they aren't necessary equal by passing the entire Set, we need to make a copy to compare them properly
-				const isSameCredentialMapping = isEqual(
-					{ ...authEntry.credentials().switch() },
-					{ ...xdr.SorobanCredentialsType.sorobanCredentialsAddress() },
-				)
-				if (isSameCredentialMapping) {
-					const addressCredentials = authEntry.credentials().address()
-
-					// Create new address credentials with our WebAuthn signature
-					const newCredentials = new xdr.SorobanAddressCredentials({
-						address: addressCredentials.address(),
-						nonce: addressCredentials.nonce(),
-						signatureExpirationLedger:
-							addressCredentials.signatureExpirationLedger(),
-						signature: signatureScVal,
-					})
-
-					// Update the auth entry with the new credentials containing our signature
-					authEntry.credentials(
-						xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
-					)
-
-					break
-				}
-			}
-		}
-
-		// The transaction is ready - no need to re-sign since we already signed earlier
-		// UPDATE: We MUST re-sign because:
-		// 1. assembleTransaction() in prepare creates a new transaction (stripping signatures)
-		// 2. We modified the auth entry above, which changes the transaction hash
-		// 3. The funding account (source) signature is required or we may experience txBadAuth errors
-
-		// Re-sign with funding account (as it is the source/fee payer)
-		transaction.sign(fundingKeypair)
-
-
-		// Submit to network
-		const submitResult = await server.sendTransaction(transaction)
-
-		if (submitResult.status === 'ERROR') {
-			console.error('❌ Submit error:', submitResult)
-			throw new Error(
-				`Transaction submission failed: ${JSON.stringify(submitResult.errorResult, null, 2) || 'Unknown error'}`,
-			)
-		}
-
-		const txHash = submitResult.hash
-
-		if (submitResult?.errorResult) {
-			console.error('❌ Submit error (false positive):', submitResult)
-			throw new Error(
-				`Transaction submission failed: ${submitResult.errorResult || 'Unknown error'}`,
-			)
-		}
+		const result = await submitSmartAccountTransferWithWebAuthn({
+			transactionXDR,
+			hash: _hash,
+			authResponse,
+			userDevice,
+			verificationJSON,
+		})
 
 		return NextResponse.json({
 			success: true,
 			data: {
-				hash: txHash, // Changed from txHash to hash to match UI expectation
-				status: 'pending',
+				hash: result.hash,
+				status: result.status,
 			},
 		})
 	} catch (error) {
-		console.error('❌ Error submitting transfer:', error)
+		logger.error('❌ Error submitting transfer:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to submit transfer',

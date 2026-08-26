@@ -2,10 +2,7 @@ import { Share2, Trophy } from 'lucide-react'
 import { Button } from '~/components/base/button'
 import { Separator } from '~/components/base/separator'
 import { PrimaryCard } from '~/components/cards/primary-card'
-import {
-	dataImpactJourney,
-	dataNft,
-} from '~/lib/mock-data/project/mock-project-side-panel'
+import { dataImpactJourney, dataNft } from '~/lib/mock-data/project/mock-project-side-panel'
 import { ButtonIconDetail } from '../button-icon-detail'
 import { GoalProgress, type GoalProgressProps } from '../goal-progress'
 import { NftItem } from '../nft-item'
@@ -14,11 +11,7 @@ import { ImpactJourney } from './impact-journey'
 
 type ViewImpactProps = GoalProgressProps
 
-export function ViewDonated({
-	goal,
-	percentage,
-	amountOfSupport,
-}: ViewImpactProps) {
+export function ViewDonated({ goal, percentage, amountOfSupport }: ViewImpactProps) {
 	return (
 		<div className="space-y-5">
 			<PrimaryCard className="space-y-5">

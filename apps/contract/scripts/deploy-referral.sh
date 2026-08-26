@@ -4,6 +4,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export CARGO_TARGET_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/target"
+
 echo "========================================"
 echo "  KindFi Referral Contract Deployment"
 echo "========================================"
@@ -133,10 +136,12 @@ fi
 # Step 1: Build Referral contract
 echo ""
 echo "=== Step 1: Building Referral Contract ==="
-cargo build --target wasm32-unknown-unknown --release --manifest-path ./contracts/referral/Cargo.toml || {
+cd contracts/referral
+stellar contract build || {
     echo "🔴 Failed to build Referral Contract"
     exit 1
 }
+cd ../..
 echo "✅ Referral Contract built successfully!"
 
 # Step 2: Upload WASM
@@ -145,7 +150,7 @@ echo "=== Step 2: Uploading WASM ==="
 REFERRAL_WASM_HASH=$(stellar contract upload \
     --network "$NETWORK" \
     --source "$SOURCE" \
-    --wasm target/wasm32-unknown-unknown/release/referral.wasm)
+    --wasm target/wasm32v1-none/release/referral.wasm)
 
 echo "WASM Hash: $REFERRAL_WASM_HASH"
 

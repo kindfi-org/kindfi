@@ -14,11 +14,7 @@ import { twMerge } from 'tailwind-merge'
  * @param message - The message to be encoded and included in the redirect URL.
  * @returns The redirect URL with the encoded message.
  */
-export function encodedRedirect(
-	type: 'error' | 'success',
-	path: string,
-	message: string,
-) {
+export function encodedRedirect(type: 'error' | 'success', path: string, message: string) {
 	return redirect(`${path}?${type}=${encodeURIComponent(message)}`)
 }
 
@@ -48,9 +44,7 @@ export function buildProjectsCategoryUrl(categorySlug: string): string {
 export async function getAccountSequence(secretKey: string): Promise<number> {
 	const appConfig: AppEnvInterface = appEnvConfig('web')
 	const server = new Server(appConfig.stellar.networkUrl)
-	const account = await server.loadAccount(
-		Keypair.fromSecret(secretKey).publicKey(),
-	)
+	const account = await server.loadAccount(Keypair.fromSecret(secretKey).publicKey())
 	return account.sequenceNumber
 }
 

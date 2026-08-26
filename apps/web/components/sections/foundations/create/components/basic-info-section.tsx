@@ -1,13 +1,6 @@
 'use client'
 
-import {
-	Calendar,
-	CheckCircle2,
-	Globe,
-	Loader2,
-	Sparkles,
-	XCircle,
-} from 'lucide-react'
+import { Calendar, CheckCircle2, Globe, Loader2, Sparkles, XCircle } from 'lucide-react'
 import { useMemo } from 'react'
 import { useFormContext } from 'react-hook-form'
 import {
@@ -30,16 +23,10 @@ type BasicInfoSectionProps = {
 	slugReadOnly?: boolean
 }
 
-export function BasicInfoSection({
-	slugReadOnly = false,
-}: BasicInfoSectionProps) {
+export function BasicInfoSection({ slugReadOnly = false }: BasicInfoSectionProps) {
 	const form = useFormContext<CreateFoundationFormData>()
 	const slug = form.watch('slug')
-	const {
-		isChecking,
-		isAvailable,
-		error: slugError,
-	} = useSlugValidation(slugReadOnly ? '' : slug)
+	const { isChecking, isAvailable, error: slugError } = useSlugValidation(slugReadOnly ? '' : slug)
 
 	// Optimize: use getValues instead of watch for display-only values
 	const description = form.getValues('description') || ''
@@ -60,14 +47,12 @@ export function BasicInfoSection({
 						<FormControl>
 							<Input
 								placeholder="e.g., Green Earth Foundation"
-								className="h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500"
+								className="h-11"
 								{...field}
 								autoComplete="organization"
 							/>
 						</FormControl>
-						<FormDescription>
-							The official name of your foundation
-						</FormDescription>
+						<FormDescription>The official name of your foundation</FormDescription>
 						<FormMessage />
 					</FormItem>
 				)}
@@ -89,7 +74,7 @@ export function BasicInfoSection({
 								<Input
 									placeholder="foundation-name"
 									className={cn(
-										'h-11 pl-28 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500',
+										'pl-28',
 										!slugReadOnly &&
 											slug &&
 											slug.length >= 3 &&
@@ -116,10 +101,7 @@ export function BasicInfoSection({
 												aria-label="Slug available"
 											/>
 										) : isAvailable === false ? (
-											<XCircle
-												className="h-4 w-4 text-destructive"
-												aria-label="Slug taken"
-											/>
+											<XCircle className="h-4 w-4 text-destructive" aria-label="Slug taken" />
 										) : null}
 									</div>
 								) : null}
@@ -147,10 +129,7 @@ export function BasicInfoSection({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel className="text-base font-medium flex items-center gap-2">
-								<Calendar
-									className="h-4 w-4 text-purple-600"
-									aria-hidden="true"
-								/>
+								<Calendar className="h-4 w-4 text-purple-600" aria-hidden="true" />
 								Year Founded <span className="text-destructive">*</span>
 							</FormLabel>
 							<FormControl>
@@ -159,15 +138,13 @@ export function BasicInfoSection({
 									placeholder="2020"
 									min="1900"
 									max={new Date().getFullYear()}
-									className="h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500"
+									className="h-11"
 									{...field}
 									onChange={(e) => field.onChange(Number(e.target.value))}
 									inputMode="numeric"
 								/>
 							</FormControl>
-							<FormDescription>
-								The year your foundation was established
-							</FormDescription>
+							<FormDescription>The year your foundation was established</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -186,14 +163,12 @@ export function BasicInfoSection({
 								<Input
 									type="url"
 									placeholder="https://example.com"
-									className="h-11 border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500"
+									className="h-11"
 									{...field}
 									autoComplete="url"
 								/>
 							</FormControl>
-							<FormDescription>
-								Your foundation&apos;s official website
-							</FormDescription>
+							<FormDescription>Your foundation&apos;s official website</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -210,14 +185,15 @@ export function BasicInfoSection({
 						</FormLabel>
 						<FormControl>
 							<Textarea
-								placeholder="Describe your foundation's purpose, impact, and what makes it unique…"
-								className="min-h-[120px] border-2 focus-visible:border-purple-500 focus-visible:ring-2 focus-visible:ring-purple-500 resize-none"
+								placeholder="A short summary of your foundation — what you do and who you help (1–2 sentences)…"
+								className="min-h-[100px] resize-none"
 								{...field}
 							/>
 						</FormControl>
 						<div className="flex justify-between items-center">
 							<FormDescription>
-								Provide a clear and compelling description of your foundation
+								Brief tagline shown on cards and search results. Use the Story section below for
+								your full narrative.
 							</FormDescription>
 							<span
 								className={`text-xs ${descriptionLength < 10 ? 'text-destructive' : 'text-muted-foreground'}`}

@@ -24,10 +24,7 @@ function _extractWordsFromTitle(title: string): string {
  * @param consecutiveNumber - Consecutive number for this escrow (1, 2, 3, etc.)
  * @returns Engagement ID string
  */
-export function generateEngagementId(
-	title: string,
-	consecutiveNumber: number,
-): string {
+export function generateEngagementId(title: string, consecutiveNumber: number): string {
 	return `Kindfi - ${title} - ${consecutiveNumber}`
 }
 
@@ -39,10 +36,7 @@ export function generateEngagementId(
  * @param consecutiveNumber - Consecutive number for this escrow (1, 2, 3, etc.)
  * @returns Escrow title string
  */
-export function generateEscrowTitle(
-	title: string,
-	consecutiveNumber: number,
-): string {
+export function generateEscrowTitle(title: string, consecutiveNumber: number): string {
 	return `Kindfi - ${title} - ${consecutiveNumber}`
 }
 

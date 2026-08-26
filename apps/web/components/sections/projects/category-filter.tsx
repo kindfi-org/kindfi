@@ -32,10 +32,7 @@ interface CategoryFilterProps {
 	onCategoryToggle: (category: string) => void
 }
 
-export function CategoryFilter({
-	selectedCategories,
-	onCategoryToggle,
-}: CategoryFilterProps) {
+export function CategoryFilter({ selectedCategories, onCategoryToggle }: CategoryFilterProps) {
 	const scrollContainerRef = useRef<HTMLDivElement>(null)
 	const scrollTrackRef = useRef<HTMLDivElement>(null)
 	const scrollThumbRef = useRef<HTMLDivElement>(null)
@@ -46,8 +43,7 @@ export function CategoryFilter({
 	const [hasOverflow, setHasOverflow] = useState(false)
 
 	// DEBUG: Log selected categories to see what's being tracked
-	useEffect(() => {
-	}, [selectedCategories])
+	useEffect(() => {}, [])
 
 	// Calculate how far right the thumb can go
 	const getMaxThumbPosition = () => {
@@ -86,8 +82,7 @@ export function CategoryFilter({
 
 		if (!container || !thumb || !track) return
 
-		const scrollRatio =
-			container.scrollLeft / (container.scrollWidth - container.clientWidth)
+		const scrollRatio = container.scrollLeft / (container.scrollWidth - container.clientWidth)
 		const maxThumbPosition = getMaxThumbPosition()
 		const thumbPosition = scrollRatio * maxThumbPosition
 
@@ -144,8 +139,7 @@ export function CategoryFilter({
 			const contentWidth = container.scrollWidth
 
 			// Calculate how much to scroll based on thumb movement
-			const scrollRatio =
-				(contentWidth - container.clientWidth) / (trackWidth - thumbWidth)
+			const scrollRatio = (contentWidth - container.clientWidth) / (trackWidth - thumbWidth)
 			const newScrollLeft = scrollStartLeft + deltaX * scrollRatio
 
 			container.scrollLeft = newScrollLeft
@@ -188,10 +182,7 @@ export function CategoryFilter({
 							className="bg-primary-100 text-primary-700 px-2 py-1 flex items-center gap-1"
 						>
 							{category}
-							<X
-								className="h-3 w-3 cursor-pointer"
-								onClick={() => onCategoryToggle(category)}
-							/>
+							<X className="h-3 w-3 cursor-pointer" onClick={() => onCategoryToggle(category)} />
 						</Badge>
 					))}
 				</div>
@@ -230,9 +221,7 @@ export function CategoryFilter({
 								aria-pressed={isSelected}
 							>
 								<span className="mr-1.5">{icon}</span>
-								<span className="text-xs font-medium whitespace-nowrap">
-									{category}
-								</span>
+								<span className="text-xs font-medium whitespace-nowrap">{category}</span>
 							</Badge>
 						</motion.div>
 					)
@@ -241,10 +230,7 @@ export function CategoryFilter({
 
 			{/* Custom scrollbar track */}
 			{hasOverflow && (
-				<div
-					ref={scrollTrackRef}
-					className="h-1 bg-gray-100 rounded-full mx-auto w-1/3 mt-1"
-				>
+				<div ref={scrollTrackRef} className="h-1 bg-gray-100 rounded-full mx-auto w-1/3 mt-1">
 					{/* Custom scrollbar thumb */}
 					<motion.div
 						ref={scrollThumbRef}

@@ -16,9 +16,7 @@ export const FeaturedCreators: React.FC<FeaturedCreatorsProps> = ({
 		<section className="py-24 lg:py-32 px-6 lg:px-8 bg-[#FAFAFA]">
 			<div className="container">
 				<div className="text-center max-w-2xl mx-auto mb-20">
-					<h2 className="text-3xl font-bold tracking-tight lg:text-4xl mb-4">
-						{title}
-					</h2>
+					<h2 className="text-3xl font-bold tracking-tight lg:text-4xl mb-4">{title}</h2>
 					<p className="text-lg text-muted-foreground">{description}</p>
 				</div>
 

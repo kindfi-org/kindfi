@@ -20,8 +20,7 @@ const swkAppLightThemeBase: SwkAppTheme = {
 	gray: 'oklch(0.600 0.006 286.033)',
 	danger: 'oklch(57.7% 0.245 27.325)',
 	border: 'rgba(0, 0, 0, 0.15)',
-	shadow:
-		'0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+	shadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
 	'border-radius': '0.5rem',
 	'font-family': 'sans-serif',
 }

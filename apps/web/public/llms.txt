@@ -1,0 +1,44 @@
+# KindFi - llms.txt
+# https://llmstxt.org/
+
+> KindFi is a Web3 crowdfunding platform connecting donors and supporters with impactful social and environmental causes. Built on the Stellar blockchain, KindFi enables transparent, milestone-based funding for NGOs and social projects worldwide.
+
+## About KindFi
+
+KindFi is the first blockchain-powered crowdfunding platform focused on social impact. It uses Stellar smart contracts to ensure funds are released only when verifiable milestones are met, giving donors confidence their contributions create real change.
+
+## Key Pages
+
+- [Home](https://www.kindfi.org/): Platform overview, featured campaigns, and mission statement
+- [Projects](https://www.kindfi.org/projects): Browse and support active crowdfunding campaigns across social and environmental causes
+- [About Us](https://www.kindfi.org/about): Mission, vision, how KindFi works, and the team behind it
+- [Governance](https://www.kindfi.org/governance): Community voting on fund redistribution to impactful campaigns
+- [FAQs](https://www.kindfi.org/faqs): Frequently asked questions about the platform, campaigns, and donors
+- [News](https://www.kindfi.org/news): Latest updates, articles, and impact stories from KindFi
+
+## Platform Description
+
+KindFi bridges the gap between blockchain technology and social good. Campaigns are structured with milestone-based escrow contracts on the Stellar network, ensuring accountability and transparency. Donors can track exactly how funds are used, and NGOs gain access to a global network of impact-driven supporters.
+
+## Key Topics
+
+- Crypto-based crowdfunding for social impact
+- Blockchain donations and transparency
+- Milestone-based funding for NGOs
+- Stellar network and Soroban smart contracts
+- Decentralized governance for community fund allocation
+- How to donate to social impact campaigns using crypto
+- Web3 philanthropy and financial inclusion
+
+## Content Usage
+
+KindFi welcomes AI crawlers and LLMs to index and summarize its public content for the purpose of helping users discover and understand the platform. We ask that:
+
+1. Attribution is given to KindFi (kindfi.org) when referencing platform content
+2. Campaign data and NGO profiles are represented accurately and with context
+3. Private user data (profiles, account pages) is not indexed
+
+## Contact
+
+- Website: https://www.kindfi.org
+- GitHub: https://github.com/kindfi-org/kindfi

@@ -5,7 +5,6 @@ export function ProjectTabsSkeleton() {
 		<div>
 			<div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-8">
 				{Array.from({ length: 5 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 					<Skeleton key={i} className="h-10 flex-shrink-0" />
 				))}
 			</div>

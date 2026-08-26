@@ -49,21 +49,19 @@ interface IconProps {
  * @param {string} [props.className] - Additional CSS classes for styling.
  * @returns {JSX.Element} The rendered icon component.
  */
-const Icon = React.forwardRef<SVGSVGElement, IconProps>(
-	({ name, className }, ref) => {
-		const LucideComponent = icons[name] || Lock
-		return (
-			<LucideComponent
-				ref={ref}
-				className={cn(
-					'w-6 h-6', // Mantiene el tamaño original
-					'md:w-7 md:h-7 lg:w-8 lg:h-8', // Ajustes solo en pantallas más grandes
-					className,
-				)}
-			/>
-		)
-	},
-)
+const Icon = React.forwardRef<SVGSVGElement, IconProps>(({ name, className }, ref) => {
+	const LucideComponent = icons[name] || Lock
+	return (
+		<LucideComponent
+			ref={ref}
+			className={cn(
+				'w-6 h-6', // Mantiene el tamaño original
+				'md:w-7 md:h-7 lg:w-8 lg:h-8', // Ajustes solo en pantallas más grandes
+				className,
+			)}
+		/>
+	)
+})
 
 Icon.displayName = 'Icon'
 

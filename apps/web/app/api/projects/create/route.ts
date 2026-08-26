@@ -1,8 +1,12 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesInsert } from '@services/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { projectCreateFormSchema } from '~/lib/schemas/project.schemas'
 import {
 	buildSocialLinks,
@@ -12,7 +16,7 @@ import {
 } from '~/lib/utils/project-utils'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(req: Request) {
+async function createProjectHandler(req: NextRequest) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -30,7 +34,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (profileError || !profileData) {
-			console.error('Profile lookup error:', {
+			logger.error('Profile lookup error:', {
 				error: profileError,
 				userId,
 			})
@@ -50,6 +54,14 @@ export async function POST(req: Request) {
 					error: 'Forbidden',
 					message: 'Only creators and administrators can create projects',
 				},
+				{ status: 403 },
+			)
+		}
+
+		const onboardingFailure = await requireOnboardingCompleteForAction(userId)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
 				{ status: 403 },
 			)
 		}
@@ -74,7 +86,19 @@ export async function POST(req: Request) {
 			socialLinks,
 			image,
 			foundationId,
+			developmentOnly,
+			sourceLocale,
 		} = validation.data
+
+		if (developmentOnly && userRole !== 'admin') {
+			return NextResponse.json(
+				{
+					error: 'Forbidden',
+					message: 'Only administrators can create development-only projects',
+				},
+				{ status: 403 },
+			)
+		}
 
 		// Prepare project data to insert
 		const insertData: TablesInsert<'projects'> = {
@@ -87,6 +111,8 @@ export async function POST(req: Request) {
 			kindler_id: userId,
 			social_links: buildSocialLinks(website, socialLinks),
 			...(foundationId && { foundation_id: foundationId }),
+			...(developmentOnly && { development_only: true }),
+			source_locale: sourceLocale,
 		}
 
 		// Insert new project and retrieve its ID and slug
@@ -97,7 +123,7 @@ export async function POST(req: Request) {
 			.single()
 
 		if (insertError || !project) {
-			console.error(insertError)
+			logger.error(insertError)
 			return NextResponse.json({ error: insertError?.message }, { status: 500 })
 		}
 
@@ -114,11 +140,8 @@ export async function POST(req: Request) {
 					.eq('id', project.id)
 
 				if (updateImageError) {
-					console.error(updateImageError)
-					return NextResponse.json(
-						{ error: updateImageError.message },
-						{ status: 500 },
-					)
+					logger.error(updateImageError)
+					return NextResponse.json({ error: updateImageError.message }, { status: 500 })
 				}
 			}
 		}
@@ -126,23 +149,37 @@ export async function POST(req: Request) {
 		// Create tag relationships for the new project
 		await upsertTags(project.id, tags ?? [], supabase)
 
-		// Send email + in-app notifications (non-blocking)
-		import('~/lib/email/email-notification-service')
-			.then(({ sendNewProjectEmails }) =>
-				sendNewProjectEmails({
-					projectTitle: title,
-					projectSlug: project.slug ?? '',
-					creatorId: userId,
-				}),
-			)
-			.catch((err) => console.error('[Project create] Notification error:', err))
+		if (!developmentOnly) {
+			// Send email + in-app notifications (non-blocking)
+			import('~/lib/email/email-notification-service')
+				.then(({ sendNewProjectEmails }) =>
+					sendNewProjectEmails({
+						projectTitle: title,
+						projectSlug: project.slug ?? '',
+						creatorId: userId,
+					}),
+				)
+				.catch((err) => logger.error('[Project create] Notification error:', err))
+		}
 
-		return NextResponse.json({ slug: project.slug }, { status: 201 })
+		return NextResponse.json({ slug: project.slug, id: project.id }, { status: 201 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },
 		)
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createProjectHandler,
+)

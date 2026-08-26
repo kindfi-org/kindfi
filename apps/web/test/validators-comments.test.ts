@@ -70,9 +70,7 @@ describe('Comment Validation', () => {
 			const invalidData = { ...validCommentData, content: 'a'.repeat(5001) }
 			const result = validateCommentData(invalidData)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Content too long (maximum 5000 characters)',
-			)
+			expect(result.errors).toContain('Content too long (maximum 5000 characters)')
 		})
 
 		test('should reject missing author_id', () => {
@@ -96,9 +94,7 @@ describe('Comment Validation', () => {
 			}
 			const result = validateCommentData(invalidData)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Comment cannot have both project_id and project_update_id',
-			)
+			expect(result.errors).toContain('Comment cannot have both project_id and project_update_id')
 		})
 
 		test('should reject neither project_id nor project_update_id', () => {
@@ -109,9 +105,7 @@ describe('Comment Validation', () => {
 			}
 			const result = validateCommentData(invalidData)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Comment must have either project_id or project_update_id',
-			)
+			expect(result.errors).toContain('Comment must have either project_id or project_update_id')
 		})
 
 		test('should reject invalid UUID format for project_id', () => {
@@ -184,10 +178,7 @@ describe('Comment Validation', () => {
 		}
 
 		test('should pass validation when no parent comment', async () => {
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				validCommentData,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, validCommentData)
 			expect(result.isValid).toBe(true)
 			expect(result.errors).toHaveLength(0)
 		})
@@ -205,10 +196,7 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				commentWithParent,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, commentWithParent)
 			expect(result.isValid).toBe(false)
 			expect(result.errors).toContain('Parent comment not found')
 		})
@@ -228,14 +216,9 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				commentWithParent,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, commentWithParent)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Parent comment must belong to the same project',
-			)
+			expect(result.errors).toContain('Parent comment must belong to the same project')
 		})
 
 		test('should reject when parent comment belongs to different project update', async () => {
@@ -255,14 +238,9 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				commentWithParent,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, commentWithParent)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Parent comment must belong to the same project update',
-			)
+			expect(result.errors).toContain('Parent comment must belong to the same project update')
 		})
 
 		test('should reject when trying to add answer to non-question comment', async () => {
@@ -281,10 +259,7 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				answerData,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, answerData)
 			expect(result.isValid).toBe(false)
 			expect(result.errors).toContain('Answers can only be added to questions')
 		})
@@ -305,10 +280,7 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				answerData,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, answerData)
 			expect(result.isValid).toBe(true)
 			expect(result.errors).toHaveLength(0)
 		})
@@ -351,14 +323,9 @@ describe('Comment Validation', () => {
 				parent_comment_id: '123e4567-e89b-12d3-a456-426614174002',
 			}
 
-			const result = await validateParentCommentRelationships(
-				typedMockSupabase,
-				commentWithParent,
-			)
+			const result = await validateParentCommentRelationships(typedMockSupabase, commentWithParent)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Comment nesting too deep (maximum 5 levels)',
-			)
+			expect(result.errors).toContain('Comment nesting too deep (maximum 5 levels)')
 		})
 	})
 
@@ -425,9 +392,7 @@ describe('Comment Validation', () => {
 			}
 			const result = validateCommentUpdate(updateData)
 			expect(result.isValid).toBe(false)
-			expect(result.errors).toContain(
-				'Content too long (maximum 5000 characters)',
-			)
+			expect(result.errors).toContain('Content too long (maximum 5000 characters)')
 		})
 
 		test('should reject invalid UUID format for author_id in update', () => {

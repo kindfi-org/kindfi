@@ -11,6 +11,8 @@ import {
 } from '~/components/base/select'
 import { getUserFoundations } from '~/lib/queries/foundations/get-user-foundations'
 
+const NONE_FOUNDATION_VALUE = 'none'
+
 interface FoundationSelectProps {
 	value?: string
 	onChange: (value: string) => void
@@ -54,12 +56,15 @@ export function FoundationSelect({ value, onChange }: FoundationSelectProps) {
 	}
 
 	return (
-		<Select value={value || ''} onValueChange={onChange}>
-			<SelectTrigger className="border-green-600 bg-white">
+		<Select
+			value={value ? value : NONE_FOUNDATION_VALUE}
+			onValueChange={(selected) => onChange(selected === NONE_FOUNDATION_VALUE ? '' : selected)}
+		>
+			<SelectTrigger>
 				<SelectValue placeholder="Select a foundation (optional)" />
 			</SelectTrigger>
 			<SelectContent>
-				<SelectItem value="">None (Independent Campaign)</SelectItem>
+				<SelectItem value={NONE_FOUNDATION_VALUE}>None (Independent Campaign)</SelectItem>
 				{foundations.map((foundation) => (
 					<SelectItem key={foundation.id} value={foundation.id}>
 						{foundation.name}

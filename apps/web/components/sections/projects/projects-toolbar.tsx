@@ -96,9 +96,7 @@ export function ProjectsToolbar({
 					selectedCategories={selectedCategories}
 					onCategoryToggle={(category: string) => {
 						if (selectedCategories.includes(category)) {
-							setSelectedCategories?.(
-								selectedCategories.filter((id) => id !== category),
-							)
+							setSelectedCategories?.(selectedCategories.filter((id) => id !== category))
 						} else {
 							setSelectedCategories?.([...selectedCategories, category])
 						}
@@ -108,9 +106,7 @@ export function ProjectsToolbar({
 			<div className="flex max-md:flex-col justify-between items-center mb-8">
 				<div>
 					{subHeader && <h2 className="text-2xl font-semibold">{subHeader}</h2>}
-					{description && (
-						<p className="text-lg text-muted-foreground">{description}</p>
-					)}
+					{description && <p className="text-lg text-muted-foreground">{description}</p>}
 				</div>
 				<div className="flex items-center gap-4">
 					{showSortDropdown && onSortChange && (

@@ -3,12 +3,7 @@
 import { Globe } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '~/components/base/button'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '~/components/base/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
 import { cn } from '~/lib/utils'
 import { getSocialTypeFromUrl, isValidUrl } from '~/lib/utils/project-utils'
@@ -36,10 +31,7 @@ const socialConfigs: Record<string, SocialLinkConfig> = {
 	tiktok: { label: 'TikTok' },
 }
 
-export function SocialLinksDisplay({
-	socialLinks,
-	className = '',
-}: SocialLinksDisplayProps) {
+export function SocialLinksDisplay({ socialLinks, className = '' }: SocialLinksDisplayProps) {
 	const validLinks = Object.entries(socialLinks)
 		.filter(([_, url]) => url && isValidUrl(url))
 		.map(([key, url]) => {
@@ -57,14 +49,9 @@ export function SocialLinksDisplay({
 
 	return (
 		<div
-			className={cn(
-				'flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full',
-				className,
-			)}
+			className={cn('flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full', className)}
 		>
-			<span className="text-sm text-muted-foreground font-medium shrink-0">
-				Connect with us:
-			</span>
+			<span className="text-sm text-muted-foreground font-medium shrink-0">Connect with us:</span>
 			<TooltipProvider>
 				<div className="flex flex-wrap items-center gap-2">
 					{validLinks.map(({ key, url, label }) => (
@@ -77,12 +64,7 @@ export function SocialLinksDisplay({
 									aria-label={`Visit ${label}`}
 									asChild
 								>
-									<a
-										href={url}
-										target="_blank"
-										rel="noopener noreferrer"
-										aria-label={label}
-									>
+									<a href={url} target="_blank" rel="noopener noreferrer" aria-label={label}>
 										{key === 'website' ? (
 											<Globe className="h-4 w-4" />
 										) : (

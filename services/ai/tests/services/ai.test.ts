@@ -1,8 +1,5 @@
 import { HfInference } from '@huggingface/inference'
-import {
-	analyzeSentiment,
-	verifyBiometrics,
-} from '~/services/ai/src/services/ai'
+import { analyzeSentiment, verifyBiometrics } from '~/services/ai/src/services/ai'
 
 jest.mock('@huggingface/inference')
 

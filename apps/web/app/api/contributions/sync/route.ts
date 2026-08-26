@@ -2,8 +2,14 @@ import { supabase } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
+import {
+	createContributionWithProjectUpdate,
+	validateContributionAllowed,
+} from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
@@ -12,12 +18,19 @@ import { validateRequest } from '~/lib/utils/validation'
  */
 export async function POST(req: NextRequest) {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, body] = await Promise.all([getServerSession(nextAuthOption), req.json()])
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const body = await req.json()
+		const onboardingFailure = await requireOnboardingCompleteForAction(session.user.id)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
+				{ status: 403 },
+			)
+		}
+
 		const validation = validateRequest(syncContributionSchema, body)
 		if (!validation.success) {
 			return validation.response
@@ -54,20 +67,22 @@ export async function POST(req: NextRequest) {
 		}
 
 		if (!projectId) {
-			return NextResponse.json(
-				{ error: 'Project ID is required' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
 		}
 
-		// Check if contribution already exists
-		const { data: existingContribution } = await supabase
-			.from('contributions')
-			.select('id')
-			.eq('project_id', projectId)
-			.eq('contributor_id', session.user.id)
-			.eq('amount', Number(amount))
-			.single()
+		const [contributionCheck, { data: existingContribution }] = await Promise.all([
+			validateContributionAllowed(projectId, contractId),
+			supabase
+				.from('contributions')
+				.select('id')
+				.eq('project_id', projectId)
+				.eq('contributor_id', session.user.id)
+				.eq('amount', Number(amount))
+				.single(),
+		])
+		if (!contributionCheck.allowed) {
+			return NextResponse.json({ error: contributionCheck.error }, { status: 403 })
+		}
 
 		if (existingContribution) {
 			return NextResponse.json(
@@ -80,65 +95,33 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Create contribution record
-		const { data: contribution, error: contributionError } = await supabase
-			.from('contributions')
-			.insert({
-				project_id: projectId,
-				contributor_id: session.user.id,
-				amount: Number(amount),
-			})
-			.select('id')
-			.single()
+		// Create contribution record and update project totals atomically
+		const contributionResult = await createContributionWithProjectUpdate({
+			projectId,
+			contributorId: session.user.id,
+			amount: Number(amount),
+		})
 
-		if (contributionError) {
-			console.error('Error creating contribution:', contributionError)
+		if (!contributionResult.success) {
 			return NextResponse.json(
 				{
-					error: 'Failed to create contribution',
-					details: contributionError.message,
+					error: contributionResult.error,
+					details: contributionResult.details,
 				},
 				{ status: 500 },
 			)
 		}
 
-		// Update project's current_amount (raised amount)
-		const { error: updateError } = await supabase.rpc(
-			'increment_project_amount',
-			{
-				project_id_param: projectId,
-				amount_param: Number(amount),
-			},
-		)
-
-		// If RPC doesn't exist, fallback to manual update
-		if (updateError) {
-			const { data: project } = await supabase
-				.from('projects')
-				.select('current_amount')
-				.eq('id', projectId)
-				.single()
-
-			if (project) {
-				await supabase
-					.from('projects')
-					.update({
-						current_amount: (project.current_amount || 0) + Number(amount),
-					})
-					.eq('id', projectId)
-			}
-		}
-
 		return NextResponse.json(
 			{
 				success: true,
-				contributionId: contribution.id,
+				contributionId: contributionResult.contributionId,
 				message: 'Contribution synced successfully',
 			},
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Sync contribution error:', error)
+		logger.error('Sync contribution error:', error)
 		return NextResponse.json(
 			{
 				error: error instanceof Error ? error.message : 'Internal server error',

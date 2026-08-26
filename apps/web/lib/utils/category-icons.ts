@@ -19,6 +19,7 @@ export const categoryIcons: Record<string, LucideIcon> = {
 	'Arts & Culture': Palette,
 	'Community & Civic Engagement': Users,
 	'Disaster Relief & Humanitarian Aid': ShieldAlert,
+	'Humanitarian Aid': ShieldAlert,
 	Education: GraduationCap,
 	'Environment & Sustainability': Leaf,
 	Healthcare: HeartPulse,

@@ -9,11 +9,7 @@ type ProjectCreatorProps = {
 	isVerified?: boolean
 }
 
-export function ProjectCreator({
-	creatorName,
-	joinDate,
-	isVerified = true,
-}: ProjectCreatorProps) {
+export function ProjectCreator({ creatorName, joinDate, isVerified = true }: ProjectCreatorProps) {
 	return (
 		<PrimaryCard className="space-y-4">
 			<TitleCardDetail>Project Creator</TitleCardDetail>
@@ -21,9 +17,7 @@ export function ProjectCreator({
 			<div className="flex items-center gap-4">
 				<CircleUserRound className="size-10" />
 				<div>
-					<span className="font-semibold block text-gray-700">
-						{creatorName}
-					</span>
+					<span className="font-semibold block text-gray-700">{creatorName}</span>
 					<span className="text-gray-600">{joinDate}</span>
 				</div>
 			</div>
@@ -36,9 +30,7 @@ export function ProjectCreator({
 					<Check className="text-green-600" />
 					<div>
 						<span className="font-semibold block">Verified Project</span>
-						<span className="text-gray-600">
-							This project has been verified by KindFi
-						</span>
+						<span className="text-gray-600">This project has been verified by KindFi</span>
 					</div>
 				</div>
 			)}

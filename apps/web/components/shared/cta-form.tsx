@@ -2,9 +2,20 @@
 
 import { motion } from 'framer-motion'
 import { Rocket } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import { WaitlistModal } from '~/components/sections/waitlist/waitlist-modal'
 import { Button } from '../base/button'
+
+const WaitlistModal = dynamic(
+	() =>
+		import('~/components/sections/waitlist/waitlist-modal').then((mod) => ({
+			default: mod.WaitlistModal,
+		})),
+	{
+		loading: () => null,
+		ssr: false,
+	},
+)
 
 interface CtaFormProps {
 	onSubmit: (data: { name: string; project: string }) => void
@@ -59,9 +70,9 @@ export const CTAForm = ({ onSubmit, className = '' }: CtaFormProps) => {
 						Launch Your Social Cause with KindFi
 					</h2>
 					<p className="text-lg text-gray-600 mb-8">
-						Whether you’re an NGO, local initiative, or changemaker — start your
-						journey in minutes. Our Web3-powered platform gives your project
-						visibility, trust, and a path to real funding
+						Whether you’re an NGO, local initiative, or changemaker — start your journey in minutes.
+						Our Web3-powered platform gives your project visibility, trust, and a path to real
+						funding
 					</p>
 				</motion.div>
 				<div className="flex-1 flex-col sm:flex-row gap-4">

@@ -8,7 +8,6 @@ export interface PagePropsBase {
 
 export interface NavigationItem {
 	href: `/${string}` | `https://${string}` | `http://${string}`
-	// TODO: Title and label are overlapping, remove title...
 	title?: string
 	label?: string
 	icon?: LucideIcon

@@ -1,5 +1,6 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { logger } from '@/lib/logger'
 
 /**
  * Get the appropriate RP ID based on the origin
@@ -11,9 +12,7 @@ export function getRpIdFromOrigin(origin: string): string {
 	const rpIds = config.passkey.rpId
 
 	// Try to match the origin with expected origins
-	const originIndex = expectedOrigins.findIndex(
-		(expectedOrigin) => expectedOrigin === origin,
-	)
+	const originIndex = expectedOrigins.indexOf(origin)
 
 	if (originIndex !== -1 && rpIds[originIndex]) {
 		return rpIds[originIndex]
@@ -28,13 +27,10 @@ export function getRpIdFromOrigin(origin: string): string {
 		// Remove 'www.' prefix if present for consistency
 		const rpId = hostname.replace(/^www\./, '')
 
-
 		return rpId
 	} catch {
 		// Invalid URL, fall back to first configured RP ID
-		console.warn(
-			`⚠️ Invalid origin format: ${origin}. Using first configured RP ID.`,
-		)
+		logger.warn(`⚠️ Invalid origin format: ${origin}. Using first configured RP ID.`)
 		return rpIds[0] || 'localhost'
 	}
 }
@@ -48,9 +44,7 @@ export function getRpNameFromOrigin(origin: string): string {
 	const rpNames = config.passkey.rpName
 
 	// Try to match the origin with expected origins
-	const originIndex = expectedOrigins.findIndex(
-		(expectedOrigin) => expectedOrigin === origin,
-	)
+	const originIndex = expectedOrigins.indexOf(origin)
 
 	if (originIndex !== -1 && rpNames[originIndex]) {
 		return rpNames[originIndex]

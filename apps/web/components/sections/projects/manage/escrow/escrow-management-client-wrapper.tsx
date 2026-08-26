@@ -1,166 +1,78 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
-import { motion, useReducedMotion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { IoLockClosedOutline } from 'react-icons/io5'
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '~/components/base/card'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { Button } from '~/components/base/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/base/card'
+import { ManageSectionShell } from '~/components/sections/projects/manage/manage-section-shell'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
+import { useI18n } from '~/lib/i18n/context'
+import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { SyncEscrowCard } from './components/sync-escrow-card'
 import { EscrowManagementPanel } from './escrow-management-panel'
 
-export function EscrowManagementClientWrapper({
-	projectSlug,
-}: {
-	projectSlug: string
-}) {
-	const prefersReducedMotion = useReducedMotion()
+export function EscrowManagementClientWrapper({ projectSlug }: { projectSlug: string }) {
+	const { t } = useI18n()
 	const {
 		data: project,
+		isLoading,
 		error,
-		isLoading: _isLoading,
-	} = useSupabaseQuery(
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>>(
 		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, projectSlug),
+		projectSlug,
+		'basic-info',
 		{ additionalKeyValues: [projectSlug] },
 	)
 
-	if (error || !project) notFound()
-
-	const _category = project.category?.slug
-		? { name: project.category.name, slug: project.category.slug }
-		: undefined
-
-	if (!project.escrowContractAddress) {
+	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
-				{/* Subtle background pattern */}
-				<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
-
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-					className="relative z-10"
-				>
-					<motion.header
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{
-							delay: prefersReducedMotion ? 0 : 0.1,
-							duration: prefersReducedMotion ? 0 : 0.3,
-						}}
-						className="flex flex-col items-center justify-center mb-8"
-					>
-						<div className="flex items-center gap-3 mt-4">
-							<div className="rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 p-3 text-white shadow-sm">
-								<IoLockClosedOutline size={24} className="relative z-10" />
-							</div>
-							<div>
-								<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
-									Escrow Management
-								</h1>
-								<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-									Fund escrow, approve milestones, release funds, and track
-									balance
-								</p>
-							</div>
-						</div>
-					</motion.header>
-
-					<motion.div
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{
-							delay: prefersReducedMotion ? 0 : 0.2,
-							duration: prefersReducedMotion ? 0 : 0.3,
-						}}
-						className="max-w-2xl mx-auto"
-					>
-						<Card className="border-border bg-card">
-							<CardHeader>
-								<CardTitle>No Escrow Found</CardTitle>
-								<CardDescription>
-									This project doesn&apos;t have an escrow contract yet.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<p className="text-sm text-muted-foreground">
-									Please create an escrow contract from the{' '}
-									<a
-										href={`/projects/${projectSlug}/manage/settings`}
-										className="text-primary hover:underline"
-									>
-										escrow creation page
-									</a>
-									.
-								</p>
-							</CardContent>
-						</Card>
-					</motion.div>
-				</motion.div>
+			<div className="space-y-6" aria-live="polite">
+				<div className="h-16 animate-pulse rounded-xl bg-muted" />
+				<div className="h-64 animate-pulse rounded-xl bg-muted" />
 			</div>
 		)
 	}
 
-	return (
-		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
-			{/* Subtle background pattern */}
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
+	if (error || !project) notFound()
 
-			<motion.div
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: prefersReducedMotion ? 0 : 0.4 }}
-				className="relative z-10"
+	if (!project.escrowContractAddress) {
+		return (
+			<ManageSectionShell
+				title={t('projects.manage.escrowOpsTitle')}
+				description={t('projects.manage.escrowOpsEmptyDescription')}
+				className="mx-auto max-w-2xl"
 			>
-				{/* Header */}
-				<motion.header
-					initial={{ opacity: 0, y: -10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{
-						delay: prefersReducedMotion ? 0 : 0.1,
-						duration: prefersReducedMotion ? 0 : 0.3,
-					}}
-					className="flex flex-col  mb-8"
-				>
-					<div className="flex items-center gap-3 mt-4">
-						<div className="rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 p-3 text-white shadow-sm">
-							<IoLockClosedOutline size={24} className="relative z-10" />
-						</div>
-						<div>
-							<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
-								Escrow Management
-							</h1>
-							<p className="text-lg md:text-xl text-muted-foreground mt-2">
-								Fund escrow, approve milestones, release funds, and track
-								balance
-							</p>
-						</div>
-					</div>
-				</motion.header>
+				<Card className="border-border">
+					<CardHeader>
+						<CardTitle>{t('projects.manage.escrowNoContractTitle')}</CardTitle>
+						<CardDescription>{t('projects.manage.escrowNoContractDescription')}</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Button asChild>
+							<Link href={`/projects/${projectSlug}/manage/settings`}>
+								{t('projects.manage.createEscrow')}
+								<ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+							</Link>
+						</Button>
+					</CardContent>
+				</Card>
+				<SyncEscrowCard projectId={project.id} projectSlug={projectSlug} />
+			</ManageSectionShell>
+		)
+	}
 
-				{/* Content */}
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{
-						delay: prefersReducedMotion ? 0 : 0.2,
-						duration: prefersReducedMotion ? 0 : 0.3,
-					}}
-				>
-					<EscrowManagementPanel
-						projectId={project.id}
-						escrowContractAddress={project.escrowContractAddress}
-						escrowType={project.escrowType}
-					/>
-				</motion.div>
-			</motion.div>
-		</div>
+	return (
+		<ManageSectionShell
+			title={t('projects.manage.escrowOpsTitle')}
+			description={t('projects.manage.escrowOpsDescription').replace('{title}', project.title)}
+			className="mx-auto max-w-4xl"
+		>
+			<EscrowManagementPanel
+				projectId={project.id}
+				escrowContractAddress={project.escrowContractAddress}
+				escrowType={project.escrowType}
+			/>
+		</ManageSectionShell>
 	)
 }

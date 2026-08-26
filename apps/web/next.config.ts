@@ -10,13 +10,21 @@ const nextConfig: NextConfig = {
 	turbopack: {
 		root: path.join(__dirname, '../..'),
 	},
-	// TODO: Fix React module resolution for packages/lib in monorepo type-check
-	typescript: {
-		ignoreBuildErrors: true,
+	outputFileTracingIncludes: {
+		'/terms': ['./content/legal/**/*'],
+		'/privacy': ['./content/legal/**/*'],
+		'/cookies': ['./content/legal/**/*'],
+		'/licenses': ['./content/legal/**/*'],
 	},
 	experimental: {
 		mdxRs: true,
-		optimizePackageImports: ['react-icons'],
+		optimizePackageImports: [
+			'react-icons',
+			'lucide-react',
+			'framer-motion',
+			'lodash',
+			'@radix-ui/react-icons',
+		],
 	},
 	serverExternalPackages: [
 		'@packages/lib/stellar',
@@ -44,16 +52,49 @@ const nextConfig: NextConfig = {
 			},
 			{
 				protocol: 'https',
+				hostname: 'gateway.pinata.cloud',
+				pathname: '/ipfs/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'kindfi.org',
+				pathname: '/images/**',
+			},
+			{
+				protocol: 'https',
 				hostname: '*.mypinata.cloud',
 				pathname: '/ipfs/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '*.googleusercontent.com',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '*.githubusercontent.com',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'pollar.xyz',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '*.pollar.xyz',
+				pathname: '/**',
 			},
 		],
 	},
 	async headers() {
 		// Apply headers for both production and development
 		const connectSrc = isProduction
-			? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com https://api.trustlesswork.com`
-			: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com https://api.trustlesswork.com`
+			? `'self' https://flagcdn.com https://apis.google.com https://friendbot-futurenet.stellar.org https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://horizon.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com https://api.trustlesswork.com https://api.pollar.xyz https://sdk.api.pollar.xyz`
+			: `'self' https://friendbot-futurenet.stellar.org http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* wss://localhost:* wss://127.0.0.1:* https://flagcdn.com https://apis.google.com https://www.google-analytics.com https://www.googletagmanager.com https://rpc-futurenet.stellar.org https://horizon-futurenet.stellar.org https://horizon.stellar.org https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org https://*.kindfi.org https://dev-api.dashboard.kindfi.org https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://dev.api.trustlesswork.com https://api.trustlesswork.com https://api.pollar.xyz https://sdk.api.pollar.xyz`
+
+		const imgSrc = `'self' data: blob: https://flagcdn.com https://pollar.xyz https://*.pollar.xyz https://gateway.pinata.cloud https://kindfi.org https://*.googleusercontent.com https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech https://*.mypinata.cloud`
+		const imgSrcDev = `${imgSrc} https://randomuser.me http://127.0.0.1:54321`
 
 		if (isProduction) {
 			return [
@@ -78,10 +119,10 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob: https://flagcdn.com https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech https://*.mypinata.cloud;
+                img-src ${imgSrc};
                 font-src 'self' data:;
                 connect-src ${connectSrc};
-								frame-src 'self' https://www.youtube.com;
+								frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://loom.com;
                 frame-ancestors 'self';
                 upgrade-insecure-requests;
               `.replace(/\s{2,}/g, ' '),
@@ -113,10 +154,10 @@ const nextConfig: NextConfig = {
                 default-src 'self';
                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.googletagmanager.com;
                 style-src 'self' 'unsafe-inline';
-                img-src 'self' data: blob: https://flagcdn.com https://randomuser.me http://127.0.0.1:54321 https://*.jsdelivr.net https://cdn.jsdelivr.net https://unpkg.com https://*.unpkg.com https://raw.githubusercontent.com https://*.githubusercontent.com https://freighter.app https://albedo.link https://rabet.io https://xbull.app https://walletconnect.org https://*.walletconnect.org https://*.walletconnect.com https://stellar.creit.tech https://*.mypinata.cloud;
+                img-src ${imgSrcDev};
                 font-src 'self' data:;
                 connect-src ${connectSrc};
-								frame-src 'self' https://www.youtube.com;
+								frame-src 'self' https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.loom.com https://loom.com;
                 frame-ancestors 'self';
               `.replace(/\s{2,}/g, ' '),
 					},

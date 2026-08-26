@@ -5,7 +5,7 @@ import { Command as CommandPrimitive } from 'cmdk'
 import { Search } from 'lucide-react'
 import * as React from 'react'
 
-import { Dialog, DialogContent } from '~/components/base/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/base/dialog'
 import { cn } from '~/lib/utils'
 
 const Command = React.forwardRef<
@@ -27,6 +27,9 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
 	return (
 		<Dialog {...props}>
 			<DialogContent className="overflow-hidden p-0">
+				<DialogHeader className="sr-only">
+					<DialogTitle>Command palette</DialogTitle>
+				</DialogHeader>
 				<Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
 					{children}
 				</Command>
@@ -71,11 +74,7 @@ const CommandEmpty = React.forwardRef<
 	React.ElementRef<typeof CommandPrimitive.Empty>,
 	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
 >((props, ref) => (
-	<CommandPrimitive.Empty
-		ref={ref}
-		className="py-6 text-center text-sm"
-		{...props}
-	/>
+	<CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm" {...props} />
 ))
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName
@@ -124,16 +123,10 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName
 
-const CommandShortcut = ({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
 	return (
 		<span
-			className={cn(
-				'ml-auto text-xs tracking-widest text-muted-foreground',
-				className,
-			)}
+			className={cn('ml-auto text-xs tracking-widest text-muted-foreground', className)}
 			{...props}
 		/>
 	)

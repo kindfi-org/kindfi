@@ -19,9 +19,9 @@ export function useNotifications(
 ) {
 	const supabase = useMemo(() => createSupabaseBrowserClient(), [])
 	const queryClient = useQueryClient()
-	const [connectionState, setConnectionState] = useState<
-		'connected' | 'disconnected'
-	>('disconnected')
+	const [connectionState, setConnectionState] = useState<'connected' | 'disconnected'>(
+		'disconnected',
+	)
 	const notificationService = useMemo(() => new NotificationService(), [])
 
 	// Stabilize userId so the realtime effect only re-runs when the ID actually changes
@@ -74,8 +74,7 @@ export function useNotifications(
 
 	// Mutation for creating a notification
 	const createNotification = useMutation({
-		mutationFn: (data: CreateNotificationDTO) =>
-			notificationService.createNotification(data),
+		mutationFn: (data: CreateNotificationDTO) => notificationService.createNotification(data),
 		onSuccess: onSuccessUpdate,
 	})
 

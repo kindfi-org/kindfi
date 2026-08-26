@@ -6,19 +6,10 @@ interface BaseImageProps extends ImageProps {
 	isDecorative?: boolean
 }
 
-const Image: FC<BaseImageProps> = ({
-	src,
-	alt,
-	className,
-	isDecorative = false,
-	...props
-}) => {
+const Image: FC<BaseImageProps> = ({ src, alt, className, isDecorative = false, ...props }) => {
 	return (
 		<picture
-			className={cn(
-				'w-full h-full flex items-center justify-center overflow-hidden',
-				className,
-			)}
+			className={cn('w-full h-full flex items-center justify-center overflow-hidden', className)}
 		>
 			<NextImage
 				{...props}

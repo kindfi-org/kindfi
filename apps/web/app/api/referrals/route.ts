@@ -1,29 +1,13 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
+import { limitOffsetQuerySchema } from '~/lib/schemas/common.schemas'
 import { createReferralSchema } from '~/lib/schemas/referral.schemas'
+import { resolveUserStellarAddress } from '~/lib/services/resolve-user-stellar-address'
+import { GamificationContractService } from '~/lib/stellar/gamification-contracts'
 import { validateRequest } from '~/lib/utils/validation'
-
-/**
- * Resolve a user ID to a Stellar address (G... or C...) via devices table.
- * Returns null if no address is found.
- */
-async function resolveUserStellarAddress(
-	supabase: import('@packages/lib/types').TypedSupabaseClient,
-	userId: string,
-): Promise<string | null> {
-	const { data: devices } = await supabase
-		.from('devices')
-		.select('address')
-		.eq('user_id', userId)
-		.not('address', 'eq', '0x')
-		.not('address', 'is', null)
-		.limit(1)
-
-	return devices?.[0]?.address ?? null
-}
 
 /**
  * GET /api/referrals
@@ -33,45 +17,50 @@ async function resolveUserStellarAddress(
  * but this app authenticates via NextAuth. The session check above ensures
  * only authenticated users can access this endpoint.
  */
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
+		const { searchParams } = req.nextUrl
+		const paginationValidation = validateRequest(limitOffsetQuerySchema, {
+			limit: searchParams.get('limit'),
+			offset: searchParams.get('offset'),
+		})
+		if (!paginationValidation.success) {
+			return paginationValidation.response
+		}
+		const { limit, offset } = paginationValidation.data
+
 		// Use service role client to bypass RLS — auth is handled by NextAuth session above
 		const { supabase } = await import('@packages/lib/supabase')
 
-		// Get referrals, statistics, and referred record in parallel
-		const [referralsResult, statsResult, referredResult] = await Promise.all([
+		// Get referrals, statistics, referred record, and referral profile in parallel
+		const [referralsResult, statsResult, referredResult, profileResult] = await Promise.all([
 			supabase
 				.from('referral_records')
-				.select('*')
+				.select('*', { count: 'exact' })
 				.eq('referrer_id', session.user.id)
-				.order('created_at', { ascending: false }),
-			supabase
-				.from('referrer_statistics')
-				.select('*')
-				.eq('referrer_id', session.user.id)
-				.single(),
-			supabase
-				.from('referral_records')
-				.select('*')
-				.eq('referred_id', session.user.id)
-				.single(),
+				.order('created_at', { ascending: false })
+				.range(offset, offset + limit - 1),
+			supabase.from('referrer_statistics').select('*').eq('referrer_id', session.user.id).single(),
+			supabase.from('referral_records').select('*').eq('referred_id', session.user.id).single(),
+			supabase.from('referral_profiles').select('*').eq('user_id', session.user.id).maybeSingle(),
 		])
 
-		const { data: referrals, error: referralsError } = referralsResult
+		const { data: referrals, error: referralsError, count: referralsCount } = referralsResult
 		const { data: stats, error: statsError } = statsResult
 		const { data: referredRecord } = referredResult
+		const { data: referralProfile } = profileResult
 
 		if (referralsError) {
-			console.error('Error fetching referrals:', referralsError)
+			logger.error('Error fetching referrals:', referralsError)
 		}
 
 		if (statsError && statsError.code !== 'PGRST116') {
-			console.error('Error fetching referrer stats:', statsError)
+			logger.error('Error fetching referrer stats:', statsError)
 		}
 
 		return NextResponse.json({
@@ -82,13 +71,14 @@ export async function GET(_req: NextRequest) {
 				total_reward_points: 0,
 			},
 			referred_by: referredRecord?.referrer_id || null,
+			is_activated: Boolean(referralProfile),
+			referral_code: referralProfile?.referral_code ?? null,
+			referral_profile: referralProfile ?? null,
+			pagination: { limit, offset, total: referralsCount ?? 0 },
 		})
 	} catch (error) {
-		console.error('Error in GET /api/referrals:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in GET /api/referrals:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
 
@@ -124,10 +114,7 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (existing) {
-			return NextResponse.json(
-				{ error: 'Referral already exists' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Referral already exists' }, { status: 400 })
 		}
 
 		// Create referral record in DB
@@ -142,11 +129,8 @@ export async function POST(req: NextRequest) {
 			.single()
 
 		if (error) {
-			console.error('Error creating referral:', error)
-			return NextResponse.json(
-				{ error: 'Failed to create referral' },
-				{ status: 500 },
-			)
+			logger.error('Error creating referral:', error)
+			return NextResponse.json({ error: 'Failed to create referral' }, { status: 500 })
 		}
 
 		// Update or create referrer statistics
@@ -176,8 +160,7 @@ export async function POST(req: NextRequest) {
 		// ---- On-chain: create_referral ----
 		let contractResult: { success: boolean; error?: string } | null = null
 		const referralContractAddress =
-			process.env.REFERRAL_CONTRACT_ADDRESS ||
-			process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
+			process.env.REFERRAL_CONTRACT_ADDRESS || process.env.NEXT_PUBLIC_REFERRAL_CONTRACT_ADDRESS
 
 		if (referralContractAddress && process.env.SOROBAN_PRIVATE_KEY) {
 			// Resolve both addresses in parallel
@@ -186,32 +169,23 @@ export async function POST(req: NextRequest) {
 				resolveUserStellarAddress(supabase, referred_id),
 			])
 
-
 			if (referrerAddress && referredAddress) {
 				try {
 					const contractService = new GamificationContractService()
-					contractResult = await contractService.createReferral(
-						referralContractAddress,
-						{ referrerAddress, referredAddress },
-					)
+					contractResult = await contractService.createReferral(referralContractAddress, {
+						referrerAddress,
+						referredAddress,
+					})
 
 					if (!contractResult.success) {
-						console.error(
-							'[Referral API] On-chain create_referral failed:',
-							contractResult.error,
-						)
+						logger.error('[Referral API] On-chain create_referral failed:', contractResult.error)
 					} else {
 					}
 				} catch (err) {
-					console.error(
-						'[Referral API] Error calling create_referral on-chain:',
-						err,
-					)
+					logger.error('[Referral API] Error calling create_referral on-chain:', err)
 				}
 			} else {
-				console.warn(
-					'[Referral API] Skipping on-chain create_referral — missing Stellar addresses',
-				)
+				logger.warn('[Referral API] Skipping on-chain create_referral — missing Stellar addresses')
 			}
 		}
 
@@ -220,10 +194,7 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		console.error('Error in POST /api/referrals:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in POST /api/referrals:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

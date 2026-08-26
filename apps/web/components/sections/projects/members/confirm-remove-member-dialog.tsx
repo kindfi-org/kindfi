@@ -26,16 +26,13 @@ export function ConfirmRemoveMemberDialog({
 				<AlertDialogHeader>
 					<AlertDialogTitle>Remove member?</AlertDialogTitle>
 					<AlertDialogDescription>
-						Are you sure you no longer want to be a member of this project? You
-						will lose access to the Project Management pages.
+						Are you sure you no longer want to be a member of this project? You will lose access to
+						the Project Management pages.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction
-						onClick={onConfirm}
-						className="gradient-btn text-white"
-					>
+					<AlertDialogAction onClick={onConfirm} className="gradient-btn text-white">
 						Remove
 					</AlertDialogAction>
 				</AlertDialogFooter>

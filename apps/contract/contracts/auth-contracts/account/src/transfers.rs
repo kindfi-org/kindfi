@@ -2,9 +2,18 @@
 /// 
 /// This module implements token transfers (XLM and Stellar Assets) 
 /// for WebAuthn-authenticated smart wallet accounts.
-use soroban_sdk::{token, Address, Env, String};
+use soroban_sdk::{symbol_short, token, Address, Env, Symbol};
 
 use crate::errors::Error;
+
+const NATIVE_TOKEN: Symbol = symbol_short!("native");
+
+fn native_token_address(env: &Env) -> Address {
+    env.storage()
+        .instance()
+        .get(&NATIVE_TOKEN)
+        .expect("native token not configured")
+}
 
 /// Transfer XLM (native Stellar lumens) to another address
 /// 
@@ -23,14 +32,7 @@ pub fn transfer_xlm(env: &Env, to: Address, amount: i128) -> Result<(), Error> {
         return Err(Error::InvalidAmount);
     }
 
-    // Get the native token (XLM) contract address
-    let native_token_address = Address::from_string(&String::from_str(
-        env,
-        "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC", // Native XLM on Stellar in Testnet
-    ));
-
-    // Use standard token client for native XLM
-    let token_client = token::Client::new(env, &native_token_address);
+    let token_client = token::Client::new(env, &native_token_address(env));
 
     // Transfer from this contract to the recipient
     token_client.transfer(
@@ -118,12 +120,7 @@ pub fn invoke_contract(
 
 /// Get the balance of XLM (native lumens) for this smart wallet
 pub fn get_xlm_balance(env: &Env) -> i128 {
-    let native_token_address = Address::from_string(&String::from_str(
-        env,
-        "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-    ));
-
-    let token_client = token::Client::new(env, &native_token_address);
+    let token_client = token::Client::new(env, &native_token_address(env));
     token_client.balance(&env.current_contract_address())
 }
 

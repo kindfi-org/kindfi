@@ -3,18 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-	IoCalendarOutline,
 	IoCreateOutline,
 	IoMegaphoneOutline,
 	IoPeopleOutline,
-	IoSettingsOutline,
 	IoSpeedometerOutline,
 } from 'react-icons/io5'
 import { cn } from '~/lib/utils'
-import {
-	FOUNDATION_MANAGE_SECTIONS,
-	type FoundationManageSectionKey,
-} from './constants'
+import { FOUNDATION_MANAGE_SECTIONS, type FoundationManageSectionKey } from './constants'
 
 const SECTION_ICONS: Record<
 	FoundationManageSectionKey,
@@ -23,9 +18,7 @@ const SECTION_ICONS: Record<
 	overview: IoSpeedometerOutline,
 	edit: IoCreateOutline,
 	campaigns: IoMegaphoneOutline,
-	milestones: IoCalendarOutline,
 	members: IoPeopleOutline,
-	settings: IoSettingsOutline,
 }
 
 export function FoundationManageNavigation({ slug }: { slug: string }) {
@@ -60,9 +53,7 @@ export function FoundationManageNavigation({ slug }: { slug: string }) {
 								<Icon
 									className={cn(
 										'shrink-0 transition-opacity',
-										isActive
-											? 'opacity-100'
-											: 'opacity-70 group-hover:opacity-100',
+										isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100',
 									)}
 									size={18}
 									aria-hidden="true"

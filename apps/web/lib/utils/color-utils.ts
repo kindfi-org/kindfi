@@ -1,10 +1,51 @@
 import getContrast from 'get-contrast'
 
+const DEFAULT_HEX_COLOR = '#61646B'
+
 const MAXIMUM_COLOR_RANGE = 0xffffff
 function randomHexColor(): string {
 	return `#${`${Math.floor(Math.random() * MAXIMUM_COLOR_RANGE)
 		.toString(16)
 		.padStart(6, '0')}`}`
+}
+
+/** Normalize user/database colors to 6-char hex; fall back when invalid. */
+/** Convert a hex color to rgba for translucent overlays and tinted surfaces. */
+export function hexToRgba(
+	color: string | null | undefined,
+	alpha: number,
+	fallback = DEFAULT_HEX_COLOR,
+): string {
+	const hex = normalizeHexColor(color, fallback).replace('#', '')
+	const r = Number.parseInt(hex.slice(0, 2), 16)
+	const g = Number.parseInt(hex.slice(2, 4), 16)
+	const b = Number.parseInt(hex.slice(4, 6), 16)
+	const clampedAlpha = Math.min(1, Math.max(0, alpha))
+	return `rgba(${r}, ${g}, ${b}, ${clampedAlpha})`
+}
+
+export function normalizeHexColor(
+	color: string | null | undefined,
+	fallback = DEFAULT_HEX_COLOR,
+): string {
+	if (!color || typeof color !== 'string') return fallback
+
+	let hex = color.trim()
+	if (!hex.startsWith('#')) hex = `#${hex}`
+	hex = hex.replace('#', '')
+
+	if (/^[0-9A-Fa-f]{3}$/.test(hex)) {
+		hex = hex
+			.split('')
+			.map((char) => char + char)
+			.join('')
+	}
+
+	if (/^[0-9A-Fa-f]{6}$/.test(hex)) {
+		return `#${hex}`
+	}
+
+	return fallback
 }
 
 export function getA11yColorMatch(color: string): [string, string] {
@@ -18,10 +59,7 @@ export function getA11yColorMatch(color: string): [string, string] {
 	const MAX_ATTEMPTS = 100
 	let contrastColor = randomHexColor()
 
-	while (
-		!getContrast.isAccessible(newColor, contrastColor) &&
-		attempts < MAX_ATTEMPTS
-	) {
+	while (!getContrast.isAccessible(newColor, contrastColor) && attempts < MAX_ATTEMPTS) {
 		contrastColor = randomHexColor()
 		attempts++
 	}
@@ -35,11 +73,7 @@ export function getA11yColorMatch(color: string): [string, string] {
  */
 export function getContrastRatio(color1: string, color2: string): number {
 	const getLuminance = (color: string): number => {
-		// Convert hex to RGB
-		const hex = color.replace('#', '')
-		if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
-			throw new Error(`Invalid hex color format: ${color}`)
-		}
+		const hex = normalizeHexColor(color).replace('#', '')
 		const r = Number.parseInt(hex.slice(0, 2), 16) / 255
 		const g = Number.parseInt(hex.slice(2, 4), 16) / 255
 		const b = Number.parseInt(hex.slice(4, 6), 16) / 255
@@ -55,8 +89,7 @@ export function getContrastRatio(color1: string, color2: string): number {
 		const toLinear = (v: number) =>
 			v <= WCAG_LUMINANCE_THRESHOLD
 				? v / WCAG_LUMINANCE_DIVISOR
-				: ((v + WCAG_LUMINANCE_OFFSET) / WCAG_LUMINANCE_MULTIPLIER) **
-					WCAG_LUMINANCE_POWER
+				: ((v + WCAG_LUMINANCE_OFFSET) / WCAG_LUMINANCE_MULTIPLIER) ** WCAG_LUMINANCE_POWER
 
 		return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
 	}
@@ -76,15 +109,12 @@ export function getContrastRatio(color1: string, color2: string): number {
 export function getContrastTextColor(
 	backgroundColor: string,
 ): 'text-black' | 'text-white' | 'text-muted-foreground' {
-	const contrastWithWhite = getContrastRatio(backgroundColor, '#FFFFFF')
-	const contrastWithBlack = getContrastRatio(backgroundColor, '#000000')
-	const contrastWithGray = getContrastRatio(backgroundColor, '#61646B') // text-muted-foreground
+	const background = normalizeHexColor(backgroundColor)
+	const contrastWithWhite = getContrastRatio(background, '#FFFFFF')
+	const contrastWithBlack = getContrastRatio(background, '#000000')
+	const contrastWithGray = getContrastRatio(background, '#61646B') // text-muted-foreground
 
-	const maxContrast = Math.max(
-		contrastWithWhite,
-		contrastWithBlack,
-		contrastWithGray,
-	)
+	const maxContrast = Math.max(contrastWithWhite, contrastWithBlack, contrastWithGray)
 
 	if (maxContrast === contrastWithWhite) return 'text-white'
 	if (maxContrast === contrastWithBlack) return 'text-black'
@@ -94,9 +124,7 @@ export function getContrastTextColor(
 /**
  * Generate a visually distinct random color using HSL for better distribution
  */
-export function generateDistinctRandomColor(
-	existingColors: string[] = [],
-): string {
+export function generateDistinctRandomColor(existingColors: string[] = []): string {
 	// Use HSL for better color distribution
 	const hue = Math.floor(Math.random() * 360)
 	const saturation = 60 + Math.floor(Math.random() * 30) // 60-90% for vibrant colors

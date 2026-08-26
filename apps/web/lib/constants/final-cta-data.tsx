@@ -1,13 +1,5 @@
-import {
-	Apple,
-	Facebook,
-	Globe,
-	Mail,
-	Settings,
-	Shield,
-	Target,
-	Zap,
-} from 'lucide-react'
+import { Globe, Mail, Settings, Shield, Target, Zap } from 'lucide-react'
+import { AppleIcon, FacebookIcon } from '~/lib/icons/social-icons'
 import type { Feature, SocialButtonProps, Statistics } from '~/lib/types'
 
 export const features: Feature[] = [
@@ -46,28 +38,28 @@ export const socialButtons: SocialButtonProps[] = [
 		id: 'email-social-button-id',
 		icon: <Mail className="w-5 h-5" />,
 		provider: 'Correo',
-		onClick: () => console.log('Email login'),
+		onClick: () => {},
 		className: 'bg-teal-600 hover:bg-teal-700 text-white',
 	},
 	{
 		id: 'google-social-button-id',
 		icon: <Globe className="w-5 h-5" />,
 		provider: 'Google',
-		onClick: () => console.log('Google login'),
+		onClick: () => {},
 		className: 'bg-teal-600 hover:bg-teal-700 text-white',
 	},
 	{
 		id: 'facebook-social-button-id',
-		icon: <Facebook className="w-5 h-5" />,
+		icon: <FacebookIcon className="w-5 h-5" />,
 		provider: 'Facebook',
-		onClick: () => console.log('Facebook login'),
+		onClick: () => {},
 		className: 'bg-teal-600 hover:bg-teal-700 text-white',
 	},
 	{
 		id: 'apple-social-button-id',
-		icon: <Apple className="w-5 h-5" />,
+		icon: <AppleIcon className="w-5 h-5" />,
 		provider: 'Apple',
-		onClick: () => console.log('Apple login'),
+		onClick: () => {},
 		className: 'bg-teal-600 hover:bg-teal-700 text-white',
 	},
 ]
@@ -79,7 +71,6 @@ export const statistics: Statistics = {
 	},
 	capitalRaised: {
 		value: '$1.7B',
-		label:
-			'In regional funding can now be unlocked with blockchain transparency',
+		label: 'In regional funding can now be unlocked with blockchain transparency',
 	},
 }

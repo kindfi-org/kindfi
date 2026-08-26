@@ -1,3 +1,8 @@
+declare module '*.css' {
+	const content: Record<string, string>
+	export default content
+}
+
 declare module 'next-mdx-remote/rsc' {
 	export const MDXRemote: any
 }

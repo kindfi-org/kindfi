@@ -20,12 +20,11 @@ export interface CommentMetadata {
 }
 
 // Type-safe metadata based on comment type
-export type TypedMetadata<T extends Enums<'comment_type'>> =
-	T extends 'question'
-		? QuestionMetadata
-		: T extends 'answer'
-			? AnswerMetadata
-			: CommentMetadata
+export type TypedMetadata<T extends Enums<'comment_type'>> = T extends 'question'
+	? QuestionMetadata
+	: T extends 'answer'
+		? AnswerMetadata
+		: CommentMetadata
 
 export interface CommentData extends Omit<Tables<'comments'>, 'metadata'> {
 	metadata?: QuestionMetadata | AnswerMetadata | CommentMetadata

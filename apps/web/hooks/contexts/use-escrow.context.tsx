@@ -41,14 +41,12 @@ import {
 	useStartDispute,
 	useUpdateEscrow,
 } from '@trustless-work/escrow'
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, useCallback, useContext, useMemo } from 'react'
 
 interface EscrowActionsContext {
 	// initialize
 	deployEscrow: (
-		payload:
-			| InitializeSingleReleaseEscrowPayload
-			| InitializeMultiReleaseEscrowPayload,
+		payload: InitializeSingleReleaseEscrowPayload | InitializeMultiReleaseEscrowPayload,
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
 
@@ -78,9 +76,7 @@ interface EscrowActionsContext {
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
 	resolveDispute: (
-		payload:
-			| SingleReleaseResolveDisputePayload
-			| MultiReleaseResolveDisputePayload,
+		payload: SingleReleaseResolveDisputePayload | MultiReleaseResolveDisputePayload,
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
 
@@ -95,10 +91,7 @@ interface EscrowActionsContext {
 		payload: SingleReleaseReleaseFundsPayload | MultiReleaseReleaseFundsPayload,
 		type: EscrowType,
 	) => Promise<EscrowRequestResponse>
-	fundEscrow: (
-		payload: FundEscrowPayload,
-		type: EscrowType,
-	) => Promise<EscrowRequestResponse>
+	fundEscrow: (payload: FundEscrowPayload, type: EscrowType) => Promise<EscrowRequestResponse>
 
 	// milestones
 	changeMilestoneStatus: (
@@ -128,7 +121,12 @@ export function EscrowProvider({ children }: { children: React.ReactNode }) {
 	const { updateEscrow } = useUpdateEscrow()
 	const { startDispute } = useStartDispute()
 	const { resolveDispute } = useResolveDispute()
-	const { getMultipleBalances } = useGetMultipleEscrowBalances()
+	const { getMultipleBalances: getMultipleBalancesMutation } = useGetMultipleEscrowBalances()
+
+	const getMultipleBalances = useCallback(
+		(payload: GetBalanceParams, _type: EscrowType) => getMultipleBalancesMutation(payload),
+		[getMultipleBalancesMutation],
+	)
 	const { releaseFunds } = useReleaseFunds()
 	const { fundEscrow } = useFundEscrow()
 	const { changeMilestoneStatus } = useChangeMilestoneStatus()
@@ -169,15 +167,18 @@ export function EscrowProvider({ children }: { children: React.ReactNode }) {
 		],
 	)
 
-	return (
-		<EscrowContext.Provider value={value}>{children}</EscrowContext.Provider>
-	)
+	return <EscrowContext.Provider value={value}>{children}</EscrowContext.Provider>
 }
 
 export function useEscrow() {
 	const ctx = useContext(EscrowContext)
 	if (!ctx) throw new Error('useEscrow must be used within EscrowProvider')
 	return ctx
+}
+
+/** Returns escrow actions when available; null when EscrowProvider is not mounted. */
+export function useOptionalEscrow(): EscrowActionsContext | null {
+	return useContext(EscrowContext) ?? null
 }
 
 export type { EscrowActionsContext }

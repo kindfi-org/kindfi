@@ -20,6 +20,7 @@ export const projects: Project[] = [
 			{ id: 'tag-future', name: 'FUTURE', color: '#2C3E50' },
 		],
 		createdAt: '2024-01-03T09:15:00Z',
+		status: 'active',
 	},
 	{
 		id: '2',
@@ -39,6 +40,7 @@ export const projects: Project[] = [
 			{ id: 'tag-sustainable', name: 'SUSTAINABLE', color: '#1ABC9C' },
 		],
 		createdAt: '2024-01-17T14:40:00Z',
+		status: 'active',
 	},
 	{
 		id: '3',
@@ -58,6 +60,7 @@ export const projects: Project[] = [
 			{ id: 'tag-impact', name: 'IMPACT', color: '#9B59B6' },
 		],
 		createdAt: '2024-01-29T11:05:00Z',
+		status: 'active',
 	},
 	{
 		id: '4',
@@ -77,6 +80,7 @@ export const projects: Project[] = [
 			{ id: 'tag-art', name: 'ART', color: '#D35400' },
 		],
 		createdAt: '2024-02-06T08:50:00Z',
+		status: 'active',
 	},
 	{
 		id: '5',
@@ -96,6 +100,7 @@ export const projects: Project[] = [
 			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
 		],
 		createdAt: '2024-02-14T10:00:00Z',
+		status: 'active',
 	},
 	{
 		id: '6',
@@ -115,6 +120,7 @@ export const projects: Project[] = [
 			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
 		],
 		createdAt: '2024-08-21T16:00:00Z',
+		status: 'active',
 	},
 	{
 		id: '7',
@@ -134,6 +140,7 @@ export const projects: Project[] = [
 			{ id: 'tag-urban', name: 'URBAN', color: '#7F8C8D' },
 		],
 		createdAt: '2024-02-27T16:30:00Z',
+		status: 'active',
 	},
 	{
 		id: '8',
@@ -153,6 +160,7 @@ export const projects: Project[] = [
 			{ id: 'tag-humanitarian', name: 'HUMANITARIAN', color: '#FF6F61' },
 		],
 		createdAt: '2024-03-05T13:20:00Z',
+		status: 'active',
 	},
 	{
 		id: '9',
@@ -172,6 +180,7 @@ export const projects: Project[] = [
 			{ id: 'tag-ngo', name: 'NGO', color: '#2980B9' },
 		],
 		createdAt: '2024-03-18T15:10:00Z',
+		status: 'active',
 	},
 	{
 		id: '10',
@@ -191,6 +200,7 @@ export const projects: Project[] = [
 			{ id: 'tag-sustainability', name: 'SUSTAINABILITY', color: '#2ECC71' },
 		],
 		createdAt: '2024-03-30T17:45:00Z',
+		status: 'active',
 	},
 	{
 		id: '11',
@@ -210,6 +220,7 @@ export const projects: Project[] = [
 			{ id: 'tag-care', name: 'CARE', color: '#F5B041' },
 		],
 		createdAt: '2024-04-08T09:25:00Z',
+		status: 'active',
 	},
 	{
 		id: '12',
@@ -229,6 +240,7 @@ export const projects: Project[] = [
 			{ id: 'tag-information', name: 'INFORMATION', color: '#9B59B6' },
 		],
 		createdAt: '2024-04-19T14:50:00Z',
+		status: 'active',
 	},
 	{
 		id: '13',
@@ -248,6 +260,7 @@ export const projects: Project[] = [
 			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
 		],
 		createdAt: '2024-04-28T12:10:00Z',
+		status: 'active',
 	},
 	{
 		id: '14',
@@ -267,6 +280,7 @@ export const projects: Project[] = [
 			{ id: 'tag-support', name: 'SUPPORT', color: '#D35400' },
 		],
 		createdAt: '2024-05-06T11:35:00Z',
+		status: 'active',
 	},
 	{
 		id: '15',
@@ -286,6 +300,7 @@ export const projects: Project[] = [
 			{ id: 'tag-plastic', name: 'PLASTIC', color: '#34495E' },
 		],
 		createdAt: '2024-05-15T10:15:00Z',
+		status: 'active',
 	},
 	{
 		id: '16',
@@ -305,6 +320,7 @@ export const projects: Project[] = [
 			{ id: 'tag-inclusion', name: 'INCLUSION', color: '#FF9800' },
 		],
 		createdAt: '2024-06-02T07:40:00Z',
+		status: 'active',
 	},
 	{
 		id: '17',
@@ -324,6 +340,7 @@ export const projects: Project[] = [
 			{ id: 'tag-children', name: 'CHILDREN', color: '#F39C12' },
 		],
 		createdAt: '2024-06-18T13:55:00Z',
+		status: 'active',
 	},
 	{
 		id: '18',
@@ -343,6 +360,7 @@ export const projects: Project[] = [
 			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
 		],
 		createdAt: '2024-07-01T08:20:00Z',
+		status: 'active',
 	},
 	{
 		id: '19',
@@ -362,6 +380,7 @@ export const projects: Project[] = [
 			{ id: 'tag-youth', name: 'YOUTH', color: '#03A9F4' },
 		],
 		createdAt: '2024-07-19T14:30:00Z',
+		status: 'active',
 	},
 	{
 		id: '20',
@@ -381,5 +400,6 @@ export const projects: Project[] = [
 			{ id: 'tag-community', name: 'COMMUNITY', color: '#FFCA28' },
 		],
 		createdAt: '2024-08-03T09:45:00Z',
+		status: 'active',
 	},
 ]

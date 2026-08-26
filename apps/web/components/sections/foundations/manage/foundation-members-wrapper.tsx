@@ -9,29 +9,76 @@ import { notFound } from 'next/navigation'
 import { IoPeopleOutline } from 'react-icons/io5'
 import { Badge } from '~/components/base/badge'
 import { Card, CardContent } from '~/components/base/card'
+import { AddTeamMemberForm } from '~/components/sections/projects/members/add-team-member-form'
+import { TeamMemberList } from '~/components/sections/projects/members/team-member-list'
+import { useFoundationTeamMutation } from '~/hooks/foundations/use-foundation-team-mutation'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
+import { getFoundationTeamBySlug } from '~/lib/queries/foundations/get-foundation-team-by-slug'
+import type { CreateTeamMemberData } from '~/lib/types/project/project-team.types'
+import { ReplaceFounderDialog } from './replace-founder-dialog'
 import { ManagePageShell, ManageSectionHeader } from './shared'
 
 interface FoundationMembersWrapperProps {
 	foundationSlug: string
 }
 
-export function FoundationMembersWrapper({
-	foundationSlug,
-}: FoundationMembersWrapperProps) {
+export function FoundationMembersWrapper({ foundationSlug }: FoundationMembersWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
+	const { createMember, deleteMember, replaceFounder } = useFoundationTeamMutation()
+
 	const {
 		data: foundation,
-		error,
-		isLoading,
+		error: foundationError,
+		isLoading: isFoundationLoading,
 	} = useSupabaseQuery(
 		'foundation',
-		(client) => getFoundationBySlug(client, foundationSlug),
-		{ additionalKeyValues: [foundationSlug] },
+		(client) => getFoundationBySlug(client, foundationSlug, { localize: false }),
+		{
+			additionalKeyValues: [foundationSlug],
+		},
 	)
 
-	if (error ?? !foundation) {
+	const {
+		data: teamData,
+		isLoading: isTeamLoading,
+		error: teamError,
+	} = useSupabaseQuery(
+		'foundation-team',
+		(client) => getFoundationTeamBySlug(client, foundationSlug),
+		{
+			additionalKeyValues: [foundationSlug],
+		},
+	)
+
+	if (foundationError ?? teamError ?? !foundation) {
 		notFound()
+	}
+
+	const isLoading = isFoundationLoading || isTeamLoading
+	const teamMembers = teamData?.team ?? []
+
+	const handleAddMember = async (data: CreateTeamMemberData) => {
+		if (!teamData) return
+
+		await createMember.mutateAsync({
+			foundationId: teamData.foundationId,
+			foundationSlug,
+			...data,
+		})
+	}
+
+	const handleReplaceFounder = async (userId: string) => {
+		await replaceFounder.mutateAsync({ foundationSlug, userId })
+	}
+
+	const handleDeleteMember = async (memberId: string) => {
+		if (!teamData) return
+
+		await deleteMember.mutateAsync({
+			foundationId: teamData.foundationId,
+			foundationSlug,
+			memberId,
+		})
 	}
 
 	if (isLoading) {
@@ -51,15 +98,9 @@ export function FoundationMembersWrapper({
 	return (
 		<ManagePageShell>
 			<ManageSectionHeader
-				icon={
-					<IoPeopleOutline
-						size={24}
-						className="relative z-10"
-						aria-hidden="true"
-					/>
-				}
+				icon={<IoPeopleOutline size={24} className="relative z-10" aria-hidden="true" />}
 				title="Foundation Team"
-				description={`View the people behind ${foundation.name}`}
+				description={`Add, view, and remove team members for ${foundation.name}`}
 			/>
 
 			<motion.div
@@ -68,9 +109,8 @@ export function FoundationMembersWrapper({
 				transition={{
 					delay: prefersReducedMotion ? 0 : 0.2,
 					duration: prefersReducedMotion ? 0 : 0.3,
-					transitionProperty: 'opacity',
 				}}
-				className="space-y-6"
+				className="space-y-8"
 			>
 				<div>
 					<h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -83,11 +123,7 @@ export function FoundationMembersWrapper({
 								<div className="flex items-start gap-6">
 									{foundation.founder.imageUrl ? (
 										<Link
-											href={
-												foundation.founder.slug
-													? `/u/${foundation.founder.slug}`
-													: '#'
-											}
+											href={foundation.founder.slug ? `/u/${foundation.founder.slug}` : '#'}
 											className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-full ring-4 ring-purple-100 hover:ring-purple-200 transition-[box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
 										>
 											<Image
@@ -116,10 +152,14 @@ export function FoundationMembersWrapper({
 														{foundation.founder.displayName ?? 'Anonymous'}
 													</p>
 												)}
-												<Badge className="bg-purple-600 text-white border-0 mt-2">
-													Founder
-												</Badge>
+												<Badge className="bg-purple-600 text-white border-0 mt-2">Founder</Badge>
 											</div>
+											<ReplaceFounderDialog
+												currentFounderId={foundation.founder.id}
+												currentFounderName={foundation.founder.displayName}
+												onReplace={handleReplaceFounder}
+												isPending={replaceFounder.isPending}
+											/>
 										</div>
 										{foundation.founder.bio ? (
 											<p className="text-muted-foreground leading-relaxed mt-3">
@@ -132,33 +172,37 @@ export function FoundationMembersWrapper({
 						</Card>
 					) : (
 						<Card className="border-0 bg-muted/50">
-							<CardContent className="py-12 text-center">
+							<CardContent className="py-12 text-center space-y-4">
 								<Building2
 									className="h-16 w-16 text-muted-foreground mx-auto mb-4"
 									aria-hidden="true"
 								/>
-								<p className="text-muted-foreground">
-									Founder information not available
-								</p>
+								<p className="text-muted-foreground">Founder information not available</p>
+								<ReplaceFounderDialog
+									onReplace={handleReplaceFounder}
+									isPending={replaceFounder.isPending}
+								/>
 							</CardContent>
 						</Card>
 					)}
 				</div>
 
-				<div className="mt-8">
-					<Card className="border-0 bg-muted/30">
-						<CardContent className="p-8 text-center">
-							<IoPeopleOutline
-								className="h-12 w-12 text-muted-foreground mx-auto mb-4"
-								aria-hidden="true"
-							/>
-							<h3 className="text-lg font-semibold mb-2">Team Members</h3>
-							<p className="text-muted-foreground text-sm">
-								Foundation team member management coming soon. For now, only the
-								founder is displayed.
-							</p>
-						</CardContent>
-					</Card>
+				<div className="space-y-8">
+					<AddTeamMemberForm
+						onAdd={handleAddMember}
+						entityLabel="foundation"
+						excludeUserIds={[
+							foundation.founder?.id,
+							...teamMembers
+								.filter((member) => member.userId)
+								.map((member) => member.userId as string),
+						].filter((id): id is string => Boolean(id))}
+					/>
+					<TeamMemberList
+						members={teamMembers}
+						onDelete={handleDeleteMember}
+						entityLabel="foundation"
+					/>
 				</div>
 			</motion.div>
 		</ManagePageShell>

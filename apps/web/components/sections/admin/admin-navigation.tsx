@@ -6,6 +6,8 @@ import {
 	IoBarChartOutline,
 	IoBusinessOutline,
 	IoChevronForwardOutline,
+	IoEarthOutline,
+	IoFlagOutline,
 	IoFolderOutline,
 	IoGiftOutline,
 	IoHomeOutline,
@@ -32,7 +34,10 @@ const entityItems: NavItem[] = [
 	{ href: '/admin/projects', label: 'Projects', Icon: IoFolderOutline },
 	{ href: '/admin/foundations', label: 'Foundations', Icon: IoBusinessOutline },
 	{ href: '/admin/users', label: 'Users', Icon: IoPeopleOutline },
+	{ href: '/admin/milestone-reviews', label: 'Milestone Reviews', Icon: IoFlagOutline },
 	{ href: '/admin/escrows', label: 'Escrows', Icon: IoShieldCheckmarkOutline },
+	{ href: '/admin/compliance', label: 'Compliance', Icon: IoEarthOutline },
+	{ href: '/admin/kyc', label: 'KYC', Icon: IoShieldCheckmarkOutline },
 	{ href: '/admin/gamification', label: 'Gamification', Icon: IoGiftOutline },
 	{
 		href: '/admin/governance',
@@ -49,12 +54,7 @@ const configItems: NavItem[] = [
 	{ href: '/admin/settings', label: 'Settings', Icon: IoSettingsOutline },
 ]
 
-function NavLink({
-	href,
-	label,
-	Icon,
-	isActive,
-}: NavItem & { isActive: boolean }) {
+function NavLink({ href, label, Icon, isActive }: NavItem & { isActive: boolean }) {
 	return (
 		<Link
 			href={href}
@@ -107,8 +107,7 @@ function NavGroup({
 			<ul className="space-y-0.5">
 				{items.map((item) => {
 					const isActive =
-						pathname === item.href ||
-						(item.href !== '/admin' && pathname?.startsWith(item.href))
+						pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
 					return (
 						<li key={item.href}>
 							<NavLink {...item} isActive={!!isActive} />

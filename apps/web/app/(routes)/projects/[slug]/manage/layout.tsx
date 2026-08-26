@@ -1,5 +1,12 @@
+import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import { notFound, redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
 import type { ReactNode } from 'react'
-import { ManageNavigation } from '~/components/sections/projects/manage/manage-navigation'
+import { ProjectManageCommandCenter } from '~/components/sections/projects/manage/project-manage-command-center'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { canUserManageProject } from '~/lib/queries/projects/can-user-manage-project'
+import { isPlatformAdmin } from '~/lib/queries/projects/development-only-access'
+import { getProjectManageMeta } from '~/lib/queries/projects/get-project-manage-meta'
 
 export default async function ManageLayout({
 	children,
@@ -9,11 +16,33 @@ export default async function ManageLayout({
 	params: Promise<{ slug: string }>
 }) {
 	const { slug } = await params
+	const session = await getServerSession(nextAuthOption)
+
+	// Use service role for layout metadata; access is enforced below via NextAuth + canUserManageProject.
+	const projectMeta = await getProjectManageMeta(supabaseServiceRole, slug)
+	if (!projectMeta) {
+		notFound()
+	}
+
+	const canManage = await canUserManageProject(
+		projectMeta.id,
+		projectMeta.kindlerId,
+		session?.user?.id,
+	)
+
+	if (!canManage) {
+		redirect(`/projects/${slug}`)
+	}
+
+	const admin = session?.user?.id ? await isPlatformAdmin(session.user.id) : false
 
 	return (
-		<section className="container mx-auto px-4 py-8 md:py-12">
-			<ManageNavigation slug={slug} />
-			<main className="min-w-0">{children}</main>
+		<section
+			className="container mx-auto max-w-6xl px-4 py-6 md:py-8"
+			aria-label="Project management"
+		>
+			<ProjectManageCommandCenter slug={slug} project={projectMeta} isPlatformAdmin={admin} />
+			<main className="min-w-0 pt-6">{children}</main>
 		</section>
 	)
 }

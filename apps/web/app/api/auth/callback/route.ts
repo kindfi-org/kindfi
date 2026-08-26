@@ -49,17 +49,11 @@ export async function GET(request: NextRequest) {
 				eventType: 'CODE_EXCHANGE_SUCCESS',
 			})
 		} catch (error) {
-			const response = errorHandler.handleAuthError(
-				error as AuthError,
-				'exchangeCodeForSession',
-			)
+			const response = errorHandler.handleAuthError(error as AuthError, 'exchangeCodeForSession')
 
 			// Add error parameters to the redirect URL
 			const finalRedirectUrl = new URL(redirectUrl)
-			finalRedirectUrl.searchParams.set(
-				'error',
-				response.error ?? 'unknown_error',
-			)
+			finalRedirectUrl.searchParams.set('error', response.error ?? 'unknown_error')
 
 			// Redirect with error parameters
 			logger.info({

@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 import type { CreateFoundationFormData } from '../types'
 
 export function useFoundationFormSubmission() {
@@ -14,18 +15,25 @@ export function useFoundationFormSubmission() {
 			const formDataToSubmit = new FormData()
 			formDataToSubmit.append('name', data.name)
 			formDataToSubmit.append('description', data.description)
+			if (data.story) formDataToSubmit.append('story', data.story)
+			if (data.impactHighlights?.length) {
+				const filtered = data.impactHighlights.map((s) => s.trim()).filter(Boolean)
+				if (filtered.length) {
+					formDataToSubmit.append('impactHighlights', JSON.stringify(filtered))
+				}
+			}
 			formDataToSubmit.append('slug', data.slug)
 			formDataToSubmit.append('foundedYear', String(data.foundedYear))
 			if (data.mission) formDataToSubmit.append('mission', data.mission)
 			if (data.vision) formDataToSubmit.append('vision', data.vision)
-			if (data.websiteUrl)
-				formDataToSubmit.append('websiteUrl', data.websiteUrl)
+			if (data.websiteUrl) formDataToSubmit.append('websiteUrl', data.websiteUrl)
 			if (data.socialLinks && Object.keys(data.socialLinks).length > 0) {
 				formDataToSubmit.append('socialLinks', JSON.stringify(data.socialLinks))
 			}
 			if (data.logo instanceof File) {
 				formDataToSubmit.append('logo', data.logo)
 			}
+			formDataToSubmit.append('sourceLocale', data.sourceLocale ?? 'en')
 
 			const response = await fetch('/api/foundations/create', {
 				method: 'POST',
@@ -37,9 +45,7 @@ export function useFoundationFormSubmission() {
 			if (!response.ok) {
 				// Handle slug conflict specifically
 				if (result.error === 'Slug already exists') {
-					throw new Error(
-						'This foundation URL is already taken. Please choose a different slug.',
-					)
+					throw new Error('This foundation URL is already taken. Please choose a different slug.')
 				}
 				throw new Error(result.error || 'Failed to create foundation')
 			}
@@ -47,11 +53,9 @@ export function useFoundationFormSubmission() {
 			toast.success('Foundation created successfully!')
 			router.push(`/foundations/${result.slug}`)
 		} catch (error) {
-			console.error('Error creating foundation:', error)
+			logger.error('Error creating foundation:', error)
 			toast.error(
-				error instanceof Error
-					? error.message
-					: 'Failed to create foundation. Please try again.',
+				error instanceof Error ? error.message : 'Failed to create foundation. Please try again.',
 			)
 			throw error
 		} finally {

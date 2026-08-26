@@ -79,10 +79,7 @@ describe('/api/quests/progress', () => {
 		const response = await POST(req)
 		const body = await response.json()
 
-		expect(mockRateLimiterIncrement).toHaveBeenCalledWith(
-			'user-1',
-			'quest_progress',
-		)
+		expect(mockRateLimiterIncrement).toHaveBeenCalledWith('user-1', 'quest_progress')
 		expect(response.status).toBe(429)
 		expect(body).toEqual({ error: 'Too many requests' })
 	})

@@ -1,22 +1,27 @@
-// app/api/kyc/didit/create-session/route.ts
-
-import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { createDiditSession } from '~/lib/services/didit'
+import {
+	findActiveDiditSessionForUser,
+	getCanonicalKycStatusForUser,
+	recordKycStatusTransition,
+	saveDiditSession,
+} from '~/lib/kyc/session-service'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { createDiditSessionSchema } from '~/lib/schemas/kyc.schemas'
+import { createDiditSession } from '~/lib/services/didit'
 import { validateRequest } from '~/lib/utils/validation'
 
 /**
  * POST /api/kyc/didit/create-session
  *
- * Creates a Didit verification session for the authenticated user
+ * Creates a Didit verification session for the authenticated user.
+ * Reuses an active session instead of opening a duplicate Didit flow.
  */
-export async function POST(req: NextRequest) {
+async function createSessionHandler(req: NextRequest) {
 	try {
-		// Get user session from NextAuth
 		const session = await getServerSession(nextAuthOption)
 
 		if (!session?.user?.id || !session?.user?.email) {
@@ -30,50 +35,73 @@ export async function POST(req: NextRequest) {
 		}
 		const { redirectUrl, metadata } = validation.data
 
-		// Create Didit session
-		const diditSession = await createDiditSession(
-			session.user.email,
-			redirectUrl,
-			{
-				userId: session.user.id,
-				...(metadata || {}),
-			},
-		)
-
-		// Store session in database using Supabase
-		// Use service role client since we've already validated the user via NextAuth
-		// and we're explicitly setting the user_id
-		const { error: dbError } = await supabaseServiceRole
-			.from('kyc_reviews')
-			.upsert({
-				user_id: session.user.id,
-				status: 'pending',
-				verification_level: 'enhanced',
-				notes: JSON.stringify({
-					diditSessionId: diditSession.session_id,
-					diditSessionToken: diditSession.session_token,
-					createdAt: new Date().toISOString(),
-				}),
+		const canonicalStatus = await getCanonicalKycStatusForUser(session.user.id)
+		if (canonicalStatus === 'approved') {
+			return NextResponse.json({
+				success: true,
+				alreadyVerified: true,
+				canonicalStatus,
 			})
+		}
 
-		if (dbError) {
-			console.error('Failed to store KYC session:', dbError)
-			// Don't fail the request if DB write fails, session is still created
+		const activeSession = await findActiveDiditSessionForUser(session.user.id)
+		if (activeSession?.verificationUrl) {
+			return NextResponse.json({
+				success: true,
+				sessionId: activeSession.sessionId,
+				verificationUrl: activeSession.verificationUrl,
+				resumed: true,
+				canonicalStatus: activeSession.canonicalStatus,
+			})
+		}
+
+		const diditSession = await createDiditSession(session.user.email, redirectUrl, {
+			userId: session.user.id,
+			...(metadata || {}),
+		})
+
+		const saved = await saveDiditSession({
+			userId: session.user.id,
+			sessionId: diditSession.session_id,
+			sessionToken: diditSession.session_token,
+			verificationUrl: diditSession.url,
+			diditStatus: diditSession.status,
+			canonicalStatus: 'pending',
+		})
+
+		if (!saved) {
+			logger.error('[kyc] Didit session created but failed to persist session_id')
+		} else {
+			await recordKycStatusTransition({
+				userId: session.user.id,
+				sessionId: diditSession.session_id,
+				toDiditStatus: diditSession.status,
+				fromCanonicalStatus: canonicalStatus,
+				toCanonicalStatus: 'pending',
+				source: 'create_session',
+			})
 		}
 
 		return NextResponse.json({
 			success: true,
 			sessionId: diditSession.session_id,
 			verificationUrl: diditSession.url,
+			canonicalStatus: 'pending',
 		})
 	} catch (error) {
-		console.error('Error creating Didit session:', error)
-		return NextResponse.json(
-			{
-				error: 'Failed to create verification session',
-				details: error instanceof Error ? error.message : String(error),
-			},
-			{ status: 500 },
-		)
+		logger.error('Error creating Didit session:', error)
+		return NextResponse.json({ error: 'Failed to create verification session' }, { status: 500 })
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	createSessionHandler,
+)

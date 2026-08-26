@@ -11,7 +11,7 @@ export default async function EditFoundationPage({
 }) {
 	const { slug } = await params
 	const supabase = await createSupabaseServerClient()
-	const foundation = await getFoundationBySlug(supabase, slug)
+	const foundation = await getFoundationBySlug(supabase, slug, { localize: false })
 
 	if (!foundation) {
 		notFound()
@@ -24,6 +24,8 @@ export default async function EditFoundationPage({
 				foundation={{
 					name: foundation.name,
 					description: foundation.description,
+					story: foundation.story,
+					impactHighlights: foundation.impactHighlights,
 					slug: foundation.slug,
 					foundedYear: foundation.foundedYear,
 					mission: foundation.mission,
@@ -31,6 +33,7 @@ export default async function EditFoundationPage({
 					websiteUrl: foundation.websiteUrl,
 					socialLinks: foundation.socialLinks ?? {},
 					logoUrl: foundation.logoUrl,
+					sourceLocale: foundation.sourceLocale,
 				}}
 			/>
 		</ManagePageShell>

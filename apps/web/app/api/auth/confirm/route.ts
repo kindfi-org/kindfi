@@ -51,10 +51,7 @@ export async function GET(request: NextRequest) {
 		})
 		const errorUrl = new URL('/error', request.url)
 		errorUrl.searchParams.set('reason', 'rate_limit_exceeded')
-		errorUrl.searchParams.set(
-			'error',
-			'Too many attempts. Please try again later.',
-		)
+		errorUrl.searchParams.set('error', 'Too many attempts. Please try again later.')
 		redirect(errorUrl.toString())
 	}
 

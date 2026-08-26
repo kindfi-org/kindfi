@@ -1,25 +1,27 @@
 /**
+ * Resolve Stellar Expert network slug from KindFi network id.
+ */
+export const resolveStellarExplorerNetwork = (
+	network?: 'testnet' | 'mainnet',
+): 'testnet' | 'public' => {
+	if (network === 'mainnet') return 'public'
+	if (network === 'testnet') return 'testnet'
+
+	const isProduction =
+		process.env.NEXT_PUBLIC_APP_ENV === 'production' || process.env.NODE_ENV === 'production'
+	return isProduction ? 'public' : 'testnet'
+}
+
+/**
  * Get Stellar Explorer URL for a contract
  * @param contractId - The contract ID/address
  * @param network - Optional network override ('testnet' | 'mainnet'). If not provided, uses environment detection
  * @returns The Stellar Explorer URL
  */
-export function getStellarExplorerUrl(
-	contractId: string,
-	network?: 'testnet' | 'mainnet',
-): string {
+export function getStellarExplorerUrl(contractId: string, network?: 'testnet' | 'mainnet'): string {
 	if (!contractId) return ''
 
-	// Determine network if not provided
-	let explorerNetwork: 'testnet' | 'public' = 'testnet'
-	if (!network) {
-		const isProduction =
-			process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-			process.env.NODE_ENV === 'production'
-		explorerNetwork = isProduction ? 'public' : 'testnet'
-	} else {
-		explorerNetwork = network === 'mainnet' ? 'public' : 'testnet'
-	}
+	const explorerNetwork = resolveStellarExplorerNetwork(network)
 
 	return `https://stellar.expert/explorer/${explorerNetwork}/contract/${contractId}`
 }
@@ -36,16 +38,7 @@ export function getStellarExplorerAccountUrl(
 ): string {
 	if (!address) return ''
 
-	// Determine network if not provided
-	let explorerNetwork: 'testnet' | 'public' = 'testnet'
-	if (!network) {
-		const isProduction =
-			process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-			process.env.NODE_ENV === 'production'
-		explorerNetwork = isProduction ? 'public' : 'testnet'
-	} else {
-		explorerNetwork = network === 'mainnet' ? 'public' : 'testnet'
-	}
+	const explorerNetwork = resolveStellarExplorerNetwork(network)
 
 	// User addresses are contract addresses, so use contract endpoint
 	return `https://stellar.expert/explorer/${explorerNetwork}/contract/${address}`
@@ -60,13 +53,7 @@ export function getStellarExplorerAddressUrl(
 	network?: 'testnet' | 'mainnet',
 ): string {
 	if (!address) return ''
-	const explorerNetwork =
-		network === 'mainnet'
-			? 'public'
-			: process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-					process.env.NODE_ENV === 'production'
-				? 'public'
-				: 'testnet'
+	const explorerNetwork = resolveStellarExplorerNetwork(network)
 	const path = address.startsWith('G') ? 'account' : 'contract'
 	return `https://stellar.expert/explorer/${explorerNetwork}/${path}/${address}`
 }
@@ -74,17 +61,8 @@ export function getStellarExplorerAddressUrl(
 /**
  * Get Stellar Explorer URL for a transaction hash.
  */
-export function getStellarExplorerTxUrl(
-	txHash: string,
-	network?: 'testnet' | 'mainnet',
-): string {
+export function getStellarExplorerTxUrl(txHash: string, network?: 'testnet' | 'mainnet'): string {
 	if (!txHash) return ''
-	const explorerNetwork =
-		network === 'mainnet'
-			? 'public'
-			: process.env.NEXT_PUBLIC_APP_ENV === 'production' ||
-					process.env.NODE_ENV === 'production'
-				? 'public'
-				: 'testnet'
+	const explorerNetwork = resolveStellarExplorerNetwork(network)
 	return `https://stellar.expert/explorer/${explorerNetwork}/tx/${txHash}`
 }

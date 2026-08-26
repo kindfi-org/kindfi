@@ -2,8 +2,11 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
+import { authorizeProjectManage } from '~/lib/api/authorize-project-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { projectUpdateFormSchema } from '~/lib/schemas/project.schemas'
+import { upsertManualTranslation } from '~/lib/services/content-translation/server'
 import {
 	buildSocialLinks,
 	deleteFolderFromBucket,
@@ -43,42 +46,16 @@ export async function PATCH(req: Request) {
 			socialLinks,
 			image,
 			removeImage,
+			sourceLocale,
+			translation,
 		} = validation.data
 
 		// Verify user has permission to update this project
-		// Check if user is the project owner or has editor role in parallel
-		const [projectResult, memberResult] = await Promise.all([
-			supabaseServiceRole
-				.from('projects')
-				.select('id, kindler_id')
-				.eq('id', projectId)
-				.single(),
-			supabaseServiceRole
-				.from('project_members')
-				.select('role')
-				.eq('project_id', projectId)
-				.eq('user_id', userId)
-				.in('role', ['core', 'admin', 'editor'])
-				.single(),
-		])
-
-		const { data: project, error: projectError } = projectResult
-		const { data: memberData } = memberResult
-
-		if (projectError || !project) {
-			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
-		}
-
-		// Check if user is the project owner
-		const isOwner = project.kindler_id === userId
-		const hasEditorRole = !!memberData
-
-		if (!isOwner && !hasEditorRole) {
+		const auth = await authorizeProjectManage(userId, projectId)
+		if (!auth.ok) {
 			return NextResponse.json(
-				{
-					error: 'Forbidden: You do not have permission to update this project',
-				},
-				{ status: 403 },
+				{ error: auth.status === 404 ? 'Project not found' : 'Forbidden' },
+				{ status: auth.status },
 			)
 		}
 
@@ -95,6 +72,7 @@ export async function PATCH(req: Request) {
 			project_location: location,
 			category_id: category,
 			social_links: buildSocialLinks(website, socialLinks),
+			source_locale: sourceLocale,
 		}
 
 		// If the image was updated, upload new one and attach to project
@@ -112,7 +90,7 @@ export async function PATCH(req: Request) {
 					// Delete all files in the project's thumbnail folder
 					await deleteFolderFromBucket(supabase, 'project_thumbnails', slug)
 				} catch (e) {
-					console.warn('Failed to cleanup thumbnails:', (e as Error).message)
+					logger.warn('Failed to cleanup thumbnails:', (e as Error).message)
 				}
 			}
 		}
@@ -124,25 +102,23 @@ export async function PATCH(req: Request) {
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
 		// Remove old tag relationships before inserting updated ones
-		await supabase
-			.from('project_tag_relationships')
-			.delete()
-			.eq('project_id', projectId)
+		await supabase.from('project_tag_relationships').delete().eq('project_id', projectId)
 
 		// Upsert new tag relationships
 		await upsertTags(projectId, tags ?? [], supabase)
 
-		return NextResponse.json(
-			{ message: 'Project updated successfully' },
-			{ status: 200 },
-		)
+		if (translation) {
+			await upsertManualTranslation('project', projectId, sourceLocale, translation)
+		}
+
+		return NextResponse.json({ message: 'Project updated successfully' }, { status: 200 })
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

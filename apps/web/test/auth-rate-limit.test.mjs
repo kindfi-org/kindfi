@@ -24,17 +24,13 @@ async function makeRequest(clientId = 'unknown') {
 			status: response.status,
 			redirectUrl: response.url,
 		}
-	} catch (error) {
-		console.error(`Request failed for client ${clientId}:`, error.message)
+	} catch (_error) {
 		return null
 	}
 }
 
 async function cleanupRateLimitKeys(clientId) {
-	const keys = [
-		`rate_limit:verifyOtp:${clientId}`,
-		`rate_limit_block:verifyOtp:${clientId}`,
-	]
+	const keys = [`rate_limit:verifyOtp:${clientId}`, `rate_limit_block:verifyOtp:${clientId}`]
 	await Promise.all(keys.map((key) => redis.del(key)))
 }
 
@@ -73,10 +69,7 @@ describe('OTP verification rate limiting', () => {
 	test('should handle rate limits independently per client', async () => {
 		const clientA = '10.0.0.3'
 		const clientB = '10.0.0.4'
-		await Promise.all([
-			cleanupRateLimitKeys(clientA),
-			cleanupRateLimitKeys(clientB),
-		])
+		await Promise.all([cleanupRateLimitKeys(clientA), cleanupRateLimitKeys(clientB)])
 
 		// Block client A
 		for (let i = 0; i < 6; i++) {

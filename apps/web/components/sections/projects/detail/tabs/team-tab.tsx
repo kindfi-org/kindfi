@@ -44,19 +44,12 @@ export function TeamTab({ team }: TeamTabProps) {
 
 							{/* Name + role icon */}
 							<div className="flex items-center gap-2 mb-1">
-								<h3 className="font-bold text-lg">
-									{member.displayName ?? 'Unknown'}
-								</h3>
-								<Icon
-									className={`h-4 w-4 ${role.iconClass}`}
-									aria-label={role.label}
-								/>
+								<h3 className="font-bold text-lg">{member.displayName ?? 'Unknown'}</h3>
+								<Icon className={`h-4 w-4 ${role.iconClass}`} aria-label={role.label} />
 							</div>
 
 							{/* Title */}
-							<p className="text-primary font-semibold uppercase">
-								{member.title ?? 'Member'}
-							</p>
+							<p className="text-primary font-semibold uppercase">{member.title ?? 'Member'}</p>
 
 							{/* Bio */}
 							<p className="text-sm text-muted-foreground mb-4">
@@ -64,9 +57,7 @@ export function TeamTab({ team }: TeamTabProps) {
 							</p>
 
 							{/* Role badge */}
-							<span
-								className={`${role.badgeClass} text-xs px-2 py-1 rounded-full`}
-							>
+							<span className={`${role.badgeClass} text-xs px-2 py-1 rounded-full`}>
 								{role.label}
 							</span>
 						</motion.div>

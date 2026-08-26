@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import type { NftTier } from '~/lib/governance/types'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
@@ -12,7 +13,10 @@ import { getVoteWeight } from '~/lib/governance/vote-weight'
  */
 export async function GET() {
 	try {
-		const session = await getServerSession(nextAuthOption)
+		const [session, { supabase }] = await Promise.all([
+			getServerSession(nextAuthOption),
+			import('@packages/lib/supabase'),
+		])
 
 		if (!session?.user?.id) {
 			return NextResponse.json({
@@ -23,8 +27,6 @@ export async function GET() {
 			})
 		}
 
-		const { supabase } = await import('@packages/lib/supabase')
-
 		const { data: nft, error } = await supabase
 			.from('user_nfts')
 			.select('tier')
@@ -32,7 +34,7 @@ export async function GET() {
 			.single()
 
 		if (error && error.code !== 'PGRST116') {
-			console.error('Error fetching user NFT for eligibility:', error)
+			logger.error('Error fetching user NFT for eligibility:', error)
 		}
 
 		if (!nft) {
@@ -52,10 +54,7 @@ export async function GET() {
 			voteWeight: getVoteWeight(tier),
 		})
 	} catch (error) {
-		console.error('Error in GET /api/governance/eligibility:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error in GET /api/governance/eligibility:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }

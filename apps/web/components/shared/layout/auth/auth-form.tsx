@@ -1,26 +1,35 @@
+import type { LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { FormShell } from '~/components/shared/form/form-shell'
 import { cn } from '~/lib/utils'
 
 interface AuthFormProps {
 	children: React.ReactNode
 	title: string
-	subtitle?: React.ReactNode
+	subtitle?: ReactNode
+	icon?: LucideIcon
 	className?: string
-	footerContent?: React.ReactNode
+	footerContent?: ReactNode
 }
 
+/** @deprecated Prefer FormShell directly for new auth screens. */
 export function AuthForm({
 	children,
 	title,
 	subtitle,
+	icon,
 	className,
+	footerContent,
 }: AuthFormProps) {
 	return (
-		<div className={cn('w-full space-y-6', className)}>
-			<div className="space-y-2 text-center">
-				<h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-				{subtitle && <div>{subtitle}</div>}
-			</div>
+		<FormShell
+			title={title}
+			subtitle={subtitle}
+			icon={icon}
+			footer={footerContent}
+			className={cn(className)}
+		>
 			{children}
-		</div>
+		</FormShell>
 	)
 }

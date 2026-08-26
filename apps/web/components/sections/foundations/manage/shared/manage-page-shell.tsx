@@ -28,7 +28,6 @@ export function ManagePageShell({ children }: ManagePageShellProps) {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{
 					duration: shouldReduceMotion ? 0 : 0.4,
-					transitionProperty: 'opacity, transform',
 				}}
 				className={INNER_CLASS}
 			>

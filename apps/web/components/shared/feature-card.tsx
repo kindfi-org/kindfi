@@ -5,12 +5,7 @@ interface FeatureCardProps {
 	className?: string
 }
 
-export const FeatureCard = ({
-	icon,
-	title,
-	description,
-	className = '',
-}: FeatureCardProps) => {
+export const FeatureCard = ({ icon, title, description, className = '' }: FeatureCardProps) => {
 	return (
 		<div className={`text-center ${className}`}>
 			<div className="mb-4 flex justify-center">{icon}</div>

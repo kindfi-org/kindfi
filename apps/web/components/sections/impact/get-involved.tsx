@@ -26,8 +26,8 @@ export function MakeImpact() {
 						viewport={{ once: true }}
 						className="mb-12 text-lg text-gray-600 sm:text-xl"
 					>
-						Join thousands of others in creating meaningful change through
-						transparent, blockchain-verified crowdfunding.
+						Join thousands of others in creating meaningful change through transparent,
+						blockchain-verified crowdfunding.
 					</motion.p>
 
 					<motion.div

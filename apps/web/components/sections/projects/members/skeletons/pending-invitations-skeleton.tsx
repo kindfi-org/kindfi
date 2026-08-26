@@ -36,7 +36,6 @@ export function PendingInvitationsSkeleton() {
 						</TableHeader>
 						<TableBody>
 							{Array.from({ length: 2 }).map((_, i) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 								<TableRow key={i}>
 									<TableCell>
 										<div className="flex items-center gap-2">
@@ -74,7 +73,6 @@ export function PendingInvitationsSkeleton() {
 				</div>
 				<Skeleton className="h-4 w-full sm:w-80" />
 				{Array.from({ length: 2 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: using index as key is acceptable here
 					<Card key={i} className="bg-white">
 						<CardContent className="p-4">
 							<div className="flex items-start justify-between">

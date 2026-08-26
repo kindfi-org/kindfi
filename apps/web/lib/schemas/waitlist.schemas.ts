@@ -15,10 +15,7 @@ export const waitlistStepOneSchema = z.object({
 
 export const waitlistStepTwoSchema = z.object({
 	projectName: z.string().min(2, 'Project name is too short').optional(),
-	projectDescription: z
-		.string()
-		.min(10, 'Please share at least 10 characters')
-		.optional(),
+	projectDescription: z.string().min(10, 'Please share at least 10 characters').optional(),
 	location: z.string().optional(),
 })
 
@@ -27,5 +24,6 @@ export const waitlistStepThreeSchema = z.object({
 	consent: z.literal(true, { error: 'Consent is required' }),
 })
 
-export const waitlistSchema: z.ZodSchema<WaitlistFormData> =
-	waitlistStepOneSchema.and(waitlistStepTwoSchema).and(waitlistStepThreeSchema)
+export const waitlistSchema: z.ZodSchema<WaitlistFormData> = waitlistStepOneSchema
+	.and(waitlistStepTwoSchema)
+	.and(waitlistStepThreeSchema)

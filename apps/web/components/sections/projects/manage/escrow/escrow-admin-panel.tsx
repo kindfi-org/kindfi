@@ -1,9 +1,9 @@
 'use client'
 
-import type { EscrowType } from '@trustless-work/escrow'
 import { EscrowFormProvider } from './context/escrow-form-context'
 import { EscrowAdminPanelContent } from './escrow-admin-panel-content'
 import { useProjectDefaults } from './hooks/use-project-defaults'
+import type { EscrowAdminPanelProps } from './types'
 
 export function EscrowAdminPanel({
 	projectId,
@@ -11,16 +11,13 @@ export function EscrowAdminPanel({
 	projectTitle,
 	projectDescription,
 	escrowType,
-}: {
-	projectId: string
-	projectSlug: string
-	projectTitle?: string
-	projectDescription?: string
-	escrowContractAddress?: string
-	escrowType?: EscrowType
-}) {
-	const { suggestedTitle, suggestedEngagementId, suggestedDescription } =
-		useProjectDefaults({ projectId, projectTitle, projectDescription })
+}: EscrowAdminPanelProps) {
+	const { suggestedTitle, suggestedEngagementId, suggestedDescription } = useProjectDefaults({
+		projectId,
+		projectSlug,
+		projectTitle,
+		projectDescription,
+	})
 
 	return (
 		<EscrowFormProvider
@@ -29,15 +26,12 @@ export function EscrowAdminPanel({
 				title: suggestedTitle,
 				engagementId: suggestedEngagementId,
 				description: suggestedDescription,
+				suggestedTitle,
+				suggestedEngagementId,
+				suggestedDescription,
 			}}
 		>
-			<EscrowAdminPanelContent
-				projectId={projectId}
-				projectSlug={projectSlug}
-				suggestedTitle={suggestedTitle}
-				suggestedEngagementId={suggestedEngagementId}
-				suggestedDescription={suggestedDescription}
-			/>
+			<EscrowAdminPanelContent projectId={projectId} projectSlug={projectSlug} />
 		</EscrowFormProvider>
 	)
 }

@@ -5,22 +5,12 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '~/components/base/button'
 import { LogoOrg } from '~/components/base/logo-org'
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from '~/components/base/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '~/components/base/sheet'
+import { NotificationBell } from '~/components/shared/notification-bell'
 import { useAuth } from '~/hooks/use-auth'
 import { useI18n } from '~/lib/i18n/context'
-import { NotificationBell } from '~/components/shared/notification-bell'
 import { LanguageSelector } from './language-selector'
-import {
-	MobileAuthButtons,
-	MobileNavigation,
-	MobileUserMenu,
-} from './mobile-navigation'
+import { MobileAuthButtons, MobileNavigation, MobileUserMenu } from './mobile-navigation'
 import { Navigation } from './navigation'
 import { UserMenu } from './user-menu'
 
@@ -95,11 +85,7 @@ export const Header = () => {
 										{user && <NotificationBell />}
 									</div>
 									<MobileNavigation />
-									{user ? (
-										<MobileUserMenu user={user} />
-									) : (
-										<MobileAuthButtons />
-									)}
+									{user ? <MobileUserMenu user={user} /> : <MobileAuthButtons />}
 								</div>
 							</SheetContent>
 						</Sheet>

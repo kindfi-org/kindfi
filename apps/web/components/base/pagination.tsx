@@ -26,16 +26,11 @@ Pagination.displayName = 'Pagination'
  * @param {React.Ref<HTMLUListElement>} ref - Forwarded ref.
  * @returns {JSX.Element} Unordered list element.
  */
-const PaginationContent = React.forwardRef<
-	HTMLUListElement,
-	React.ComponentProps<'ul'>
->(({ className, ...props }, ref) => (
-	<ul
-		ref={ref}
-		className={cn('flex flex-row items-center gap-1', className)}
-		{...props}
-	/>
-))
+const PaginationContent = React.forwardRef<HTMLUListElement, React.ComponentProps<'ul'>>(
+	({ className, ...props }, ref) => (
+		<ul ref={ref} className={cn('flex flex-row items-center gap-1', className)} {...props} />
+	),
+)
 PaginationContent.displayName = 'PaginationContent'
 
 /**
@@ -45,12 +40,9 @@ PaginationContent.displayName = 'PaginationContent'
  * @param {React.Ref<HTMLLIElement>} ref - Forwarded ref.
  * @returns {JSX.Element} List item element.
  */
-const PaginationItem = React.forwardRef<
-	HTMLLIElement,
-	React.ComponentProps<'li'>
->(({ className, ...props }, ref) => (
-	<li ref={ref} className={cn('', className)} {...props} />
-))
+const PaginationItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li'>>(
+	({ className, ...props }, ref) => <li ref={ref} className={cn('', className)} {...props} />,
+)
 PaginationItem.displayName = 'PaginationItem'
 
 /**
@@ -69,12 +61,7 @@ type PaginationLinkProps = {
  * @param {PaginationLinkProps} props - React component props.
  * @returns {JSX.Element} Anchor element for pagination links.
  */
-const PaginationLink = ({
-	className,
-	isActive,
-	size = 'icon',
-	...props
-}: PaginationLinkProps) => (
+const PaginationLink = ({ className, isActive, size = 'icon', ...props }: PaginationLinkProps) => (
 	<a
 		aria-current={isActive ? 'page' : undefined}
 		className={cn(
@@ -115,10 +102,7 @@ PaginationPrevious.displayName = 'PaginationPrevious'
  * @param {React.ComponentProps<typeof PaginationLink>} props - React component props.
  * @returns {JSX.Element} Button to go to the next page.
  */
-const PaginationNext = ({
-	className,
-	...props
-}: React.ComponentProps<typeof PaginationLink>) => (
+const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof PaginationLink>) => (
 	<PaginationLink
 		aria-label="Go to next page"
 		size="default"
@@ -137,10 +121,7 @@ PaginationNext.displayName = 'PaginationNext'
  * @param {string} [props.className] - Additional CSS classes.
  * @returns {JSX.Element} Span element representing skipped pages.
  */
-const PaginationEllipsis = ({
-	className,
-	...props
-}: React.ComponentProps<'span'>) => (
+const PaginationEllipsis = ({ className, ...props }: React.ComponentProps<'span'>) => (
 	<span
 		aria-hidden
 		className={cn('flex h-9 w-9 items-center justify-center', className)}

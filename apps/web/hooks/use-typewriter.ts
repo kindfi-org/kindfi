@@ -35,10 +35,7 @@ export function useTypewriter(
 	const [displayText, setDisplayText] = useState(words[startIndex] ?? '')
 	const [isDeleting, setIsDeleting] = useState(false)
 
-	const longestWordCh = useMemo(
-		() => Math.max(0, ...words.map((w) => w.length)),
-		[words],
-	)
+	const longestWordCh = useMemo(() => Math.max(0, ...words.map((w) => w.length)), [words])
 
 	useEffect(() => {
 		if (!Array.isArray(words) || words.length === 0) return
@@ -49,10 +46,7 @@ export function useTypewriter(
 
 		if (isDeleting) {
 			if (displayText.length > 0) {
-				timeout = setTimeout(
-					() => setDisplayText((t) => t.slice(0, -1)),
-					deletingSpeedMs,
-				)
+				timeout = setTimeout(() => setDisplayText((t) => t.slice(0, -1)), deletingSpeedMs)
 			} else {
 				const nextIndex = getNextIndex(wordIndex, words.length, order)
 

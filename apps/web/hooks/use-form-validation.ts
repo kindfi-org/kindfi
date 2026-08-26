@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import { throttle } from 'lodash'
+import throttle from 'lodash/throttle'
 import { useState } from 'react'
 
 /**
@@ -53,9 +53,7 @@ export function useFormValidation(rules: ValidationRules = {}) {
 		}
 	}
 
-	const handleValidation = (
-		e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>,
-	) => {
+	const handleValidation = (e: React.ChangeEvent<HTMLInputElement & { name: ValidFieldName }>) => {
 		const { name, value } = e.target
 		validateField(name, value)
 	}

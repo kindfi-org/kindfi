@@ -2578,14 +2578,7 @@
 		},
 		"public.escrow_status_type": {
 			"name": "escrow_status_type",
-			"values": [
-				"NEW",
-				"FUNDED",
-				"ACTIVE",
-				"COMPLETED",
-				"DISPUTED",
-				"CANCELLED"
-			],
+			"values": ["NEW", "FUNDED", "ACTIVE", "COMPLETED", "DISPUTED", "CANCELLED"],
 			"schema": "public"
 		},
 		"public.kyc_status_enum": {

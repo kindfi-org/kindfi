@@ -6,6 +6,9 @@ const NOTIFICATION_TYPES = [
 	'project_comment',
 	'project_investment',
 	'project_milestone',
+	'milestone_review_requested',
+	'milestone_review_approved',
+	'milestone_review_rejected',
 	'escrow_update',
 	'escrow_dispute',
 	'kyc_status',
@@ -29,14 +32,14 @@ export type NotificationPriority = (typeof NOTIFICATION_PRIORITIES)[number]
 /**
  * Maps notification types to their corresponding UI categories
  */
-export const notificationTypeToCategory: Record<
-	NotificationType,
-	NotificationCategory
-> = {
+export const notificationTypeToCategory: Record<NotificationType, NotificationCategory> = {
 	project_update: 'info',
 	project_comment: 'info',
 	project_investment: 'success',
 	project_milestone: 'success',
+	milestone_review_requested: 'info',
+	milestone_review_approved: 'success',
+	milestone_review_rejected: 'warning',
 	escrow_update: 'info',
 	escrow_dispute: 'warning',
 	kyc_status: 'info',
@@ -152,32 +155,23 @@ export interface NotificationResponse {
  * Type guard to check if a value is a valid NotificationType
  */
 export function isNotificationType(value: unknown): value is NotificationType {
-	return (
-		typeof value === 'string' &&
-		NOTIFICATION_TYPES.includes(value as NotificationType)
-	)
+	return typeof value === 'string' && NOTIFICATION_TYPES.includes(value as NotificationType)
 }
 
 /**
  * Type guard to check if a value is a valid NotificationCategory
  */
-export function isNotificationCategory(
-	value: unknown,
-): value is NotificationCategory {
+export function isNotificationCategory(value: unknown): value is NotificationCategory {
 	return (
-		typeof value === 'string' &&
-		NOTIFICATION_CATEGORIES.includes(value as NotificationCategory)
+		typeof value === 'string' && NOTIFICATION_CATEGORIES.includes(value as NotificationCategory)
 	)
 }
 
 /**
  * Type guard to check if a value is a valid NotificationPriority
  */
-export function isNotificationPriority(
-	value: unknown,
-): value is NotificationPriority {
+export function isNotificationPriority(value: unknown): value is NotificationPriority {
 	return (
-		typeof value === 'string' &&
-		NOTIFICATION_PRIORITIES.includes(value as NotificationPriority)
+		typeof value === 'string' && NOTIFICATION_PRIORITIES.includes(value as NotificationPriority)
 	)
 }

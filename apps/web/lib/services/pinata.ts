@@ -118,9 +118,7 @@ export async function uploadFileToIPFS(
 
 	if (!response.ok) {
 		const errorText = await response.text()
-		throw new Error(
-			`Pinata file upload failed (${response.status}): ${errorText}`,
-		)
+		throw new Error(`Pinata file upload failed (${response.status}): ${errorText}`)
 	}
 
 	const data = (await response.json()) as PinataUploadResponse

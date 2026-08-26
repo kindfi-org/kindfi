@@ -20,7 +20,6 @@ export const mockStep5KycData = {
 		proofDocument: null,
 	},
 }
-export const handleBack = () => console.log('Back clicked')
-export const handleSubmit = () => console.log('Submit clicked')
-export const handleStepChange = (step: number) =>
-	alert(`Navigate to step: ${step}`)
+export const handleBack = () => {}
+export const handleSubmit = () => {}
+export const handleStepChange = (step: number) => alert(`Navigate to step: ${step}`)

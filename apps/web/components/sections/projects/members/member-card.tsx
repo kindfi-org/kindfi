@@ -3,14 +3,7 @@
 import type { Enums } from '@services/supabase'
 import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
-import {
-	Check,
-	Mail,
-	MoreHorizontal,
-	Pencil,
-	UserMinus,
-	X as XIcon,
-} from 'lucide-react'
+import { Check, Mail, MoreHorizontal, Pencil, UserMinus, X as XIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
@@ -55,8 +48,7 @@ export function MemberCard({
 	const isOwner = member.userId === currentUserId
 
 	const saveDisabled =
-		tempTitle.trim().length === 0 ||
-		tempTitle.trim() === (member.title?.trim() ?? '')
+		tempTitle.trim().length === 0 || tempTitle.trim() === (member.title?.trim() ?? '')
 
 	const handleCommit = () => {
 		const next = tempTitle.trim()
@@ -88,14 +80,10 @@ export function MemberCard({
 									src={member.avatar || PLACEHOLDER_IMG}
 									alt={member.displayName || 'User Avatar'}
 								/>
-								<AvatarFallback>
-									{getAvatarFallback(member.displayName || '')}
-								</AvatarFallback>
+								<AvatarFallback>{getAvatarFallback(member.displayName || '')}</AvatarFallback>
 							</Avatar>
 							<div className="flex-1 min-w-0">
-								<span className="font-medium truncate">
-									{member.displayName}
-								</span>
+								<span className="font-medium truncate">{member.displayName}</span>
 
 								<div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
 									<Mail className="h-3 w-3" aria-hidden="true" />
@@ -145,9 +133,7 @@ export function MemberCard({
 								) : (
 									<div className="flex items-center gap-2 mb-2">
 										<span className="text-sm">
-											{member.title || (
-												<span className="text-muted-foreground">—</span>
-											)}
+											{member.title || <span className="text-muted-foreground">—</span>}
 										</span>
 										{isOwner && (
 											<Button
@@ -177,24 +163,13 @@ export function MemberCard({
 							<>
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-										<Button
-											variant="ghost"
-											size="sm"
-											className="h-8 w-8 p-0"
-											aria-label={menuAria}
-										>
+										<Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={menuAria}>
 											<MoreHorizontal className="h-4 w-4" aria-hidden="true" />
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end" className="min-w-[220px]">
-										<div className="px-2 py-1.5 text-xs text-muted-foreground">
-											Change role
-										</div>
-										{(
-											Object.keys(memberRole) as Array<
-												Enums<'project_member_role'>
-											>
-										).map((rk) => {
+										<div className="px-2 py-1.5 text-xs text-muted-foreground">Change role</div>
+										{(Object.keys(memberRole) as Array<Enums<'project_member_role'>>).map((rk) => {
 											const meta = memberRole[rk]
 											const isCurrent = rk === member.role
 											return (

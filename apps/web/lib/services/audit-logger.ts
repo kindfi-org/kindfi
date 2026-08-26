@@ -1,4 +1,5 @@
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
+import { logger } from '@/lib/logger'
 
 // audit_logs table is not in generated Supabase types
 const AUDIT_LOGS_TABLE = 'audit_logs' as const
@@ -15,19 +16,12 @@ export type AuditOperation =
 	| 'escrow.dispute.assign_mediator'
 	| 'nft.mint'
 	| 'nft.evolve'
+	| 'etherfuse.on_ramp'
+	| 'etherfuse.off_ramp'
 
-export type AuditResourceType =
-	| 'escrow'
-	| 'transaction'
-	| 'milestone'
-	| 'dispute'
-	| 'nft'
+export type AuditResourceType = 'escrow' | 'transaction' | 'milestone' | 'dispute' | 'nft'
 
-export type AuditStatus =
-	| 'initiated'
-	| 'success'
-	| 'failure'
-	| 'validation_error'
+export type AuditStatus = 'initiated' | 'success' | 'failure' | 'validation_error'
 
 export interface AuditLogEntry {
 	timestamp: string
@@ -69,7 +63,7 @@ export class AuditLogger {
 	 * Never throws — catches DB errors to avoid disrupting the main flow.
 	 */
 	async log(params: AuditLogParams): Promise<void> {
-		const entry: AuditLogEntry = {
+		const _entry: AuditLogEntry = {
 			timestamp: new Date().toISOString(),
 			correlationId: params.correlationId,
 			operation: params.operation,
@@ -82,13 +76,15 @@ export class AuditLogger {
 			durationMs: params.durationMs,
 		}
 
-		// Always emit structured JSON to console
-		console.info('[AUDIT]', JSON.stringify(entry))
-
 		try {
 			const supabase = createSupabaseBrowserClient()
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- audit_logs not in generated types
-			const { error } = await (supabase as any)
+			const { error } = await (
+				supabase as unknown as {
+					from: (table: typeof AUDIT_LOGS_TABLE) => {
+						insert: (values: Record<string, unknown>) => PromiseLike<{ error: Error | null }>
+					}
+				}
+			)
 				.from(AUDIT_LOGS_TABLE)
 				.insert({
 					correlation_id: params.correlationId,
@@ -104,7 +100,8 @@ export class AuditLogger {
 
 			if (error) throw error
 		} catch (dbError) {
-			console.error('[AuditLogger] Failed to persist audit log:', dbError)
+			// eslint-disable-next-line no-console -- last-resort fallback: AuditLogger itself failed, no other logging mechanism available
+			logger.error('[AuditLogger] Failed to persist audit log:', dbError)
 			// Don't throw to avoid disrupting the main flow
 		}
 	}

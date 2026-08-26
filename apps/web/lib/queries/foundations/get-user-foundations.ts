@@ -1,9 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 
-export async function getUserFoundations(
-	client: TypedSupabaseClient,
-	userId: string,
-) {
+export async function getUserFoundations(client: TypedSupabaseClient, userId: string) {
 	const { data, error } = await client
 		.from('foundations')
 		.select(

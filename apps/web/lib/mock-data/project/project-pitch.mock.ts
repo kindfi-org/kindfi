@@ -3,8 +3,8 @@ import { MessageSquareText, Share2, Star, Users } from 'lucide-react'
 import type { RequiredItem, Step, Tip } from '~/lib/types/project/pitch.types'
 
 export const requiredItems: RequiredItem[] = [
-	{ id: 'highlights', label: 'Add at least 2 Highlights', completed: false },
-	{ id: 'pitch', label: 'Complete your Pitch', completed: false },
+	{ id: 'highlights', label: 'Add at least 2 Campaign Impact points', completed: false },
+	{ id: 'pitch', label: 'Complete your Project Story', completed: false },
 	{ id: 'contract', label: 'Review Contract', completed: false },
 ]
 
@@ -12,8 +12,7 @@ export const tips: Tip[] = [
 	{
 		id: 'feedback',
 		title: 'Get Pitch Feedback',
-		description:
-			'Share your pitch with our community experts for valuable insights.',
+		description: 'Share your pitch with our community experts for valuable insights.',
 		action: 'Request Feedback',
 		icon: MessageSquareText,
 	},

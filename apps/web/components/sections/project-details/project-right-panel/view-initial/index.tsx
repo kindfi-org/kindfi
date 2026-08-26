@@ -1,4 +1,3 @@
-import { zodResolver } from '~/lib/form/zod-resolver'
 import { Clock, Heart } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -13,6 +12,7 @@ import {
 } from '~/components/base/form'
 import { Input } from '~/components/base/input'
 import { PrimaryCard } from '~/components/cards/primary-card'
+import { zodResolver } from '~/lib/form/zod-resolver'
 import {
 	dataCreator,
 	dataDetails,
@@ -38,12 +38,7 @@ type ViewInitialProps = {
 	onSubmit: (data: FormValue) => void
 } & GoalProgressProps
 
-export function ViewInitial({
-	amountOfSupport,
-	goal,
-	percentage,
-	onSubmit,
-}: ViewInitialProps) {
+export function ViewInitial({ amountOfSupport, goal, percentage, onSubmit }: ViewInitialProps) {
 	const form = useForm<FormValue>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -54,11 +49,7 @@ export function ViewInitial({
 	return (
 		<div className="space-y-5">
 			<PrimaryCard className="space-y-5">
-				<GoalProgress
-					amountOfSupport={amountOfSupport}
-					goal={goal}
-					percentage={percentage}
-				/>
+				<GoalProgress amountOfSupport={amountOfSupport} goal={goal} percentage={percentage} />
 
 				<div className="flex flex-wrap mt-6 gap-y-4">
 					{dataDetails.map((item) => (
@@ -110,9 +101,7 @@ function InfoDetails({ name, value }: { name: string; value: string }) {
 		<div className="flex flex-col basis-1/2">
 			<span className="font-semibold text-gray-600">{name}</span>
 			<span className="font-bold text-gray-900 text-lg flex items-center">
-				{name === 'Closing Date' && (
-					<Clock className="text-green-600 size-5 mr-1" />
-				)}
+				{name === 'Closing Date' && <Clock className="text-green-600 size-5 mr-1" />}
 				{value}
 			</span>
 		</div>

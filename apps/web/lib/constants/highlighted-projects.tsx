@@ -449,11 +449,7 @@ export const timelineEvents: TimelineEvent[] = [
 	},
 ]
 
-const createMediaItems = (
-	count: number,
-	prefix: string,
-	type: 'image' | 'video' = 'image',
-) =>
+const createMediaItems = (count: number, prefix: string, type: 'image' | 'video' = 'image') =>
 	Array.from({ length: count }, (_, i) => ({
 		id: `${prefix.toLowerCase()}-${i + 1}`,
 		src: `/images/${type}.png`,

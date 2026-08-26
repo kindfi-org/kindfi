@@ -2,14 +2,13 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { highlightsUpdateSchema } from '~/lib/schemas/project.schemas'
+import { upsertManualTranslation } from '~/lib/services/content-translation/server'
 import { validateRequest } from '~/lib/utils/validation'
 
-export async function POST(
-	req: Request,
-	_params: { params: Promise<{ slug: string }> },
-) {
+export async function POST(req: Request, _params: { params: Promise<{ slug: string }> }) {
 	try {
 		// Ensure the request is authenticated before processing
 		const session = await getServerSession(nextAuthOption)
@@ -21,14 +20,14 @@ export async function POST(
 		const body = await req.json()
 		const validation = validateRequest(highlightsUpdateSchema, body)
 		if (!validation.success) return validation.response
-		const { projectId, highlights } = validation.data
+		const { projectId, highlights, translationHighlights } = validation.data
 
 		// Verify user has permission to update this project
 		// Check if user is the project owner or has editor role in parallel
 		const [projectResult, memberResult] = await Promise.all([
 			supabaseServiceRole
 				.from('projects')
-				.select('id, kindler_id, metadata')
+				.select('id, kindler_id, metadata, source_locale')
 				.eq('id', projectId)
 				.single(),
 			supabaseServiceRole
@@ -87,15 +86,24 @@ export async function POST(
 			.eq('id', projectId)
 
 		if (updateError) {
-			console.error(updateError)
+			logger.error(updateError)
 			return NextResponse.json({ error: updateError.message }, { status: 500 })
 		}
 
+		const sourceLocale =
+			((project as { source_locale?: string }).source_locale as 'en' | 'es' | undefined) ?? 'en'
+
+		if (translationHighlights?.length) {
+			await upsertManualTranslation('project', projectId, sourceLocale, {
+				highlights: translationHighlights,
+			})
+		}
+
 		return NextResponse.json({
-			message: 'Highlights saved successfully',
+			message: 'Campaign impact saved successfully',
 		})
 	} catch (err) {
-		console.error(err)
+		logger.error(err)
 		return NextResponse.json(
 			{ error: err instanceof Error ? err.message : 'Unknown error' },
 			{ status: 500 },

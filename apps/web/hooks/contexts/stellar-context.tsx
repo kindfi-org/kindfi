@@ -8,11 +8,7 @@ const StellarContext = createContext<StellarContextProps | undefined>(undefined)
 
 export function StellarProvider({ children }: { children: ReactNode }) {
 	const stellar = useStellar()
-	return (
-		<StellarContext.Provider value={stellar}>
-			{children}
-		</StellarContext.Provider>
-	)
+	return <StellarContext.Provider value={stellar}>{children}</StellarContext.Provider>
 }
 
 export const useStellarContext = () => {

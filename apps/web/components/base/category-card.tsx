@@ -39,9 +39,7 @@ export function CategoryCard({ category, index }: CategoryCardProps) {
 				<div className="space-y-2">
 					<div className="flex items-center justify-between text-gray-600">
 						<span>Total Funded</span>
-						<span className="font-bold text-black">
-							${category.totalFunded.toLocaleString()}
-						</span>
+						<span className="font-bold text-black">${category.totalFunded.toLocaleString()}</span>
 					</div>
 					<div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
 						<div className="h-full w-3/4 bg-black rounded-full" />
@@ -50,9 +48,7 @@ export function CategoryCard({ category, index }: CategoryCardProps) {
 
 				<div className="flex items-center justify-between text-gray-600">
 					<span>Active Projects</span>
-					<span className="font-bold text-black">
-						{category.activeProjects}
-					</span>
+					<span className="font-bold text-black">{category.activeProjects}</span>
 				</div>
 
 				<div className="flex items-center gap-2 text-sm">

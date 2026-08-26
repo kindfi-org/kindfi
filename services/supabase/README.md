@@ -56,8 +56,8 @@ Generate the necessary types and schemas for the Supabase service:
 # Option 2: Using npm script with PROJECT_ID env variable
 PROJECT_ID=<YOUR_PROJECT_ID> bun run gen:remote
 
-# Option 3: Direct command
-supabase gen types typescript --project-id <YOUR_PROJECT_ID> > src/database.types.ts
+# Option 3: Direct command (prefer bun run types / gen-types.sh — they write atomically)
+PROJECT_ID=<YOUR_PROJECT_ID> bun run types:remote
 bun run schemas
 ```
 
@@ -75,6 +75,8 @@ bun gen # generates what it is in local database
 ```
 
 **Important:** After generating types from remote, commit the `src/database.types.ts` file to your repository so Vercel builds have access to the types.
+
+`database.types.ts` and `database.schemas.ts` are force-ignored by Biome (`!!` in root `biome.json`) and must never be formatted by `biome check --write`. Regenerate via `bun run gen` (local) or `bun run gen:remote` (remote); scripts write to a temp file first so a failed CLI run cannot truncate the committed file.
 
 3. **Environment Variables**
 
@@ -97,6 +99,39 @@ Obtaining the Service Role Key
 3. In the left sidebar, click on Settings.
 4. Select Data API from the settings menu.
 5. Locate the Service Role Key and reveal and copy it:
+
+## Auth Email (Custom SMTP)
+
+Signup and OTP emails are sent by **Supabase Auth**, not the Next.js app. Until custom SMTP is configured on your hosted Supabase project, messages come from `Supabase Auth <noreply@mail.app.supabase.io>` with the default "Confirm Your Signup" template.
+
+### Production (required)
+
+1. Open [Supabase Dashboard](https://supabase.com/dashboard) → your project → **Authentication** → **SMTP Settings**.
+2. Enable custom SMTP and enter Resend credentials:
+
+| Field | Value |
+|-------|-------|
+| Host | `smtp.resend.com` |
+| Port | `587` |
+| Username | `resend` |
+| Password | Your Resend API key (`RESEND_SMTP_API_KEY`) |
+| Sender email | `noreply@kindfi.org` |
+| Sender name | `KindFi Notifications` |
+
+3. Ensure `kindfi.org` is verified in [Resend](https://resend.com/domains) and `noreply@kindfi.org` is allowed as a sender.
+4. Under **Authentication** → **Email Templates**, paste the HTML from `services/supabase/templates/`:
+   - **Confirm signup** → `confirmation.html`
+   - **Magic link** → `magic_link.html`
+   - **Change email address** → `email_change.html`
+5. After saving SMTP, review **Authentication** → **Rate Limits** (default is 30 emails/hour until adjusted).
+
+### Local development
+
+`services/supabase/config.toml` enables Resend SMTP when `RESEND_SMTP_API_KEY` is set in `services/supabase/.env`. Restart local Supabase after changing SMTP settings:
+
+```sh
+bun stop && bun start
+```
 
 ## Useful Commands
 

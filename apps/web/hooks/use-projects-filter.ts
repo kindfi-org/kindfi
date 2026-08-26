@@ -50,59 +50,45 @@ export function useProjectsFilter() {
 		[selectedCategories],
 	)
 
-	const sortProjects = useCallback(
-		(projects: Project[], option: SortOption) => {
-			const sortedProjects = [...projects]
+	const sortProjects = useCallback((projects: Project[], option: SortOption) => {
+		const sortedProjects = [...projects]
 
-			switch (option) {
-				case 'Most Recent':
-					// Fallback to current date if createdAt is not available
-					return sortedProjects.sort((a, b) => {
-						const dateA = a.created_at
-							? new Date(a.created_at).getTime()
-							: Date.now()
-						const dateB = b.created_at
-							? new Date(b.created_at).getTime()
-							: Date.now()
-						return dateB - dateA
-					})
-				case 'Most Funded':
-					return sortedProjects.sort((a, b) => {
-						const percentA =
-							a.percentage_complete ||
-							(a.current_amount / (a.target_amount || a.goal || 1)) * 100
-						const percentB =
-							b.percentage_complete ||
-							(b.current_amount / (b.target_amount || b.goal || 1)) * 100
-						return percentB - percentA
-					})
-				case 'Most Supporters':
-					return sortedProjects.sort(
-						(a, b) =>
-							(b.kinder_count || b.donors || 0) -
-							(a.kinder_count || a.donors || 0),
-					)
-				default:
-					// 'popular' - could be based on a trending flag or other metrics
-					return sortedProjects.sort((a, b) => {
-						// Sort by trending flag first
-						if (a.trending && !b.trending) return -1
-						if (!a.trending && b.trending) return 1
+		switch (option) {
+			case 'Most Recent':
+				// Fallback to current date if createdAt is not available
+				return sortedProjects.sort((a, b) => {
+					const dateA = a.created_at ? new Date(a.created_at).getTime() : Date.now()
+					const dateB = b.created_at ? new Date(b.created_at).getTime() : Date.now()
+					return dateB - dateA
+				})
+			case 'Most Funded':
+				return sortedProjects.sort((a, b) => {
+					const percentA =
+						a.percentage_complete || (a.current_amount / (a.target_amount || a.goal || 1)) * 100
+					const percentB =
+						b.percentage_complete || (b.current_amount / (b.target_amount || b.goal || 1)) * 100
+					return percentB - percentA
+				})
+			case 'Most Supporters':
+				return sortedProjects.sort(
+					(a, b) => (b.kinder_count || b.donors || 0) - (a.kinder_count || a.donors || 0),
+				)
+			default:
+				// 'popular' - could be based on a trending flag or other metrics
+				return sortedProjects.sort((a, b) => {
+					// Sort by trending flag first
+					if (a.trending && !b.trending) return -1
+					if (!a.trending && b.trending) return 1
 
-						// Then by featured flag
-						if (a.featured && !b.featured) return -1
-						if (!a.featured && b.featured) return 1
+					// Then by featured flag
+					if (a.featured && !b.featured) return -1
+					if (!a.featured && b.featured) return 1
 
-						// Then by number of supporters
-						return (
-							(b.kinder_count || b.donors || 0) -
-							(a.kinder_count || a.donors || 0)
-						)
-					})
-			}
-		},
-		[],
-	)
+					// Then by number of supporters
+					return (b.kinder_count || b.donors || 0) - (a.kinder_count || a.donors || 0)
+				})
+		}
+	}, [])
 
 	return {
 		selectedCategories,
@@ -110,8 +96,7 @@ export function useProjectsFilter() {
 			setState((prev) => ({ ...prev, selectedCategories: val }))
 		},
 		sortOption,
-		setSortOption: (val: SortOption) =>
-			setState((prev) => ({ ...prev, sortOption: val })),
+		setSortOption: (val: SortOption) => setState((prev) => ({ ...prev, sortOption: val })),
 		filterProjects,
 		sortProjects,
 	}

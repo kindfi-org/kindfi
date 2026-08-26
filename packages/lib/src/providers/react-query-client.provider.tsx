@@ -15,11 +15,7 @@ import { useState } from 'react'
  *   <MyApp />
  * </ReactQueryClientProvider>
  */
-export const ReactQueryClientProvider = ({
-	children,
-}: {
-	children: React.ReactNode
-}) => {
+export const ReactQueryClientProvider = ({ children }: { children: React.ReactNode }) => {
 	const [queryClient] = useState(
 		() =>
 			new QueryClient({
@@ -32,7 +28,5 @@ export const ReactQueryClientProvider = ({
 				},
 			}),
 	)
-	return (
-		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-	)
+	return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }

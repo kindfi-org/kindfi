@@ -25,8 +25,7 @@ export function TopImpactMakers() {
 						viewport={{ once: true }}
 						className="mx-auto max-w-2xl text-lg text-gray-600"
 					>
-						Celebrating the individuals making extraordinary contributions to
-						social causes.
+						Celebrating the individuals making extraordinary contributions to social causes.
 					</motion.p>
 				</div>
 

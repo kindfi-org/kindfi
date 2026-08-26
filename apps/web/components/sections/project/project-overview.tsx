@@ -4,10 +4,7 @@ import { useState } from 'react'
 import { FaBullseye, FaCheckCircle, FaGlobe, FaUsers } from 'react-icons/fa'
 import { AboutProject } from '~/components/sections/project/about-project'
 import { SectionContainer } from '~/components/sections/project/section-container'
-import {
-	aboutProjectProps,
-	successGalleryItems,
-} from '~/lib/mock-data/project/mock-projects'
+import { aboutProjectProps, successGalleryItems } from '~/lib/mock-data/project/mock-projects'
 
 interface MediaItem {
 	id: string
@@ -33,10 +30,7 @@ const ProjectOverview = () => {
 
 		const currentList = [...mediaList]
 		const [selectedImage] = currentList.splice(selectedIndex, 1)
-		const reorderedList = [
-			selectedImage,
-			...currentList.filter((item) => item !== selectedImage),
-		]
+		const reorderedList = [selectedImage, ...currentList.filter((item) => item !== selectedImage)]
 		setMediaList(reorderedList)
 	}
 

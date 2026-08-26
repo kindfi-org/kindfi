@@ -88,8 +88,7 @@ Join us in creating a world where every child has access to quality education.`,
 		{
 			id: 'milestone1',
 			title: 'Initial Resource Distribution',
-			description:
-				'Distribute books and supplies to the first 10 schools in the program.',
+			description: 'Distribute books and supplies to the first 10 schools in the program.',
 			amount: 10000,
 			deadline: '2023-12-31',
 			status: 'completed',
@@ -98,8 +97,7 @@ Join us in creating a world where every child has access to quality education.`,
 		{
 			id: 'milestone2',
 			title: 'Technology Implementation',
-			description:
-				'Set up computer labs in 15 schools and provide internet connectivity.',
+			description: 'Set up computer labs in 15 schools and provide internet connectivity.',
 			amount: 25000,
 			deadline: '2024-03-31',
 			status: 'approved',
@@ -108,8 +106,7 @@ Join us in creating a world where every child has access to quality education.`,
 		{
 			id: 'milestone3',
 			title: 'Mentorship Program Launch',
-			description:
-				'Launch mentorship program connecting students with professionals.',
+			description: 'Launch mentorship program connecting students with professionals.',
 			amount: 15000,
 			deadline: '2024-06-30',
 			status: 'pending',
@@ -118,8 +115,7 @@ Join us in creating a world where every child has access to quality education.`,
 		{
 			id: 'milestone4',
 			title: 'Program Evaluation',
-			description:
-				'Conduct comprehensive evaluation of program impact and effectiveness.',
+			description: 'Conduct comprehensive evaluation of program impact and effectiveness.',
 			amount: 5000,
 			deadline: '2024-09-30',
 			status: 'disputed',
@@ -153,8 +149,7 @@ Join us in creating a world where every child has access to quality education.`,
 				},
 				{
 					id: 'comment2',
-					content:
-						'How many more schools are you planning to reach in the next phase?',
+					content: 'How many more schools are you planning to reach in the next phase?',
 					author: {
 						id: 'user2',
 						name: 'Jane Smith',
@@ -197,8 +192,7 @@ Join us in creating a world where every child has access to quality education.`,
 	comments: [
 		{
 			id: 'generalComment1',
-			content:
-				'This project is exactly what our community needs. Thank you for your work!',
+			content: 'This project is exactly what our community needs. Thank you for your work!',
 			author: {
 				id: 'user3',
 				name: 'Maria Garcia',
@@ -210,8 +204,7 @@ Join us in creating a world where every child has access to quality education.`,
 		},
 		{
 			id: 'generalComment2',
-			content:
-				"I'm interested in volunteering. Is there a way to get involved beyond investing?",
+			content: "I'm interested in volunteering. Is there a way to get involved beyond investing?",
 			author: {
 				id: 'user4',
 				name: 'Robert Kim',

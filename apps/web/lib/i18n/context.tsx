@@ -2,40 +2,63 @@
 
 import type React from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
+import { setLocaleCookie } from '~/lib/i18n/locale-cookie.shared'
+import { safeLocalStorageGet, safeLocalStorageSet } from '~/lib/utils/safe-storage'
+import { loadLocaleBundle } from './load-locale'
+import { en } from './translations/en'
 
 export type Language = 'en' | 'es'
 
-// Recursive translation dictionary where leaves are strings
+// Recursive translation dictionary where leaves are strings or string arrays
 export interface TranslationDict {
-	[key: string]: string | TranslationDict
+	[key: string]: string | string[] | TranslationDict
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === 'object'
 }
 
+function resolveInBundle(dict: unknown, key: string): string | string[] | undefined {
+	const keys = key.split('.')
+	let value: unknown = dict
+
+	for (const k of keys) {
+		if (isRecord(value)) {
+			value = value[k]
+		} else {
+			return undefined
+		}
+	}
+
+	if (typeof value === 'string' || Array.isArray(value)) {
+		return value
+	}
+
+	return undefined
+}
+
 interface I18nContextType {
 	language: Language
 	setLanguage: (lang: Language) => void
 	t: (key: string) => string
+	tArray: (key: string) => string[]
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 interface I18nProviderProps {
 	children: React.ReactNode
-	translations: Record<Language, TranslationDict>
 }
 
-export function I18nProvider({ children, translations }: I18nProviderProps) {
+export function I18nProvider({ children }: I18nProviderProps) {
 	const [language, setLanguageState] = useState<Language>('en')
+	const [bundles, setBundles] = useState<Partial<Record<Language, TranslationDict>>>({ en })
 
 	// Load language from localStorage on mount
-	// Use setTimeout to avoid React Compiler warning about setState in effect
 	useEffect(() => {
-		const savedLanguage = localStorage.getItem('language') as Language
+		const savedLanguage = safeLocalStorageGet('language') as Language
 		if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
-			// Schedule state update in next tick to avoid synchronous setState in effect
+			setLocaleCookie(savedLanguage)
 			const timer = setTimeout(() => {
 				setLanguageState(savedLanguage)
 			}, 0)
@@ -43,30 +66,50 @@ export function I18nProvider({ children, translations }: I18nProviderProps) {
 		}
 	}, [])
 
+	// Lazy-load inactive locale bundles when the active language changes
+	useEffect(() => {
+		if (bundles[language]) return
+
+		let cancelled = false
+		void loadLocaleBundle(language).then((bundle) => {
+			if (!cancelled) {
+				setBundles((prev) => ({ ...prev, [language]: bundle }))
+			}
+		})
+
+		return () => {
+			cancelled = true
+		}
+	}, [language, bundles])
+
 	const setLanguage = (lang: Language) => {
 		setLanguageState(lang)
-		localStorage.setItem('language', lang)
-		// Update HTML lang attribute for accessibility
+		safeLocalStorageSet('language', lang)
+		setLocaleCookie(lang)
 		document.documentElement.lang = lang
 	}
 
+	const resolveValue = (key: string): string | string[] | undefined => {
+		const activeBundle = bundles[language]
+		return (
+			(activeBundle ? resolveInBundle(activeBundle, key) : undefined) ??
+			resolveInBundle(en, key) ??
+			(bundles.en ? resolveInBundle(bundles.en, key) : undefined)
+		)
+	}
+
 	const t = (key: string): string => {
-		const keys = key.split('.')
-		let value: unknown = translations[language]
+		const resolved = resolveValue(key)
+		return typeof resolved === 'string' ? resolved : key
+	}
 
-		for (const k of keys) {
-			if (isRecord(value)) {
-				value = (value as Record<string, unknown>)[k]
-			} else {
-				return key // Return key if translation not found
-			}
-		}
-
-		return typeof value === 'string' ? value : key
+	const tArray = (key: string): string[] => {
+		const resolved = resolveValue(key)
+		return Array.isArray(resolved) ? resolved : []
 	}
 
 	return (
-		<I18nContext.Provider value={{ language, setLanguage, t }}>
+		<I18nContext.Provider value={{ language, setLanguage, t, tArray }}>
 			{children}
 		</I18nContext.Provider>
 	)

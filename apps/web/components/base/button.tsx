@@ -1,9 +1,7 @@
-import { appEnvConfig } from '@packages/lib/config'
-import type { AppEnvInterface } from '@packages/lib/types'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-
+import { logger } from '@/lib/logger'
 import { cn } from '~/lib/utils'
 
 /**
@@ -25,12 +23,10 @@ const buttonVariants = cva(
 			/** Defines different button visual styles */
 			variant: {
 				default: 'text-blue-700',
-				destructive:
-					'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+				destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
 				outline:
-					'border border-input bg-background text-black hover:text-blue-700',
-				secondary:
-					'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+					'border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
+				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 				ghost: 'hover:gradient-border-btn',
 				link: 'text-primary underline-offset-4 hover:underline',
 				'primary-gradient': 'gradient-btn text-white',
@@ -76,8 +72,6 @@ export interface ButtonProps
 	iconOnly?: boolean
 	'aria-label'?: boolean extends true ? string : string | undefined
 }
-
-const appConfig: AppEnvInterface = appEnvConfig('web')
 
 /**
  * `Button` component used for triggering actions within the UI. It supports various variants and sizes,
@@ -130,12 +124,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		)
 
 		// Use the iconOnly prop or determine it based on the presence of text content
-		const isIconOnly =
-			iconOnly || (!hasTextContent && (startIcon || endIcon || children))
+		const isIconOnly = iconOnly || (!hasTextContent && (startIcon || endIcon || children))
 
 		// Warning for icon-only buttons without aria-label in development
 		// if (appConfig.env.nodeEnv !== 'production' && isIconOnly && !ariaLabel) {
-		// 	console.error(
+
 		// 		`Accessibility error: Icon-only Button must have an aria-label to describe its purpose. Component: ${Button.displayName}`,
 		// 	)
 		// }
@@ -147,11 +140,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			role: isLink ? 'link' : undefined,
 			'aria-label': ariaLabel || (isIconOnly ? String(children) : 'Button'),
 			title: ariaLabel || (typeof children === 'string' ? children : 'Button'),
-			...(appConfig.env.nodeEnv !== 'production' &&
+			...(process.env.NODE_ENV !== 'production' &&
 				isLink &&
 				!('href' in props) && {
 					onClick: (e) => {
-						console.warn(
+						logger.warn(
 							'Accessibility warning: Buttons with role="link" should have an href attribute.',
 						)
 						props.onClick?.(e)
@@ -161,18 +154,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		}
 
 		return asChild ? (
-			<Slot
-				className={cn(buttonVariants({ variant, size, className }))}
-				ref={ref}
-			>
+			<Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref}>
 				{React.cloneElement(children as React.ReactElement, buttonProps)}
 			</Slot>
 		) : (
-			<Comp
-				className={cn(buttonVariants({ variant, size, className }))}
-				ref={ref}
-				{...buttonProps}
-			>
+			<Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...buttonProps}>
 				{startIcon}
 				{children}
 				{endIcon}

@@ -31,16 +31,11 @@ export function ErrorFallback({
 	return (
 		<div role="alert" className="p-4 text-center">
 			<div className="mb-4 text-red-600">
-				<AlertCircle
-					className="mx-auto"
-					size={40}
-					color="red"
-					strokeWidth={2}
-				/>
+				<AlertCircle className="mx-auto" size={40} color="red" strokeWidth={2} />
 			</div>
 			<h2 className="text-xl font-semibold mb-2 text-gray-800">{title}</h2>
 			<p className="mb-4 text-gray-600">{message}</p>
-			<p className="mb-4 text-gray-600">{error.message}</p>
+			{error instanceof Error ? <p className="mb-4 text-gray-600">{error.message}</p> : null}
 			<Button
 				onClick={handleReset}
 				disabled={isLoading}

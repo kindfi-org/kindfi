@@ -205,8 +205,13 @@ Deploy all auth contracts (Factory, Controller, Account) using the deployment sc
 # Futurenet
 ./scripts/deploy-auth.sh --futurenet
 
-# Mainnet
+# Mainnet (with confirmation prompt)
 ./scripts/deploy-auth.sh --mainnet
+
+# Full mainnet orchestration (all contracts)
+./scripts/deploy-all-mainnet.sh --source production
+
+See [DEPLOYMENT_MAINNET.md](./DEPLOYMENT_MAINNET.md) for the complete mainnet guide.
 
 # Specify source account
 ./scripts/deploy-auth.sh --testnet --source <account_name>

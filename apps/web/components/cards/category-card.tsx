@@ -15,13 +15,7 @@ interface CategoryCardProps extends Category {
 	type: keyof typeof iconMap
 }
 
-export function CategoryCard({
-	name,
-	description,
-	slug,
-	type,
-	className = '',
-}: CategoryCardProps) {
+export function CategoryCard({ name, description, slug, type, className = '' }: CategoryCardProps) {
 	const Icon = iconMap[type] || LayoutGrid
 
 	return (

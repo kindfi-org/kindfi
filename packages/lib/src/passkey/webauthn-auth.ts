@@ -1,8 +1,8 @@
 // import { createHash } from 'node:crypto'
 
+import { createHash } from 'node:crypto'
 import { xdr } from '@stellar/stellar-sdk'
 import type { Api } from '@stellar/stellar-sdk/rpc'
-import { createHash } from 'crypto'
 import isEqual from 'lodash/isEqual'
 
 const P256_ORDER = Buffer.from(
@@ -10,16 +10,13 @@ const P256_ORDER = Buffer.from(
 	'hex',
 )
 
-const HALF_ORDER =
-	(BigInt('0x' + P256_ORDER.toString('hex')) - BigInt(1)) / BigInt(2)
+const HALF_ORDER = (BigInt(`0x${P256_ORDER.toString('hex')}`) - BigInt(1)) / BigInt(2)
 
 export function buildWebAuthnSignatureScVal({
 	assertion,
 	userData,
 }: BuildWebAuthnSignatureScValParams): BuildWebAuthnSignatureScValResult {
-	const authenticatorData = base64UrlToBuffer(
-		assertion.response.authenticatorData,
-	)
+	const authenticatorData = base64UrlToBuffer(assertion.response.authenticatorData)
 	const clientDataJSON = base64UrlToBuffer(assertion.response.clientDataJSON)
 	const derSignature = base64UrlToBuffer(assertion.response.signature)
 	const signature = convertP256SignatureAsnToCompact(derSignature)
@@ -33,7 +30,7 @@ export function buildWebAuthnSignatureScVal({
 	let parsedClientData: WebAuthnClientDataJSON = {}
 	try {
 		parsedClientData = JSON.parse(clientDataJSON.toString('utf8'))
-	} catch (e) {
+	} catch (_e) {
 		// leave as empty object if parsing fails
 	}
 
@@ -63,9 +60,7 @@ export function buildWebAuthnSignatureScVal({
 	const webauthnPayload = Buffer.concat([authenticatorData, clientDataHash])
 
 	// Compute webauthnPayloadHash
-	const webauthnPayloadHash = createHash('sha256')
-		.update(webauthnPayload)
-		.digest()
+	const webauthnPayloadHash = createHash('sha256').update(webauthnPayload).digest()
 
 	// Extract challenge and challengeBytes if present
 	let challenge: string | undefined
@@ -120,13 +115,10 @@ export function deriveSignaturePayload({
 
 	const addressCredentials = authEntry.credentials().address()
 	const nonce = addressCredentials.nonce()
-	const signatureExpirationLedger =
-		addressCredentials.signatureExpirationLedger()
+	const signatureExpirationLedger = addressCredentials.signatureExpirationLedger()
 	const rootInvocation = authEntry.rootInvocation()
 
-	const networkIdHash = createHash('sha256')
-		.update(networkPassphrase, 'utf8')
-		.digest()
+	const networkIdHash = createHash('sha256').update(networkPassphrase, 'utf8').digest()
 
 	const sorobanAuthPreimage = new xdr.HashIdPreimageSorobanAuthorization({
 		networkId: networkIdHash,
@@ -135,8 +127,7 @@ export function deriveSignaturePayload({
 		invocation: rootInvocation,
 	})
 
-	const preimage =
-		xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(sorobanAuthPreimage)
+	const preimage = xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(sorobanAuthPreimage)
 	const payloadHex = createHash('sha256').update(preimage.toXDR()).digest('hex')
 
 	return {

@@ -1,4 +1,4 @@
-# KindFi Code of Conduct
+# KindFi Code of  Conduct
 
 ## Our Pledge
 

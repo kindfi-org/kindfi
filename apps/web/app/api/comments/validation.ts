@@ -7,11 +7,7 @@ export const COMMENT_TYPES = ['comment', 'question', 'answer'] as const
 // Schema for validating comment creation requests
 export const createCommentSchema = z
 	.object({
-		content: z
-			.string()
-			.trim()
-			.min(1, 'Content is required')
-			.max(5000, 'Content too long'),
+		content: z.string().trim().min(1, 'Content is required').max(5000, 'Content too long'),
 		parent_comment_id: z.string().uuid('Invalid parent comment ID').optional(),
 		project_id: z.string().uuid('Invalid project ID').optional(),
 		project_update_id: z.string().uuid('Invalid project update ID').optional(),

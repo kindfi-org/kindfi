@@ -11,11 +11,7 @@ export const Section = ({
 }: SectionProps) => {
 	return (
 		<section className={`w-full py-12 md:py-16 lg:py-20 ${className}`}>
-			<div
-				className={containerType === 'full' ? 'w-full' : 'container mx-auto'}
-			>
-				{children}
-			</div>
+			<div className={containerType === 'full' ? 'w-full' : 'container mx-auto'}>{children}</div>
 		</section>
 	)
 }

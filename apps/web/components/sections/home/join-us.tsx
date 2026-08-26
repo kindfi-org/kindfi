@@ -43,10 +43,7 @@ export function JoinUs() {
 					<SectionCaption
 						title={t('home.joinUsTitle')}
 						subtitle={t('home.joinUsSubtitle')}
-						highlightWords={[
-							'Support Change. Earn Trust. Build Impact',
-							'KindFi',
-						]}
+						highlightWords={['Support Change. Earn Trust. Build Impact', 'KindFi']}
 					/>
 				</motion.div>
 
@@ -72,9 +69,7 @@ export function JoinUs() {
 								>
 									{feature.title}
 								</h3>
-								<p className="mt-4 text-gray-600 leading-relaxed">
-									{feature.description}
-								</p>
+								<p className="mt-4 text-gray-600 leading-relaxed">{feature.description}</p>
 							</article>
 						</motion.div>
 					))}

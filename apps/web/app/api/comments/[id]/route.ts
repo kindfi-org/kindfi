@@ -1,16 +1,13 @@
 import { supabase } from '@packages/lib/supabase'
 import type { TablesUpdate } from '@services/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
-import { updateCommentSchema } from '../validation'
 import { validateRequest } from '~/lib/utils/validation'
+import { updateCommentSchema } from '../validation'
 
 // PATCH /api/comments/[id]
 // Updates an existing comment
 
-export async function PATCH(
-	req: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params
 	if (!id) {
 		return NextResponse.json({ error: 'Missing id' }, { status: 400 })
@@ -49,8 +46,7 @@ export async function PATCH(
 	if (existing.author_id !== user.id) {
 		return NextResponse.json(
 			{
-				error:
-					'Forbidden: You are not able to update comments that are not yours',
+				error: 'Forbidden: You are not able to update comments that are not yours',
 			},
 			{ status: 403 },
 		)
@@ -63,10 +59,7 @@ export async function PATCH(
 	}
 	if (typeof bodyData.is_resolved === 'boolean') {
 		if (existing.type !== 'question') {
-			return NextResponse.json(
-				{ error: 'Only questions can be marked resolved' },
-				{ status: 400 },
-			)
+			return NextResponse.json({ error: 'Only questions can be marked resolved' }, { status: 400 })
 		}
 		const currentMetadata = (existing.metadata as Record<string, unknown>) || {}
 		updates.metadata = {
@@ -76,10 +69,7 @@ export async function PATCH(
 	}
 
 	if (Object.keys(updates).length === 0) {
-		return NextResponse.json(
-			{ error: 'No valid fields to update' },
-			{ status: 400 },
-		)
+		return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
 	}
 
 	const { data, error } = await supabase

@@ -1,10 +1,10 @@
 'use client'
 
-import { useSupabaseQuery } from '@packages/lib/hooks'
 import { motion, useReducedMotion } from 'framer-motion'
 import { notFound } from 'next/navigation'
 import { IoCreateOutline } from 'react-icons/io5'
-import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
+import { useManagedProjectQuery } from '~/hooks/projects/use-managed-project-query'
+import type { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { UpdateProjectFormSkeleton } from './skeletons'
 import { UpdateProjectForm } from './update-project-form'
 
@@ -12,27 +12,27 @@ interface UpdateProjectWrapperProps {
 	projectSlug: string
 }
 
-export function UpdateProjectWrapper({
-	projectSlug,
-}: UpdateProjectWrapperProps) {
+export function UpdateProjectWrapper({ projectSlug }: UpdateProjectWrapperProps) {
 	const prefersReducedMotion = useReducedMotion()
 	const {
 		data: project,
 		isLoading,
 		error,
-	} = useSupabaseQuery(
+	} = useManagedProjectQuery<Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>>(
 		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, projectSlug),
+		projectSlug,
+		'basic-info',
 		{ additionalKeyValues: [projectSlug] },
 	)
+
+	if (isLoading) {
+		return <UpdateProjectFormSkeleton />
+	}
 
 	if (error || !project) notFound()
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 relative">
-			{/* Subtle background pattern */}
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,1,36,0.03)_1px,transparent_0)] bg-[size:32px_32px] opacity-40" />
-
+		<div className="relative">
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -47,19 +47,17 @@ export function UpdateProjectWrapper({
 						delay: prefersReducedMotion ? 0 : 0.1,
 						duration: prefersReducedMotion ? 0 : 0.3,
 					}}
-					className="flex flex-col items-center justify-center mb-8"
+					className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8"
 				>
 					<div className="flex items-center gap-3">
 						<div className="rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 p-3 text-white shadow-sm">
 							<IoCreateOutline size={24} className="relative z-10" />
 						</div>
 						<div>
-							<h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-text">
-								Edit Project Basics
-							</h1>
-							<p className="text-lg md:text-xl text-muted-foreground mt-2 text-center">
-								Update your project&apos;s core information and social media
-								presence
+							<h1 className="text-2xl font-bold tracking-tight md:text-3xl">Edit project basics</h1>
+							<p className="mt-1 text-muted-foreground">
+								Update core information and social links for{' '}
+								<span className="font-medium text-foreground">{project.title}</span>
 							</p>
 						</div>
 					</div>
@@ -74,11 +72,7 @@ export function UpdateProjectWrapper({
 						duration: prefersReducedMotion ? 0 : 0.3,
 					}}
 				>
-					{isLoading ? (
-						<UpdateProjectFormSkeleton />
-					) : (
-						<UpdateProjectForm project={project} />
-					)}
+					<UpdateProjectForm project={project} />
 				</motion.div>
 			</motion.div>
 		</div>

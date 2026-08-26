@@ -1,5 +1,9 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { v4 as uuidv4 } from 'uuid'
+import type {
+	ProjectPitchTranslationContent,
+	ProjectTranslationContent,
+} from '~/lib/services/content-translation/types'
 import { countries } from '../constants/projects/countries.constant'
 import type {
 	BasicProjectInfo,
@@ -136,8 +140,7 @@ export function getSocialTypeFromUrl(url: string): string | null {
 	try {
 		const domain = new URL(url).hostname.toLowerCase()
 
-		if (domain.includes('x.com') || domain.includes('twitter.com'))
-			return 'twitter'
+		if (domain.includes('x.com') || domain.includes('twitter.com')) return 'twitter'
 		if (domain.includes('facebook.com')) return 'facebook'
 		if (domain.includes('instagram.com')) return 'instagram'
 		if (domain.includes('linkedin.com')) return 'linkedin'
@@ -155,6 +158,41 @@ export function getSocialTypeFromUrl(url: string): string | null {
 }
 
 /**
+ * Strips empty translation fields so PATCH requests do not fail validation
+ * when the form still has placeholder `{ title: '', description: '' }`.
+ */
+export function sanitizeProjectTranslationForApi(
+	translation?: ProjectTranslationContent,
+): ProjectTranslationContent | undefined {
+	if (!translation) return undefined
+
+	const title = translation.title?.trim()
+	const description = translation.description?.trim()
+	const result: ProjectTranslationContent = {}
+
+	if (title && title.length >= 3) result.title = title
+	if (description && description.length >= 10) result.description = description
+
+	return Object.keys(result).length > 0 ? result : undefined
+}
+
+export function sanitizePitchTranslationForApi(
+	translation?: ProjectPitchTranslationContent,
+): ProjectPitchTranslationContent | undefined {
+	if (!translation) return undefined
+
+	const title = translation.title?.trim()
+	const story = translation.story?.trim()
+	const plainStory = story?.replace(/<[^>]*>/g, '').trim() ?? ''
+	const result: ProjectPitchTranslationContent = {}
+
+	if (title && title.length >= 1) result.title = title
+	if (plainStory.length >= 50 && story) result.story = story
+
+	return Object.keys(result).length > 0 ? result : undefined
+}
+
+/**
  * Normalizes a backend project object into a format that matches
  * the CreateProjectFormData interface used in frontend forms.
  *
@@ -164,9 +202,7 @@ export function getSocialTypeFromUrl(url: string): string | null {
  * @param project - A raw project object from the database
  * @returns A structured object suitable for pre-filling a project form
  */
-export function normalizeProjectToFormDefaults(
-	project: BasicProjectInfo,
-): CreateProjectFormData {
+export function normalizeProjectToFormDefaults(project: BasicProjectInfo): CreateProjectFormData {
 	return {
 		title: project.title ?? '',
 		description: project.description ?? '',
@@ -180,6 +216,11 @@ export function normalizeProjectToFormDefaults(
 		location: project.location ?? '',
 		category: project.category?.id ?? '',
 		tags: project.tags ?? [],
+		sourceLocale: project.sourceLocale ?? 'en',
+		translation: {
+			title: project.translation?.title ?? '',
+			description: project.translation?.description ?? '',
+		},
 	}
 }
 
@@ -207,13 +248,21 @@ export function parseFormData(formData: FormData) {
 		description: formData.get('description') as string,
 		targetAmount: Number(formData.get('targetAmount')),
 		minimumInvestment: Number(formData.get('minimumInvestment')),
-		website: formData.get('website') as string,
+		website: (formData.get('website') as string | null) ?? '',
 		location: formData.get('location') as string,
 		category: formData.get('category') as string,
 		tags: safeJsonParse(formData.get('tags') as string, [] as { name: string; color: string }[]),
 		socialLinks: safeJsonParse(formData.get('socialLinks') as string, [] as string[]),
 		image: formData.get('image') as File | null,
 		foundationId: (formData.get('foundationId') as string) || undefined,
+		developmentOnly: formData.get('developmentOnly') === 'true',
+		sourceLocale: (formData.get('sourceLocale') as string) || 'en',
+		translation: sanitizeProjectTranslationForApi(
+			safeJsonParse(
+				formData.get('translation') as string,
+				undefined as ProjectTranslationContent | undefined,
+			),
+		),
 	}
 }
 
@@ -225,10 +274,7 @@ export function parseFormData(formData: FormData) {
  * @param socialLinks - Array of social media URLs
  * @returns A record of platform keys mapped to their respective URLs
  */
-export function buildSocialLinks(
-	website?: string,
-	socialLinks?: string[],
-): Record<string, string> {
+export function buildSocialLinks(website?: string, socialLinks?: string[]): Record<string, string> {
 	const links = Object.fromEntries(
 		(socialLinks || [])
 			.map((url: string) => {
@@ -319,9 +365,7 @@ export async function upsertTags(
 	supabase: TypedSupabaseClient,
 ): Promise<void> {
 	const tagNames = tags.map((t) => t.name.toLowerCase().trim())
-	const tagColors = Object.fromEntries(
-		tags.map((t) => [t.name.toLowerCase(), t.color]),
-	)
+	const tagColors = Object.fromEntries(tags.map((t) => [t.name.toLowerCase(), t.color]))
 
 	const { data: insertedTags, error: tagError } = await supabase
 		.from('project_tags')
@@ -336,14 +380,12 @@ export async function upsertTags(
 
 	if (tagError) throw new Error(tagError.message)
 
-	const { error: relError } = await supabase
-		.from('project_tag_relationships')
-		.insert(
-			insertedTags.map((tag) => ({
-				project_id: projectId,
-				tag_id: tag.id,
-			})),
-		)
+	const { error: relError } = await supabase.from('project_tag_relationships').insert(
+		insertedTags.map((tag) => ({
+			project_id: projectId,
+			tag_id: tag.id,
+		})),
+	)
 
 	if (relError) throw new Error(relError.message)
 }
@@ -374,43 +416,11 @@ export async function uploadPitchDeck(
 	})
 }
 
-/**
- * Converts a YouTube or Vimeo URL into an embeddable format.
- * Supports typical watch/share links and transforms them to iframe-compatible embed URLs.
- *
- * Examples:
- * - https://www.youtube.com/watch?v=abc123 → https://www.youtube.com/embed/abc123
- * - https://vimeo.com/123456 → https://player.vimeo.com/video/123456
- *
- * @param url - The original video URL provided by the user
- * @returns The embed-compatible URL if matched, or the original URL if no transformation applies
- */
-export function transformToEmbedUrl(url: string): string {
-	try {
-		const parsedUrl = new URL(url)
-		const hostname = parsedUrl.hostname
-		const pathname = parsedUrl.pathname
-
-		if (hostname.includes('youtube.com')) {
-			const videoId = parsedUrl.searchParams.get('v')
-			if (videoId) return `https://www.youtube.com/embed/${videoId}`
-		}
-
-		if (hostname === 'youtu.be') {
-			const videoId = pathname.split('/')[1]
-			if (videoId) return `https://www.youtube.com/embed/${videoId}`
-		}
-
-		if (hostname.includes('vimeo.com')) {
-			const videoId = pathname.split('/')[1]
-			if (videoId) return `https://player.vimeo.com/video/${videoId}`
-		}
-
-		return url // fallback (leave unchanged)
-	} catch {
-		return url // invalid URL, return as is
-	}
-}
+export {
+	getVideoProvider,
+	isSupportedVideoUrl,
+	transformToEmbedUrl,
+} from '~/lib/utils/video-embed'
 
 /**
  * Convenience helper to delete all files from a bucket/folder with Supabase.

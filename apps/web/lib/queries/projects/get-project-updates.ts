@@ -1,9 +1,6 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 
-export async function getProjectUpdates(
-	client: TypedSupabaseClient,
-	projectId: string,
-) {
+export async function getProjectUpdates(client: TypedSupabaseClient, projectId: string) {
 	// Fetch all updates for the given project
 	const { data: updates, error: updatesError } = await client
 		.from('project_updates')
@@ -24,10 +21,7 @@ export async function getProjectUpdates(
 
 	// Fetch profiles for all authors (both updates and comments)
 	const authorIds = Array.from(
-		new Set([
-			...updates.map((u) => u.author_id),
-			...comments.map((c) => c.author_id),
-		]),
+		new Set([...updates.map((u) => u.author_id), ...comments.map((c) => c.author_id)]),
 	)
 
 	const { data: profiles, error: profilesError } = await client

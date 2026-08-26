@@ -31,25 +31,19 @@ export function FundsReleasedEmail({
 	return (
 		<Html lang="en">
 			<Head />
-			<Preview>
-				Funds released for {projectTitle} — payment confirmed
-			</Preview>
+			<Preview>Funds released for {projectTitle} — payment confirmed</Preview>
 			<Tailwind>
 				<Body className="bg-gray-50 text-gray-900">
 					<Container className="mx-auto my-8 w-full max-w-[560px]">
 						<Section className="bg-white rounded-2xl p-8 shadow">
-							<Text className="text-2xl font-semibold mb-1">
-								💰 Funds released
-							</Text>
+							<Text className="text-2xl font-semibold mb-1">💰 Funds released</Text>
 							<Text className="text-sm text-gray-500 mb-4">KindFi</Text>
 
-							<Text className="text-base leading-6 mb-3">
-								Hi {recipientName},
-							</Text>
+							<Text className="text-base leading-6 mb-3">Hi {recipientName},</Text>
 
 							<Text className="text-base leading-6 mb-3">
-								Your escrow funds for <strong>{projectTitle}</strong> have been
-								successfully released and confirmed on-chain.
+								Your escrow funds for <strong>{projectTitle}</strong> have been successfully
+								released and confirmed on-chain.
 								{amount ? (
 									<>
 										{' '}
@@ -61,8 +55,7 @@ export function FundsReleasedEmail({
 							</Text>
 
 							<Text className="text-base leading-6 mb-4">
-								You can view the transaction details and manage your project from
-								your dashboard.
+								You can view the transaction details and manage your project from your dashboard.
 							</Text>
 
 							<Button

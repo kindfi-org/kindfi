@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { devicesSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -16,22 +17,15 @@ export async function POST(req: NextRequest) {
 		if (!validation.success) return validation.response
 		const { address, operation, signature } = validation.data
 
-		// TODO: Import and initialize StellarPasskeyService from web app
-		// For now, this is a placeholder that should call the kyc-server API
-		// or implement the StellarPasskeyService in the web app
-
 		// Call kyc-server API (recommended for now)
 		const kycServerUrl = process.env.KYC_SERVER_URL || 'http://localhost:3001'
-		const response = await fetch(
-			`${kycServerUrl}/api/stellar/execute-transaction`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ address, operation, signature }),
+		const response = await fetch(`${kycServerUrl}/api/stellar/execute-transaction`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
 			},
-		)
+			body: JSON.stringify({ address, operation, signature }),
+		})
 
 		if (!response.ok) {
 			const errorData = await response.json()
@@ -50,26 +44,8 @@ export async function POST(req: NextRequest) {
 			success: true,
 			transactionHash: data.transactionHash,
 		})
-
-		// TODO: Implement StellarPasskeyService in web app (future)
-		// const stellarService = new StellarPasskeyService(
-		//   process.env.STELLAR_NETWORK_PASSPHRASE,
-		//   process.env.STELLAR_RPC_URL,
-		//   process.env.STELLAR_FUNDING_SECRET_KEY,
-		// )
-		//
-		// const transactionHash = await stellarService.executePasskeyTransaction(
-		//   address,
-		//   operation,
-		//   signature,
-		// )
-		//
-		// return NextResponse.json({
-		//   success: true,
-		//   transactionHash,
-		// })
 	} catch (error) {
-		console.error('Error executing device operation:', error)
+		logger.error('Error executing device operation:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to execute device operation',

@@ -43,25 +43,33 @@ type TeamMemberResponse = {
 export function useTeamMutation() {
 	const queryClient = useQueryClient()
 
-	const createMember = useMutation<
-		TeamMemberResponse,
-		Error,
-		CreateTeamMemberRequest
-	>({
+	const createMember = useMutation<TeamMemberResponse, Error, CreateTeamMemberRequest>({
 		mutationFn: async (data) => {
+			const body =
+				data.type === 'manual'
+					? {
+							type: 'manual' as const,
+							projectId: data.projectId,
+							fullName: data.fullName,
+							roleTitle: data.roleTitle,
+							bio: data.bio,
+							photoUrl: data.photoUrl,
+							yearsInvolved: data.yearsInvolved,
+						}
+					: {
+							type: 'registered' as const,
+							projectId: data.projectId,
+							userId: data.userId,
+							roleTitle: data.roleTitle,
+							bio: data.bio,
+						}
+
 			const res = await fetch(`/api/projects/${data.projectSlug}/team`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({
-					projectId: data.projectId,
-					fullName: data.fullName,
-					roleTitle: data.roleTitle,
-					bio: data.bio,
-					photoUrl: data.photoUrl,
-					yearsInvolved: data.yearsInvolved,
-				}),
+				body: JSON.stringify(body),
 			})
 
 			if (!res.ok) {
@@ -99,11 +107,7 @@ export function useTeamMutation() {
 		},
 	})
 
-	const updateMember = useMutation<
-		TeamMemberResponse,
-		Error,
-		UpdateTeamMemberRequest
-	>({
+	const updateMember = useMutation<TeamMemberResponse, Error, UpdateTeamMemberRequest>({
 		mutationFn: async (data) => {
 			const res = await fetch(`/api/projects/${data.projectSlug}/team`, {
 				method: 'PATCH',
@@ -157,11 +161,7 @@ export function useTeamMutation() {
 		},
 	})
 
-	const deleteMember = useMutation<
-		{ message: string },
-		Error,
-		DeleteTeamMemberRequest
-	>({
+	const deleteMember = useMutation<{ message: string }, Error, DeleteTeamMemberRequest>({
 		mutationFn: async (data) => {
 			const res = await fetch(
 				`/api/projects/${data.projectSlug}/team?projectId=${data.projectId}&memberId=${data.memberId}`,

@@ -1,12 +1,16 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { logger } from '@/lib/logger'
+import { createSmartAccountTransactionBuilder } from '@/lib/smart-account/adapters/transaction-builder.adapter'
+import { requireSmartAccountFeature } from '@/lib/smart-account/guards/require-smart-account-feature'
+import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
+import { getKycEnforcementMode } from '~/lib/kyc/enforcement-config'
 import { transferPrepareSchema } from '~/lib/schemas/stellar.schemas'
+import type { TransactionChallenge } from '~/lib/smart-account/transactions/smart-wallet-transactions'
 import { validateRequest } from '~/lib/utils/validation'
-import {
-	SmartWalletTransactionService,
-	type TransactionChallenge,
-} from '~/lib/stellar/smart-wallet-transactions'
 
 /**
  * POST /api/stellar/transfer/prepare
@@ -15,6 +19,9 @@ import {
  */
 export async function POST(req: NextRequest) {
 	try {
+		const featureGuard = requireSmartAccountFeature()
+		if (featureGuard) return featureGuard
+
 		const body = await req.json()
 		const validation = validateRequest(transferPrepareSchema, body)
 		if (!validation.success) {
@@ -22,11 +29,23 @@ export async function POST(req: NextRequest) {
 		}
 		const { from, to, amount, asset, sponsorFees } = validation.data
 
+		const session = await getServerSession(nextAuthOption)
+		if (session?.user?.id) {
+			const kycDecision = await requireKycAuthorization({
+				userId: session.user.id,
+				action: 'send_assets',
+				amount: Number(amount),
+				asset: asset || 'native',
+			})
+			if (!kycDecision.ok) return kycDecision.response
+		} else if (getKycEnforcementMode() === 'enforced') {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
 		// Get configuration
 		const config = appEnvConfig('web')
 
-		// Initialize service with proper config
-		const txService = new SmartWalletTransactionService(
+		const txService = createSmartAccountTransactionBuilder(
 			config.stellar.networkPassphrase,
 			config.stellar.rpcUrl,
 			config.stellar.fundingAccount,
@@ -62,7 +81,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('Error preparing transfer:', error)
+		logger.error('Error preparing transfer:', error)
 		return NextResponse.json(
 			{
 				error: 'Failed to prepare transfer',

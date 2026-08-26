@@ -61,12 +61,7 @@ export interface EscrowMediator {
 export type ReviewType = 'dispute' | 'milestone'
 
 // Export review status enum
-export type ReviewStatus =
-	| 'PENDING'
-	| 'MEDIATION'
-	| 'APPROVED'
-	| 'REJECTED'
-	| 'RESOLVED'
+export type ReviewStatus = 'PENDING' | 'MEDIATION' | 'APPROVED' | 'REJECTED' | 'RESOLVED'
 
 // Define payload types for the API
 export interface DisputePayload {

@@ -18,15 +18,22 @@ pub enum Error {
 
 const STORAGE_KEY_WASM_HASH: Symbol = symbol_short!("hash");
 const AUTH_CONTRACT: Symbol = symbol_short!("auth");
+const NATIVE_TOKEN: Symbol = symbol_short!("native");
 
 #[contractimpl]
 impl AccountFactory {
-    pub fn __constructor(env: Env, auth_contract: Address, wasm_hash: BytesN<32>) {
+    pub fn __constructor(
+        env: Env,
+        auth_contract: Address,
+        wasm_hash: BytesN<32>,
+        native_token: Address,
+    ) {
         env.storage()
             .instance()
             .set(&STORAGE_KEY_WASM_HASH, &wasm_hash);
 
         env.storage().instance().set(&AUTH_CONTRACT, &auth_contract);
+        env.storage().instance().set(&NATIVE_TOKEN, &native_token);
     }
 
     pub fn deploy(
@@ -53,9 +60,21 @@ impl AccountFactory {
             .get::<Symbol, BytesN<32>>(&STORAGE_KEY_WASM_HASH)
             .ok_or(Error::StorageKeyError)?;
 
+        let native_token = env
+            .storage()
+            .instance()
+            .get::<Symbol, Address>(&NATIVE_TOKEN)
+            .ok_or(Error::StorageKeyError)?;
+
         let address = env.deployer().with_current_contract(salt).deploy_v2(
             wasm_hash,
-            vec![&env, id.to_val(), pk.to_val(), auth_contract.to_val()],
+            vec![
+                &env,
+                id.to_val(),
+                pk.to_val(),
+                auth_contract.to_val(),
+                native_token.to_val(),
+            ],
         );
 
         env.events().publish(

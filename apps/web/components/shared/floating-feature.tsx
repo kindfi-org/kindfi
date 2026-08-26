@@ -1,5 +1,6 @@
 'use client'
 
+import type { Variants } from 'framer-motion'
 import { motion } from 'framer-motion'
 import { useMemo } from 'react'
 import { Icon } from '~/components/base/icon'
@@ -60,13 +61,13 @@ const FloatingFeature = ({
 	}, [variant])
 
 	// Animation variants
-	const featureVariants = {
+	const featureVariants: Variants = {
 		hidden: { opacity: 0, y: 30 },
 		visible: {
 			opacity: 1,
 			y: 0,
 			transition: {
-				type: 'spring',
+				type: 'spring' as const,
 				damping: 15,
 				stiffness: 300,
 			},

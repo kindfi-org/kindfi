@@ -6,7 +6,6 @@ export type TPercentage = number & { readonly __brand: 'percentage' }
 /** Custom type for non-empty string values */
 export type NonEmptyString = string & { readonly __brand: 'non-empty-string' }
 
-// TODO: Add more Tailwind color combinations as needed. Better use a className instead of a TW string for better readability...
 /** Allowed Tailwind color combinations for category styling */
 export type TailwindColor =
 	| 'bg-teal-50/80 text-teal-700 hover:bg-teal-100/80 border-teal-200/50' // project-category__teal

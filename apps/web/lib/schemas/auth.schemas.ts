@@ -9,13 +9,6 @@ export const authCallbackQuerySchema = z.object({
 /** Query params for email OTP verification (auth/confirm) */
 export const authConfirmQuerySchema = z.object({
 	token_hash: z.string().min(1, 'Token hash is required'),
-	type: z.enum([
-		'signup',
-		'recovery',
-		'invite',
-		'magiclink',
-		'email_change',
-		'email',
-	]),
+	type: z.enum(['signup', 'recovery', 'invite', 'magiclink', 'email_change', 'email']),
 	next: z.string().default('/'),
 })

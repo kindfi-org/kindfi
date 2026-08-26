@@ -2,7 +2,8 @@
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { Loader2, Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
@@ -34,7 +35,7 @@ export function ProjectUpdatesTabSection() {
 	const isKindler = true // Placeholder - replace with actual auth logic
 
 	// Fetch project updates
-	const fetchUpdates = async () => {
+	const fetchUpdates = useCallback(async () => {
 		try {
 			setIsLoading(true)
 			const supabase = createSupabaseBrowserClient()
@@ -48,22 +49,18 @@ export function ProjectUpdatesTabSection() {
 				.range((page - 1) * pageSize, page * pageSize - 1)
 
 			if (error) {
-				console.error('Error fetching updates:', error)
+				logger.error('Error fetching updates:', error)
 				throw error
 			}
 
-			setUpdates((prevUpdates) =>
-				page === 1 ? data : [...prevUpdates, ...data],
-			)
+			setUpdates((prevUpdates) => (page === 1 ? data : [...prevUpdates, ...data]))
 		} catch (err) {
-			console.error('Failed to fetch updates:', err)
-			setError(
-				err instanceof Error ? err : new Error('Failed to fetch updates'),
-			)
+			logger.error('Failed to fetch updates:', err)
+			setError(err instanceof Error ? err : new Error('Failed to fetch updates'))
 		} finally {
 			setIsLoading(false)
 		}
-	}
+	}, [page])
 
 	// Create a new update
 	const handleCreateUpdate = async (data: { content: string }) => {
@@ -81,13 +78,10 @@ export function ProjectUpdatesTabSection() {
 				author_id: authorId,
 			}
 
-			const { error } = await supabase
-				.from('project_updates')
-				.insert([updateData])
-				.select()
+			const { error } = await supabase.from('project_updates').insert([updateData]).select()
 
 			if (error) {
-				console.error('Error creating update:', error)
+				logger.error('Error creating update:', error)
 				throw new Error(`Insert error: ${error.message}`)
 			}
 
@@ -96,10 +90,8 @@ export function ProjectUpdatesTabSection() {
 			await fetchUpdates()
 			setIsCreatingUpdate(false)
 		} catch (err) {
-			console.error('Error creating update:', err)
-			alert(
-				`Failed to create update: ${err instanceof Error ? err.message : 'Unknown error'}`,
-			)
+			logger.error('Error creating update:', err)
+			alert(`Failed to create update: ${err instanceof Error ? err.message : 'Unknown error'}`)
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -111,20 +103,17 @@ export function ProjectUpdatesTabSection() {
 			setIsSubmitting(true)
 			const supabase = createSupabaseBrowserClient()
 
-			const { error } = await supabase
-				.from('project_updates')
-				.update(data)
-				.eq('id', id)
+			const { error } = await supabase.from('project_updates').update(data).eq('id', id)
 
 			if (error) {
-				console.error('Error updating update:', error)
+				logger.error('Error updating update:', error)
 				throw error
 			}
 
 			// Refetch updates after editing
 			await fetchUpdates()
 		} catch (err) {
-			console.error('Error updating update:', err)
+			logger.error('Error updating update:', err)
 			alert('Failed to update. Please try again.')
 		} finally {
 			setIsSubmitting(false)
@@ -136,13 +125,10 @@ export function ProjectUpdatesTabSection() {
 		try {
 			const supabase = createSupabaseBrowserClient()
 
-			const { error } = await supabase
-				.from('project_updates')
-				.delete()
-				.eq('id', id)
+			const { error } = await supabase.from('project_updates').delete().eq('id', id)
 
 			if (error) {
-				console.error('Error deleting update:', error)
+				logger.error('Error deleting update:', error)
 				throw error
 			}
 
@@ -150,7 +136,7 @@ export function ProjectUpdatesTabSection() {
 			await fetchUpdates()
 			return Promise.resolve()
 		} catch (err) {
-			console.error('Error deleting update:', err)
+			logger.error('Error deleting update:', err)
 			alert('Failed to delete update. Please try again.')
 			return Promise.reject(err)
 		}
@@ -166,11 +152,9 @@ export function ProjectUpdatesTabSection() {
 		if (!isCreatingUpdate) {
 			fetchUpdates()
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates is stable; adding it causes unnecessary refetches
-	}, [page, projectId, isCreatingUpdate])
+	}, [isCreatingUpdate, fetchUpdates])
 
 	// Setup real-time subscription
-	// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
 	useEffect(() => {
 		if (isCreatingUpdate) return
 
@@ -197,8 +181,7 @@ export function ProjectUpdatesTabSection() {
 		return () => {
 			supabase.removeChannel(channel)
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUpdates intentionally omitted to avoid resubscribing on every fetch
-	}, [projectId, isCreatingUpdate])
+	}, [isCreatingUpdate, fetchUpdates])
 
 	return (
 		<section
@@ -218,10 +201,7 @@ export function ProjectUpdatesTabSection() {
 							Project Updates
 						</h1>
 						{isKindler && (
-							<Button
-								onClick={() => setIsCreatingUpdate(true)}
-								className="flex items-center gap-2"
-							>
+							<Button onClick={() => setIsCreatingUpdate(true)} className="flex items-center gap-2">
 								<Plus size={16} />
 								Add Update
 							</Button>
@@ -240,9 +220,7 @@ export function ProjectUpdatesTabSection() {
 							</Button>
 						</div>
 					) : updates.length === 0 ? (
-						<div className="text-center py-10 text-gray-500">
-							No updates available yet.
-						</div>
+						<div className="text-center py-10 text-gray-500">No updates available yet.</div>
 					) : (
 						<>
 							<UpdateCard
@@ -252,9 +230,7 @@ export function ProjectUpdatesTabSection() {
 								onEdit={handleEditUpdate}
 								onDelete={handleDeleteUpdate}
 							/>
-							{updates.length >= pageSize && (
-								<LoadMoreButton onLoadMore={handleLoadMore} />
-							)}
+							{updates.length >= pageSize && <LoadMoreButton onLoadMore={handleLoadMore} />}
 						</>
 					)}
 				</>

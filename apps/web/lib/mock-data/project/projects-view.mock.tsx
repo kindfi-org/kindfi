@@ -104,8 +104,7 @@ export const mockProjectsView: Project[] = [
 	{
 		id: '5',
 		title: 'Disaster Aid Response',
-		description:
-			'Provide immediate aid and support to communities affected by natural disasters.',
+		description: 'Provide immediate aid and support to communities affected by natural disasters.',
 		image_url: '/images/disaster-aid.webp',
 		categories: ['community', 'healthcare'],
 		current_amount: 28500,
@@ -129,8 +128,7 @@ export const mockProjectsView: Project[] = [
 	{
 		id: '6',
 		title: 'Artisan Community Support',
-		description:
-			'Help local artisans preserve traditional crafts and expand their market reach.',
+		description: 'Help local artisans preserve traditional crafts and expand their market reach.',
 		image_url: '/images/artesania.webp',
 		categories: ['community', 'education'],
 		current_amount: 15200,

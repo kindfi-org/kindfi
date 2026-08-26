@@ -1,12 +1,75 @@
 import type { TypedSupabaseClient } from '@packages/lib/types'
 import { sortMap } from '~/lib/constants/projects'
+import {
+	getProjectEscrowRowId,
+	resolveProjectEscrowContracts,
+} from '~/lib/queries/projects/resolve-project-escrow-contracts'
+import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
+import {
+	fetchContentTranslations,
+	type LocalizeOptions,
+	resolveLocalizedFields,
+} from '~/lib/services/content-translation'
+import type { Project } from '~/lib/types/project'
+import { calculateReleasedAmount } from '~/lib/utils/projects/milestone-funding'
+
+export type ProjectListItem = Project & {
+	status?: string
+	developmentOnly: boolean
+}
+
+export type GetAllProjectsOptions = LocalizeOptions & {
+	viewerLocale?: SupportedLocale
+}
+
+/**
+ * Result shape returned when using cursor-based pagination (`offset` provided).
+ * `total` is the full catalog count for the current filters so the client can
+ * display "X of Y" and determine whether more pages exist.
+ */
+export type PaginatedProjectsResult = {
+	items: ProjectListItem[]
+	total: number
+	nextOffset: number | null
+}
+
+/**
+ * Fetch a page of projects from Supabase.
+ *
+ * Pagination behaviour:
+ * - When `offset` is provided the function uses PostgREST `.range()` and
+ *   returns `PaginatedProjectsResult` (items + total + nextOffset).
+ * - When only `limit` is provided (legacy path) or neither is provided, the
+ *   function returns the flat `ProjectListItem[]` array for backward-compat.
+ */
+export async function getAllProjects(
+	client: TypedSupabaseClient,
+	categorySlugs?: string[],
+	sortSlug?: string,
+	limit?: number,
+	options?: GetAllProjectsOptions,
+): Promise<ProjectListItem[]>
+
+export async function getAllProjects(
+	client: TypedSupabaseClient,
+	categorySlugs: string[],
+	sortSlug: string,
+	limit: number,
+	options: GetAllProjectsOptions | undefined,
+	offset: number,
+): Promise<PaginatedProjectsResult>
 
 export async function getAllProjects(
 	client: TypedSupabaseClient,
 	categorySlugs: string[] = [],
 	sortSlug = 'most-popular',
 	limit?: number,
-) {
+	options?: GetAllProjectsOptions,
+	offset?: number,
+): Promise<ProjectListItem[] | PaginatedProjectsResult> {
+	const isPaginated = typeof offset === 'number'
+	const pageSize = limit ?? 12
+
 	const { column, ascending } = sortMap[sortSlug] ?? sortMap['most-popular']
 
 	let query = client
@@ -25,14 +88,21 @@ export async function getAllProjects(
       percentage_complete,
       kinder_count,
       status,
+      development_only,
+      source_locale,
       category:category_id ( * ),
       project_tag_relationships (
         tag:tag_id ( id, name, color )
+      ),
+      milestones (
+        amount,
+        status
       ),
       project_escrows:project_escrows!left (
         escrow_id
       )
     `,
+			isPaginated ? { count: 'exact' } : {},
 		)
 		.order(column, { ascending })
 
@@ -50,32 +120,66 @@ export async function getAllProjects(
 		}
 	}
 
-	if (limit) {
+	if (isPaginated) {
+		// Cursor-based pagination: fetch exactly one page
+		query = query.range(offset, offset + pageSize - 1)
+	} else if (limit) {
+		// Legacy limit-only path (hero, search, etc.)
 		query = query.limit(limit)
 	}
 
-	const { data, error } = await query
+	const { data, error, count } = await query
 
 	if (error) throw error
 
-	return (
+	const projectIds = data?.map((project) => project.id) ?? []
+	const translations =
+		options?.localize !== false && projectIds.length > 0
+			? await fetchContentTranslations(client, 'project', projectIds, options?.viewerLocale ?? 'en')
+			: new Map()
+
+	const escrowRowIds =
+		data
+			?.map((project) =>
+				getProjectEscrowRowId(
+					(
+						project as unknown as {
+							project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+						}
+					).project_escrows,
+				),
+			)
+			.filter((id): id is string => Boolean(id)) ?? []
+
+	const escrowContracts = await resolveProjectEscrowContracts(client, escrowRowIds)
+
+	const items: ProjectListItem[] =
 		data?.map((project) => {
-			const escrowRel = (
-				project as unknown as {
-					project_escrows?:
-						| { escrow_id?: string }
-						| Array<{ escrow_id?: string }>
-				}
-			).project_escrows
-			const escrowId = Array.isArray(escrowRel)
-				? escrowRel[0]?.escrow_id
-				: escrowRel?.escrow_id
+			const sourceLocale = (project.source_locale as SupportedLocale | undefined) ?? 'en'
+			const localized = resolveLocalizedFields(
+				{
+					title: project.title,
+					description: project.description,
+				},
+				sourceLocale,
+				translations.get(project.id),
+				options,
+			)
+
+			const escrowRowId = getProjectEscrowRowId(
+				(
+					project as unknown as {
+						project_escrows?: { escrow_id?: string } | Array<{ escrow_id?: string }>
+					}
+				).project_escrows,
+			)
+			const escrow = escrowRowId ? escrowContracts.get(escrowRowId) : undefined
 
 			return {
 				id: project.id,
-				title: project.title,
+				title: localized.title ?? project.title,
 				slug: project.slug,
-				description: project.description,
+				description: localized.description ?? project.description,
 				image: project.image_url,
 				goal: project.target_amount,
 				raised: project.current_amount,
@@ -83,10 +187,26 @@ export async function getAllProjects(
 				minInvestment: project.min_investment,
 				createdAt: project.created_at,
 				status: (project as { status?: string }).status,
+				developmentOnly: Boolean((project as { development_only?: boolean }).development_only),
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
-				escrowContractAddress: escrowId,
-			}
+				escrowContractAddress: escrow?.escrowContractAddress,
+				escrowType: escrow?.escrowType,
+				releasedAmount: calculateReleasedAmount(
+					(
+						project as unknown as {
+							milestones?: Array<{ amount: number | string | null; status: string | null }>
+						}
+					).milestones,
+				),
+			} satisfies ProjectListItem
 		}) ?? []
-	)
+
+	if (isPaginated) {
+		const total = count ?? 0
+		const nextOffset = offset + items.length < total ? offset + pageSize : null
+		return { items, total, nextOffset }
+	}
+
+	return items
 }

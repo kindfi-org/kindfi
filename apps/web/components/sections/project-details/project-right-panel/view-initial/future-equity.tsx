@@ -6,10 +6,7 @@ type FutureEquityProps = {
 	investmentRange: string
 }
 
-export function FutureEquity({
-	valuationCap,
-	investmentRange,
-}: FutureEquityProps) {
+export function FutureEquity({ valuationCap, investmentRange }: FutureEquityProps) {
 	return (
 		<div className="space-y-1">
 			<Separator className="mb-3" />

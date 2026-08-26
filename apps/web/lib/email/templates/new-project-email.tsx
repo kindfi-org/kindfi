@@ -47,32 +47,27 @@ export function NewProjectEmail({
 							</Text>
 							<Text className="text-sm text-gray-500 mb-4">KindFi</Text>
 
-							<Text className="text-base leading-6 mb-3">
-								Hi {recipientName},
-							</Text>
+							<Text className="text-base leading-6 mb-3">Hi {recipientName},</Text>
 
 							{isCreator ? (
 								<>
 									<Text className="text-base leading-6 mb-3">
-										Your project <strong>{projectTitle}</strong> has been
-										successfully created on KindFi.
+										Your project <strong>{projectTitle}</strong> has been successfully created on
+										KindFi.
 									</Text>
 									<Text className="text-base leading-6 mb-4">
-										You have 7 days to complete your project setup. Add
-										milestones, team members, and more to start receiving
-										support.
+										You have 7 days to complete your project setup. Add milestones, team members,
+										and more to start receiving support.
 									</Text>
 								</>
 							) : (
 								<>
 									<Text className="text-base leading-6 mb-3">
 										{creatorName ? `${creatorName} has launched ` : ''}
-										<strong>{projectTitle}</strong> — a project that could use
-										your support.
+										<strong>{projectTitle}</strong> — a project that could use your support.
 									</Text>
 									<Text className="text-base leading-6 mb-4">
-										Be one of the first to discover and support this project on
-										KindFi.
+										Be one of the first to discover and support this project on KindFi.
 									</Text>
 								</>
 							)}

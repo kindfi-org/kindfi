@@ -72,9 +72,7 @@ const DialogOverlay = React.forwardRef<
 			ref={ref}
 			className={cn(
 				'fixed inset-0 z-50 backdrop-blur-[1px]',
-				reducedMotion
-					? 'bg-black/80'
-					: animations.fadeAndAnimateAndOverlay.inOut,
+				reducedMotion ? 'bg-black/80' : animations.fadeAndAnimateAndOverlay.inOut,
 				className,
 			)}
 			{...props}
@@ -83,41 +81,39 @@ const DialogOverlay = React.forwardRef<
 })
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+const containsDialogTitle = (children: React.ReactNode): boolean => {
+	return React.Children.toArray(children).some((child) => {
+		if (!React.isValidElement(child)) return false
+
+		const type = child.type as { displayName?: string }
+		if (
+			type.displayName === DialogPrimitive.Title.displayName ||
+			type.displayName === 'DialogTitle'
+		) {
+			return true
+		}
+
+		const props = child.props as { children?: React.ReactNode }
+		if (props.children) {
+			return containsDialogTitle(props.children)
+		}
+
+		return false
+	})
+}
+
 const DialogContent = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Content>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
 	const reducedMotion = useReducedMotion()
-	const contentRef = React.useRef<HTMLDivElement | null>(null)
-	const [needsSrOnlyTitle, setNeedsSrOnlyTitle] = React.useState(true)
-	const fallbackTitleId = React.useId()
-
-	const setRefs = React.useCallback(
-		(node: HTMLDivElement | null) => {
-			contentRef.current = node
-			if (typeof ref === 'function') {
-				ref(node)
-			} else if (ref) {
-				;(ref as React.MutableRefObject<HTMLDivElement | null>).current = node
-			}
-		},
-		[ref],
-	)
-
-	// Re-scan when body changes so we drop the sr-only fallback once a real DialogTitle mounts.
-	// biome-ignore lint/correctness/useExhaustiveDependencies: children drives dialog body updates
-	React.useLayoutEffect(() => {
-		const root = contentRef.current
-		if (!root) return
-		const hasTitle = root.querySelector('[data-dialog-title]')
-		setNeedsSrOnlyTitle(!hasTitle)
-	}, [children])
+	const hasTitle = containsDialogTitle(children)
 
 	return (
 		<DialogPortal>
 			<DialogOverlay />
 			<DialogPrimitive.Content
-				ref={setRefs}
+				ref={ref}
 				className={cn(
 					'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-default',
 					reducedMotion ? '' : animations.fadeAndAnimate.inOut,
@@ -126,12 +122,12 @@ const DialogContent = React.forwardRef<
 				)}
 				{...props}
 			>
-				{children}
-				{needsSrOnlyTitle ? (
-					<DialogPrimitive.Title id={fallbackTitleId} className="sr-only">
+				{!hasTitle ? (
+					<DialogPrimitive.Title data-dialog-title="" className="sr-only">
 						Dialog
 					</DialogPrimitive.Title>
 				) : null}
+				{children}
 				<DialogPrimitive.Close
 					className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
 					aria-label="Close dialog button. Click to close the dialog"
@@ -145,29 +141,17 @@ const DialogContent = React.forwardRef<
 })
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn(
-			'flex flex-col space-y-1.5 text-center sm:text-left mt-10',
-			className,
-		)}
+		className={cn('flex flex-col space-y-1.5 text-center sm:text-left mt-10', className)}
 		{...props}
 	/>
 )
 DialogHeader.displayName = 'DialogHeader'
 
-const DialogFooter = ({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn(
-			'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
-			className,
-		)}
+		className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
 		{...props}
 	/>
 )
@@ -184,37 +168,26 @@ DialogFooter.displayName = 'DialogFooter'
 const DialogTitle = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Title>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, id, ...props }, ref) => {
-	const generatedId = React.useId()
-	return (
-		<DialogPrimitive.Title
-			data-dialog-title=""
-			id={id ?? generatedId}
-			ref={ref}
-			className={cn(
-				'text-lg font-semibold leading-none tracking-tight',
-				className,
-			)}
-			{...props}
-		/>
-	)
-})
+>(({ className, ...props }, ref) => (
+	<DialogPrimitive.Title
+		data-dialog-title=""
+		ref={ref}
+		className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+		{...props}
+	/>
+))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
 const DialogDescription = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Description>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, id, ...props }, ref) => {
-	const generatedId = React.useId()
-	return (
-		<DialogPrimitive.Description
-			ref={ref}
-			id={id ?? generatedId}
-			className={cn('text-sm text-muted-foreground', className)}
-			{...props}
-		/>
-	)
-})
+>(({ className, ...props }, ref) => (
+	<DialogPrimitive.Description
+		ref={ref}
+		className={cn('text-sm text-muted-foreground', className)}
+		{...props}
+	/>
+))
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 export {

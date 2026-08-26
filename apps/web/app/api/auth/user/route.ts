@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@packages/lib/supabase-server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
 	try {
@@ -24,18 +25,12 @@ export async function GET() {
 			.single()
 
 		if (profileError) {
-			console.error('Error fetching user profile:', profileError)
-			return NextResponse.json(
-				{ error: 'Error fetching user profile' },
-				{ status: 500 },
-			)
+			logger.error('Error fetching user profile:', profileError)
+			return NextResponse.json({ error: 'Error fetching user profile' }, { status: 500 })
 		}
 
 		if (!userProfile) {
-			return NextResponse.json(
-				{ error: 'User profile not found' },
-				{ status: 404 },
-			)
+			return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
 		}
 
 		// Return basic user info
@@ -49,10 +44,7 @@ export async function GET() {
 			},
 		})
 	} catch (error) {
-		console.error('Error getting user:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 },
-		)
+		logger.error('Error getting user:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
 	}
 }
