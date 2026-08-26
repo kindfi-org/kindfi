@@ -129,14 +129,32 @@ const findLatestKycReview = async (
 	return { id: data.id, status: data.status as KycDbStatus }
 }
 
+export const resolveKycStatus = (params: {
+	sessionStatus: CanonicalKycStatus | null
+	reviewStatus: KycDbStatus | null
+}): CanonicalKycStatus => {
+	if (
+		params.sessionStatus === 'approved' ||
+		canonicalFromDbStatus(params.reviewStatus) === 'approved'
+	) {
+		return 'approved'
+	}
+
+	return params.sessionStatus ?? canonicalFromDbStatus(params.reviewStatus)
+}
+
 export const getCanonicalKycStatusForUser = async (userId: string): Promise<CanonicalKycStatus> => {
 	const session = await findLatestDiditSessionForUser(userId)
-	if (session) {
-		return session.canonicalStatus
+	if (session?.canonicalStatus === 'approved') {
+		return 'approved'
 	}
 
 	const review = await findLatestKycReview(userId)
-	return canonicalFromDbStatus(review?.status)
+
+	return resolveKycStatus({
+		sessionStatus: session?.canonicalStatus ?? null,
+		reviewStatus: review?.status ?? null,
+	})
 }
 
 export const upsertKycReviewStatus = async (params: {
