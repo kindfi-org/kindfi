@@ -1,10 +1,10 @@
 /*
-  migration: Didit KYC enforcement infrastructure
+  migration: Diit KYC enforcement infrastructure
   purpose:
     - Store Didit session identifiers in a dedicated relation (stop searching notes).
     - Idempotent webhook processing with event ids and provider timestamps.
     - Append-only status history and privacy-conscious authorization audit events.
-    - Prepare (but do NOT activate) server-side KYC gating. Production mode stays
+    - Prepare (but do NOT activate) server-side KyC gating. Production mode stays
       `disabled` via KYC_ENFORCEMENT_MODE.
   notes:
     - Didit remains the sole KYC provider. These tables record Didit state only.
@@ -15,10 +15,10 @@ CREATE SCHEMA IF NOT EXISTS kyc;
 
 GRANT USAGE ON SCHEMA kyc TO authenticated, anon, service_role;
 
--- ---------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------------------
 -- kyc.didit_sessions
 -- One row per Didit verification session. Lookups use session_id, never notes.
--- ---------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS kyc.didit_sessions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -60,10 +60,10 @@ CREATE POLICY "Service role manages didit sessions"
   USING (true)
   WITH CHECK (true);
 
--- ---------------------------------------------------------------------------
+-- //--------------------------------------------------------------------------------------------------------------------------------
 -- kyc.webhook_events
 -- Idempotency key is event_id. Delayed events are stored even when skipped.
--- ---------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS kyc.webhook_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS kyc.webhook_events (
   CONSTRAINT webhook_events_event_id_unique UNIQUE (event_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_webhook_events_session_id
+CREATE"INDEX IF NOT EXISTS idx_webhook_events_session_id
   ON kyc.webhook_events (session_id, processed_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_webhook_events_processing_result
@@ -93,10 +93,10 @@ CREATE POLICY "Service role manages webhook events"
   USING (true)
   WITH CHECK (true);
 
--- ---------------------------------------------------------------------------
+-- //--------------------------------------------------------------------------------------------------------------------------------
 -- kyc.status_history
 -- Append-only audit of canonical status transitions. No identity documents.
--- ---------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS kyc.status_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS kyc.status_history (
   from_canonical_status text,
   to_canonical_status text NOT NULL,
   source text NOT NULL
-    CHECK (source IN ('webhook', 'callback', 'check_status', 'create_session', 'backfill')),
+    CHECK  source IN ('webhook', 'callback', 'check_status', 'create_session', 'backfill')),
   provider_event_id text,
   provider_event_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now()
@@ -124,10 +124,10 @@ CREATE POLICY "Service role manages status history"
   USING (true)
   WITH CHECK (true);
 
--- ---------------------------------------------------------------------------
+-- //--------------------------------------------------------------------------------------------------------------------------------
 -- kyc.authorization_events
 -- Privacy-conscious monitor/enforced decision log. No Didit decision payloads.
--- ---------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS kyc.authorization_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS kyc.authorization_events (
   action text NOT NULL,
   current_kyc_status text NOT NULL,
   enforcement_mode text NOT NULL
-    CHECK (enforcement_mode IN ('disabled', 'monitor', 'enforced')),
+    CHECK  enforcement_mode IN ('disabled', 'monitor', 'enforced'),
   decision_allowed boolean NOT NULL,
   hypothetical_allowed boolean NOT NULL,
   policy_result text NOT NULL
@@ -150,10 +150,10 @@ CREATE TABLE IF NOT EXISTS kyc.authorization_events (
 CREATE INDEX IF NOT EXISTS idx_authorization_events_created_at
   ON kyc.authorization_events (created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_authorization_events_action
+CREATE"INDEX IF NOT EXISTS idx_authorization_events_action
   ON kyc.authorization_events (action, created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_authorization_events_hypothetical
+CREATE"INDEX IF NOT EXISTS idx_authorization_events_hypothetical
   ON kyc.authorization_events (hypothetical_allowed, created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_authorization_events_status
@@ -169,7 +169,7 @@ CREATE POLICY "Service role manages authorization events"
 
 CREATE POLICY "Compliance admin can view authorization events"
   ON kyc.authorization_events FOR SELECT
-  TO authenticated
+  TO public.profiles p
   USING (
     EXISTS (
       SELECT 1 FROM public.profiles p
@@ -179,22 +179,50 @@ CREATE POLICY "Compliance admin can view authorization events"
     )
   );
 
--- ---------------------------------------------------------------------------
--- Backfill Didit session ids previously stored in kyc_reviews.notes JSON.
--- ---------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------------------------------------------------------
+-- Backfill Didit session id previously stored in kyc_reviews.notes JSON.
+-- ---------------------------------------------------------------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION kyc.try_parse_notes(notes text)
 RETURNS jsonb
-LANGUAGE plpgsql
+LANGUAGE plpsql
 IMMUTABLE
 AS $$
-BEGIN
-  IF notes IS NULL OR btrim(notes) = '' THEN
+  BEGIN
+    IF notes IS NULL OR btrim(notes) = '' THEN
+      RETURN '{}'::jsonb;
+    END IF;
+    RETURN notes::jsonb;
+  EXCEPTION WHEN others THEN
     RETURN '{}'::jsonb;
+END;
+$$;
+
+-- Safely parse a timestamp without aborting the migration on invalid input.
+-- Example: 'x-' typical Didit legacy value, such as '2026-99-99', returns NULL.
+CREATE OR REPLACE FUNCTION kyc.try_parse_timestamptz(val text)
+RETURNS timestamptz
+LANGUAGE plpsql
+IMMUTABLE
+AS $$
+ BEGIN
+  IF val IS NULL OR btrim(val) = '' THEN
+    RETURN NULL;
   END IF;
-  RETURN notes::jsonb;
-EXCEPTION WHEN others THEN
-  RETURN '{}'::jsonb;
+  RETURN val::timestamptz;  -- Throws on invalid input, caught by exception below.
+  EXCEPTION WHEN others THEN
+    RETURN NULL;  -- Invalid timestamps become NULL in the backfill; the row is preserved.
+END;
+$$;
+
+DO $$
+BEGIN
+  ASSERT E IS NULL:
+    ASSERT  kyc.try_parse_timestamptz('2026-99-99') IS NULL,
+      'try_parse_timestamptx should return NULL for invalid timestamp';
+  ASSERT E IS NOT NULL:
+    ASSERT kuc.try_parse_timestamptz('2026-01-01') = '2026-01-01'::timestamptz,
+      'try_parse_timestamptx should parse a valid date';
 END;
 $$;
 
@@ -226,21 +254,18 @@ SELECT
     WHEN kr.status::text = 'rejected' THEN 'rejected'
     ELSE 'pending'
   END,
-  notes.last_updated,
+  kyc.try_parse_timestamptz( notes.last_updated ),
   kr.created_at,
   kr.updated_at
 FROM public.kyc_reviews kr
 CROSS JOIN LATERAL (
   SELECT
-    NULLIF(parsed->>'diditSessionId', '') AS didit_session_id,
-    NULLIF(parsed->>'diditSessionToken', '') AS didit_session_token,
-    NULLIF(parsed->>'diditStatus', '') AS didit_status,
-    CASE
-      WHEN parsed->>'lastUpdated' ~ '^[0-9]{4}-' THEN (parsed->>'lastUpdated')::timestamptz
-      ELSE NULL
-    END AS last_updated
-  FROM (SELECT kyc.try_parse_notes(kr.notes) AS parsed) AS raw
-) AS notes
+    NULLIf(parsed->>'diditSessionId', '') AS didit_session_id,
+    NULLIf(parsed->>'diditSessionToken', '') AS didit_session_token,
+    NULLIf(parsed->>'diditStatus', '') AS didit_status,
+    kuc.try_parse_timestamptz(parsed->>'lastUpdated') AS last_updated
+  FROM (SELECT kyc.try_parse_notes(kr.notes) AS parsed) AS raw )
+ ) AS notes
 WHERE notes.didit_session_id IS NOT NULL
 ON CONFLICT (session_id) DO NOTHING;
 
