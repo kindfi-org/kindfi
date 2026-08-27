@@ -4,11 +4,15 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
+import { ProfileDashboardV2 } from '~/components/sections/profile/dashboard/profile-dashboard-v2'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
 import { requireCompletedOnboarding } from '~/lib/onboarding/guard'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
+
+/** Set NEXT_PUBLIC_DASHBOARD_V2=true in .env to enable the new dashboard layout. */
+const DASHBOARD_V2_ENABLED = process.env.NEXT_PUBLIC_DASHBOARD_V2 === 'true'
 
 export const metadata: Metadata = {
 	title: 'My Profile | KindFi',
@@ -64,19 +68,31 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 		redirect('/sign-in')
 	}
 
+	const userPayload = {
+		id: session.user.id,
+		email: session.user.email || '',
+		created_at: profileData.created_at,
+		profile: profileData,
+	}
+	const smartAccountAddress = isSmartAccountEnabled()
+		? resolveSmartAccountAddress(session.device?.address || session.user.device?.address)
+		: null
+
+	if (DASHBOARD_V2_ENABLED) {
+		return (
+			<ProfileDashboardV2
+				user={userPayload}
+				smartAccountAddress={smartAccountAddress}
+				kycCompleted={kycCompleted}
+				initialSection={params.section}
+			/>
+		)
+	}
+
 	return (
 		<ProfileDashboard
-			user={{
-				id: session.user.id,
-				email: session.user.email || '',
-				created_at: profileData.created_at,
-				profile: profileData,
-			}}
-			smartAccountAddress={
-				isSmartAccountEnabled()
-					? resolveSmartAccountAddress(session.device?.address || session.user.device?.address)
-					: null
-			}
+			user={userPayload}
+			smartAccountAddress={smartAccountAddress}
 			kycCompleted={kycCompleted}
 			initialSection={params.section}
 		/>
