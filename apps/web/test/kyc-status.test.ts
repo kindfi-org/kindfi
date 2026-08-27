@@ -25,6 +25,13 @@ describe('toCanonicalKycStatus', () => {
 		expect(toCanonicalKycStatus('approved')).toBe('approved')
 		expect(toCanonicalKycStatus('verified')).toBe('approved')
 		expect(toCanonicalKycStatus('VERIFIED')).toBe('approved')
+		expect(toCanonicalKycStatus('  Approved  ')).toBe('approved')
+	})
+
+	test('normalizes compact and separator variants', () => {
+		expect(toCanonicalKycStatus('inreview')).toBe('in_review')
+		expect(toCanonicalKycStatus('manual-review')).toBe('manual_review')
+		expect(toCanonicalKycStatus('notstarted')).toBe('not_started')
 	})
 
 	test('treats missing status as not_started', () => {
