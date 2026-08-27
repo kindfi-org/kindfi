@@ -214,23 +214,22 @@ BEGIN
   status_key := lower(regexp_replace(btrim(status), '\s+', ' ', 'g'));
   compact_key := regexp_replace(status_key, '[\s_-]', '', 'g');
 
-  IF status_key IN ('approved', 'verified') THEN RETURN 'approved'; END IF;
-  IF status_key IN ('declined', 'rejected', 'denied') THEN RETURN 'rejected'; END IF;
-  IF status_key IN ('in review', 'in_review') OR compact_key = 'inreview' THEN
+  IF compact_key IN ('approved', 'verified') THEN RETURN 'approved'; END IF;
+  IF compact_key IN ('declined', 'rejected', 'denied') THEN RETURN 'rejected'; END IF;
+  IF compact_key = 'inreview' THEN
     RETURN 'in_review';
   END IF;
-  IF status_key IN ('not started', 'not_started') OR compact_key = 'notstarted' THEN
+  IF compact_key = 'notstarted' THEN
     RETURN 'not_started';
   END IF;
-  IF status_key IN ('in progress', 'in_progress', 'pending')
-    OR compact_key IN ('inprogress', 'pending') THEN
+  IF compact_key IN ('inprogress', 'pending') THEN
     RETURN 'pending';
   END IF;
-  IF status_key IN ('abandoned', 'expired') THEN RETURN 'expired'; END IF;
-  IF status_key IN ('manual review', 'manual_review') OR compact_key = 'manualreview' THEN
+  IF compact_key IN ('abandoned', 'expired') THEN RETURN 'expired'; END IF;
+  IF compact_key = 'manualreview' THEN
     RETURN 'manual_review';
   END IF;
-  IF status_key = 'provider_unavailable' OR compact_key = 'providerunavailable' THEN
+  IF compact_key = 'providerunavailable' THEN
     RETURN 'provider_unavailable';
   END IF;
 
@@ -271,14 +270,9 @@ BEGIN
     IF status_value IS NOT NULL THEN
       status_key := lower(regexp_replace(btrim(status_value), '\s+', ' ', 'g'));
       compact_key := regexp_replace(status_key, '[\s_-]', '', 'g');
-      IF status_key NOT IN (
-        'not started', 'not_started', 'notstarted', 'in progress', 'in_progress',
-        'inprogress', 'pending', 'in review', 'in_review', 'inreview', 'approved',
-        'verified', 'declined', 'rejected', 'denied', 'abandoned', 'expired',
-        'manual review', 'manual_review', 'manualreview', 'provider_unavailable',
-        'providerunavailable'
-      ) AND compact_key NOT IN (
-        'notstarted', 'inprogress', 'pending', 'inreview', 'manualreview',
+      IF compact_key NOT IN (
+        'notstarted', 'inprogress', 'pending', 'inreview', 'approved', 'verified',
+        'declined', 'rejected', 'denied', 'abandoned', 'expired', 'manualreview',
         'providerunavailable'
       ) THEN
         RAISE EXCEPTION 'Cannot enable KYC backfill: kyc_reviews.id % has unknown Didit status %', legacy_row.id, status_value;
