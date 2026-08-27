@@ -80,6 +80,21 @@ export const getKycEnforcementMetrics = async (sinceDays = 30): Promise<KycEnfor
 		logger.error('[kyc] Failed to load authorization metrics', {
 			error: eventsResult.error.message,
 		})
+		throw new Error(`Failed to load authorization metrics: ${eventsResult.error.message}`)
+	}
+
+	if (failuresResult.error) {
+		logger.error('[kyc] Failed to load webhook failure metrics', {
+			error: failuresResult.error.message,
+		})
+		throw new Error(`Failed to load webhook failure metrics: ${failuresResult.error.message}`)
+	}
+
+	if (sessionsResult.error) {
+		logger.error('[kyc] Failed to load session status metrics', {
+			error: sessionsResult.error.message,
+		})
+		throw new Error(`Failed to load session status metrics: ${sessionsResult.error.message}`)
 	}
 
 	const events = (eventsResult.data ?? []) as AuthorizationEventRow[]
