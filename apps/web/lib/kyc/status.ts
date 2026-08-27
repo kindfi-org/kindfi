@@ -176,8 +176,12 @@ export const requiredActionForStatus = (
 	}
 }
 
+export const ACTIVE_DIDIT_SESSION_STATUSES: readonly CanonicalKycStatus[] = [
+	'not_started',
+	'pending',
+	'in_review',
+	'manual_review',
+] as const
+
 export const isActiveDiditSessionStatus = (status: CanonicalKycStatus): boolean =>
-	status === 'not_started' ||
-	status === 'pending' ||
-	status === 'in_review' ||
-	status === 'manual_review'
+	(ACTIVE_DIDIT_SESSION_STATUSES as readonly string[]).includes(status)
