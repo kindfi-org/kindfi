@@ -150,10 +150,10 @@ async function createProjectHandler(req: NextRequest) {
 		await upsertTags(project.id, tags ?? [], supabase)
 
 		if (!developmentOnly) {
-			// Send email + in-app notifications (non-blocking)
-			import('~/lib/email/email-notification-service')
-				.then(({ sendNewProjectEmails }) =>
-					sendNewProjectEmails({
+			// Notify creator that project is awaiting admin review (non-blocking)
+			import('~/lib/email/notifications/send-new-project-emails')
+				.then(({ sendProjectSubmittedForReviewEmail }) =>
+					sendProjectSubmittedForReviewEmail({
 						projectTitle: title,
 						projectSlug: project.slug ?? '',
 						creatorId: userId,
