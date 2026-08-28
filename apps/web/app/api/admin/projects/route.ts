@@ -30,7 +30,9 @@ async function handleProjects(request: NextRequest): Promise<NextResponse> {
 	const { searchParams } = new URL(request.url)
 
 	if ([...searchParams.keys()].length === 0) {
-		const projects = await getAllProjects(supabaseServiceRole, [], 'most-recent', 1000)
+		const projects = await getAllProjects(supabaseServiceRole, [], 'most-recent', 1000, {
+			includeAllStatuses: true,
+		})
 		return NextResponse.json(projects)
 	}
 

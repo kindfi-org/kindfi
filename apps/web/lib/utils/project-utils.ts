@@ -416,6 +416,25 @@ export async function uploadPitchDeck(
 	})
 }
 
+export async function uploadStoryImage(
+	slug: string,
+	file: File,
+	supabase: TypedSupabaseClient,
+): Promise<string | null> {
+	const adapter = makeSupabaseAdapter(supabase, 'project_story_images')
+	return uploadFile({
+		client: adapter,
+		folder: slug,
+		file,
+		generateFilename: (slug, file) => {
+			const ext = file.name.split('.').pop() || 'jpg'
+			return `${slug}/${uuidv4()}.${ext}`
+		},
+		deleteExisting: false,
+		cacheControl: '31536000', // 1 year — story images are immutable
+	})
+}
+
 export {
 	getVideoProvider,
 	isSupportedVideoUrl,

@@ -107,10 +107,7 @@ export function getFirstIncompleteWizardStep(input: {
 }): import('~/lib/types/project/content-wizard.types').ContentWizardStep {
 	if (!input.hasSourceLocale) return 'language'
 	if (!isBasicsSourceComplete(input)) return 'basics-primary'
-	if (!isBasicsTranslationComplete(input.translation)) return 'basics-translation'
 	if (!isStorySourceComplete(input)) return 'story-primary'
-	if (!isStoryTranslationComplete(input.pitchTranslation)) return 'story-translation'
 	if (!isHighlightsListComplete(input.highlights)) return 'highlights-primary'
-	if (!isHighlightsListComplete(input.translationHighlights)) return 'highlights-translation'
 	return 'media'
 }

@@ -1,14 +1,11 @@
 import { useMemo } from 'react'
 import {
 	wizardBasicsPrimarySchema,
-	wizardBasicsTranslationSchema,
 	wizardHighlightsPrimarySchema,
-	wizardHighlightsTranslationSchema,
 	wizardLanguageSchema,
 	wizardLocationSchema,
 	wizardMediaSchema,
 	wizardStoryPrimarySchema,
-	wizardStoryTranslationSchema,
 } from '~/lib/schemas/content-wizard.schemas'
 import type {
 	ContentWizardFormData,
@@ -36,12 +33,6 @@ function validateStep(step: ContentWizardStep, formData: ContentWizardFormData):
 			})
 			return result.success ? [] : result.error.issues.map((i) => i.message)
 		}
-		case 'basics-translation': {
-			const result = wizardBasicsTranslationSchema.safeParse({
-				translation: formData.translation,
-			})
-			return result.success ? [] : result.error.issues.map((i) => i.message)
-		}
 		case 'story-primary': {
 			const result = wizardStoryPrimarySchema.safeParse({
 				title: formData.pitchTitle,
@@ -49,21 +40,9 @@ function validateStep(step: ContentWizardStep, formData: ContentWizardFormData):
 			})
 			return result.success ? [] : result.error.issues.map((i) => i.message)
 		}
-		case 'story-translation': {
-			const result = wizardStoryTranslationSchema.safeParse({
-				pitchTranslation: formData.pitchTranslation,
-			})
-			return result.success ? [] : result.error.issues.map((i) => i.message)
-		}
 		case 'highlights-primary': {
 			const result = wizardHighlightsPrimarySchema.safeParse({
 				highlights: formData.highlights,
-			})
-			return result.success ? [] : result.error.issues.map((i) => i.message)
-		}
-		case 'highlights-translation': {
-			const result = wizardHighlightsTranslationSchema.safeParse({
-				translationHighlights: formData.translationHighlights,
 			})
 			return result.success ? [] : result.error.issues.map((i) => i.message)
 		}
@@ -100,9 +79,6 @@ export function useContentWizardValidation(formData: ContentWizardFormData) {
 			'basics-primary',
 			'story-primary',
 			'highlights-primary',
-			'basics-translation',
-			'story-translation',
-			'highlights-translation',
 			'media',
 			'location',
 			'review',
@@ -129,11 +105,8 @@ export function useContentWizardValidation(formData: ContentWizardFormData) {
 			translationStatus,
 			isFullyValid:
 				steps['basics-primary'].valid &&
-				steps['basics-translation'].valid &&
 				steps['story-primary'].valid &&
-				steps['story-translation'].valid &&
 				steps['highlights-primary'].valid &&
-				steps['highlights-translation'].valid &&
 				steps.location.valid,
 		}
 	}, [formData])

@@ -20,6 +20,7 @@ export type ProjectListItem = Project & {
 
 export type GetAllProjectsOptions = LocalizeOptions & {
 	viewerLocale?: SupportedLocale
+	includeAllStatuses?: boolean
 }
 
 /**
@@ -105,6 +106,10 @@ export async function getAllProjects(
 			isPaginated ? { count: 'exact' } : {},
 		)
 		.order(column, { ascending })
+
+	if (!options?.includeAllStatuses) {
+		query = query.in('status', ['active', 'paused', 'funded'])
+	}
 
 	if (categorySlugs.length > 0) {
 		const { data: categories, error: catErr } = await client
