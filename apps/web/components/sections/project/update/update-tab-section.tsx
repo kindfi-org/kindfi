@@ -5,19 +5,10 @@ import { Loader2, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
+import { appendUpdatePage, mergeRealtimePage, type ProjectUpdate } from '~/lib/utils/project-updates'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 import { UpdateForm } from './update-form'
-
-// Define types for project updates based on actual DB structure
-type ProjectUpdate = {
-	id: string
-	project_id: string
-	author_id: string
-	content: string
-	created_at: string
-	updated_at: string
-}
 
 export function ProjectUpdatesTabSection() {
 	const projectId = '58b28e49-ec44-482a-8ac5-aa75b264b6c8'
@@ -34,13 +25,12 @@ export function ProjectUpdatesTabSection() {
 	// This would typically come from a user context or auth hook
 	const isKindler = true // Placeholder - replace with actual auth logic
 
-	// Fetch project updates
+	// Fetch project updates for the currently selected page.
 	const fetchUpdates = useCallback(async () => {
 		try {
 			setIsLoading(true)
 			const supabase = createSupabaseBrowserClient()
 
-			// Modified query to only select project_updates data without joins
 			const { data, error } = await supabase
 				.from('project_updates')
 				.select('*')
@@ -53,12 +43,32 @@ export function ProjectUpdatesTabSection() {
 				throw error
 			}
 
-			setUpdates((prevUpdates) => (page === 1 ? data : [...prevUpdates, ...data]))
+			// Explicit page navigation appends the newly fetched page.
+			setUpdates((prevUpdates) => (page === 1 ? data : appendUpdatePage(prevUpdates, data)))
 		} catch (err) {
 			logger.error('Failed to fetch updates:', err)
 			setError(err instanceof Error ? err : new Error('Failed to fetch updates'))
 		} finally {
 			setIsLoading(false)
+		}
+	}, [page])
+
+	// Realtime refreshes replace the visible page rather than appending it.
+	const refreshUpdatesFromRealtime = useCallback(async () => {
+		try {
+			const supabase = createSupabaseBrowserClient()
+			const { data, error } = await supabase
+				.from('project_updates')
+				.select('*')
+				.eq('project_id', projectId)
+				.order('created_at', { ascending: false })
+				.range((page - 1) * pageSize, page * pageSize - 1)
+
+			if (error) throw error
+
+			setUpdates((prevUpdates) => mergeRealtimePage(prevUpdates, data))
+		} catch (err) {
+			logger.error('Failed to refresh updates after realtime event:', err)
 		}
 	}, [page])
 
@@ -172,8 +182,7 @@ export function ProjectUpdatesTabSection() {
 					filter: `project_id=eq.${projectId}`,
 				},
 				() => {
-					// Refetch data when any change occurs
-					fetchUpdates()
+					refreshUpdatesFromRealtime()
 				},
 			)
 			.subscribe()
@@ -181,7 +190,7 @@ export function ProjectUpdatesTabSection() {
 		return () => {
 			supabase.removeChannel(channel)
 		}
-	}, [isCreatingUpdate, fetchUpdates])
+	}, [isCreatingUpdate, refreshUpdatesFromRealtime])
 
 	return (
 		<section
