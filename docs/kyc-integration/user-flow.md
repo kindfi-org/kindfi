@@ -14,17 +14,35 @@
 
 **User action**: Clicks "Start KYC Process" button.
 
-**What happens**:
+**What happens**: The `POST /api/kyc/didit/create-session` route validates the
+authenticated user and resolves the current KYC state before creating anything.
 
-1. `KYCCard` calls `createSession()` from `useDiditKYC` hook
-2. Hook calls `POST /api/kyc/didit/create-session`
-3. Server creates Didit session via Didit API
-4. Server stores `session_id` on `kyc.didit_sessions` and keeps `kyc_reviews.status` in sync
-5. Server returns `verification_url`
-6. Client shows `KYCRedirectModal` with 3-second countdown
-7. User can cancel or wait for auto-redirect
+1. If the user is already approved, the route returns:
 
-**Database state**: New `kyc.didit_sessions` row plus a `kyc_reviews` record:
+   ```json
+   { "success": true, "alreadyVerified": true, "canonicalStatus": "approved" }
+   ```
+
+   No Didit session is created and no new session row is written.
+
+2. Otherwise, if the user has an active Didit session with a verification URL,
+   the route reuses that session and returns its existing URL with
+   `resumed: true`. This lets the user continue the current verification flow
+   without opening a duplicate Didit session or writing another session row.
+
+3. Only when the user is not approved and has no reusable active session does
+   the new-session flow run:
+
+   1. `KYCCard` calls `createSession()` from the `useDiditKYC` hook.
+   2. The server creates a Didit session through the Didit API.
+   3. The server stores `session_id` on `kyc.didit_sessions` and keeps
+      `kyc_reviews.status` in sync.
+   4. The server returns `verification_url`.
+   5. The client shows `KYCRedirectModal` with a 3-second countdown.
+   6. The user can cancel or wait for automatic redirection.
+
+**Database state for the new-session path**: A new `kyc.didit_sessions` row plus
+a `kyc_reviews` record:
 
 - `kyc_reviews.status`: `pending`
 - `kyc.didit_sessions.session_id`: Didit session identifier
