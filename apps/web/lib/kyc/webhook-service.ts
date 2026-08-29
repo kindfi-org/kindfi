@@ -116,14 +116,20 @@ export const applyDiditStatusUpdate = async (
 		return { applied: false, reason: 'error', canonicalStatus, userId }
 	}
 
-	if (existing?.lastProviderEventAt && providerEventAt) {
-		if (isStaleProviderEvent(providerEventAt, existing.lastProviderEventAt)) {
-			await getKycSchemaClient()
-				.from('webhook_events')
-				.update({ processing_result: 'stale' })
-				.eq('event_id', eventId)
-			return { applied: false, reason: 'stale', canonicalStatus, userId }
-		}
+	if (
+		existing &&
+		isStaleProviderEvent(
+			providerEventAt,
+			existing.lastProviderEventAt,
+			canonicalStatus,
+			existing.canonicalStatus,
+		)
+	) {
+		await getKycSchemaClient()
+			.from('webhook_events')
+			.update({ processing_result: 'stale' })
+			.eq('event_id', eventId)
+		return { applied: false, reason: 'stale', canonicalStatus, userId }
 	}
 
 	const reviewId = await upsertKycReviewStatus({
@@ -132,19 +138,24 @@ export const applyDiditStatusUpdate = async (
 		existingReviewId: existing?.kycReviewId,
 	})
 
-	const { error: sessionError } = await getKycSchemaClient().from('didit_sessions').upsert(
-		{
+	const updateConditions = providerEventAt
+		? `last_provider_event_at.is.null,last_provider_event_at.lt.${providerEventAt},and(last_provider_event_at.eq.${providerEventAt},canonical_status.not.in.(approved,rejected))`
+		: 'last_provider_event_at.is.null'
+
+	const { data: updatedSession, error: sessionError } = await getKycSchemaClient()
+		.from('didit_sessions')
+		.update({
 			user_id: userId,
 			kyc_review_id: reviewId,
-			session_id: input.sessionId,
 			didit_status: input.diditStatus,
 			canonical_status: canonicalStatus,
 			last_provider_event_id: eventId,
 			last_provider_event_at: providerEventAt,
 			updated_at: new Date().toISOString(),
-		},
-		{ onConflict: 'session_id' },
-	)
+		})
+		.eq('session_id', input.sessionId)
+		.or(updateConditions)
+		.select('session_id')
 
 	if (sessionError) {
 		logger.error('[kyc] Failed to update Didit session status', { error: sessionError.message })
@@ -153,6 +164,14 @@ export const applyDiditStatusUpdate = async (
 			.update({ processing_result: 'error' })
 			.eq('event_id', eventId)
 		return { applied: false, reason: 'error', canonicalStatus, userId }
+	}
+
+	if (!updatedSession || updatedSession.length === 0) {
+		await getKycSchemaClient()
+			.from('webhook_events')
+			.update({ processing_result: 'stale' })
+			.eq('event_id', eventId)
+		return { applied: false, reason: 'stale', canonicalStatus, userId }
 	}
 
 	await recordKycStatusTransition({
