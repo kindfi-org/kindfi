@@ -143,9 +143,38 @@ export const resolveKycStatus = (params: {
 	return params.sessionStatus ?? canonicalFromDbStatus(params.reviewStatus)
 }
 
+export const hasAnyApprovedSessionForUser = async (userId: string): Promise<boolean> => {
+	const { data, error } = await getKycSchemaClient()
+		.from('didit_sessions')
+		.select('id')
+		.eq('user_id', userId)
+		.eq('canonical_status', 'approved')
+		.limit(1)
+		.maybeSingle()
+
+	if (error) {
+		logger.error('[kyc] Failed to check for approved sessions', {
+			error: error.message,
+		})
+		return false
+	}
+
+	return data !== null
+}
+
 export const getCanonicalKycStatusForUser = async (userId: string): Promise<CanonicalKycStatus> => {
 	const session = await findLatestDiditSessionForUser(userId)
 	if (session?.canonicalStatus === 'approved') {
+		return 'approved'
+	}
+
+	/**
+	 * Guard: if any older session is approved, preserve that status even
+	 * when the newest session is non-approved (e.g. a new verification
+	 * attempt still in progress). A newer non-approved session must not
+	 * downgrade a previously approved user.
+	 */
+	if (await hasAnyApprovedSessionForUser(userId)) {
 		return 'approved'
 	}
 
