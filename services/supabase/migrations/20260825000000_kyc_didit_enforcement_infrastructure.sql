@@ -198,6 +198,90 @@ EXCEPTION WHEN others THEN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION kyc.to_canonical_status(status text)
+RETURNS text
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  status_key text;
+  compact_key text;
+BEGIN
+  IF status IS NULL OR status = '' THEN
+    RETURN 'not_started';
+  END IF;
+
+  status_key := lower(regexp_replace(btrim(status), '\s+', ' ', 'g'));
+  compact_key := regexp_replace(status_key, '[\s_-]', '', 'g');
+
+  IF compact_key IN ('approved', 'verified') THEN RETURN 'approved'; END IF;
+  IF compact_key IN ('declined', 'rejected', 'denied') THEN RETURN 'rejected'; END IF;
+  IF compact_key = 'inreview' THEN
+    RETURN 'in_review';
+  END IF;
+  IF compact_key = 'notstarted' THEN
+    RETURN 'not_started';
+  END IF;
+  IF compact_key IN ('inprogress', 'pending') THEN
+    RETURN 'pending';
+  END IF;
+  IF compact_key IN ('abandoned', 'expired') THEN RETURN 'expired'; END IF;
+  IF compact_key = 'manualreview' THEN
+    RETURN 'manual_review';
+  END IF;
+  IF compact_key = 'providerunavailable' THEN
+    RETURN 'provider_unavailable';
+  END IF;
+
+  RETURN 'pending';
+END;
+$$;
+
+-- Do not let malformed or unknown production notes silently become pending.
+DO $$
+DECLARE
+  legacy_row record;
+  parsed_notes jsonb;
+  status_value text;
+  status_key text;
+  compact_key text;
+BEGIN
+  FOR legacy_row IN
+    SELECT id, notes
+    FROM public.kyc_reviews
+    WHERE notes IS NOT NULL AND btrim(notes) <> ''
+  LOOP
+    BEGIN
+      parsed_notes := legacy_row.notes::jsonb;
+    EXCEPTION WHEN others THEN
+      RAISE EXCEPTION 'Cannot enable KYC backfill: kyc_reviews.id % has malformed notes JSON', legacy_row.id;
+    END;
+
+    IF jsonb_typeof(parsed_notes) <> 'object' THEN
+      RAISE EXCEPTION 'Cannot enable KYC backfill: kyc_reviews.id % notes must be a JSON object', legacy_row.id;
+    END IF;
+
+    IF parsed_notes ? 'diditSessionId'
+      AND NULLIF(btrim(parsed_notes->>'diditSessionId'), '') IS NULL THEN
+      RAISE EXCEPTION 'Cannot enable KYC backfill: kyc_reviews.id % has an empty diditSessionId', legacy_row.id;
+    END IF;
+
+    status_value := NULLIF(parsed_notes->>'diditStatus', '');
+    IF status_value IS NOT NULL THEN
+      status_key := lower(regexp_replace(btrim(status_value), '\s+', ' ', 'g'));
+      compact_key := regexp_replace(status_key, '[\s_-]', '', 'g');
+      IF compact_key NOT IN (
+        'notstarted', 'inprogress', 'pending', 'inreview', 'approved', 'verified',
+        'declined', 'rejected', 'denied', 'abandoned', 'expired', 'manualreview',
+        'providerunavailable'
+      ) THEN
+        RAISE EXCEPTION 'Cannot enable KYC backfill: kyc_reviews.id % has unknown Didit status %', legacy_row.id, status_value;
+      END IF;
+    END IF;
+  END LOOP;
+END;
+$$;
+
 INSERT INTO kyc.didit_sessions (
   user_id,
   kyc_review_id,
@@ -215,17 +299,7 @@ SELECT
   notes.didit_session_id,
   notes.didit_session_token,
   notes.didit_status,
-  CASE
-    WHEN lower(coalesce(notes.didit_status, kr.status::text)) IN ('approved', 'verified') THEN 'approved'
-    WHEN lower(coalesce(notes.didit_status, kr.status::text)) IN ('declined', 'rejected', 'denied') THEN 'rejected'
-    WHEN lower(notes.didit_status) IN ('in review', 'in_review') THEN 'in_review'
-    WHEN lower(notes.didit_status) IN ('not started', 'not_started') THEN 'not_started'
-    WHEN lower(notes.didit_status) IN ('abandoned', 'expired') THEN 'expired'
-    WHEN lower(notes.didit_status) IN ('manual review', 'manual_review') THEN 'manual_review'
-    WHEN kr.status::text IN ('approved', 'verified') THEN 'approved'
-    WHEN kr.status::text = 'rejected' THEN 'rejected'
-    ELSE 'pending'
-  END,
+  kyc.to_canonical_status(COALESCE(notes.didit_status, kr.status::text)),
   notes.last_updated,
   kr.created_at,
   kr.updated_at
