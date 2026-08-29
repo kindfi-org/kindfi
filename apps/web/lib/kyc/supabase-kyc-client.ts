@@ -1,3 +1,5 @@
+import 'server-only'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 
 /**
@@ -7,4 +9,4 @@ import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
  *
  * Backed by the service-role client. Callers must authenticate first.
  */
-export const getKycSchemaClient = () => supabaseServiceRole.schema('kyc')
+export const getKycSchemaClient = (): SupabaseClient => supabaseServiceRole.schema('kyc')
