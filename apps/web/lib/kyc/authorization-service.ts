@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import type { KycAuthorizationAuditEvent } from './audit-log'
 import { getKycEnforcedActions, getKycEnforcementMode } from './enforcement-config'
 import { isApprovedKycStatus, reasonCodeForStatus, requiredActionForStatus } from './status'
@@ -92,19 +93,28 @@ export const authorizeFinancialAction = async (
 	const allowed = enforced ? hypothetical.policyResult === 'allow' : true
 
 	const recordAudit = deps.recordAudit ?? (await import('./audit-log')).recordKycAuthorizationEvent
-	await recordAudit({
-		userId: input.userId,
-		action: input.action,
-		currentKycStatus,
-		mode,
-		decisionAllowed: allowed,
-		hypotheticalAllowed: hypothetical.policyResult === 'allow',
-		policyResult: hypothetical.policyResult,
-		reasonCode: hypothetical.reasonCode,
-		amount: input.amount,
-		asset: input.asset,
-		network: input.network,
-	})
+	try {
+		await recordAudit({
+			userId: input.userId,
+			action: input.action,
+			currentKycStatus,
+			mode,
+			decisionAllowed: allowed,
+			hypotheticalAllowed: hypothetical.policyResult === 'allow',
+			policyResult: hypothetical.policyResult,
+			reasonCode: hypothetical.reasonCode,
+			amount: input.amount,
+			asset: input.asset,
+			network: input.network,
+		})
+	} catch (auditError) {
+		logger.warn('[kyc] Failed to record authorization audit', {
+			error: auditError instanceof Error ? auditError.message : 'unknown',
+			userId: input.userId,
+			action: input.action,
+			mode,
+		})
+	}
 
 	return {
 		allowed,
