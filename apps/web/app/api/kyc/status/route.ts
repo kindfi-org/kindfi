@@ -1,4 +1,5 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
@@ -8,6 +9,7 @@ import {
 	findLatestDiditSessionForUser,
 	getCanonicalKycStatusForUser,
 } from '~/lib/kyc/session-service'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 
 /**
  * GET /api/kyc/status
@@ -15,7 +17,7 @@ import {
  * Returns the authenticated user's Didit-normalized KYC status plus a derived
  * enforcement hint for UI. The hint is never an authorization boundary.
  */
-export async function GET() {
+async function getKycStatusHandler(_req: NextRequest) {
 	try {
 		const session = await getServerSession(nextAuthOption)
 
@@ -56,3 +58,15 @@ export async function GET() {
 		return NextResponse.json({ error: 'Failed to fetch KYC status' }, { status: 500 })
 	}
 }
+
+export const GET = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	getKycStatusHandler,
+)
