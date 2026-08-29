@@ -1,6 +1,7 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { logger } from '@/lib/logger'
 import {
+	ACTIVE_DIDIT_SESSION_STATUSES,
 	canonicalFromDbStatus,
 	isActiveDiditSessionStatus,
 	toCanonicalKycStatus,
@@ -33,6 +34,9 @@ interface DiditSessionRow {
 	last_provider_event_at: string | null
 }
 
+const DIDIT_SESSION_COLUMNS =
+	'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at'
+
 const mapSessionRow = (row: DiditSessionRow): DiditSessionRecord => ({
 	id: row.id,
 	userId: row.user_id,
@@ -50,9 +54,7 @@ export const findDiditSessionBySessionId = async (
 ): Promise<DiditSessionRecord | null> => {
 	const { data, error } = await getKycSchemaClient()
 		.from('didit_sessions')
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.eq('session_id', sessionId)
 		.maybeSingle()
 
@@ -69,9 +71,7 @@ export const findLatestDiditSessionForUser = async (
 ): Promise<DiditSessionRecord | null> => {
 	const { data, error } = await getKycSchemaClient()
 		.from('didit_sessions')
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.eq('user_id', userId)
 		.order('created_at', { ascending: false })
 		.limit(1)
@@ -90,11 +90,9 @@ export const findActiveDiditSessionForUser = async (
 ): Promise<DiditSessionRecord | null> => {
 	const { data, error } = await getKycSchemaClient()
 		.from('didit_sessions')
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.eq('user_id', userId)
-		.in('canonical_status', ['not_started', 'pending', 'in_review', 'manual_review'])
+		.in('canonical_status', ACTIVE_DIDIT_SESSION_STATUSES)
 		.order('created_at', { ascending: false })
 		.limit(1)
 		.maybeSingle()
@@ -275,9 +273,7 @@ export const saveDiditSession = async (params: {
 			},
 			{ onConflict: 'session_id' },
 		)
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.maybeSingle()
 
 	if (error) {
