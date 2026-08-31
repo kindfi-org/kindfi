@@ -47,6 +47,7 @@
  * - `POST /api/foundations/create`
  * - `POST /api/projects/create`
  * - `POST /api/notifications/push`
+ * - `GET  /api/kyc/status`
  *
  * ### Previously protected
  * - `POST /api/nfts/mint` (strict)

@@ -8,14 +8,12 @@ import { ContentWizardStepIndicator } from '~/components/sections/projects/conte
 import { useContentWizardSave } from '~/components/sections/projects/content-wizard/hooks/use-content-wizard-save'
 import { useContentWizardValidation } from '~/components/sections/projects/content-wizard/hooks/use-content-wizard-validation'
 import { WizardBasicsPrimaryStep } from '~/components/sections/projects/content-wizard/steps/wizard-basics-primary-step'
-import { WizardBasicsTranslationStep } from '~/components/sections/projects/content-wizard/steps/wizard-basics-translation-step'
 import { WizardHighlightsStep } from '~/components/sections/projects/content-wizard/steps/wizard-highlights-step'
 import { WizardLanguageStep } from '~/components/sections/projects/content-wizard/steps/wizard-language-step'
 import { WizardLocationStep } from '~/components/sections/projects/content-wizard/steps/wizard-location-step'
 import { WizardMediaStep } from '~/components/sections/projects/content-wizard/steps/wizard-media-step'
 import { WizardReviewStep } from '~/components/sections/projects/content-wizard/steps/wizard-review-step'
 import { WizardStoryPrimaryStep } from '~/components/sections/projects/content-wizard/steps/wizard-story-primary-step'
-import { WizardStoryTranslationStep } from '~/components/sections/projects/content-wizard/steps/wizard-story-translation-step'
 import { ManageSectionHeader } from '~/components/sections/projects/manage/manage-section-header'
 import { useContentWizard } from '~/hooks/contexts/use-content-wizard.context'
 import { useI18n } from '~/lib/i18n/context'
@@ -30,9 +28,6 @@ const isContentWizardStep = (value: string | null): value is ContentWizardStep =
 		'basics-primary',
 		'story-primary',
 		'highlights-primary',
-		'basics-translation',
-		'story-translation',
-		'highlights-translation',
 		'media',
 		'location',
 		'review',
@@ -60,7 +55,7 @@ export function ContentWizard() {
 		gcTime: 1000 * 60 * 60,
 	})
 
-	const { steps, translationStatus } = useContentWizardValidation(formData)
+	const { steps } = useContentWizardValidation(formData)
 	const { saveStep, isSaving } = useContentWizardSave()
 
 	const hasInitializedStep = useRef(false)
@@ -132,12 +127,6 @@ export function ContentWizard() {
 		[formData, defaultCategoryId, updateFormData, saveStep, mode, goToNextStep],
 	)
 
-	const handleSaveLater = useCallback(() => {
-		if (projectSlug) {
-			router.push(`/projects/${projectSlug}/manage`)
-		}
-	}, [projectSlug, router])
-
 	const handleFinish = useCallback(async () => {
 		await saveStep('review', formData)
 		if (projectSlug) {
@@ -187,36 +176,6 @@ export function ContentWizard() {
 						isSaving={isSaving}
 					/>
 				)
-			case 'basics-translation':
-				return (
-					<WizardBasicsTranslationStep
-						onBack={goToPreviousStep}
-						onContinue={(data) => persistAndAdvance(data, 'basics-translation')}
-						onSaveLater={handleSaveLater}
-						isSaving={isSaving}
-					/>
-				)
-			case 'story-translation':
-				return (
-					<WizardStoryTranslationStep
-						onBack={goToPreviousStep}
-						onContinue={(data) => persistAndAdvance(data, 'story-translation')}
-						onSaveLater={handleSaveLater}
-						isSaving={isSaving}
-					/>
-				)
-			case 'highlights-translation':
-				return (
-					<WizardHighlightsStep
-						variant="translation"
-						onBack={goToPreviousStep}
-						onContinue={(translationHighlights) =>
-							persistAndAdvance({ translationHighlights }, 'highlights-translation')
-						}
-						onSaveLater={handleSaveLater}
-						isSaving={isSaving}
-					/>
-				)
 			case 'media':
 				return (
 					<WizardMediaStep
@@ -246,7 +205,6 @@ export function ContentWizard() {
 		handleLanguageContinue,
 		handleBasicsPrimaryContinue,
 		persistAndAdvance,
-		handleSaveLater,
 		handleFinish,
 		isSaving,
 		formData.translationHighlights,
@@ -257,12 +215,6 @@ export function ContentWizard() {
 			<ManageSectionHeader
 				title={t('projects.manage.contentWizard.title')}
 				description={t('projects.manage.contentWizard.subtitle')}
-				actions={
-					<p className="text-sm text-muted-foreground tabular-nums">
-						{t('projects.manage.contentWizard.translationProgress')}:{' '}
-						<span className="font-medium text-foreground">{translationStatus.overallPercent}%</span>
-					</p>
-				}
 			/>
 
 			<ContentWizardStepIndicator

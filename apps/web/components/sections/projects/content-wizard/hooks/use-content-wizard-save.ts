@@ -71,17 +71,7 @@ export function useContentWizardSave() {
 					return { projectId, projectSlug }
 				}
 
-				case 'basics-translation': {
-					await saveProject({
-						...data,
-						slug: projectSlug,
-						translation: sanitizeProjectTranslationForApi(data.translation),
-					})
-					return { projectId, projectSlug }
-				}
-
-				case 'story-primary':
-				case 'story-translation': {
+				case 'story-primary': {
 					if (!projectId || !projectSlug) {
 						throw new Error('Project must be created before saving story')
 					}
@@ -93,7 +83,6 @@ export function useContentWizardSave() {
 						story: data.pitchStory,
 						pitchDeck: data.pitchDeck,
 						videoUrl: data.pitchVideoUrl,
-						translation: data.pitchTranslation,
 					})
 					return { projectId, projectSlug }
 				}
@@ -103,37 +92,38 @@ export function useContentWizardSave() {
 						throw new Error('Project must be created before saving highlights')
 					}
 
-					// Primary step only — do not persist incomplete translation placeholders
 					await saveHighlights({
 						projectId,
 						projectSlug,
 						highlights: data.highlights,
-					})
-					return { projectId, projectSlug }
-				}
-
-				case 'highlights-translation': {
-					if (!projectId || !projectSlug) {
-						throw new Error('Project must be created before saving highlights')
-					}
-
-					await saveHighlights({
-						projectId,
-						projectSlug,
-						highlights: data.highlights,
-						translationHighlights: data.translationHighlights,
 					})
 					return { projectId, projectSlug }
 				}
 
 				case 'media':
-				case 'location':
+				case 'location': {
+					await saveProject({
+						...data,
+						slug: projectSlug,
+						translation: sanitizeProjectTranslationForApi(data.translation),
+					})
+					return { projectId, projectSlug }
+				}
+
 				case 'review': {
 					await saveProject({
 						...data,
 						slug: projectSlug,
 						translation: sanitizeProjectTranslationForApi(data.translation),
 					})
+					// Submit for admin review (non-blocking — failure should not prevent redirect)
+					if (projectSlug) {
+						fetch(`/api/projects/${projectSlug}/manage/status`, {
+							method: 'PATCH',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ status: 'review' }),
+						}).catch(() => {})
+					}
 					return { projectId, projectSlug }
 				}
 

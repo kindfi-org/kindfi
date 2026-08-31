@@ -2,6 +2,19 @@ import type { CanonicalKycStatus, KycDbStatus, KycReasonCode, KycRequiredAction 
 import { CANONICAL_KYC_STATUSES } from './types'
 
 /**
+ * Documentation entry mapping Didit provider status strings to canonical
+ * KindFi KYC statuses with explanatory notes.
+ */
+export interface DiditStatusDocumentationEntry {
+	/** Raw Didit status string as returned by the provider API */
+	diditStatus: string
+	/** Canonical KindFi KYC status this maps to */
+	canonical: CanonicalKycStatus
+	/** Human-readable explanation of the mapping and status meaning */
+	notes: string
+}
+
+/**
  * Didit session statuses observed in the KindFi integration and Didit v3 API.
  * Unknown values fall through to `pending` unless they match an alias below.
  */
@@ -28,11 +41,7 @@ export const DIDIT_STATUS_ALIASES: Record<string, CanonicalKycStatus> = {
 	manualreview: 'manual_review',
 }
 
-export const DIDIT_TO_CANONICAL_DOCUMENTATION: Array<{
-	diditStatus: string
-	canonical: CanonicalKycStatus
-	notes: string
-}> = [
+export const DIDIT_TO_CANONICAL_DOCUMENTATION: DiditStatusDocumentationEntry[] = [
 	{
 		diditStatus: 'Not Started',
 		canonical: 'not_started',
@@ -176,8 +185,12 @@ export const requiredActionForStatus = (
 	}
 }
 
+export const ACTIVE_DIDIT_SESSION_STATUSES: readonly CanonicalKycStatus[] = [
+	'not_started',
+	'pending',
+	'in_review',
+	'manual_review',
+] as const
+
 export const isActiveDiditSessionStatus = (status: CanonicalKycStatus): boolean =>
-	status === 'not_started' ||
-	status === 'pending' ||
-	status === 'in_review' ||
-	status === 'manual_review'
+	(ACTIVE_DIDIT_SESSION_STATUSES as readonly string[]).includes(status)

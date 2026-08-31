@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 
 interface DiditCallbackBody {
 	verificationSessionId: string
@@ -25,7 +26,7 @@ const isValidCallbackBody = (data: unknown): data is DiditCallbackBody =>
  * The browser-supplied status is stored only after the session is bound to
  * the authenticated user; Didit webhooks remain authoritative.
  */
-export async function POST(req: NextRequest) {
+async function diditCallbackHandler(req: NextRequest): Promise<NextResponse> {
 	let body: unknown
 	try {
 		body = await req.json()
@@ -69,3 +70,14 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ error: 'Failed to process callback' }, { status: 500 })
 	}
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'moderate',
+		identifier: async (req) => {
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? req.ip ?? 'anonymous'
+		},
+	},
+	diditCallbackHandler,
+)

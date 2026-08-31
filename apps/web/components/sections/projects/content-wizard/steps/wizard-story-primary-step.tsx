@@ -52,7 +52,7 @@ export function WizardStoryPrimaryStep({
 	isSaving = false,
 }: WizardStoryPrimaryStepProps) {
 	const { t } = useI18n()
-	const { formData } = useContentWizard()
+	const { formData, projectSlug } = useContentWizard()
 
 	const form = useForm<StoryFormValues>({
 		resolver: zodResolver(storyPrimaryFormSchema),
@@ -104,6 +104,7 @@ export function WizardStoryPrimaryStep({
 										value={field.value}
 										onChange={field.onChange}
 										error={form.formState.errors.pitchStory?.message}
+										projectSlug={projectSlug ?? undefined}
 									/>
 								</FormControl>
 								<FormDescription>

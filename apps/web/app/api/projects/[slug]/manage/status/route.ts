@@ -60,7 +60,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 
 		const { data: project, error: fetchError } = await supabaseServiceRole
 			.from('projects')
-			.select('id, status')
+			.select('id, status, title, kindler_id')
 			.eq('id', projectId)
 			.single()
 
@@ -110,6 +110,50 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 				previousState: currentStatus,
 				newState: nextStatus,
 			})
+		}
+
+		// Non-blocking notifications based on new status
+		if (nextStatus === 'review') {
+			// Notify all admins that a campaign needs review
+			const { data: creatorProfile } = await supabaseServiceRole
+				.from('profiles')
+				.select('display_name, full_name')
+				.eq('id', project.kindler_id)
+				.single()
+			const creatorName = creatorProfile?.display_name ?? creatorProfile?.full_name ?? undefined
+
+			import('~/lib/email/notifications/send-project-review-notification')
+				.then(({ sendProjectReviewRequestNotification }) =>
+					sendProjectReviewRequestNotification({
+						projectTitle: project.title,
+						projectSlug: slug,
+						creatorName,
+					}),
+				)
+				.catch((err) => logger.error('[Status PATCH] Admin review notification error:', err))
+		} else if (nextStatus === 'active') {
+			// Notify creator of approval and notify followers
+			import('~/lib/email/notifications/send-new-project-emails')
+				.then(({ sendProjectActivatedEmails }) =>
+					sendProjectActivatedEmails({
+						projectTitle: project.title,
+						projectSlug: slug,
+						creatorId: project.kindler_id,
+					}),
+				)
+				.catch((err) => logger.error('[Status PATCH] Activation notification error:', err))
+		} else if (nextStatus === 'rejected') {
+			// Notify creator of rejection
+			import('~/lib/email/notification-helpers')
+				.then(({ createInAppNotification }) =>
+					createInAppNotification({
+						userId: project.kindler_id,
+						title: 'Campaign rejected',
+						body: `Your campaign "${project.title}" was not approved. Please review feedback from the admin team and resubmit.`,
+						type: 'warning',
+					}),
+				)
+				.catch((err) => logger.error('[Status PATCH] Rejection notification error:', err))
 		}
 
 		return NextResponse.json({

@@ -1,6 +1,7 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { logger } from '@/lib/logger'
 import {
+	ACTIVE_DIDIT_SESSION_STATUSES,
 	canonicalFromDbStatus,
 	isActiveDiditSessionStatus,
 	toCanonicalKycStatus,
@@ -33,6 +34,9 @@ interface DiditSessionRow {
 	last_provider_event_at: string | null
 }
 
+const DIDIT_SESSION_COLUMNS =
+	'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at'
+
 const mapSessionRow = (row: DiditSessionRow): DiditSessionRecord => ({
 	id: row.id,
 	userId: row.user_id,
@@ -50,9 +54,7 @@ export const findDiditSessionBySessionId = async (
 ): Promise<DiditSessionRecord | null> => {
 	const { data, error } = await getKycSchemaClient()
 		.from('didit_sessions')
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.eq('session_id', sessionId)
 		.maybeSingle()
 
@@ -69,9 +71,7 @@ export const findLatestDiditSessionForUser = async (
 ): Promise<DiditSessionRecord | null> => {
 	const { data, error } = await getKycSchemaClient()
 		.from('didit_sessions')
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.eq('user_id', userId)
 		.order('created_at', { ascending: false })
 		.limit(1)
@@ -90,11 +90,9 @@ export const findActiveDiditSessionForUser = async (
 ): Promise<DiditSessionRecord | null> => {
 	const { data, error } = await getKycSchemaClient()
 		.from('didit_sessions')
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.eq('user_id', userId)
-		.in('canonical_status', ['not_started', 'pending', 'in_review', 'manual_review'])
+		.in('canonical_status', ACTIVE_DIDIT_SESSION_STATUSES)
 		.order('created_at', { ascending: false })
 		.limit(1)
 		.maybeSingle()
@@ -129,14 +127,61 @@ const findLatestKycReview = async (
 	return { id: data.id, status: data.status as KycDbStatus }
 }
 
+export const resolveKycStatus = (params: {
+	sessionStatus: CanonicalKycStatus | null
+	reviewStatus: KycDbStatus | null
+}): CanonicalKycStatus => {
+	if (
+		params.sessionStatus === 'approved' ||
+		canonicalFromDbStatus(params.reviewStatus) === 'approved'
+	) {
+		return 'approved'
+	}
+
+	return params.sessionStatus ?? canonicalFromDbStatus(params.reviewStatus)
+}
+
+export const hasAnyApprovedSessionForUser = async (userId: string): Promise<boolean> => {
+	const { data, error } = await getKycSchemaClient()
+		.from('didit_sessions')
+		.select('id')
+		.eq('user_id', userId)
+		.eq('canonical_status', 'approved')
+		.limit(1)
+		.maybeSingle()
+
+	if (error) {
+		logger.error('[kyc] Failed to check for approved sessions', {
+			error: error.message,
+		})
+		return false
+	}
+
+	return data !== null
+}
+
 export const getCanonicalKycStatusForUser = async (userId: string): Promise<CanonicalKycStatus> => {
 	const session = await findLatestDiditSessionForUser(userId)
-	if (session) {
-		return session.canonicalStatus
+	if (session?.canonicalStatus === 'approved') {
+		return 'approved'
+	}
+
+	/**
+	 * Guard: if any older session is approved, preserve that status even
+	 * when the newest session is non-approved (e.g. a new verification
+	 * attempt still in progress). A newer non-approved session must not
+	 * downgrade a previously approved user.
+	 */
+	if (await hasAnyApprovedSessionForUser(userId)) {
+		return 'approved'
 	}
 
 	const review = await findLatestKycReview(userId)
-	return canonicalFromDbStatus(review?.status)
+
+	return resolveKycStatus({
+		sessionStatus: session?.canonicalStatus ?? null,
+		reviewStatus: review?.status ?? null,
+	})
 }
 
 export const upsertKycReviewStatus = async (params: {
@@ -228,9 +273,7 @@ export const saveDiditSession = async (params: {
 			},
 			{ onConflict: 'session_id' },
 		)
-		.select(
-			'id, user_id, kyc_review_id, session_id, verification_url, didit_status, canonical_status, last_provider_event_id, last_provider_event_at',
-		)
+		.select(DIDIT_SESSION_COLUMNS)
 		.maybeSingle()
 
 	if (error) {
