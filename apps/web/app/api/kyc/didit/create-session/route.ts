@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
 import {
-	findActiveDiditSessionForUser,
+	findValidActiveDiditSessionForUser,
 	getCanonicalKycStatusForUser,
 	recordKycStatusTransition,
 	saveDiditSession,
@@ -44,7 +44,7 @@ async function createSessionHandler(req: NextRequest) {
 			})
 		}
 
-		const activeSession = await findActiveDiditSessionForUser(session.user.id)
+		const activeSession = await findValidActiveDiditSessionForUser(session.user.id)
 		if (activeSession?.verificationUrl) {
 			return NextResponse.json({
 				success: true,
