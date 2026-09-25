@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 import { ProfileDashboardV2 } from '~/components/sections/profile/dashboard/profile-dashboard-v2'
 import { ProfileDashboard } from '~/components/sections/profile/profile-dashboard'
 import { nextAuthOption } from '~/lib/auth/auth-options'
-import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
+import { getCanonicalKycStatusForUser } from '~/lib/kyc/session-service'
 import { requireCompletedOnboarding } from '~/lib/onboarding/guard'
 import { resolveSmartAccountAddress } from '~/lib/utils/wallet-address'
 
@@ -28,7 +28,6 @@ interface ProfilePageProps {
 	searchParams: Promise<{
 		kyc?: string
 		verificationSessionId?: string
-		status?: string
 		section?: string
 	}>
 }
@@ -42,17 +41,8 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 	await requireCompletedOnboarding('/profile')
 
 	const params = await searchParams
-	const kycCompleted = params.kyc === 'completed'
-
-	if (params.verificationSessionId && params.status && kycCompleted) {
-		await applyDiditStatusUpdate({
-			sessionId: params.verificationSessionId,
-			diditStatus: params.status,
-			userId: session.user.id,
-			source: 'callback',
-			providerEventAt: new Date(),
-		})
-	}
+	const kycCallback = params.kyc === 'completed' && Boolean(params.verificationSessionId)
+	const kycCompleted = (await getCanonicalKycStatusForUser(session.user.id)) === 'approved'
 
 	const supabase = await createSupabaseServerClient()
 	const { data: profileData, error } = await supabase
@@ -84,6 +74,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 				user={userPayload}
 				smartAccountAddress={smartAccountAddress}
 				kycCompleted={kycCompleted}
+				kycCallback={kycCallback}
 				initialSection={params.section}
 			/>
 		)
@@ -94,6 +85,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 			user={userPayload}
 			smartAccountAddress={smartAccountAddress}
 			kycCompleted={kycCompleted}
+			kycCallback={kycCallback}
 			initialSection={params.section}
 		/>
 	)

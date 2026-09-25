@@ -41,6 +41,7 @@ interface ProfileDashboardV2Props {
 	}
 	smartAccountAddress?: string | null
 	kycCompleted?: boolean
+	kycCallback?: boolean
 	initialSection?: string
 }
 
@@ -48,6 +49,7 @@ function ProfileDashboardV2Inner({
 	user,
 	smartAccountAddress = null,
 	kycCompleted = false,
+	kycCallback = false,
 	initialSection,
 }: ProfileDashboardV2Props) {
 	const { t } = useI18n()
@@ -68,34 +70,23 @@ function ProfileDashboardV2Inner({
 
 	// KYC callback toast
 	useEffect(() => {
-		if (!kycCompleted) return
+		if (!kycCallback) return
 
 		const urlParams = new URLSearchParams(window.location.search)
-		const status = urlParams.get('status')
 		const sessionId = urlParams.get('verificationSessionId')
 
-		if (!status || !sessionId) {
+		if (!sessionId) {
 			toast.info(t('profile.kycCallbackChecking'))
 			return
 		}
 
-		const normalizedStatus = status.replace(/\+/g, ' ')
-		if (normalizedStatus === 'Approved') {
-			toast.success(t('profile.kycCallbackApproved'))
-		} else if (normalizedStatus === 'Declined') {
-			toast.error(t('profile.kycCallbackDeclined'))
-		} else if (normalizedStatus === 'In Review' || normalizedStatus === 'In Progress') {
-			toast.info(t('profile.kycCallbackReview'))
-		} else {
-			toast.info(t('profile.kycCallbackChecking'))
-		}
+		toast.info(t('profile.kycCallbackChecking'))
 
 		fetch('/api/kyc/didit/callback', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				verificationSessionId: sessionId,
-				status: normalizedStatus,
 			}),
 		})
 			.then(async (res) => {
@@ -117,7 +108,7 @@ function ProfileDashboardV2Inner({
 			.catch(() => {
 				toast.error(t('profile.kycUpdateFailed'))
 			})
-	}, [kycCompleted, t])
+	}, [kycCallback, t])
 
 	const renderSection = () => {
 		switch (activeSection) {
