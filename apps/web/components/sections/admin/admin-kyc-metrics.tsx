@@ -74,7 +74,7 @@ export const AdminKycMetrics = ({ mode, metrics }: AdminKycMetricsProps) => {
 					value={metrics.statusResolutionFailures}
 				/>
 				<MetricTile
-					label="Didit sessions tracked"
+					label={`Didit sessions started in the last ${metrics.periodDays} days`}
 					value={metrics.statusDistribution.reduce((sum, row) => sum + row.count, 0)}
 				/>
 			</div>
@@ -107,9 +107,12 @@ export const AdminKycMetrics = ({ mode, metrics }: AdminKycMetricsProps) => {
 
 			<section className="space-y-3">
 				<h2 className="text-sm font-medium">Didit status distribution</h2>
+				<p className="text-xs text-muted-foreground">
+					Sessions started in the last {metrics.periodDays} days, grouped by their current status.
+				</p>
 				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 					{metrics.statusDistribution.length === 0 ? (
-						<p className="text-sm text-muted-foreground">No Didit sessions stored yet.</p>
+						<p className="text-sm text-muted-foreground">No Didit sessions started in this period.</p>
 					) : (
 						metrics.statusDistribution.map((row) => (
 							<MetricTile key={row.status} label={row.status} value={row.count} />
