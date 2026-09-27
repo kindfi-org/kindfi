@@ -48,11 +48,9 @@ export function MilestonesOverviewCard({ milestones }: MilestonesOverviewCardPro
 
 						return (
 							<div
-								key={
-									isSingle
-										? `single:${milestone.description}`
-										: `multi:${multiMilestone.amount}:${milestone.description}`
-								}
+								// SDK milestone types carry no stable identifier — position is the identity
+								// (matches the "Release N" label), so content-based keys can't collide.
+								key={isSingle ? `single:${index}` : `multi:${index}`}
 								className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
 							>
 								<div className="flex-1 space-y-2">
