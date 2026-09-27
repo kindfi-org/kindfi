@@ -48,16 +48,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 
 		const nextStatus = parsed.data.status as ProjectStatus
 
-		if (!auth.access.isPlatformAdmin && nextStatus === 'review') {
-			const kycDecision = await requireKycAuthorization({
-				userId,
-				action: 'submit_campaign',
-			})
-			if (!kycDecision.ok) {
-				return kycDecision.response
-			}
-		}
-
 		const { data: project, error: fetchError } = await supabaseServiceRole
 			.from('projects')
 			.select('id, status, title, kindler_id')
@@ -85,6 +75,19 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 				},
 				{ status: 403 },
 			)
+		}
+
+		// The transition is validated first: KYC authorization is only meaningful for a
+		// change the caller may actually make, so an invalid transition must be answered
+		// before any KYC work happens.
+		if (!auth.access.isPlatformAdmin && nextStatus === 'review') {
+			const kycDecision = await requireKycAuthorization({
+				userId,
+				action: 'submit_campaign',
+			})
+			if (!kycDecision.ok) {
+				return kycDecision.response
+			}
 		}
 
 		const { data: updated, error: updateError } = await supabaseServiceRole
