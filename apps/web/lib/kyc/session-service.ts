@@ -362,7 +362,20 @@ export const findPendingPollarWalletActivations = async (
 		}))
 }
 
-export const isPollarWalletActivationPending = async (userId: string): Promise<boolean> => {
+type PollarActivationReadState =
+	| { status: 'pending' }
+	| { status: 'not_pending' }
+	| { status: 'read_error'; error: string }
+
+/**
+ * Reads the persisted activation state, keeping a failed read distinct from a
+ * successful read that says "not pending". `retryPollarWalletActivation` needs
+ * that distinction: treating a read failure as "not pending" reports a spurious
+ * success and leaves the wallet unactivated for good.
+ */
+const readPollarWalletActivationState = async (
+	userId: string,
+): Promise<PollarActivationReadState> => {
 	const { data, error } = await supabaseServiceRole
 		.from('profiles')
 		.select('id, pollar_wallet_address, pollar_wallet_activated_at')
@@ -371,11 +384,17 @@ export const isPollarWalletActivationPending = async (userId: string): Promise<b
 
 	if (error) {
 		logger.error('[Pollar] Failed to read wallet activation state', { error: error.message })
-		return false
+		return { status: 'read_error', error: error.message }
 	}
 
-	if (!data) return false
-	return Boolean(data.pollar_wallet_address) && !data.pollar_wallet_activated_at
+	if (!data) return { status: 'not_pending' }
+	const pending = Boolean(data.pollar_wallet_address) && !data.pollar_wallet_activated_at
+	return { status: pending ? 'pending' : 'not_pending' }
+}
+
+export const isPollarWalletActivationPending = async (userId: string): Promise<boolean> => {
+	const state = await readPollarWalletActivationState(userId)
+	return state.status === 'pending'
 }
 
 /**
@@ -387,7 +406,19 @@ export const isPollarWalletActivationPending = async (userId: string): Promise<b
 export const retryPollarWalletActivation = async (
 	userId: string,
 ): Promise<PollarWalletActivationResult> => {
-	if (!(await isPollarWalletActivationPending(userId))) {
+	const pendingState = await readPollarWalletActivationState(userId)
+	if (pendingState.status === 'read_error') {
+		// A failed read is not evidence that activation completed. Report it as a
+		// failure so the retry job observes it and tries again, instead of claiming
+		// success and leaving the wallet unactivated indefinitely.
+		return {
+			userId,
+			activated: false,
+			reason: 'activation_failed',
+			error: pendingState.error,
+		}
+	}
+	if (pendingState.status === 'not_pending') {
 		return { userId, activated: true, reason: 'not_pending' }
 	}
 
