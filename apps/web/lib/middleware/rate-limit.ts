@@ -41,6 +41,7 @@
  * - `POST /api/contributions/create`
  * - `POST /api/governance/vote`
  * - `POST /api/kyc/didit/create-session`
+ * - `POST /api/kyc/authorize`
  *
  * ### Medium priority — `moderate` (10 req/min, 30 min block)
  * - `POST /api/comments`

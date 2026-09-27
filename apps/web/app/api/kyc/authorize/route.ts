@@ -5,6 +5,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { authorizeFinancialAction } from '~/lib/kyc/authorization-service'
 import { toKycDenialPayload } from '~/lib/kyc/denial'
 import { KYC_FINANCIAL_ACTIONS, type KycFinancialAction } from '~/lib/kyc/types'
+import { withRateLimit } from '~/lib/middleware/rate-limit'
 
 const authorizeBodySchema = (
 	body: unknown,
@@ -32,7 +33,7 @@ const authorizeBodySchema = (
  * Server-side authorization check for a financial action. Used by the UI as
  * a preflight; API routes still re-check. Never trusts a client KYC status.
  */
-export async function POST(req: NextRequest) {
+async function authorizeHandler(req: NextRequest) {
 	const session = await getServerSession(nextAuthOption)
 	if (!session?.user?.id) {
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -64,3 +65,15 @@ export async function POST(req: NextRequest) {
 
 	return NextResponse.json(result)
 }
+
+export const POST = withRateLimit(
+	{
+		preset: 'strict',
+		identifier: async (req) => {
+			const ip = req.headers.get('x-forwarded-for')
+			const session = await getServerSession(nextAuthOption)
+			return session?.user?.id ?? ip ?? 'anonymous'
+		},
+	},
+	authorizeHandler,
+)

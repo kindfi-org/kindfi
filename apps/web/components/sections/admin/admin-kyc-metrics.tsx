@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import type { KycEnforcementMetrics } from '~/lib/kyc/metrics'
 import type { KycEnforcementMode } from '~/lib/kyc/types'
@@ -24,7 +25,18 @@ const MetricTile = ({ label, value }: { label: string; value: number }) => (
 )
 
 export const AdminKycMetrics = ({ mode, metrics }: AdminKycMetricsProps) => {
+	const router = useRouter()
+	const searchParams = useSearchParams()
 	const [period, setPeriod] = useState(String(metrics.periodDays))
+
+	const handlePeriodChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		const newPeriod = event.target.value
+		setPeriod(newPeriod)
+
+		const params = new URLSearchParams(searchParams.toString())
+		params.set('days', newPeriod)
+		router.push(`?${params.toString()}`)
+	}
 
 	return (
 		<div className="space-y-8">
