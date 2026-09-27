@@ -84,7 +84,10 @@ export const applyDiditStatusUpdate = async (
 	const providerEventAt = toIso(input.providerEventAt)
 
 	const existing = await findDiditSessionBySessionId(input.sessionId)
-	const userId = existing?.userId ?? input.userId
+	if (existing && input.userId && existing.userId !== input.userId) {
+		return { applied: false, reason: 'not_found' }
+	}
+	const userId = existing?.userId
 
 	if (!userId) {
 		await recordWebhookEvent({

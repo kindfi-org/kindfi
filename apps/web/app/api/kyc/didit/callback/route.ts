@@ -3,28 +3,27 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { findDiditSessionBySessionId } from '~/lib/kyc/session-service'
 import { applyDiditStatusUpdate } from '~/lib/kyc/webhook-service'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { getDiditSessionStatus } from '~/lib/services/didit'
 
 interface DiditCallbackBody {
 	verificationSessionId: string
-	status: string
 }
 
 const isValidCallbackBody = (data: unknown): data is DiditCallbackBody =>
 	typeof data === 'object' &&
 	data !== null &&
 	typeof (data as DiditCallbackBody).verificationSessionId === 'string' &&
-	(data as DiditCallbackBody).verificationSessionId.length > 0 &&
-	typeof (data as DiditCallbackBody).status === 'string' &&
-	(data as DiditCallbackBody).status.length > 0
+	(data as DiditCallbackBody).verificationSessionId.length > 0
 
 /**
  * POST /api/kyc/didit/callback
  *
- * Handles callback from Didit with a status update after the user returns.
- * The browser-supplied status is stored only after the session is bound to
- * the authenticated user; Didit webhooks remain authoritative.
+ * Handles the browser return from Didit. The browser supplies only the
+ * session identifier: status is fetched from Didit and never trusted from
+ * query parameters or request JSON.
  */
 async function diditCallbackHandler(req: NextRequest): Promise<NextResponse> {
 	let body: unknown
@@ -35,10 +34,7 @@ async function diditCallbackHandler(req: NextRequest): Promise<NextResponse> {
 	}
 
 	if (!isValidCallbackBody(body)) {
-		return NextResponse.json(
-			{ error: 'Missing or invalid verificationSessionId or status' },
-			{ status: 400 },
-		)
+		return NextResponse.json({ error: 'Missing or invalid verificationSessionId' }, { status: 400 })
 	}
 
 	try {
@@ -48,13 +44,18 @@ async function diditCallbackHandler(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 		}
 
-		const { verificationSessionId, status } = body
+		const { verificationSessionId } = body
+		const storedSession = await findDiditSessionBySessionId(verificationSessionId)
+		if (!storedSession || storedSession.userId !== session.user.id) {
+			return NextResponse.json({ error: 'Verification session not found' }, { status: 404 })
+		}
+		const diditStatus = await getDiditSessionStatus(verificationSessionId)
 		const result = await applyDiditStatusUpdate({
 			sessionId: verificationSessionId,
-			diditStatus: status,
+			diditStatus: diditStatus.status,
 			userId: session.user.id,
 			source: 'callback',
-			providerEventAt: new Date(),
+			providerEventAt: diditStatus.updated_at ? new Date(diditStatus.updated_at) : new Date(),
 		})
 
 		const canonicalStatus = result.canonicalStatus ?? 'pending'
@@ -63,7 +64,7 @@ async function diditCallbackHandler(req: NextRequest): Promise<NextResponse> {
 			success: true,
 			status: canonicalStatus === 'approved' ? 'approved' : canonicalStatus,
 			canonicalStatus,
-			diditStatus: status,
+			diditStatus: diditStatus.status,
 		})
 	} catch (error) {
 		logger.error('Error processing Didit callback:', error)
@@ -76,7 +77,7 @@ export const POST = withRateLimit(
 		preset: 'moderate',
 		identifier: async (req) => {
 			const session = await getServerSession(nextAuthOption)
-			return session?.user?.id ?? req.ip ?? 'anonymous'
+			return session?.user?.id ?? req.headers.get('x-forwarded-for') ?? 'anonymous'
 		},
 	},
 	diditCallbackHandler,
