@@ -319,17 +319,165 @@ export const recordKycStatusTransition = async (params: {
 	}
 }
 
+export interface PendingPollarWalletActivation {
+	userId: string
+	walletAddress: string
+}
+
+export interface PollarWalletActivationResult {
+	userId: string
+	activated: boolean
+	reason?: 'not_pending' | 'activation_failed'
+	error?: string
+}
+
+/**
+ * A Pollar wallet address without an activation timestamp is the persisted
+ * "activation pending" state: `pollar_wallet_activated_at` is only written once
+ * Pollar confirms activation, so a failed attempt leaves this state behind and it
+ * can be retried later — no webhook replay or status transition required.
+ */
+export const findPendingPollarWalletActivations = async (
+	limit = 25,
+): Promise<PendingPollarWalletActivation[]> => {
+	const { data, error } = await supabaseServiceRole
+		.from('profiles')
+		.select('id, pollar_wallet_address')
+		.not('pollar_wallet_address', 'is', null)
+		.is('pollar_wallet_activated_at', null)
+		.order('updated_at', { ascending: false })
+		.limit(limit)
+
+	if (error) {
+		logger.error('[Pollar] Failed to load pending wallet activations', { error: error.message })
+		return []
+	}
+
+	const rows = (data ?? []) as Array<{ id: string; pollar_wallet_address: string | null }>
+
+	return rows
+		.filter((row) => Boolean(row.pollar_wallet_address))
+		.map((row) => ({
+			userId: row.id,
+			walletAddress: row.pollar_wallet_address as string,
+		}))
+}
+
+type PollarActivationReadState =
+	| { status: 'pending' }
+	| { status: 'not_pending' }
+	| { status: 'read_error'; error: string }
+
+/**
+ * Reads the persisted activation state, keeping a failed read distinct from a
+ * successful read that says "not pending". `retryPollarWalletActivation` needs
+ * that distinction: treating a read failure as "not pending" reports a spurious
+ * success and leaves the wallet unactivated for good.
+ */
+const readPollarWalletActivationState = async (
+	userId: string,
+): Promise<PollarActivationReadState> => {
+	const { data, error } = await supabaseServiceRole
+		.from('profiles')
+		.select('id, pollar_wallet_address, pollar_wallet_activated_at')
+		.eq('id', userId)
+		.maybeSingle()
+
+	if (error) {
+		logger.error('[Pollar] Failed to read wallet activation state', { error: error.message })
+		return { status: 'read_error', error: error.message }
+	}
+
+	if (!data) return { status: 'not_pending' }
+	const pending = Boolean(data.pollar_wallet_address) && !data.pollar_wallet_activated_at
+	return { status: pending ? 'pending' : 'not_pending' }
+}
+
+export const isPollarWalletActivationPending = async (userId: string): Promise<boolean> => {
+	const state = await readPollarWalletActivationState(userId)
+	return state.status === 'pending'
+}
+
+/**
+ * Retries a deferred Pollar wallet activation and reports the outcome instead of
+ * swallowing it, so a retry job or a later status read can observe the failure and
+ * try again. Never throws: a failed activation must not invalidate the approved
+ * KYC status, which is already persisted and never rolled back here.
+ */
+export const retryPollarWalletActivation = async (
+	userId: string,
+): Promise<PollarWalletActivationResult> => {
+	const pendingState = await readPollarWalletActivationState(userId)
+	if (pendingState.status === 'read_error') {
+		// A failed read is not evidence that activation completed. Report it as a
+		// failure so the retry job observes it and tries again, instead of claiming
+		// success and leaving the wallet unactivated indefinitely.
+		return {
+			userId,
+			activated: false,
+			reason: 'activation_failed',
+			error: pendingState.error,
+		}
+	}
+	if (pendingState.status === 'not_pending') {
+		return { userId, activated: true, reason: 'not_pending' }
+	}
+
+	try {
+		const { activatePollarWalletForProfile } = await import('~/lib/pollar/bridge/link-pollar-user')
+		await activatePollarWalletForProfile(userId)
+		return { userId, activated: true }
+	} catch (activationError) {
+		return {
+			userId,
+			activated: false,
+			reason: 'activation_failed',
+			error:
+				activationError instanceof Error
+					? activationError.message
+					: 'Unknown Pollar activation error',
+		}
+	}
+}
+
+/**
+ * Job entry point: sweeps pending Pollar wallet activations and retries each one.
+ * Safe to run repeatedly — profiles activated by another path are skipped.
+ */
+export const runPollarWalletActivationRetryJob = async (
+	limit = 25,
+): Promise<{ attempted: number; activated: number; failed: number }> => {
+	const pending = await findPendingPollarWalletActivations(limit)
+	let activated = 0
+	let failed = 0
+
+	for (const entry of pending) {
+		const result = await retryPollarWalletActivation(entry.userId)
+		if (result.activated) {
+			activated += 1
+		} else {
+			failed += 1
+		}
+	}
+
+	return { attempted: pending.length, activated, failed }
+}
+
 export const activatePollarIfApproved = async (
 	userId: string,
 	canonicalStatus: CanonicalKycStatus,
 ): Promise<void> => {
 	if (canonicalStatus !== 'approved') return
 
-	try {
-		const { activatePollarWalletForProfile } = await import('~/lib/pollar/bridge/link-pollar-user')
-		await activatePollarWalletForProfile(userId)
-	} catch (activationError) {
-		logger.warn('[Pollar] Deferred wallet activation after KYC failed', activationError)
+	// A failure here is recoverable, not fatal: the profile keeps its pending
+	// activation state so the retry job or the wallet-activate endpoint can finish
+	// the activation without another webhook or status transition.
+	const result = await retryPollarWalletActivation(userId)
+	if (!result.activated) {
+		logger.warn('[Pollar] Deferred wallet activation after KYC failed', {
+			userId,
+			error: result.error,
+		})
 	}
 }
 
