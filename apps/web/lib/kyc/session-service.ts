@@ -9,6 +9,7 @@ import {
 } from './status'
 import { getKycSchemaClient } from './supabase-kyc-client'
 import type { CanonicalKycStatus, KycDbStatus } from './types'
+import { getDiditSessionStatus } from '~/lib/services/didit'
 
 export interface DiditSessionRecord {
 	id: string
@@ -330,4 +331,68 @@ export const activatePollarIfApproved = async (
 	} catch (activationError) {
 		logger.warn('[Pollar] Deferred wallet activation after KYC failed', activationError)
 	}
+}
+
+/**
+ * Validates whether a Didit session is still valid for reuse.
+ * Checks the session status from Didit API to ensure it hasn't expired or been abandoned.
+ *
+ * @param sessionId - The Didit session ID to validate
+ * @returns true if the session is valid for reuse, false otherwise
+ */
+export const isDiditSessionValidForReuse = async (
+	sessionId: string,
+): Promise<boolean> => {
+	try {
+		const sessionStatus = await getDiditSessionStatus(sessionId)
+
+		// Session is invalid if it's abandoned or expired
+		if (sessionStatus.status === 'Abandoned' || sessionStatus.status === 'Declined') {
+			logger.info('[kyc] Didit session is not valid for reuse', {
+				sessionId,
+				status: sessionStatus.status,
+			})
+			return false
+		}
+
+		// Session is valid if it's still in progress or approved
+		return true
+	} catch (error) {
+		// If we can't fetch the session status, assume it's not valid to be safe
+		logger.warn('[kyc] Failed to validate Didit session status, assuming invalid', {
+			sessionId,
+			error: error instanceof Error ? error.message : String(error),
+		})
+		return false
+	}
+}
+
+/**
+ * Finds an active Didit session for the user that is still valid for reuse.
+ * Validates the session status against Didit API to ensure it hasn't expired.
+ *
+ * @param userId - The user ID to find the session for
+ * @returns The valid active session record, or null if none exists
+ */
+export const findValidActiveDiditSessionForUser = async (
+	userId: string,
+): Promise<DiditSessionRecord | null> => {
+	const activeSession = await findActiveDiditSessionForUser(userId)
+
+	if (!activeSession?.verificationUrl) {
+		return null
+	}
+
+	// Validate the session is still active in Didit
+	const isValid = await isDiditSessionValidForReuse(activeSession.sessionId)
+
+	if (!isValid) {
+		logger.info('[kyc] Active session is expired or abandoned, will create new session', {
+			userId,
+			sessionId: activeSession.sessionId,
+		})
+		return null
+	}
+
+	return activeSession
 }
