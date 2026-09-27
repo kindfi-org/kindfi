@@ -85,6 +85,7 @@ export const KycRequiredGate = ({ open, onOpenChange, userId, denial }: KycRequi
 			const callbackUrl = `${window.location.origin}/profile?kyc=completed`
 			const result = await createSession(callbackUrl)
 			if (result.success && result.verificationUrl) {
+				onOpenChange(false)
 				setVerificationUrl(result.verificationUrl)
 				setShowRedirectModal(true)
 			} else {
