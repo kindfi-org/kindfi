@@ -41,6 +41,10 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 		if (shouldRefresh) refreshStatus()
 	}, [shouldRefresh, refreshStatus])
 
+	const handleRefreshStatus = () => {
+		refreshStatus()
+	}
+
 	const handleStartKYC = async () => {
 		setIsCreating(true)
 		try {
@@ -133,7 +137,7 @@ export function KYCCard({ userId, shouldRefresh = false }: KYCCardProps) {
 						variant="outline"
 						size="sm"
 						className="mt-2 w-full rounded-full"
-						onClick={() => refreshStatus()}
+						onClick={handleRefreshStatus}
 						disabled={kycStatus.isLoading}
 					>
 						{t('profile.kycGateRecheck')}
