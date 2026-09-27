@@ -58,6 +58,10 @@ interface SessionStatusRow {
 /**
  * Aggregate monitor-mode metrics. Counts only authorization and webhook
  * metadata — never identity documents or Didit decision payloads.
+ *
+ * Every figure — including the Didit session totals and status distribution —
+ * is scoped to the same reporting period: authorization events and webhook
+ * failures by their own timestamps, and Didit sessions by `created_at`.
  */
 export const getKycEnforcementMetrics = async (sinceDays = 30): Promise<KycEnforcementMetrics> => {
 	const client = getKycSchemaClient()
@@ -73,7 +77,10 @@ export const getKycEnforcementMetrics = async (sinceDays = 30): Promise<KycEnfor
 			.select('id')
 			.in('processing_result', ['unmapped', 'error'])
 			.gte('processed_at', since),
-		client.from('didit_sessions').select('canonical_status'),
+		client
+			.from('didit_sessions')
+			.select('canonical_status')
+			.gte('created_at', since),
 	])
 
 	if (eventsResult.error) {

@@ -11,7 +11,6 @@ import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
 import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
 import { zodResolver } from '~/lib/form/zod-resolver'
-import { requestKycAuthorization } from '~/lib/kyc/client'
 import { trackOnboardingPath } from '~/lib/pollar/analytics'
 import {
 	CAMPAIGN_COMPLETE_DONATION_MESSAGE,
@@ -95,14 +94,8 @@ export function useProjectSidebarFormSubmit({
 		}
 
 		try {
-			const kyc = await requestKycAuthorization({
-				action: 'donate',
-				amount: data.investmentAmount,
-			})
-			if (!kyc.allowed) {
-				kycGate.showDenial(kyc.denial)
-				return
-			}
+			const allowed = await kycGate.preflight('donate', { amount: data.investmentAmount })
+			if (!allowed) return
 
 			const signer = await ensureTrustlessSigner()
 			if (data.investmentAmount > 1_000_000) {
