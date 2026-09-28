@@ -5,7 +5,16 @@ import type { KycDenialPayload } from '~/lib/kyc/client'
 import { parseKycDenialResponse, requestKycAuthorization } from '~/lib/kyc/client'
 import type { KycFinancialAction } from '~/lib/kyc/types'
 
-export const useKycRequiredGate = (userId: string) => {
+/**
+ * KYC gate hook.
+ *
+ * `userId` is the resolved authenticated principal. `null` means "the principal is
+ * not resolved yet": callers must not fire a gated request while
+ * `isPrincipalResolved` is `false`, and must not treat `null` as "the gate is
+ * disabled". Callers that can only hold a string are unaffected - the type
+ * parameter keeps their `userId` a plain `string`.
+ */
+export const useKycRequiredGate = <UserId extends string | null>(userId: UserId) => {
 	const [denial, setDenial] = useState<KycDenialPayload | null>(null)
 	const [open, setOpen] = useState(false)
 
@@ -40,6 +49,8 @@ export const useKycRequiredGate = (userId: string) => {
 		setOpen,
 		denial,
 		userId,
+		/** `false` only when the principal is unresolved (`null`), never for an empty string. */
+		isPrincipalResolved: userId !== null,
 		showDenial,
 		handleDeniedResponse,
 		preflight,

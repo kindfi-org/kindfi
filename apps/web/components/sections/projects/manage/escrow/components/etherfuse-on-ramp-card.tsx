@@ -18,6 +18,7 @@ import {
 import { KycRequiredGate } from '~/components/sections/kyc/kyc-required-gate'
 import { useEtherfuseRampAssets } from '~/hooks/use-etherfuse-ramp-assets'
 import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
+import { useResolvedUserId } from '~/hooks/use-resolved-user-id'
 import { isKycDenialPayload } from '~/lib/kyc/client'
 
 interface EtherfuseOnRampCardProps {
@@ -42,7 +43,12 @@ export function EtherfuseOnRampCard({
 	)
 	const [isProcessing, setIsProcessing] = useState(false)
 	const [statusPage, setStatusPage] = useState<string | null>(null)
-	const kycGate = useKycRequiredGate(userId ?? '')
+	const {
+		userId: resolvedUserId,
+		isLoading: isResolvingUserId,
+		error: userIdError,
+	} = useResolvedUserId(userId)
+	const kycGate = useKycRequiredGate(resolvedUserId)
 
 	useEffect(() => {
 		if (assets.length === 0) {
@@ -66,11 +72,14 @@ export function EtherfuseOnRampCard({
 			return
 		}
 
+		if (!resolvedUserId) {
+			logger.error('Unable to resolve authenticated user for on-ramp', userIdError)
+			toast.error('Unable to resolve your account. Please sign in again.')
+			return
+		}
+
 		try {
 			setIsProcessing(true)
-
-			const resolvedUserId =
-				userId ?? (await fetch('/api/auth/user').then((res) => res.json())).user.id
 
 			const response = await fetch('/api/etherfuse/on-ramp', {
 				method: 'POST',
@@ -226,7 +235,13 @@ export function EtherfuseOnRampCard({
 
 							<Button
 								onClick={handleOnRamp}
-								disabled={!amount || Number(amount) <= 0 || !targetAsset || isProcessing}
+								disabled={
+									!amount ||
+									Number(amount) <= 0 ||
+									!targetAsset ||
+									isProcessing ||
+									isResolvingUserId
+								}
 								className="w-full"
 								size="lg"
 							>
@@ -249,7 +264,7 @@ export function EtherfuseOnRampCard({
 			<KycRequiredGate
 				open={kycGate.open}
 				onOpenChange={kycGate.setOpen}
-				userId={kycGate.userId}
+				userId={resolvedUserId ?? ''}
 				denial={kycGate.denial}
 			/>
 		</>
