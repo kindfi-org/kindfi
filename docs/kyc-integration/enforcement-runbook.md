@@ -89,7 +89,9 @@ KYC_ENFORCED_ACTIONS=send_assets,use_off_ramp
 
 Enforced mode requires canonical Didit status `approved` for the configured
 actions. Direct API calls cannot bypass this check; each server entry point
-calls `authorizeFinancialAction`.
+calls `authorizeFinancialAction`. Signed XDR broadcasts through Trustless Work
+`helper/send-transaction` classify the transaction first and authorize the
+matching action before any submission (upstream broadcast or Soroban fallback).
 
 ## 5. Redeploy or restart
 
@@ -129,3 +131,8 @@ the mode is `monitor` or `disabled`.
 | `send_assets` | `POST /api/stellar/transfer/prepare`, `POST /api/stellar/transfer/submit`, `POST /api/kyc/authorize` (wallet send preflight) |
 | `use_on_ramp` | `POST /api/etherfuse/on-ramp` |
 | `use_off_ramp` | `POST /api/etherfuse/off-ramp` |
+
+Trustless Work `helper/send-transaction` (`POST /api/trustless-work/helper/send-transaction`)
+classifies the signed XDR before broadcast and authorizes the matching action:
+`releaseFunds` invokes authorize `release_escrow_funds`, `fundEscrow` invokes
+`donate`, and classic payments or unknown payloads authorize `send_assets`.
