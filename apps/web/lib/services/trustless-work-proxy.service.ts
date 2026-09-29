@@ -13,6 +13,8 @@ import {
 	isReleaseEscrowProxyPath,
 } from '~/lib/config/trustless-work-proxy.paths'
 import { requireKycAuthorization } from '~/lib/kyc/denial'
+import { getKycEnforcementMode } from '~/lib/kyc/enforcement-config'
+import { classifySignedXdrAction } from '~/lib/services/classify-trustless-signed-xdr.service'
 import {
 	isFundEscrowProxyPath,
 	validateFundEscrowProxyRequest,
@@ -90,10 +92,19 @@ const isTxBadAuthUpstreamBody = (body: string): boolean => {
 const handleSendTransaction = async (
 	headers: Record<string, string>,
 	body: string | undefined,
+	userId: string | undefined,
 ): Promise<Response> => {
 	const signedXdr = readSignedXdrFromBody(body)
 	if (!signedXdr) {
 		return NextResponse.json({ statusCode: 400, message: 'signedXdr is required' }, { status: 400 })
+	}
+
+	if (userId) {
+		const action = classifySignedXdrAction(signedXdr)
+		const kycDecision = await requireKycAuthorization({ userId, action })
+		if (!kycDecision.ok) return kycDecision.response
+	} else if (getKycEnforcementMode() === 'enforced') {
+		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 	}
 
 	const upstreamUrl = `${getTrustlessWorkApiBaseUrl()}/helper/send-transaction`
@@ -213,7 +224,7 @@ export async function proxyTrustlessWorkRequest(
 	const body = method !== 'GET' && method !== 'HEAD' ? await request.text() : undefined
 
 	if (path === 'helper/send-transaction' && method === 'POST') {
-		return handleSendTransaction(headers, body)
+		return handleSendTransaction(headers, body, userId)
 	}
 
 	if (isFundEscrowProxyPath(path, method)) {
