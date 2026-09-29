@@ -52,6 +52,12 @@ const resolveWebhookEventId = (jsonBody: DiditWebhookEvent): string | null => {
  *
  * Handles Didit webhook events for verification status updates.
  * Signatures are verified before any payload is processed.
+ *
+ * Retry contract: a processing failure returns a non-2xx status so Didit
+ * redelivers the event. The idempotency record for a failed event is released by
+ * the webhook service, so the redelivery actually re-runs the status
+ * application instead of being rejected as a duplicate. Events that were already
+ * applied stay deduplicated and still answer 200.
  */
 export async function POST(req: NextRequest) {
 	try {
@@ -110,6 +116,17 @@ export async function POST(req: NextRequest) {
 				sessionId: jsonBody.session_id,
 				webhookType: jsonBody.webhook_type,
 			})
+		}
+
+		if (!result.applied && result.reason === 'error') {
+			// Nothing was applied and the idempotency record has been released, so
+			// the provider must retry: a 2xx here would silently drop the status
+			// transition.
+			logger.error('[kyc] Didit webhook processing failed; asking the provider to retry', {
+				sessionId: jsonBody.session_id,
+				webhookType: jsonBody.webhook_type,
+			})
+			return NextResponse.json({ received: false, error: 'Webhook processing failed' }, { status: 500 })
 		}
 
 		return NextResponse.json({ received: true })
