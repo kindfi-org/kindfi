@@ -12,6 +12,7 @@ import { isCreatorProfileRole } from '~/lib/profile/is-creator-profile-role'
 import { cn } from '~/lib/utils'
 import { AccountInfoCard } from './cards/account-info-card'
 import { CountryOfResidenceCard } from './cards/country-of-residence-card'
+import { NotificationPermissionCard } from './cards/notification-permission-card'
 import { PersonalInfoCard } from './cards/personal-info-card'
 import { profileFadeUp } from './profile-motion'
 import { ProfileViewSkeleton } from './skeletons'
@@ -275,6 +276,7 @@ const ProfileSectionTabsInner = ({
 							createdAt={user.created_at}
 							slug={user.profile?.slug ?? ''}
 						/>
+						<NotificationPermissionCard />
 					</div>
 				) : null}
 			</TabsContent>

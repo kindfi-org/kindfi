@@ -241,6 +241,25 @@ export const profile = {
 	countryOfResidenceUpdated: 'País de residencia actualizado',
 	countryOfResidenceUpdateFailed: 'No se pudo actualizar el país de residencia',
 	selectCountryPlaceholder: 'Selecciona un país',
+	browserNotificationsTitle: 'Notificaciones del navegador',
+	browserNotificationsDescription:
+		'Recibe alertas en este dispositivo sobre actualizaciones de campañas, hitos y actividad de tu cuenta.',
+	browserNotificationsEnable: 'Activar notificaciones del navegador',
+	browserNotificationsRequesting: 'Esperando a tu navegador...',
+	browserNotificationsStatusChecking: 'Comprobando compatibilidad con notificaciones...',
+	browserNotificationsStatusDefault:
+		'Las notificaciones del navegador están desactivadas en este dispositivo.',
+	browserNotificationsStatusGranted:
+		'Las notificaciones del navegador están activadas en este dispositivo.',
+	browserNotificationsStatusDenied:
+		'Las notificaciones del navegador están bloqueadas. Para activarlas, permite las notificaciones de este sitio en la configuración de tu navegador.',
+	browserNotificationsStatusUnsupported: 'Este navegador no admite notificaciones.',
+	browserNotificationsEnabled: 'Notificaciones del navegador activadas',
+	browserNotificationsBlocked: 'Se bloquearon las notificaciones del navegador',
+	browserNotificationsDismissed:
+		'No se hicieron cambios. Puedes activar las notificaciones en cualquier momento.',
+	browserNotificationsRequestFailed:
+		'No se pudo solicitar el permiso de notificaciones. Inténtalo de nuevo.',
 	edit: 'Editar',
 	cancel: 'Cancelar',
 	saveChanges: 'Guardar cambios',
