@@ -15,10 +15,15 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
-	const [filePreview, setFilePreview] = useState<string | null>(null)
+	const [filePreview, setFilePreview] = useState<{ file: File; url: string } | null>(null)
 
-	// Derive preview synchronously for string values; file values use the managed file preview
-	const preview = typeof value === 'string' ? value : value instanceof File ? filePreview : null
+	// Derive preview synchronously for string values; file values use the managed file preview matching current File
+	const preview =
+		typeof value === 'string'
+			? value
+			: value instanceof File && filePreview?.file === value
+				? filePreview.url
+				: null
 
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
@@ -57,7 +62,7 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 
 		reader.onload = () => {
 			if (!isCancelled) {
-				setFilePreview(reader.result as string)
+				setFilePreview({ file: value, url: reader.result as string })
 			}
 		}
 

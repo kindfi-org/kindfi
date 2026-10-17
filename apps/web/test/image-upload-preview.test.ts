@@ -1,177 +1,125 @@
 import { describe, expect, it } from 'bun:test'
+import React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { ImageUpload } from '../components/sections/projects/create/image-upload'
 
-describe('ImageUpload preview management', () => {
-	it('synchronously derives preview for string URL values without async delay', () => {
-		const stringUrl = 'https://images.unsplash.com/photo-project.jpg'
-		// In ImageUpload: const preview = typeof value === 'string' ? value : value instanceof File ? filePreview : null
-		const derivePreview = (value: File | string | null, filePreview: string | null) =>
-			typeof value === 'string' ? value : value instanceof File ? filePreview : null
+describe('ImageUpload component and preview lifecycle', () => {
+	it('renders preview image for existing string URL values without delay', () => {
+		const html = renderToStaticMarkup(
+			React.createElement(ImageUpload, {
+				value: 'https://images.unsplash.com/photo-banner.jpg',
+				onChange: () => {},
+			}),
+		)
 
-		expect(derivePreview(stringUrl, null)).toBe(stringUrl)
-		expect(derivePreview(null, 'stale-preview')).toBe(null)
+		expect(html).toContain('src="https://images.unsplash.com/photo-banner.jpg"')
+		expect(html).toContain('alt="Project preview"')
+		expect(html).toContain('aria-label="Remove image"')
 	})
 
-	it('runs exactly one managed preview operation per selected file', async () => {
-		let operationCount = 0
-		let activePreview: string | null = null
+	it('renders dropzone when value is null', () => {
+		const html = renderToStaticMarkup(
+			React.createElement(ImageUpload, {
+				value: null,
+				onChange: () => {},
+			}),
+		)
 
-		// Simulates the single managed preview lifecycle
-		class ManagedPreviewController {
-			private isCancelled = false
-			private activeReader: { abort: () => void } | null = null
+		expect(html).toContain('Upload project image')
+		expect(html).toContain('Drag and drop or click to select')
+		expect(html).not.toContain('Project preview')
+	})
 
-			public setFile(file: File | null) {
-				// Cleanup previous in-flight operation
-				if (this.activeReader) {
-					this.isCancelled = true
-					this.activeReader.abort()
-					this.activeReader = null
-				}
+	it('renders validation error message when error prop is provided', () => {
+		const html = renderToStaticMarkup(
+			React.createElement(ImageUpload, {
+				value: null,
+				onChange: () => {},
+				error: 'File size exceeds 5MB limit',
+			}),
+		)
 
-				if (!file) {
-					activePreview = null
-					return
-				}
+		expect(html).toContain('File size exceeds 5MB limit')
+		expect(html).toContain('text-destructive')
+	})
 
-				this.isCancelled = false
-				operationCount++
+	it('does not render premature preview for a pending File before read completion', () => {
+		const file = new File(['mock content'], 'pending.png', { type: 'image/png' })
+		const html = renderToStaticMarkup(
+			React.createElement(ImageUpload, {
+				value: file,
+				onChange: () => {},
+			}),
+		)
 
-				let aborted = false
-				const reader = {
-					abort: () => {
-						aborted = true
-					},
-				}
-				this.activeReader = reader
+		// Before reader finishes, preview should be null and placeholder rendered
+		expect(html).toContain('pending.png')
+		expect(html).not.toContain('<img')
+	})
 
-				// Simulating async file read
-				return new Promise<void>((resolve) => {
-					setTimeout(() => {
-						if (!this.isCancelled && !aborted) {
-							activePreview = `data:image/png;base64,mock-${file.name}`
-						}
-						resolve()
-					}, 10)
-				})
-			}
+	it('clears preview when transitioning from File A to pending File B', () => {
+		const fileA = new File(['alpha'], 'a.png', { type: 'image/png' })
+		const fileB = new File(['beta'], 'b.png', { type: 'image/png' })
+
+		// State simulation matching ImageUpload:
+		// preview = typeof value === 'string' ? value : value instanceof File && filePreview?.file === value ? filePreview.url : null
+		let filePreview: { file: File; url: string } | null = {
+			file: fileA,
+			url: 'data:image/png;base64,alpha-data',
 		}
 
-		const controller = new ManagedPreviewController()
-		const fileA = new File(['alpha'], 'alpha.png', { type: 'image/png' })
+		let currentValue: File | string | null = fileA
+		const getPreview = () =>
+			typeof currentValue === 'string'
+				? currentValue
+				: currentValue instanceof File && filePreview?.file === currentValue
+					? filePreview.url
+					: null
 
-		await controller.setFile(fileA)
+		// While File A is active
+		expect(getPreview()).toBe('data:image/png;base64,alpha-data')
 
-		expect(operationCount).toBe(1)
-		expect(activePreview).toBe('data:image/png;base64,mock-alpha.png')
+		// When user selects File B (before File B finishes reading)
+		currentValue = fileB
+		// Preview must immediately invalidate File A and evaluate to null
+		expect(getPreview()).toBe(null)
+
+		// When File B read completes
+		filePreview = { file: fileB, url: 'data:image/png;base64,beta-data' }
+		expect(getPreview()).toBe('data:image/png;base64,beta-data')
 	})
 
-	it('ensures rapid A -> B selection always shows B and aborts stale A', async () => {
-		let activePreview: string | null = null
-		const abortedReaders: string[] = []
-
-		class ManagedPreviewLifecycle {
-			private isCancelled = false
-			private currentFile: File | null = null
-			private activeAbort: (() => void) | null = null
-
-			public selectFile(file: File, delayMs: number): Promise<void> {
-				// Abort previous read
-				if (this.activeAbort) {
-					this.isCancelled = true
-					this.activeAbort()
-					this.activeAbort = null
-				}
-
-				this.isCancelled = false
-				this.currentFile = file
-
-				return new Promise<void>((resolve) => {
-					const fileName = file.name
-					let wasAborted = false
-
-					this.activeAbort = () => {
-						wasAborted = true
-						abortedReaders.push(fileName)
-					}
-
-					setTimeout(() => {
-						if (!this.isCancelled && !wasAborted && this.currentFile === file) {
-							activePreview = `data:image/png;base64,mock-${file.name}`
-						}
-						resolve()
-					}, delayMs)
-				})
-			}
-
-			public remove(): void {
-				if (this.activeAbort) {
-					this.isCancelled = true
-					this.activeAbort()
-					this.activeAbort = null
-				}
-				this.currentFile = null
-				activePreview = null
-			}
-		}
-
-		const lifecycle = new ManagedPreviewLifecycle()
-		const fileA = new File(['alpha'], 'file-a.png', { type: 'image/png' })
-		const fileB = new File(['beta'], 'file-b.png', { type: 'image/png' })
-
-		// Rapid selection: File A is started with a longer delay (50ms)
-		const promiseA = lifecycle.selectFile(fileA, 50)
-
-		// File B is selected immediately before File A completes, with shorter delay (10ms)
-		const promiseB = lifecycle.selectFile(fileB, 10)
-
-		await Promise.all([promiseA, promiseB])
-
-		// File A must have been aborted
-		expect(abortedReaders).toContain('file-a.png')
-		// Active preview must strictly be File B
-		expect(activePreview).toBe('data:image/png;base64,mock-file-b.png')
-	})
-
-	it('clears preview immediately on removal and prevents delayed preview completion from reviving it', async () => {
-		let activePreview: string | null = null
-		let cancelled = false
-		let aborted = false
-
+	it('clears preview immediately on removal and prevents delayed reads from reviving it', async () => {
 		const file = new File(['content'], 'delayed.png', { type: 'image/png' })
+		let isCancelled = false
+		let filePreview: { file: File; url: string } | null = null
+		let currentValue: File | string | null = file
 
-		// Start reading file with delay
+		const getPreview = () =>
+			typeof currentValue === 'string'
+				? currentValue
+				: currentValue instanceof File && filePreview?.file === currentValue
+					? filePreview.url
+					: null
+
+		// Simulate in-flight reader
 		const readPromise = new Promise<void>((resolve) => {
 			setTimeout(() => {
-				if (!cancelled && !aborted && file.size > 0) {
-					activePreview = `data:image/png;base64,${file.name}`
+				if (!isCancelled) {
+					filePreview = { file, url: 'data:image/png;base64,delayed-content' }
 				}
 				resolve()
-			}, 30)
+			}, 25)
 		})
 
-		// Before reading finishes, user removes the image
-		cancelled = true
-		aborted = true
-		activePreview = null
+		// User removes image before read finishes
+		isCancelled = true
+		currentValue = null
+		filePreview = null
 
 		await readPromise
 
-		// Preview must remain null, never resurrected by the delayed reader
-		expect(activePreview).toBe(null)
-	})
-
-	it('preserves existing string URL values and clears immediately on removal', () => {
-		let value: File | string | null = 'https://kindfi.org/existing-project.jpg'
-		let filePreview: string | null = null
-
-		const getPreview = () =>
-			typeof value === 'string' ? value : value instanceof File ? filePreview : null
-
-		expect(getPreview()).toBe('https://kindfi.org/existing-project.jpg')
-
-		// Simulate removeImage()
-		value = null
-		filePreview = null
+		// Preview must remain null
 		expect(getPreview()).toBe(null)
 	})
 })
