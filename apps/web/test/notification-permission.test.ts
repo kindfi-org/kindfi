@@ -14,7 +14,7 @@ type PromptBehaviour = (
 
 function createNotificationApi(
 	permission: NotificationPermission,
-	behaviour: PromptBehaviour = async () => 'granted',
+	behaviour: PromptBehaviour = async () => 'granted' as const,
 ) {
 	const api = {
 		permission,
@@ -93,7 +93,11 @@ describe('getNotificationPermission', () => {
 		expect(getNotificationPermission(null)).toBe('unsupported')
 	})
 
-	test.each(['default', 'denied', 'granted'] as const)('reads %s without prompting', (permission) => {
+	test.each([
+		'default',
+		'denied',
+		'granted',
+	] as const)('reads %s without prompting', (permission: NotificationPermission) => {
 		const api = createNotificationApi(permission)
 
 		expect(getNotificationPermission(api)).toBe(permission)
@@ -136,17 +140,17 @@ describe('requestNotificationPermission (user action)', () => {
 		})
 	})
 
-	test.each(['granted', 'denied'] as const)(
-		'does not prompt again once permission is %s',
-		async (permission) => {
-			const api = createNotificationApi(permission)
+	test.each([
+		'granted',
+		'denied',
+	] as const)('does not prompt again once permission is %s', async (permission: NotificationPermission) => {
+		const api = createNotificationApi(permission)
 
-			const result = await requestNotificationPermission(api)
+		const result = await requestNotificationPermission(api)
 
-			expect(result).toEqual({ status: permission, prompted: false })
-			expect(api.requestPermission).not.toHaveBeenCalled()
-		},
-	)
+		expect(result).toEqual({ status: permission, prompted: false })
+		expect(api.requestPermission).not.toHaveBeenCalled()
+	})
 
 	test('a second action after a decision does not re-prompt', async () => {
 		const api = answersWith('denied')

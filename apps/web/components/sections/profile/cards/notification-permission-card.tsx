@@ -58,11 +58,11 @@ export function NotificationPermissionCard() {
 				</p>
 			</div>
 			<div className="space-y-4">
-				<p role="status" aria-live="polite" className="text-sm text-gray-700">
+				<output aria-live="polite" className="block text-sm text-gray-700">
 					{status
 						? t(STATUS_MESSAGE_KEYS[status])
 						: t('profile.browserNotificationsStatusChecking')}
-				</p>
+				</output>
 				{/* The browser only prompts from `default`, so the action is hidden once decided. */}
 				{status === null || status === 'default' ? (
 					<Button
