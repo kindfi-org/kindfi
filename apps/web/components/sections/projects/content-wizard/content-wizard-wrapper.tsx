@@ -15,15 +15,24 @@ type ContentWizardWrapperProps = {
 export function ContentWizardWrapper({ slug }: ContentWizardWrapperProps) {
 	const { data: project, isLoading: isLoadingProject } = useManagedProjectQuery<
 		Awaited<ReturnType<typeof getBasicProjectInfoBySlug>>
-	>('basic-project-info', slug, 'basic-info', { additionalKeyValues: [slug] })
+	>('basic-project-info', slug, 'basic-info', {
+		additionalKeyValues: [slug],
+		staleTime: 60_000,
+	})
 
 	const { data: pitchData, isLoading: isLoadingPitch } = useManagedProjectQuery<
 		Awaited<ReturnType<typeof getProjectPitchDataBySlug>>
-	>('project-pitch', slug, 'pitch', { additionalKeyValues: [slug] })
+	>('project-pitch', slug, 'pitch', {
+		additionalKeyValues: [slug],
+		staleTime: 60_000,
+	})
 
 	const { data: highlights, isLoading: isLoadingHighlights } = useManagedProjectQuery<
 		Awaited<ReturnType<typeof getProjectHighlights>>
-	>('project-highlights', slug, 'highlights', { additionalKeyValues: [slug] })
+	>('project-highlights', slug, 'highlights', {
+		additionalKeyValues: [slug],
+		staleTime: 60_000,
+	})
 
 	if (isLoadingProject || isLoadingPitch || isLoadingHighlights || !project) {
 		return (
