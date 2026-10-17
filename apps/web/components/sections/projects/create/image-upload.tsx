@@ -15,20 +15,16 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
-	const [preview, setPreview] = useState<string | null>(null)
+	const [filePreview, setFilePreview] = useState<string | null>(null)
+
+	// Derive preview synchronously for string values; file values use the managed file preview
+	const preview = typeof value === 'string' ? value : value instanceof File ? filePreview : null
 
 	const onDrop = useCallback(
 		(acceptedFiles: File[]) => {
 			const file = acceptedFiles[0]
 			if (file) {
 				onChange(file)
-				const reader = new FileReader()
-				reader.onload = () => setPreview(reader.result as string)
-				reader.onerror = () => {
-					logger.error('Error reading file')
-					setPreview(null)
-				}
-				reader.readAsDataURL(file)
 			}
 		},
 		[onChange],
@@ -47,36 +43,37 @@ export function ImageUpload({ value, onChange, error }: ImageUploadProps) {
 
 	const removeImage = () => {
 		onChange(null)
-		setPreview(null)
 	}
 
-	// Mostrar preview si value es una URL o si ya hay un File
+	// Manage one single FileReader operation per selected File with cleanup
 	useEffect(() => {
-		if (typeof value === 'string') {
-			// Use setTimeout to avoid React Compiler warning about setState in effect
-			const timer = setTimeout(() => {
-				setPreview(value)
-			}, 0)
-			return () => clearTimeout(timer)
+		if (!(value instanceof File)) {
+			setFilePreview(null)
+			return
 		}
-		if (value instanceof File) {
-			const reader = new FileReader()
-			reader.onload = () => setPreview(reader.result as string)
-			reader.onerror = () => {
+
+		let isCancelled = false
+		const reader = new FileReader()
+
+		reader.onload = () => {
+			if (!isCancelled) {
+				setFilePreview(reader.result as string)
+			}
+		}
+
+		reader.onerror = () => {
+			if (!isCancelled) {
 				logger.error('Error reading file')
-				setPreview(null)
-			}
-			reader.readAsDataURL(value)
-			// Cleanup function to abort reading if component unmounts or value changes
-			return () => {
-				reader.abort()
+				setFilePreview(null)
 			}
 		}
-		// Use setTimeout to avoid React Compiler warning about setState in effect
-		const timer = setTimeout(() => {
-			setPreview(null)
-		}, 0)
-		return () => clearTimeout(timer)
+
+		reader.readAsDataURL(value)
+
+		return () => {
+			isCancelled = true
+			reader.abort()
+		}
 	}, [value])
 
 	return (
