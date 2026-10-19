@@ -20,18 +20,27 @@ favour of `preload`):
 `projectThumbnailLoadingForIndex` keeps the index-based call sites honest: only
 index `0` loads eagerly, everything else is lazy, and no listing card preloads.
 Both listings render a text hero above the cards (`ProjectsHero` on `/projects`,
-the home headline plus `CategoryPills`), so a thumbnail is not the LCP candidate.
+the home headline plus `CategoryPills`), which is why no card is given the
+`preload` policy today. That reasoning makes a thumbnail an unlikely first
+paint of the largest element, but it does not rule one out: at a tall or narrow
+viewport a visible card image can still be the LCP element, and the hero blocks
+are text and CSS gradients rather than measured candidates. Which element is LCP
+at each viewport is a question for the trace below, not something this document
+asserts.
 
 ## Inspection notes
 
 Verified by unit tests (`test/project-thumbnail-loading.test.ts`) that assert the
 prop set for each policy and that an omitted policy emits no `preload`.
 
-Not yet measured in this repository: a real mobile/desktop network trace needs
-`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in
-`apps/web/.env.local` (see `.env.local.example`) to render project data with
-`bun run dev`. When that environment is available, compare the first
-document response and the Network panel at a 390px and a 1440px viewport on `/`
-and `/projects` and record the LCP element, the number of concurrent thumbnail
-requests, and whether any `rel="preload" as="image"` link is present. No byte
-savings are claimed here because none were measured.
+Not yet measured in this repository: LCP has not been observed at any viewport,
+and a real mobile/desktop network trace needs `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in `apps/web/.env.local` (see
+`.env.local.example`) to render project data with `bun run dev`. When that
+environment is available, compare the first document response and the Network
+panel at a 390px and a 1440px viewport on `/` and `/projects` and record the
+element reported as LCP (this is what identifies whether a card image is the
+candidate, and at which viewport), the number of concurrent thumbnail requests,
+and whether any `rel="preload" as="image"` link is present. Only after that
+comparison should the `preload` policy be attached to a card, if the trace names
+one. No byte savings are claimed here because none were measured.

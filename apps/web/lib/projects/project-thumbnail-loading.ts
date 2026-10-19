@@ -37,8 +37,10 @@ export function resolveProjectThumbnailImageProps(
  * Policy for a card in a paginated project listing. Only the card that is
  * guaranteed visible on every viewport loads eagerly; the rest of the first row
  * stays lazy because the desktop grid pushes them beside, not above, the fold.
- * No listing card preloads: both `/projects` and the home carousel render a
- * text hero above the cards, so the thumbnail is not the LCP candidate.
+ * No listing card preloads: both `/projects` and the home carousel render a text
+ * hero above the cards, so no card has been named as the LCP element. That makes
+ * preloading unjustified until a trace identifies a viewport where a thumbnail
+ * is the largest contentful paint; see `docs/project-thumbnail-loading.md`.
  */
 export function projectThumbnailLoadingForIndex(index: number): ProjectThumbnailLoading {
 	if (index !== Math.trunc(index) || index < 0) {
