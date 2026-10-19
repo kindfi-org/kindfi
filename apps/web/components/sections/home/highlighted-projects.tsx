@@ -121,13 +121,13 @@ export function HighlightedProjects() {
 							aria-label="Featured Projects"
 						>
 							<CarouselContent className="-ml-3 md:-ml-4">
-								{projects.map((project, index) => (
+								{projects.map((project) => (
 									<CarouselItem
 										key={project.id}
 										className="pl-3 md:pl-4 basis-full md:basis-1/2 xl:basis-1/3"
 										aria-roledescription="slide"
 									>
-										<ProjectCardGrid project={project} index={index} />
+										<ProjectCardGrid project={project} />
 									</CarouselItem>
 								))}
 							</CarouselContent>
