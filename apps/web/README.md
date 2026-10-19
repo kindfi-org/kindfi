@@ -314,6 +314,51 @@ bun test
 
 Test files are located in the `test/` directory.
 
+### Production build smoke check
+
+Pull requests that change `apps/web`, its shared `packages/lib`,
+`packages/drizzle`, or `services/supabase` workspaces run the production build
+with Bun 1.3.14. The check uses only build-time placeholders:
+
+| Variable | Build-only value |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://build-smoke.invalid` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `build-smoke-placeholder-anon-key` |
+| `NEXT_PUBLIC_KYC_API_BASE_URL` | `https://build-smoke.invalid` |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` |
+| `NEXTAUTH_URL` | `http://localhost:3000` |
+| `NEXTAUTH_SECRET` | `build-smoke-placeholder-not-a-secret` |
+| `NEXT_PUBLIC_APP_ENV` | `production` |
+
+These values satisfy build-time configuration only; they are not credentials
+and must not be used to run the app. The `.invalid` hosts prevent the
+placeholders from targeting live services. The workflow does not provision,
+authenticate to, or mutate Supabase, Stellar, KYC, or other external services.
+Linting and type checking remain separate diagnostics.
+
+To reproduce locally from the repository root, install dependencies and run:
+
+```powershell
+bun install
+cd apps/web
+$env:NEXT_PUBLIC_SUPABASE_URL = "https://build-smoke.invalid"
+$env:NEXT_PUBLIC_SUPABASE_ANON_KEY = "build-smoke-placeholder-anon-key"
+$env:NEXT_PUBLIC_KYC_API_BASE_URL = "https://build-smoke.invalid"
+$env:NEXT_PUBLIC_APP_URL = "http://localhost:3000"
+$env:NEXTAUTH_URL = "http://localhost:3000"
+$env:NEXTAUTH_SECRET = "build-smoke-placeholder-not-a-secret"
+$env:NEXT_PUBLIC_APP_ENV = "production"
+bun scripts/test-build-boundary.ts
+bun run build
+```
+
+The boundary check runs a deliberately broken fixture in
+`test/fixtures/server-client-boundary`: a client page imports a module marked
+`server-only`. It passes only when `next build` rejects that fixture for the
+server/client boundary violation. The fixture is isolated from the real app
+build; its passing result does not mask or substitute for the separate
+`bun run build` result.
+
 ## 🎨 Design System
 
 ### Styling
