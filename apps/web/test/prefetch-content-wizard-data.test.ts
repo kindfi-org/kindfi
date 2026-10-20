@@ -56,4 +56,27 @@ describe('prefetchContentWizardData', () => {
 		expect(pitchCalls).toBe(0)
 		expect(highlightsCalls).toBe(1)
 	})
+
+	test('skips pitch when basic info has a missing or empty project id', async () => {
+		const cases: Array<{ id?: string | null }> = [{}, { id: '' }]
+
+		for (const basicInfo of cases) {
+			let pitchCalls = 0
+			let highlightsCalls = 0
+
+			await prefetchContentWizardData({
+				getBasicInfo: async () => basicInfo,
+				cacheBasicInfo: () => {},
+				prefetchPitch: async () => {
+					pitchCalls += 1
+				},
+				prefetchHighlights: async () => {
+					highlightsCalls += 1
+				},
+			})
+
+			expect(pitchCalls).toBe(0)
+			expect(highlightsCalls).toBe(1)
+		}
+	})
 })
