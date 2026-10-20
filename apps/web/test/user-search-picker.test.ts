@@ -1,8 +1,23 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
+import { afterAll, afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import { Window } from 'happy-dom'
 import React, { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import type { SearchableUser } from '~/lib/schemas/user.schemas'
+
+const globalNames = [
+	'document',
+	'HTMLElement',
+	'Event',
+	'InputEvent',
+	'MouseEvent',
+	'Node',
+	'window',
+	'IS_REACT_ACT_ENVIRONMENT',
+] as const
+const originalGlobalDescriptors = new Map<string, PropertyDescriptor | undefined>()
+for (const name of globalNames) {
+	originalGlobalDescriptors.set(name, Object.getOwnPropertyDescriptor(globalThis, name))
+}
 
 const happyWindow = new Window()
 Object.assign(globalThis, {
@@ -107,7 +122,9 @@ mock.module('~/components/base/popover', () => ({
 	},
 }))
 
+const actualUtils = await import('~/lib/utils')
 mock.module('~/lib/utils', () => ({
+	...actualUtils,
 	cn: (...classes: Array<string | false | null | undefined>) => classes.filter(Boolean).join(' '),
 	getAvatarFallback: (value: string) => value.slice(0, 1).toUpperCase(),
 }))
@@ -208,6 +225,19 @@ beforeEach(() => {
 
 afterEach(() => {
 	globalThis.fetch = originalFetch
+})
+
+afterAll(() => {
+	mock.restore()
+	for (const name of globalNames) {
+		const descriptor = originalGlobalDescriptors.get(name)
+		if (descriptor) {
+			Object.defineProperty(globalThis, name, descriptor)
+		} else {
+			delete (globalThis as Record<string, unknown>)[name]
+		}
+	}
+	happyWindow.close()
 })
 
 describe('UserSearchPicker', () => {
