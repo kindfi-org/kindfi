@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronsUpDown, Loader2, User } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/base/avatar'
 import {
 	Command,
@@ -27,23 +27,34 @@ export function UserSearchPicker({
 	const [users, setUsers] = useState<SearchableUser[]>([])
 	const [isSearching, setIsSearching] = useState(false)
 	const [searchError, setSearchError] = useState<string | null>(null)
+	const searchRequestId = useRef(0)
 	const excludedIdsKey = useMemo(() => excludeUserIds.join(','), [excludeUserIds])
 
 	useEffect(() => {
-		if (query.trim().length < 2) {
+		const trimmedQuery = query.trim()
+		const currentRequestId = ++searchRequestId.current
+
+		if (trimmedQuery.length < 2) {
 			setUsers([])
 			setSearchError(null)
+			setIsSearching(false)
 			return
 		}
 
+		setIsSearching(true)
+		setSearchError(null)
+		setUsers([])
+
 		const controller = new AbortController()
 		const timeoutId = setTimeout(async () => {
-			setIsSearching(true)
-			setSearchError(null)
 			try {
-				const res = await fetch(`/api/users/search?q=${encodeURIComponent(query.trim())}`, {
+				const res = await fetch(`/api/users/search?q=${encodeURIComponent(trimmedQuery)}`, {
 					signal: controller.signal,
 				})
+
+				if (searchRequestId.current !== currentRequestId) {
+					return
+				}
 
 				if (!res.ok) {
 					let message = 'Failed to search users'
@@ -53,22 +64,33 @@ export function UserSearchPicker({
 					} catch {
 						// ignore parse errors
 					}
-					setUsers([])
-					setSearchError(message)
+					if (searchRequestId.current === currentRequestId) {
+						setUsers([])
+						setSearchError(message)
+					}
 					return
 				}
 
 				const data = (await res.json()) as { users: SearchableUser[] }
 				const excluded = new Set(excludedIdsKey.split(',').filter(Boolean))
-				setUsers(data.users.filter((user) => !excluded.has(user.id)))
+				if (searchRequestId.current === currentRequestId) {
+					setUsers(data.users.filter((user) => !excluded.has(user.id)))
+				}
 			} catch (error) {
-				if (error instanceof DOMException && error.name === 'AbortError') {
+				if (
+					controller.signal.aborted ||
+					(error instanceof DOMException && error.name === 'AbortError')
+				) {
 					return
 				}
-				setUsers([])
-				setSearchError('Failed to search users')
+				if (searchRequestId.current === currentRequestId) {
+					setUsers([])
+					setSearchError('Failed to search users')
+				}
 			} finally {
-				setIsSearching(false)
+				if (searchRequestId.current === currentRequestId) {
+					setIsSearching(false)
+				}
 			}
 		}, 300)
 
