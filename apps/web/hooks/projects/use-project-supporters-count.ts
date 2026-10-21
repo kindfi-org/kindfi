@@ -1,65 +1,64 @@
 'use client'
 
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
 
 interface UseProjectSupportersCountParams {
 	projectId?: string
 }
 
-export function useProjectSupportersCount({ projectId }: UseProjectSupportersCountParams) {
-	const [supportersCount, setSupportersCount] = useState<number | null>(null)
-	const [isLoading, setIsLoading] = useState(false)
-	const [error, setError] = useState<unknown>(null)
+const PROJECT_SUPPORTERS_COUNT_POLL_MS = 10_000
 
-	const fetchSupportersCount = useCallback(
-		async (showLoading = true) => {
-			if (!projectId) return
-			try {
-				if (showLoading) setIsLoading(true)
-				setError(null)
-				const supabase = createSupabaseBrowserClient()
-				const { data, error: fetchError } = await supabase
-					.from('contributions')
-					.select('contributor_id')
-					.eq('project_id', projectId)
-					.gt('amount', 0)
+export function projectSupportersCountQueryOptions(projectId?: string) {
+	return {
+		queryKey: ['project-supporters-count', projectId] as const,
+		queryFn: async ({ signal }: { signal: AbortSignal }) => {
+			if (!projectId) return null
 
-				if (fetchError) throw fetchError
+			const supabase = createSupabaseBrowserClient()
+			const { data, error } = await supabase
+				.from('contributions')
+				.select('contributor_id')
+				.eq('project_id', projectId)
+				.gt('amount', 0)
+				.abortSignal(signal)
 
-				const uniqueContributors = new Set(
-					(data ?? []).map((row) => row.contributor_id).filter(Boolean),
-				)
-				setSupportersCount(uniqueContributors.size)
-			} catch (e) {
-				setError(e)
-			} finally {
-				if (showLoading) setIsLoading(false)
-			}
+			if (error) throw error
+
+			const uniqueContributors = new Set(
+				(data ?? []).map((row) => row.contributor_id).filter(Boolean),
+			)
+			return uniqueContributors.size
 		},
-		[projectId],
-	)
+		enabled: Boolean(projectId),
+		staleTime: PROJECT_SUPPORTERS_COUNT_POLL_MS,
+		refetchInterval: PROJECT_SUPPORTERS_COUNT_POLL_MS,
+		refetchIntervalInBackground: false,
+		refetchOnWindowFocus: 'always' as const,
+	}
+}
 
-	useEffect(() => {
+export function useProjectSupportersCount({ projectId }: UseProjectSupportersCountParams) {
+	const {
+		data: supportersCount = null,
+		isPending,
+		error,
+		refetch,
+	} = useQuery(projectSupportersCountQueryOptions(projectId))
+
+	const refetchSupportersCount = useCallback(async () => {
 		if (!projectId) return
-
-		fetchSupportersCount(true)
-
-		const intervalId = setInterval(() => {
-			fetchSupportersCount(false)
-		}, 10000)
-
-		return () => {
-			clearInterval(intervalId)
-		}
-	}, [projectId, fetchSupportersCount])
-
-	const refetch = useCallback(() => {
-		return fetchSupportersCount(true)
-	}, [fetchSupportersCount])
+		await refetch()
+	}, [projectId, refetch])
 
 	return useMemo(
-		() => ({ supportersCount, isLoading, error, refetch }),
-		[supportersCount, isLoading, error, refetch],
+		() => ({
+			supportersCount,
+			isLoading: Boolean(projectId) && isPending,
+			error,
+			refetch: refetchSupportersCount,
+		}),
+		[error, isPending, projectId, refetchSupportersCount, supportersCount],
 	)
 }
