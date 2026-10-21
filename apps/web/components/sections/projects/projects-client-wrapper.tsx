@@ -15,6 +15,7 @@ import {
 import { SectionContainer } from '~/components/shared/section-container'
 import { usePaginatedProjects } from '~/hooks/projects/use-paginated-projects'
 import { useI18n } from '~/lib/i18n'
+import { projectThumbnailLoadingForIndex } from '~/lib/projects/project-thumbnail-loading'
 import { getAllCategories } from '~/lib/queries/projects'
 import type { SortOption } from '~/lib/types/project'
 
@@ -211,10 +212,11 @@ export function ProjectsClientWrapper() {
 							>
 								{allProjects.map((project, index) => {
 									const isNew = newIds.has(project.id)
+									const thumbnailLoading = projectThumbnailLoadingForIndex(index)
 									if (reducedMotion || !isNew) {
 										return (
 											<div key={project.id} className="long-list-item h-full">
-												<ProjectCardGrid project={project} index={index} />
+												<ProjectCardGrid project={project} thumbnailLoading={thumbnailLoading} />
 											</div>
 										)
 									}
@@ -226,7 +228,7 @@ export function ProjectsClientWrapper() {
 											transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
 											className="long-list-item h-full"
 										>
-											<ProjectCardGrid project={project} index={index} />
+											<ProjectCardGrid project={project} thumbnailLoading={thumbnailLoading} />
 										</motion.div>
 									)
 								})}
