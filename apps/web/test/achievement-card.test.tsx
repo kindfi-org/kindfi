@@ -1,3 +1,5 @@
+/// <reference types="bun" />
+
 import { describe, expect, test } from 'bun:test'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { AchievementCard } from '~/components/sections/achievements/achievement-card'
@@ -5,6 +7,7 @@ import { AchievementCard } from '~/components/sections/achievements/achievement-
 function render(status: 'completed' | 'in-progress' | 'locked', progressPercentage = 50) {
 	return renderToStaticMarkup(
 		<AchievementCard
+			id="community-builder"
 			title="Community builder"
 			description="Support five projects"
 			status={status}
@@ -55,6 +58,7 @@ describe('AchievementCard accessibility', () => {
 		const html = renderToStaticMarkup(
 			<>
 				<AchievementCard
+					id="first"
 					title="First"
 					description="One"
 					status="completed"
@@ -62,6 +66,7 @@ describe('AchievementCard accessibility', () => {
 					onClick={() => {}}
 				/>
 				<AchievementCard
+					id="second"
 					title="Second"
 					description="Two"
 					status="locked"
