@@ -38,7 +38,11 @@ describe('AchievementCard accessibility', () => {
 	})
 
 	test('progress remains outside the button and retains clamped values', () => {
-		for (const [input, expected] of [[-10, 0], [50, 50], [120, 100]]) {
+		for (const [input, expected] of [
+			[-10, 0],
+			[50, 50],
+			[120, 100],
+		]) {
 			const html = render('in-progress', input)
 			expect(html).toContain(`aria-valuenow="${expected}"`)
 			expect(html).toContain('aria-valuemin="0"')
@@ -50,8 +54,20 @@ describe('AchievementCard accessibility', () => {
 	test('multiple cards have distinct accessible label IDs', () => {
 		const html = renderToStaticMarkup(
 			<>
-				<AchievementCard title="First" description="One" status="completed" icon="star" onClick={() => {}} />
-				<AchievementCard title="Second" description="Two" status="locked" icon="heart" onClick={() => {}} />
+				<AchievementCard
+					title="First"
+					description="One"
+					status="completed"
+					icon="star"
+					onClick={() => {}}
+				/>
+				<AchievementCard
+					title="Second"
+					description="Two"
+					status="locked"
+					icon="heart"
+					onClick={() => {}}
+				/>
 			</>,
 		)
 		const labels = [...html.matchAll(/aria-labelledby="([^"]+)"/g)].map((match) => match[1])
