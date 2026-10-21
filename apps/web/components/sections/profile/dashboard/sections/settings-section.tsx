@@ -6,6 +6,7 @@ import { useDashboardContext } from '~/hooks/profile/use-dashboard-context'
 import { useI18n } from '~/lib/i18n'
 import { AccountInfoCard } from '../../cards/account-info-card'
 import { CountryOfResidenceCard } from '../../cards/country-of-residence-card'
+import { NotificationPermissionCard } from '../../cards/notification-permission-card'
 import { PersonalInfoCard } from '../../cards/personal-info-card'
 import { RoleCard } from '../../cards/role-card'
 import { profileFadeUp } from '../../profile-motion'
@@ -41,6 +42,7 @@ export function SettingsSection() {
 						slug={user.profile?.slug ?? ''}
 					/>
 					<RoleCard userId={user.id} currentRole={user.profile?.role ?? 'pending'} />
+					<NotificationPermissionCard />
 				</div>
 			</motion.div>
 		</div>
