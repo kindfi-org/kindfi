@@ -137,6 +137,7 @@
 		"dev": "next dev",
 		"lint": "biome ci .",
 		"start": "next start",
+		"typecheck": "next typegen && tsc --noEmit --incremental false",
 		"test": "bun test/**.test.{mjs,ts,js}"
 	},
 	"version": "0.1.0"
