@@ -3,6 +3,7 @@ import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { buildNotificationsKeyValues } from '../lib/notifications/query-keys'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
 	CreateNotificationDTO,
@@ -28,6 +29,28 @@ export function useNotifications(
 	const userId = filters.user_id ?? null
 	const hasUserId = !!userId
 
+	// Every result-changing input is part of the cache key, so switching read status,
+	// type, priority or date range never reuses a fresh entry from a different filter.
+	// Memoized on primitive values so equivalent filters keep a stable key reference.
+	const createdAfterTime = filters.created_after?.getTime()
+	const createdBeforeTime = filters.created_before?.getTime()
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dependencies are the primitive values that define the key
+	const notificationsKeyValues = useMemo(
+		() => [...buildNotificationsKeyValues(filters, sort, page, pageSize)],
+		[
+			userId,
+			filters.is_read,
+			filters.type,
+			filters.priority,
+			createdAfterTime,
+			createdBeforeTime,
+			sort.field,
+			sort.direction,
+			page,
+			pageSize,
+		],
+	)
+
 	// Query for notifications using the shared hook (only when user is logged in)
 	const {
 		data: notificationsData,
@@ -38,7 +61,7 @@ export function useNotifications(
 		'notifications',
 		() => notificationService.getNotifications(filters, sort, page, pageSize),
 		{
-			additionalKeyValues: [userId, sort, page, pageSize],
+			additionalKeyValues: notificationsKeyValues,
 			staleTime: 1000 * 60 * 5, // 5 minutes
 			enabled: hasUserId,
 		},
