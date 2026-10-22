@@ -20,7 +20,7 @@ export interface NormalizedNotificationFilters {
 function toStableDate(value: Date | undefined): string | undefined {
 	if (!(value instanceof Date)) return undefined
 	const time = value.getTime()
-	return Number.isNaN(time) ? undefined : new Date(time).toISOString()
+	return Number.isNaN(time) ? '__invalid_date__' : new Date(time).toISOString()
 }
 
 /**
