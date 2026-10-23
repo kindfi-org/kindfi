@@ -52,14 +52,28 @@ describe('normalizeNotificationFilters', () => {
 		expect(normalizeNotificationFilters({})).toEqual({})
 	})
 
-	test('omits undefined and invalid values', () => {
+	test('omits undefined values', () => {
 		expect(
 			normalizeNotificationFilters({
 				is_read: undefined,
 				type: undefined,
-				created_after: new Date('not a date'),
+				priority: undefined,
+				created_after: undefined,
+				created_before: undefined,
 			}),
 		).toEqual({})
+	})
+
+	test('keeps invalid dates distinct from unset dates with a sentinel', () => {
+		expect(normalizeNotificationFilters({ created_after: new Date('not a date') })).toEqual({
+			created_after: '__invalid_date__',
+		})
+		expect(normalizeNotificationFilters({ created_before: new Date(Number.NaN) })).toEqual({
+			created_before: '__invalid_date__',
+		})
+		expect(normalizeNotificationFilters({ created_after: new Date('not a date') })).not.toEqual(
+			normalizeNotificationFilters({}),
+		)
 	})
 })
 
@@ -246,5 +260,19 @@ describe('useNotifications cache key', () => {
 		const unread = await renderKey({ user_id: USER_ID, is_read: false })
 		const read = await renderKey({ user_id: USER_ID, is_read: true })
 		expect(unread).not.toEqual(read)
+	})
+})
+
+describe('useNotifications realtime refresh', () => {
+	test('realtime events invalidate the notifications prefix instead of refetching one entry', async () => {
+		const source = await Bun.file(new URL('../hooks/use-notifications.ts', import.meta.url)).text()
+		const realtime = source.slice(
+			source.indexOf("'postgres_changes'"),
+			source.indexOf('.subscribe('),
+		)
+
+		expect(realtime).toContain("queryKey: ['supabase', 'notifications']")
+		expect(realtime).toContain("queryKey: ['supabase', 'unread-count']")
+		expect(realtime).not.toMatch(/refetch(Ref\.current)?\(/)
 	})
 })

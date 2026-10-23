@@ -2,7 +2,7 @@ import { useSupabaseQuery } from '@packages/lib/hooks'
 import { createSupabaseBrowserClient } from '@packages/lib/supabase-client'
 import { REALTIME_SUBSCRIBE_STATES } from '@supabase/realtime-js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { buildNotificationsKeyValues } from '../lib/notifications/query-keys'
 import { NotificationService } from '../lib/services/notification-service'
 import type {
@@ -87,12 +87,6 @@ export function useNotifications(
 		queryClient.invalidateQueries({ queryKey: ['supabase', 'unread-count'] })
 	}, [queryClient])
 
-	// Keep a ref to refetch so the realtime effect doesn't need it as a dep
-	const refetchRef = useRef(refetch)
-	useEffect(() => {
-		refetchRef.current = refetch
-	})
-
 	const onSuccessUpdate = invalidateQueries
 
 	// Mutation for creating a notification
@@ -146,7 +140,11 @@ export function useNotifications(
 				},
 				() => {
 					if (isMounted) {
-						refetchRef.current()
+						// Prefix invalidation refreshes every filter/sort/page variant: the active
+						// entry refetches now, inactive ones refetch when revisited.
+						queryClient.invalidateQueries({
+							queryKey: ['supabase', 'notifications'],
+						})
 						queryClient.invalidateQueries({
 							queryKey: ['supabase', 'unread-count'],
 						})

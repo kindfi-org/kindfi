@@ -14,8 +14,9 @@ export interface NormalizedNotificationFilters {
 
 /**
  * Converts a date filter into a stable cache-key value.
- * Equal instants produce the same ISO string regardless of `Date` identity;
- * invalid dates are dropped, mirroring the query which cannot apply them.
+ * Equal instants produce the same ISO string regardless of `Date` identity.
+ * Invalid dates map to a sentinel so they stay distinct from an unset filter
+ * and the service's existing error behavior (`toISOString()` throws) is preserved.
  */
 function toStableDate(value: Date | undefined): string | undefined {
 	if (!(value instanceof Date)) return undefined
