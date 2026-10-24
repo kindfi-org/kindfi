@@ -77,10 +77,7 @@ export const getKycEnforcementMetrics = async (sinceDays = 30): Promise<KycEnfor
 			.select('id')
 			.in('processing_result', ['unmapped', 'error'])
 			.gte('processed_at', since),
-		client
-			.from('didit_sessions')
-			.select('canonical_status')
-			.gte('created_at', since),
+		client.from('didit_sessions').select('canonical_status').gte('created_at', since),
 	])
 
 	if (eventsResult.error) {

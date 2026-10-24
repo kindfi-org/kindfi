@@ -12,11 +12,9 @@ const update = (id: string, content = id): ProjectUpdate => ({
 
 describe('project update list merging', () => {
 	test('appends an explicit subsequent page without duplicate IDs', () => {
-		expect(appendUpdatePage([update('one'), update('two')], [update('two', 'edited'), update('three')])).toEqual([
-			update('one'),
-			update('two', 'edited'),
-			update('three'),
-		])
+		expect(
+			appendUpdatePage([update('one'), update('two')], [update('two', 'edited'), update('three')]),
+		).toEqual([update('one'), update('two', 'edited'), update('three')])
 	})
 
 	test('replaces the realtime page while preserving loaded pages', () => {

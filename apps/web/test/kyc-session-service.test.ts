@@ -2,8 +2,8 @@ process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost'
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
 process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key'
 
-import { describe, expect, test, mock } from 'bun:test'
-import { resolveKycStatus, isDiditSessionValidForReuse } from '../lib/kyc/session-service'
+import { describe, expect, mock, test } from 'bun:test'
+import { isDiditSessionValidForReuse, resolveKycStatus } from '../lib/kyc/session-service'
 import { getDiditSessionStatus } from '../lib/services/didit'
 
 // Mock the Didit service

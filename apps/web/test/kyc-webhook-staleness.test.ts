@@ -2,13 +2,16 @@ import { describe, expect, mock, test } from 'bun:test'
 import { isStaleProviderEvent } from '../lib/kyc/provider-event'
 
 const mockGetKycSchemaClient = mock(() => ({ from: () => undefined }))
-const mockFindDiditSessionBySessionId = mock(async () => ({
-	userId: 'user-1',
-	kycReviewId: null,
-	canonicalStatus: 'approved',
-	lastProviderEventAt: '2026-08-25T11:00:00.000Z',
-	diditStatus: 'Approved',
-} as const))
+const mockFindDiditSessionBySessionId = mock(
+	async () =>
+		({
+			userId: 'user-1',
+			kycReviewId: null,
+			canonicalStatus: 'approved',
+			lastProviderEventAt: '2026-08-25T11:00:00.000Z',
+			diditStatus: 'Approved',
+		}) as const,
+)
 const mockUpsertKycReviewStatus = mock(async () => 'review-1')
 const mockRecordKycStatusTransition = mock(async () => undefined)
 const mockActivatePollarIfApproved = mock(async () => undefined)
@@ -100,7 +103,12 @@ describe('applyDiditStatusUpdate', () => {
 			providerEventAt: new Date('2026-08-25T11:00:00.000Z'),
 		})
 
-		expect(result).toEqual({ applied: false, reason: 'stale', canonicalStatus: 'pending', userId: 'user-1' })
+		expect(result).toEqual({
+			applied: false,
+			reason: 'stale',
+			canonicalStatus: 'pending',
+			userId: 'user-1',
+		})
 		expect(staleEventUpdate).not.toHaveBeenCalled()
 	})
 })
