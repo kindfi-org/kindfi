@@ -54,6 +54,7 @@ export async function resolveBasicProjectBySlug(
 				localize: false,
 			})
 		}
+		return null
 	}
 
 	if (projectMeta.status === 'draft' || projectMeta.status === 'review') {
