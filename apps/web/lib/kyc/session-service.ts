@@ -1,5 +1,6 @@
 import { supabase as supabaseServiceRole } from '@packages/lib/supabase'
 import { logger } from '@/lib/logger'
+import { getDiditSessionStatus } from '~/lib/services/didit'
 import {
 	ACTIVE_DIDIT_SESSION_STATUSES,
 	canonicalFromDbStatus,
@@ -9,7 +10,6 @@ import {
 } from './status'
 import { getKycSchemaClient } from './supabase-kyc-client'
 import type { CanonicalKycStatus, KycDbStatus } from './types'
-import { getDiditSessionStatus } from '~/lib/services/didit'
 
 export interface DiditSessionRecord {
 	id: string
@@ -488,9 +488,7 @@ export const activatePollarIfApproved = async (
  * @param sessionId - The Didit session ID to validate
  * @returns true if the session is valid for reuse, false otherwise
  */
-export const isDiditSessionValidForReuse = async (
-	sessionId: string,
-): Promise<boolean> => {
+export const isDiditSessionValidForReuse = async (sessionId: string): Promise<boolean> => {
 	try {
 		const sessionStatus = await getDiditSessionStatus(sessionId)
 
