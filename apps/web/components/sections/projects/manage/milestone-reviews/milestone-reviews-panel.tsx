@@ -138,7 +138,7 @@ export const MilestoneReviewsPanel = ({ slug }: MilestoneReviewsPanelProps) => {
 
 						return (
 							<Card
-								key={index}
+								key={milestone.description ?? `milestone-${index}`}
 								className="border-border"
 							>
 								<CardHeader className="pb-3">

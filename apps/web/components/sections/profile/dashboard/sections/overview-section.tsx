@@ -5,7 +5,6 @@ import {
 	AlertCircle,
 	BarChart3,
 	CheckCircle2,
-	DollarSign,
 	Gift,
 	Heart,
 	LayoutDashboard,
@@ -25,7 +24,6 @@ import { isCreatorProfileRole } from '~/lib/profile/is-creator-profile-role'
 import { profileFadeUp } from '../../profile-motion'
 import { ActionCard } from '../action-card'
 import { SectionHeader } from '../section-header'
-import { StatSummary } from '../stat-summary'
 
 const CreatorProfile = dynamic(
 	() =>

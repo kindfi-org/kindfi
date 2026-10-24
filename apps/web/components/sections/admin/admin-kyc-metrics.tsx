@@ -62,10 +62,7 @@ export const AdminKycMetrics = ({ mode, metrics }: AdminKycMetricsProps) => {
 						id="kyc-period"
 						name="days"
 						value={period}
-						onChange={(event) => {
-							setPeriod(event.target.value)
-							window.location.search = `?days=${event.target.value}`
-						}}
+						onChange={handlePeriodChange}
 						className="rounded-md border border-input bg-background px-2 py-1"
 					>
 						<option value="7">7 days</option>
