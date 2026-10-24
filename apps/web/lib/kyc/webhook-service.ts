@@ -128,10 +128,7 @@ const claimWebhookEvent = async (params: {
  * can re-run it. Best effort by design: a failure here must never turn a
  * recoverable processing failure into an unhandled throw.
  */
-const releaseFailedWebhookEvent = async (
-	eventId: string,
-	context: string,
-): Promise<void> => {
+const releaseFailedWebhookEvent = async (eventId: string, context: string): Promise<void> => {
 	try {
 		const { error } = await getKycSchemaClient()
 			.from('webhook_events')

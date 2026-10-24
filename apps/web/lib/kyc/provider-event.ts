@@ -41,15 +41,26 @@ export const isStaleProviderEvent = (
 		}
 	}
 
-	if ((incomingIso === null || incomingIso === undefined) && (lastIso !== null && lastIso !== undefined)) {
+	if (
+		(incomingIso === null || incomingIso === undefined) &&
+		lastIso !== null &&
+		lastIso !== undefined
+	) {
 		return isRegressiveTerminalStatus(incomingStatus, lastStatus)
 	}
 
-	if (incomingIso !== null && incomingIso !== undefined && (lastIso === null || lastIso === undefined)) {
+	if (
+		incomingIso !== null &&
+		incomingIso !== undefined &&
+		(lastIso === null || lastIso === undefined)
+	) {
 		return false
 	}
 
-	if ((incomingIso === null || incomingIso === undefined) && (lastIso === null || lastIso === undefined)) {
+	if (
+		(incomingIso === null || incomingIso === undefined) &&
+		(lastIso === null || lastIso === undefined)
+	) {
 		return isRegressiveTerminalStatus(incomingStatus, lastStatus)
 	}
 

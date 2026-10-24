@@ -137,10 +137,7 @@ export const MilestoneReviewsPanel = ({ slug }: MilestoneReviewsPanelProps) => {
 							t('profile.manageMilestones.releaseLabel').replace('{n}', String(index + 1))
 
 						return (
-							<Card
-								key={milestone.description ?? `milestone-${index}`}
-								className="border-border"
-							>
+							<Card key={milestone.description ?? `milestone-${index}`} className="border-border">
 								<CardHeader className="pb-3">
 									<div className="flex flex-wrap items-start justify-between gap-3">
 										<div className="space-y-1">
