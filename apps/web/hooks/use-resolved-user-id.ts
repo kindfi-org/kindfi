@@ -24,14 +24,11 @@ export function useResolvedUserId(userIdProp?: string): UseResolvedUserIdResult 
 	const [userId, setUserId] = useState<string | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
-	const [reloadKey, setReloadKey] = useState(0)
-
 	const latestRequestRef = useRef(0)
 
-	useEffect(() => {
+	const resolveUserId = useCallback(() => {
 		const requestId = latestRequestRef.current + 1
 		latestRequestRef.current = requestId
-		let cancelled = false
 
 		setIsLoading(true)
 		setError(null)
@@ -40,8 +37,8 @@ export function useResolvedUserId(userIdProp?: string): UseResolvedUserIdResult 
 			userId: userIdProp,
 			fetchUser: (input) => fetch(input),
 		}).then((result) => {
-			// Ignore resolutions from an unmounted component or a superseded request.
-			if (cancelled || latestRequestRef.current !== requestId) return
+			// Ignore resolutions from a superseded request.
+			if (latestRequestRef.current !== requestId) return
 
 			if (result.status === 'unavailable') {
 				setUserId(null)
@@ -52,15 +49,15 @@ export function useResolvedUserId(userIdProp?: string): UseResolvedUserIdResult 
 			}
 			setIsLoading(false)
 		})
+	}, [userIdProp])
 
-		return () => {
-			cancelled = true
-		}
-	}, [userIdProp, reloadKey])
+	useEffect(() => {
+		resolveUserId()
+	}, [resolveUserId])
 
 	const refresh = useCallback(() => {
-		setReloadKey((key) => key + 1)
-	}, [])
+		resolveUserId()
+	}, [resolveUserId])
 
 	return { userId, isLoading, error, refresh }
 }

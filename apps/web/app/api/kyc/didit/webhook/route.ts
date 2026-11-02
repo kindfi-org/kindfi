@@ -126,7 +126,10 @@ export async function POST(req: NextRequest) {
 				sessionId: jsonBody.session_id,
 				webhookType: jsonBody.webhook_type,
 			})
-			return NextResponse.json({ received: false, error: 'Webhook processing failed' }, { status: 500 })
+			return NextResponse.json(
+				{ received: false, error: 'Webhook processing failed' },
+				{ status: 500 },
+			)
 		}
 
 		return NextResponse.json({ received: true })

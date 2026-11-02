@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import { AdminSectionHeader } from '~/components/sections/admin/admin-section-header'
 import type { KycEnforcementMetrics } from '~/lib/kyc/metrics'
 import type { KycEnforcementMode } from '~/lib/kyc/types'
@@ -62,10 +62,7 @@ export const AdminKycMetrics = ({ mode, metrics }: AdminKycMetricsProps) => {
 						id="kyc-period"
 						name="days"
 						value={period}
-						onChange={(event) => {
-							setPeriod(event.target.value)
-							window.location.search = `?days=${event.target.value}`
-						}}
+						onChange={handlePeriodChange}
 						className="rounded-md border border-input bg-background px-2 py-1"
 					>
 						<option value="7">7 days</option>
@@ -124,7 +121,9 @@ export const AdminKycMetrics = ({ mode, metrics }: AdminKycMetricsProps) => {
 				</p>
 				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 					{metrics.statusDistribution.length === 0 ? (
-						<p className="text-sm text-muted-foreground">No Didit sessions started in this period.</p>
+						<p className="text-sm text-muted-foreground">
+							No Didit sessions started in this period.
+						</p>
 					) : (
 						metrics.statusDistribution.map((row) => (
 							<MetricTile key={row.status} label={row.status} value={row.count} />

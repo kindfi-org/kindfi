@@ -81,7 +81,9 @@ const fakeClient = {
 				if (table === 'webhook_events') {
 					const eventId = String(row.event_id)
 					if (state.events.has(eventId)) {
-						return { error: { code: '23505', message: 'duplicate key value violates unique constraint' } }
+						return {
+							error: { code: '23505', message: 'duplicate key value violates unique constraint' },
+						}
 					}
 					state.events.set(eventId, {
 						event_id: eventId,
@@ -270,9 +272,7 @@ describe('applyDiditStatusUpdate retryability', () => {
 
 		const results = await Promise.all([applyEvent('evt-race'), applyEvent('evt-race')])
 		const applied = results.filter((result) => result.applied)
-		const duplicates = results.filter(
-			(result) => !result.applied && result.reason === 'duplicate',
-		)
+		const duplicates = results.filter((result) => !result.applied && result.reason === 'duplicate')
 
 		expect(applied.length).toBe(1)
 		expect(duplicates.length).toBe(1)

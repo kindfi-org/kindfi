@@ -56,7 +56,7 @@ export function DashboardProvider({
 	kycCompleted = false,
 	children,
 }: DashboardProviderProps) {
-	const { address: externalWalletAddress, connect, disconnect, isConnected } = useWallet()
+	const { address: externalWalletAddress, disconnect, isConnected } = useWallet()
 	const {
 		address: effectiveWalletAddress,
 		isReady: isWalletReady,

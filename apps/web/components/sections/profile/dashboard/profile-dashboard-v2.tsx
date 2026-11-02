@@ -1,7 +1,7 @@
 'use client'
 
 import type { Database } from '@services/supabase'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import { ProductTourLauncher } from '~/components/product-tour/product-tour-launcher'
@@ -47,8 +47,6 @@ interface ProfileDashboardV2Props {
 
 function ProfileDashboardV2Inner({
 	user,
-	smartAccountAddress = null,
-	kycCompleted = false,
 	kycCallback = false,
 	initialSection,
 }: ProfileDashboardV2Props) {

@@ -5,7 +5,11 @@ import { Loader2, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { logger } from '@/lib/logger'
 import { Button } from '~/components/base/button'
-import { appendUpdatePage, mergeRealtimePage, type ProjectUpdate } from '~/lib/utils/project-updates'
+import {
+	appendUpdatePage,
+	mergeRealtimePage,
+	type ProjectUpdate,
+} from '~/lib/utils/project-updates'
 import { LoadMoreButton } from './load-more-button'
 import { UpdateCard } from './update-card'
 import { UpdateForm } from './update-form'

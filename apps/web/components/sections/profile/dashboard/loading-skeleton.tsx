@@ -11,8 +11,10 @@ export function LoadingSkeleton({ rows = 3, className }: LoadingSkeletonProps) {
 	return (
 		<div className={cn('space-y-4', className)} aria-hidden="true">
 			{Array.from({ length: rows }).map((_, i) => (
-				// biome-ignore lint/suspicious/noArrayIndexKey: static skeleton
-				<div key={i} className="flex gap-4 rounded-2xl border border-slate-100 bg-white/80 p-5">
+				<div
+					key={`loading-skeleton-${i}`}
+					className="flex gap-4 rounded-2xl border border-slate-100 bg-white/80 p-5"
+				>
 					<Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
 					<div className="flex-1 space-y-2">
 						<Skeleton className="h-4 w-32 rounded" />
