@@ -1,6 +1,15 @@
 'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+	type Query,
+	type QueryClient,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from '@tanstack/react-query'
+import type { Session } from 'next-auth'
+import { useSession } from 'next-auth/react'
+import { useEffect, useRef } from 'react'
 
 export interface Referral {
 	id: string
@@ -36,10 +45,50 @@ export interface ReferralsData {
 	referral_profile: ReferralProfile | null
 }
 
-const REFERRALS_QUERY_KEY = ['referrals'] as const
+export type SessionStatus = 'authenticated' | 'loading' | 'unauthenticated'
 
-const fetchReferrals = async (): Promise<ReferralsData> => {
-	const response = await fetch('/api/referrals')
+export const REFERRALS_QUERY_KEY_PREFIX = ['referrals'] as const
+export const UNAUTHENTICATED_REFERRALS_KEY = '__unauthenticated__' as const
+
+export function resolveReferralSessionUserId(
+	session: Session | null | undefined,
+	status: SessionStatus,
+): string | null {
+	if (status !== 'authenticated') return null
+	const rawId = session?.user?.id
+	if (typeof rawId !== 'string') return null
+	const trimmed = rawId.trim()
+	return trimmed.length > 0 ? trimmed : null
+}
+
+export function buildReferralsQueryKey(userId: string | null) {
+	return ['referrals', userId ?? UNAUTHENTICATED_REFERRALS_KEY] as const
+}
+
+export function isObsoleteReferralQuery(
+	query: Pick<Query, 'queryKey'>,
+	activeUserId: string | null,
+): boolean {
+	if (!Array.isArray(query.queryKey) || query.queryKey[0] !== 'referrals') {
+		return false
+	}
+	if (activeUserId === null) {
+		return true
+	}
+	return query.queryKey.length !== 2 || query.queryKey[1] !== activeUserId
+}
+
+export function reconcileReferralQueryCache(
+	queryClient: QueryClient,
+	activeUserId: string | null,
+): void {
+	const predicate = (query: Query) => isObsoleteReferralQuery(query, activeUserId)
+	void queryClient.cancelQueries({ predicate })
+	queryClient.removeQueries({ predicate })
+}
+
+const fetchReferrals = async (signal?: AbortSignal): Promise<ReferralsData> => {
+	const response = await fetch('/api/referrals', signal ? { signal } : undefined)
 	if (!response.ok) {
 		throw new Error('Failed to fetch referrals')
 	}
@@ -48,15 +97,45 @@ const fetchReferrals = async (): Promise<ReferralsData> => {
 
 export const useReferrals = () => {
 	const queryClient = useQueryClient()
+	const { data: session, status } = useSession()
+	const authenticatedUserId = resolveReferralSessionUserId(session, status)
+	const isAuthenticated = authenticatedUserId !== null
+	const queryKey = buildReferralsQueryKey(authenticatedUserId)
+
+	const activeUserIdRef = useRef<string | null>(authenticatedUserId)
+	activeUserIdRef.current = authenticatedUserId
+
+	useEffect(() => {
+		if (status === 'loading' && authenticatedUserId === null) {
+			return
+		}
+		reconcileReferralQueryCache(queryClient, authenticatedUserId)
+	}, [queryClient, authenticatedUserId, status])
 
 	const query = useQuery<ReferralsData>({
-		queryKey: REFERRALS_QUERY_KEY,
-		queryFn: fetchReferrals,
-		refetchInterval: 30000,
+		queryKey,
+		enabled: isAuthenticated,
+		refetchInterval: isAuthenticated ? 30000 : false,
+		queryFn: async ({ signal }) => {
+			const requestUserId = authenticatedUserId
+			if (!requestUserId) {
+				throw new Error('Authentication required to fetch referrals')
+			}
+			const data = await fetchReferrals(signal)
+			if (signal?.aborted || activeUserIdRef.current !== requestUserId) {
+				reconcileReferralQueryCache(queryClient, activeUserIdRef.current)
+				throw new DOMException('Referral request superseded by account transition', 'AbortError')
+			}
+			return data
+		},
 	})
 
 	const activateMutation = useMutation({
+		onMutate: () => ({ targetUserId: activeUserIdRef.current }),
 		mutationFn: async () => {
+			if (!activeUserIdRef.current) {
+				throw new Error('Failed to activate referral code')
+			}
 			const response = await fetch('/api/referrals/activate', { method: 'POST' })
 			const data = await response.json()
 			if (!response.ok) {
@@ -64,13 +143,23 @@ export const useReferrals = () => {
 			}
 			return data
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: REFERRALS_QUERY_KEY })
+		onSuccess: (_data, _variables, context) => {
+			const targetUserId = context?.targetUserId ?? null
+			if (targetUserId && activeUserIdRef.current === targetUserId) {
+				void queryClient.invalidateQueries({
+					queryKey: buildReferralsQueryKey(targetUserId),
+					exact: true,
+				})
+			}
 		},
 	})
 
 	const applyMutation = useMutation({
+		onMutate: () => ({ targetUserId: activeUserIdRef.current }),
 		mutationFn: async (code: string) => {
+			if (!activeUserIdRef.current) {
+				throw new Error('Failed to apply referral code')
+			}
 			const response = await fetch('/api/referrals/apply', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -82,13 +171,21 @@ export const useReferrals = () => {
 			}
 			return data
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: REFERRALS_QUERY_KEY })
+		onSuccess: (_data, _variables, context) => {
+			const targetUserId = context?.targetUserId ?? null
+			if (targetUserId && activeUserIdRef.current === targetUserId) {
+				void queryClient.invalidateQueries({
+					queryKey: buildReferralsQueryKey(targetUserId),
+					exact: true,
+				})
+			}
 		},
 	})
 
 	return {
 		...query,
+		data: isAuthenticated ? query.data : undefined,
+		isLoading: status === 'loading' || (isAuthenticated && query.isLoading),
 		activateReferral: activateMutation.mutateAsync,
 		isActivating: activateMutation.isPending,
 		activateError: activateMutation.error,
