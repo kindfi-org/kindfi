@@ -215,6 +215,17 @@ export const useReferrals = (): UseReferralsResult => {
 		},
 	})
 
+	const { reset: resetActivateMutation } = activateMutation
+	const { reset: resetApplyMutation } = applyMutation
+	const previousUserIdRef = useRef<string | null>(authenticatedUserId)
+	useEffect(() => {
+		if (previousUserIdRef.current !== authenticatedUserId) {
+			previousUserIdRef.current = authenticatedUserId
+			resetActivateMutation()
+			resetApplyMutation()
+		}
+	}, [authenticatedUserId, resetActivateMutation, resetApplyMutation])
+
 	return {
 		...query,
 		data: isAuthenticated ? query.data : undefined,

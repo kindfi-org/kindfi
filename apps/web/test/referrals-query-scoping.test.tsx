@@ -536,4 +536,52 @@ describe('useReferrals client-mounted gating, transitions, and mutations', () =>
 			queryClient.getQueryData<ReferralsData>(buildReferralsQueryKey('user-b'))?.referral_code,
 		).toBe('REF-BOB')
 	})
+
+	test('resets activate and apply mutation error states when the authenticated account changes', async () => {
+		const dataA = makeReferralsData('user-a', 'REF-ALICE')
+		const dataB = makeReferralsData('user-b', 'REF-BOB')
+
+		globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+			const url = String(input)
+			if (url.endsWith('/api/referrals/activate')) {
+				return jsonResponse({ error: 'Activation rate limit exceeded' }, 429)
+			}
+			if (url.endsWith('/api/referrals/apply')) {
+				return jsonResponse({ error: 'Already referred by another account' }, 400)
+			}
+			const activeId = currentSession.data?.user?.id ?? 'unknown'
+			return jsonResponse(activeId === 'user-b' ? dataB : dataA)
+		}) as unknown as typeof fetch
+
+		const { useReferrals } = await import('~/hooks/referrals/use-referrals')
+		const hookRef: { current: UseReferralsResult | null } = { current: null }
+
+		function Probe(): null {
+			hookRef.current = useReferrals()
+			return null
+		}
+
+		// 1. Mount as user-a and trigger failing activate + apply mutations
+		currentSession = { data: makeSession('user-a'), status: 'authenticated' }
+		await renderClient(<Probe />)
+		await flushAsyncAct()
+
+		await act(async () => {
+			await hookRef.current?.activateReferral().catch(() => {})
+			await hookRef.current?.applyReferralCode('BADCODE').catch(() => {})
+		})
+		await flushAsyncAct()
+		expect(hookRef.current?.activateError?.message).toBe('Activation rate limit exceeded')
+		expect(hookRef.current?.applyError?.message).toBe('Already referred by another account')
+
+		// 2. Switch to user-b while Probe remains mounted: user-a's mutation errors must reset cleanly
+		currentSession = { data: makeSession('user-b'), status: 'authenticated' }
+		await renderClient(<Probe />)
+		await flushAsyncAct()
+		expect(hookRef.current?.data?.referral_code).toBe('REF-BOB')
+		expect(hookRef.current?.activateError).toBeNull()
+		expect(hookRef.current?.applyError).toBeNull()
+		expect(hookRef.current?.isActivating).toBe(false)
+		expect(hookRef.current?.isApplying).toBe(false)
+	})
 })
