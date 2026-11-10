@@ -3,13 +3,14 @@
 import {
 	type Query,
 	type QueryClient,
+	type UseQueryResult,
 	useMutation,
 	useQuery,
 	useQueryClient,
 } from '@tanstack/react-query'
 import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 export interface Referral {
 	id: string
@@ -47,9 +48,24 @@ export interface ReferralsData {
 
 export type SessionStatus = 'authenticated' | 'loading' | 'unauthenticated'
 
+export type UseReferralsResult = Omit<UseQueryResult<ReferralsData>, 'data' | 'isLoading'> & {
+	data: ReferralsData | undefined
+	isLoading: boolean
+	activateReferral: () => Promise<unknown>
+	isActivating: boolean
+	activateError: Error | null
+	applyReferralCode: (code: string) => Promise<unknown>
+	isApplying: boolean
+	applyError: Error | null
+}
+
 export const REFERRALS_QUERY_KEY_PREFIX = ['referrals'] as const
 export const UNAUTHENTICATED_REFERRALS_KEY = '__unauthenticated__' as const
 
+/**
+ * Resolves the canonical authenticated user ID from a NextAuth session.
+ * Returns `null` whenever authentication is unresolved, signed out, or blank.
+ */
 export function resolveReferralSessionUserId(
 	session: Session | null | undefined,
 	status: SessionStatus,
@@ -61,10 +77,16 @@ export function resolveReferralSessionUserId(
 	return trimmed.length > 0 ? trimmed : null
 }
 
-export function buildReferralsQueryKey(userId: string | null) {
+/**
+ * Builds the account-scoped TanStack Query key for referral data.
+ */
+export function buildReferralsQueryKey(userId: string | null): readonly ['referrals', string] {
 	return ['referrals', userId ?? UNAUTHENTICATED_REFERRALS_KEY] as const
 }
 
+/**
+ * Determines whether a cached query belongs to a superseded referral session.
+ */
 export function isObsoleteReferralQuery(
 	query: Pick<Query, 'queryKey'>,
 	activeUserId: string | null,
@@ -78,6 +100,9 @@ export function isObsoleteReferralQuery(
 	return query.queryKey.length !== 2 || query.queryKey[1] !== activeUserId
 }
 
+/**
+ * Cancels and removes referral cache entries that do not belong to `activeUserId`.
+ */
 export function reconcileReferralQueryCache(
 	queryClient: QueryClient,
 	activeUserId: string | null,
@@ -87,6 +112,9 @@ export function reconcileReferralQueryCache(
 	queryClient.removeQueries({ predicate })
 }
 
+/**
+ * Fetches the authenticated user's referral dashboard payload.
+ */
 const fetchReferrals = async (signal?: AbortSignal): Promise<ReferralsData> => {
 	const response = await fetch('/api/referrals', signal ? { signal } : undefined)
 	if (!response.ok) {
@@ -95,7 +123,10 @@ const fetchReferrals = async (signal?: AbortSignal): Promise<ReferralsData> => {
 	return response.json()
 }
 
-export const useReferrals = () => {
+/**
+ * Subscribes to account-scoped referral data and exposes referral activation/application mutations.
+ */
+export const useReferrals = (): UseReferralsResult => {
 	const queryClient = useQueryClient()
 	const { data: session, status } = useSession()
 	const authenticatedUserId = resolveReferralSessionUserId(session, status)
@@ -103,7 +134,9 @@ export const useReferrals = () => {
 	const queryKey = buildReferralsQueryKey(authenticatedUserId)
 
 	const activeUserIdRef = useRef<string | null>(authenticatedUserId)
-	activeUserIdRef.current = authenticatedUserId
+	useLayoutEffect(() => {
+		activeUserIdRef.current = authenticatedUserId
+	}, [authenticatedUserId])
 
 	useEffect(() => {
 		if (status === 'loading' && authenticatedUserId === null) {
@@ -130,7 +163,7 @@ export const useReferrals = () => {
 		},
 	})
 
-	const activateMutation = useMutation({
+	const activateMutation = useMutation<unknown, Error, void, { targetUserId: string | null }>({
 		onMutate: () => ({ targetUserId: activeUserIdRef.current }),
 		mutationFn: async () => {
 			if (!activeUserIdRef.current) {
@@ -154,7 +187,7 @@ export const useReferrals = () => {
 		},
 	})
 
-	const applyMutation = useMutation({
+	const applyMutation = useMutation<unknown, Error, string, { targetUserId: string | null }>({
 		onMutate: () => ({ targetUserId: activeUserIdRef.current }),
 		mutationFn: async (code: string) => {
 			if (!activeUserIdRef.current) {
