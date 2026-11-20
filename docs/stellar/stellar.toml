@@ -1,0 +1,30 @@
+# SEP-1 stellar.toml for KindFi (source of truth in git).
+# Production will serve this at https://<domain>/.well-known/stellar.toml
+# See docs/stellar/standards.md. No secrets or guessed contract ids here.
+
+VERSION = "2.0.0"
+
+# HOME_DOMAIN is not set here: the production domain is not decided in this repo.
+# The domain owner adds it (and any ACCOUNTS) when serving the file.
+
+[DOCUMENTATION]
+ORG_URL = "https://kindfis-organization.gitbook.io/development"
+ORG_GITHUB = "kindfi-org"
+
+# Testnet USDC issuer used by the app (default; override with
+# NEXT_PUBLIC_TESTNET_USDC_ISSUER_ADDRESS).
+[[CURRENCIES]]
+code = "USDC"
+issuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+is_asset_anchored = true
+anchor_asset_type = "fiat"
+anchor_asset = "USD"
+
+# Mainnet Circle USDC issuer used by the app (default; override with
+# NEXT_PUBLIC_MAINNET_USDC_CONTRACT_ADDRESS).
+[[CURRENCIES]]
+code = "USDC"
+issuer = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN"
+is_asset_anchored = true
+anchor_asset_type = "fiat"
+anchor_asset = "USD"

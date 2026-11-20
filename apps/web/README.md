@@ -426,6 +426,10 @@ Ensure all production environment variables are set in your deployment platform 
 - [React Query](https://tanstack.com/query/latest)
 - [Didit Documentation](https://didit.me/) - Identity verification platform
 
+## 🌐 stellar.toml (SEP-1)
+
+The source of truth is [`docs/stellar/stellar.toml`](../../docs/stellar/stellar.toml); the SEPs the app relies on are mapped in [`docs/stellar/standards.md`](../../docs/stellar/standards.md). Production should serve it at `https://<domain>/.well-known/stellar.toml` (with CORS `Access-Control-Allow-Origin: *`). Serving it is a follow-up for the domain owner; it is not deployed yet. USDC issuers mirror `apps/web/lib/constants/escrow.ts` and can be overridden with env vars such as `NEXT_PUBLIC_USDC_CONTRACT_ADDRESS`.
+
 ## 🤝 Contributing
 
 See the main [README.md](../../README.md) for contribution guidelines.
