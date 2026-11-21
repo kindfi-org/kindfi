@@ -6,7 +6,7 @@ import { usePollarSigner } from '~/hooks/pollar/use-pollar-signer'
 import type { WalletTransferConfig } from '~/lib/config/wallet-transfer.config'
 import { submitClassicPaymentWithPollar } from '~/lib/pollar/integrations/wallet-send.signer'
 import { mapWalletSendError } from '~/lib/wallet-send/errors'
-import { loadHorizonAccount } from '~/lib/wallet-send/horizon/accounts'
+import { loadHorizonAccount, WalletSendHorizonError } from '~/lib/wallet-send/horizon/accounts'
 import { createHorizonServer } from '~/lib/wallet-send/horizon/client'
 import { preflightWalletSendPayment } from '~/lib/wallet-send/horizon/preflight'
 import { submitSignedPaymentToHorizon } from '~/lib/wallet-send/submit/horizon-submit'
@@ -68,6 +68,9 @@ export const useWalletSendKit = () => {
 				const result = await submitSignedPaymentToHorizon(signedXdr, config)
 				return { hash: result.hash, submittedVia: 'wallet-kit' as const }
 			} catch (error) {
+				if (error instanceof WalletSendHorizonError) {
+					throw error
+				}
 				const mapped = mapWalletSendError(error)
 				throw Object.assign(new Error(mapped.message), { code: mapped.code })
 			} finally {
