@@ -12,19 +12,19 @@ use crate::types::{RoundStatus, VoteType};
 // ============================================================================
 
 /// Deploy and initialize a fresh Governance contract.
-fn setup_governance(env: &Env) -> (GovernanceClient, Address, Address) {
+fn setup_governance(env: &Env) -> (GovernanceClient<'_>, Address, Address) {
+    env.mock_all_auths();
     let admin = Address::generate(env);
     let reputation = Address::generate(env);
-    let contract = GovernanceClient::new(env, &env.register_contract(None, Governance));
-    contract.__constructor(&admin, &reputation);
+    let contract = GovernanceClient::new(env, &env.register(Governance, (&admin, &reputation)));
     (contract, admin, reputation)
 }
 
 /// Deploy and initialize a fresh Governance contract, grant admin role.
-fn setup_with_admin_role(env: &Env) -> (GovernanceClient, Address, Address) {
+fn setup_with_admin_role(env: &Env) -> (GovernanceClient<'_>, Address, Address) {
     let (contract, admin, reputation) = setup_governance(env);
     // Grant admin the "admin" role so #[only_role] passes
-    contract.grant_role(&admin, &admin, symbol_short!("admin"), &admin);
+    contract.grant_role(&admin, &symbol_short!("admin"), &admin);
     (contract, admin, reputation)
 }
 
@@ -42,15 +42,15 @@ fn test_constructor_stores_reputation_contract() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Error(Contract, #500)")]
 fn test_double_initialization_panics() {
     let env = Env::default();
-    let admin = Address::generate(&env);
-    let reputation = Address::generate(&env);
-    let contract = GovernanceClient::new(&env, &env.register_contract(None, Governance));
-    contract.__constructor(&admin, &reputation);
-    // Second call must panic with AlreadyInitialized
-    contract.__constructor(&admin, &reputation);
+    let (contract, admin, reputation) = setup_governance(&env);
+    // The constructor already ran at registration and the client no longer exposes it,
+    // so run it again inside the contract: it must panic with AlreadyInitialized.
+    env.as_contract(&contract.address, || {
+        Governance::__constructor(&env, admin, reputation);
+    });
 }
 
 // ============================================================================

@@ -8,19 +8,18 @@ use soroban_sdk::{symbol_short, testutils::Address as _, Address, Env};
 #[test]
 fn test_create_referral() {
     let env = Env::default();
+    env.mock_all_auths();
     let admin = Address::generate(&env);
     let recorder = Address::generate(&env);
     let referrer = Address::generate(&env);
     let referred = Address::generate(&env);
     let reputation = Address::generate(&env);
 
-    let referral_contract = env.register_contract(None, Referral);
-    
-    // Initialize
-    referral_contract.__constructor(&admin, &reputation);
+    let referral_contract =
+        ReferralClient::new(&env, &env.register(Referral, (&admin, &reputation)));
 
     // Grant recorder role
-    referral_contract.grant_role(&admin, &admin, symbol_short!("recorder"), &recorder);
+    referral_contract.grant_role(&recorder, &symbol_short!("recorder"), &admin);
 
     // Create referral
     referral_contract.create_referral(&recorder, &referrer, &referred);

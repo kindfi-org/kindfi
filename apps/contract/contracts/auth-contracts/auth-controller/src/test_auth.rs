@@ -1,8 +1,10 @@
 #![cfg(test)]
 extern crate std;
 
+use std::format;
+
 use p256::ecdsa::{
-    signature::Signer as P256Signer, Signature as P256Signature, SigningKey as P256SigningKey,
+    signature::hazmat::PrehashSigner, Signature as P256Signature, SigningKey as P256SigningKey,
     VerifyingKey as P256VerifyingKey,
 };
 use rand::{rngs::StdRng, RngCore, SeedableRng};
@@ -32,12 +34,11 @@ use account_factory::{events::AccountDeployEventData, AccountFactory, AccountFac
 
 // Create mock account contract and import WASM hash
 mod account_contract_mod {
-    use super::Context;
     soroban_sdk::contractimport!(
-        file = "../../../target/wasm32-unknown-unknown/release/account_contract.wasm"
+        file = "../../../target/wasm32v1-none/release/account_contract.wasm"
     );
 }
-mod base64_url;
+use crate::base64_url;
 
 // A secure key storage for WebAuthn-compatible Secp256r1 keys
 pub struct SecureKeyStorage {
@@ -53,7 +54,7 @@ impl SecureKeyStorage {
     fn get_public_key(&self, env: &Env) -> BytesN<65> {
         let (_, verifying_key) = self.get_secp256r1_keypair();
         let encoded_point = verifying_key.to_encoded_point(false); // Uncompressed format
-        BytesN::from_array(env, encoded_point.as_bytes())
+        BytesN::from_array(env, encoded_point.as_bytes().try_into().unwrap())
     }
 
     // Generate secp256r1 keypair for signing
@@ -72,11 +73,12 @@ impl SecureKeyStorage {
         BytesN::from_array(env, &device_id)
     }
 
-    // Sign a payload using secp256r1 (for WebAuthn simulation)
-    fn sign_secp256r1(&self, payload: &[u8]) -> [u8; 64] {
+    // Sign a 32-byte digest using secp256r1 (for WebAuthn simulation). The contract verifies
+    // the digest itself, so it is signed as a prehash, with a low-S signature.
+    fn sign_secp256r1(&self, digest: &[u8]) -> [u8; 64] {
         let (signing_key, _) = self.get_secp256r1_keypair();
-        let signature: P256Signature = signing_key.sign(payload);
-        signature.to_bytes().into()
+        let signature: P256Signature = signing_key.sign_prehash(digest).unwrap();
+        signature.normalize_s().unwrap_or(signature).to_bytes().into()
     }
 
     // Generate secp256r1 public key for account device (65 bytes)
@@ -164,13 +166,41 @@ fn get_secure_key_for_signer(signer_index: usize) -> SecureKeyStorage {
     SecureKeyStorage::new(signer_index as u64)
 }
 
+/// Events from the last invocation as (contract, topics, data), the form these tests read.
+fn event_tuples(env: &Env) -> std::vec::Vec<(Address, Vec<Val>, Val)> {
+    use soroban_sdk::xdr::{ContractEventBody, ScAddress};
+    use soroban_sdk::TryFromVal;
+
+    env.events()
+        .all()
+        .events()
+        .iter()
+        .map(|event| {
+            let ContractEventBody::V0(body) = &event.body;
+            let contract = Address::try_from_val(
+                env,
+                &ScAddress::Contract(event.contract_id.clone().expect("contract event")),
+            )
+            .unwrap();
+            let mut topics = Vec::new(env);
+            for topic in body.topics.iter() {
+                topics.push_back(Val::try_from_val(env, topic).unwrap());
+            }
+            (contract, topics, Val::try_from_val(env, &body.data).unwrap())
+        })
+        .collect()
+}
+
 // Helper functions for test setup
 fn create_auth_client(env: &Env) -> AuthControllerClient {
     let contract_address = env.register(AuthController, ());
     AuthControllerClient::new(env, &contract_address)
 }
 
-fn create_factory_client(env: &Env, auth_client: &AuthControllerClient) -> AccountFactoryClient {
+fn create_factory_client<'a>(
+    env: &'a Env,
+    auth_client: &AuthControllerClient,
+) -> AccountFactoryClient<'a> {
     // Upload the WASM to be deployed
     let wasm_hash = env
         .deployer()
@@ -187,7 +217,10 @@ fn create_factory_client(env: &Env, auth_client: &AuthControllerClient) -> Accou
     AccountFactoryClient::new(env, &contract_address)
 }
 
-fn create_account_client(env: &Env, auth_client: &AuthControllerClient) -> AccountContractClient {
+fn create_account_client<'a>(
+    env: &'a Env,
+    auth_client: &AuthControllerClient,
+) -> AccountContractClient<'a> {
     // Simulate device id and public key generation
     let secure_key = SecureKeyStorage::new(42);
     let device_id = secure_key.get_device_id(env);
@@ -1177,9 +1210,10 @@ fn test_integration_auth_controller_with_account() {
     let device_id = secure_key.get_device_id(&env);
     let public_key = secure_key.get_secp_public_key(&env);
 
+    let native_token = Address::generate(&env);
     let account_address = env.register(
         AccountContract,
-        (&device_id, &public_key, &auth_client.address),
+        (&device_id, &public_key, &auth_client.address, &native_token),
     );
 
     let account_client = AccountContractClient::new(&env, &account_address);
@@ -1233,7 +1267,7 @@ fn test_auth_controller_init_event() {
     auth_client.init(&signers, &default_threshold);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the init event
@@ -1279,7 +1313,7 @@ fn test_auth_controller_add_signer_event() {
     auth_client.add_signer(&new_signer);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for adding a signer
@@ -1325,7 +1359,7 @@ fn test_auth_controller_remove_signer_event() {
     auth_client.remove_signer(&signer_to_remove);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for removing a signer
@@ -1369,7 +1403,7 @@ fn test_auth_controller_default_threshold_changed_event() {
     auth_client.set_default_threshold(&new_threshold);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for changing the threshold
@@ -1419,7 +1453,7 @@ fn test_auth_controller_add_factory_event() {
     auth_client.add_factory(&factory, &context);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for adding a factory
@@ -1469,7 +1503,7 @@ fn test_auth_controller_remove_factory_event() {
     auth_client.remove_factory(&factory, &context);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for removing a factory
@@ -1516,7 +1550,7 @@ fn test_auth_controller_add_account_event() {
     auth_client.add_account(&account, &context);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for adding an account
@@ -1566,7 +1600,7 @@ fn test_auth_controller_remove_account_event() {
     auth_client.remove_account(&account, &context);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for removing an account
@@ -1613,7 +1647,7 @@ fn test_account_add_device_event() {
     account_client.add_device(&new_device_id, &new_public_key);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for adding a device
@@ -1666,7 +1700,7 @@ fn test_account_remove_device_event() {
     account_client.remove_device(&first_device_id);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for removing a device
@@ -1709,7 +1743,7 @@ fn test_account_add_recovery_address_event() {
     account_client.add_recovery_address(&recovery_address);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for adding a recovery address
@@ -1759,7 +1793,7 @@ fn test_account_update_recovery_address_event() {
     account_client.update_recovery_address(&new_recovery_address);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for updating a recovery address
@@ -1812,7 +1846,7 @@ fn test_account_recovered_event() {
     account_client.recover_account(&new_device_id, &new_public_key);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for account recovery
@@ -1860,7 +1894,7 @@ fn test_account_factory_deploy_event() {
     let account_address = factory_client.deploy(&salt, &device_id, &public_key);
 
     // Verify event
-    let events = env.events().all();
+    let events = event_tuples(&env);
     assert!(!events.is_empty(), "Expected events to be generated");
 
     // Find the event for deploying an account

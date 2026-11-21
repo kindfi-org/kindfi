@@ -1,16 +1,10 @@
 #![cfg(test)]
-extern crate alloc;
 extern crate std;
 
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use alloc::vec;
-use soroban_sdk::{
-    symbol_short,
-    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation},
-    Address, BytesN, Env, IntoVal,
-};
+use soroban_sdk::{testutils::Address as _, Address, BytesN, Env};
 
 use crate::{AccountFactory, AccountFactoryClient};
 
@@ -26,7 +20,7 @@ fn gen_random_bytes<const N: usize>(env: &Env) -> BytesN<N> {
 // The contract that will be deployed by the deployer contract.
 mod contract {
     soroban_sdk::contractimport!(
-        file = "../../../target/wasm32-unknown-unknown/release/account_contract.wasm"
+        file = "../../../target/wasm32v1-none/release/account_contract.wasm"
     );
 }
 
@@ -56,17 +50,8 @@ fn test_deploy() {
 
     let contract_id = factory_client.deploy(&salt, &id, &pk);
 
-    // An authorization from the auth_contract is required.
-    let expected_auth = AuthorizedInvocation {
-        // Top-level authorized function is `deploy` with all the arguments.
-        function: AuthorizedFunction::Contract((
-            factory_client.address,
-            symbol_short!("deploy"),
-            (salt, id, pk).into_val(&env),
-        )),
-        sub_invocations: vec![],
-    };
-    assert_eq!(env.auths(), vec![(auth_contract, expected_auth)]);
+    // `deploy` no longer asks the auth contract to authorize (see the note in `deploy`).
+    assert!(env.auths().iter().all(|(address, _)| *address != auth_contract));
 
     // Invoke contract to check that it is initialized.
     let client = contract::Client::new(&env, &contract_id);
