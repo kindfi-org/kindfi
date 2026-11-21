@@ -54,26 +54,44 @@ const buildSignedPaymentXdr = (): string => {
 	return tx.toXDR()
 }
 
-const buildFakeHorizonError = (resultCodes: HorizonResultCodes, messageOverride?: string) => {
-	const body = {
-		type: 'https://stellar.org/horizon-errors/transaction_failed',
-		title: 'Transaction Failed',
-		status: 400,
-		detail:
-			'The transaction failed when submitted to the stellar network. The `extras.result_codes` field on this response contains further details.',
+type FakeHorizonErrorResponse = {
+	status: 400
+	data: {
+		type: string
+		title: 'Transaction Failed'
+		status: 400
+		detail: string
 		extras: {
-			envelope_xdr: 'AAAAAgAAAAB=',
-			result_codes: resultCodes,
-			result_xdr: 'AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=',
+			envelope_xdr: string
+			result_codes: HorizonResultCodes
+			result_xdr: string
+		}
+	}
+}
+
+const buildFakeHorizonError = (
+	resultCodes: HorizonResultCodes,
+	messageOverride?: string,
+): BadRequestError => {
+	const response: FakeHorizonErrorResponse = {
+		status: 400,
+		data: {
+			type: 'https://stellar.org/horizon-errors/transaction_failed',
+			title: 'Transaction Failed',
+			status: 400,
+			detail:
+				'The transaction failed when submitted to the stellar network. The `extras.result_codes` field on this response contains further details.',
+			extras: {
+				envelope_xdr: 'AAAAAgAAAAB=',
+				result_codes: resultCodes,
+				result_xdr: 'AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=',
+			},
 		},
 	}
 
 	return new BadRequestError(
-		messageOverride ?? `Transaction submission failed: ${JSON.stringify(body)}`,
-		{
-			status: 400,
-			data: body,
-		} as any,
+		messageOverride ?? `Transaction submission failed: ${JSON.stringify(response.data)}`,
+		response,
 	)
 }
 
@@ -131,7 +149,7 @@ describe('wallet send Horizon result code mapping', () => {
 	test('returns the Horizon transaction hash when submission succeeds', async () => {
 		const signedXdr = buildSignedPaymentXdr()
 		const fakeServer: HorizonSubmitServer = {
-			submitTransaction: async () => ({ hash: 'abc123horizonhash' }) as any,
+			submitTransaction: async () => ({ hash: 'abc123horizonhash' }),
 		}
 
 		const result = await submitSignedPaymentToHorizon(signedXdr, TESTNET_CONFIG, {

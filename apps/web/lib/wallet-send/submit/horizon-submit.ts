@@ -1,4 +1,4 @@
-import { type Horizon, TransactionBuilder } from '@stellar/stellar-sdk'
+import { TransactionBuilder } from '@stellar/stellar-sdk'
 import type { WalletTransferConfig } from '~/lib/config/wallet-transfer.config'
 import { logger } from '~/lib/logger'
 import {
@@ -12,7 +12,11 @@ export type HorizonSubmitResult = {
 	hash: string
 }
 
-export type HorizonSubmitServer = Pick<Horizon.Server, 'submitTransaction'>
+export type HorizonSubmitServer = {
+	submitTransaction: (
+		transaction: ReturnType<typeof TransactionBuilder.fromXDR>,
+	) => Promise<HorizonSubmitResult>
+}
 
 const TRANSACTION_WRAPPER_CODES = new Set(['tx_failed', 'tx_fee_bump_inner_failed'])
 
