@@ -1234,6 +1234,12 @@ fn test_integration_auth_controller_with_account() {
 
     account_client.recover_account(&new_device_id, &new_public_key);
 
+    let authorizers: std::vec::Vec<Address> =
+        env.auths().into_iter().map(|(address, _)| address).collect();
+    assert_eq!(authorizers.len(), 2);
+    assert!(authorizers.contains(&auth_client.address));
+    assert!(authorizers.contains(&recovery_address));
+
     // Verify the recovery worked correctly
     let devices = account_client.get_devices();
     assert_eq!(devices.len(), 1);
