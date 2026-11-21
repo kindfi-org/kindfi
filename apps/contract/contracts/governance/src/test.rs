@@ -46,8 +46,7 @@ fn test_constructor_stores_reputation_contract() {
 fn test_double_initialization_panics() {
     let env = Env::default();
     let (contract, admin, reputation) = setup_governance(&env);
-    // The constructor already ran at registration and the client no longer exposes it,
-    // so run it again inside the contract: it must panic with AlreadyInitialized.
+    // Second constructor call, run inside the contract.
     env.as_contract(&contract.address, || {
         Governance::__constructor(&env, admin, reputation);
     });

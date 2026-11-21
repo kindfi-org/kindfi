@@ -73,8 +73,7 @@ impl SecureKeyStorage {
         BytesN::from_array(env, &device_id)
     }
 
-    // Sign a 32-byte digest using secp256r1 (for WebAuthn simulation). The contract verifies
-    // the digest itself, so it is signed as a prehash, with a low-S signature.
+    // Signs the 32-byte digest as a prehash, normalized to low-S.
     fn sign_secp256r1(&self, digest: &[u8]) -> [u8; 64] {
         let (signing_key, _) = self.get_secp256r1_keypair();
         let signature: P256Signature = signing_key.sign_prehash(digest).unwrap();
@@ -166,7 +165,7 @@ fn get_secure_key_for_signer(signer_index: usize) -> SecureKeyStorage {
     SecureKeyStorage::new(signer_index as u64)
 }
 
-/// Events from the last invocation as (contract, topics, data), the form these tests read.
+/// Events from the last invocation as (contract, topics, data).
 fn event_tuples(env: &Env) -> std::vec::Vec<(Address, Vec<Val>, Val)> {
     use soroban_sdk::xdr::{ContractEventBody, ScAddress};
     use soroban_sdk::TryFromVal;
