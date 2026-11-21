@@ -50,7 +50,7 @@ fn test_deploy() {
 
     let contract_id = factory_client.deploy(&salt, &id, &pk);
 
-    // `deploy` no longer asks the auth contract to authorize (see the note in `deploy`).
+    // `deploy` does not require auth from the auth contract (see the note in `deploy`).
     assert!(env.auths().iter().all(|(address, _)| *address != auth_contract));
 
     // Invoke contract to check that it is initialized.

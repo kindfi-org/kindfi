@@ -31,7 +31,6 @@ fn test_create_quest() {
         &0, // No expiration
     );
 
-    // Quest ids start at 1.
     assert_eq!(quest_id, 1);
 
     // Get quest
