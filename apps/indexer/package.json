@@ -1,18 +1,18 @@
 {
 	"author": "kindfi-org",
 	"dependencies": {
-		"@subql/common": "latest",
-		"@subql/types-core": "latest",
-		"@subql/types-stellar": "latest",
+		"@subql/common": "5.8.2",
+		"@subql/types-core": "2.2.0",
+		"@subql/types-stellar": "5.2.0",
 		"@stellar/stellar-sdk": "^14.4.3",
-		"tslib": "latest"
+		"tslib": "^2.8.1"
 	},
 	"description": "SubQL Indexer to process all userbase in the kindfi platform blockchain activity and contributions, to push it to the off-chain data for his cosumption.",
 	"devDependencies": {
-		"@subql/cli": "latest",
-		"@subql/testing": "latest",
-		"@subql/types": "latest",
-		"dotenv": "latest",
+		"@subql/cli": "6.6.3",
+		"@subql/testing": "2.3.1",
+		"@subql/types": "3.15.0",
+		"dotenv": "^17.4.2",
 		"typescript": "^5.2.2"
 	},
 	"files": [
