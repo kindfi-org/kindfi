@@ -12,7 +12,9 @@ use soroban_sdk::{
     auth::{Context, ContractContext},
     symbol_short, Bytes,
     testutils::{Address as _, Events},
-    vec, Address, BytesN, Env, IntoVal, String as SorobanString, TryIntoVal, Val, Vec,
+    vec,
+    xdr::{ContractEventBody, ScAddress},
+    Address, BytesN, Env, IntoVal, TryFromVal, TryIntoVal, Val, Vec,
 };
 
 use crate::{
@@ -87,7 +89,7 @@ impl SecureKeyStorage {
 }
 
 // Helper to create mock WebAuthn client data JSON
-fn create_client_data_json(env: &Env, challenge: &BytesN<32>) -> Bytes {
+pub(crate) fn create_client_data_json(env: &Env, challenge: &BytesN<32>) -> Bytes {
     // Base64Url encode the challenge (43 characters for 32 bytes)
     let mut challenge_b64 = [0u8; 43];
     base64_url::encode(&mut challenge_b64, &challenge.to_array());
@@ -104,7 +106,7 @@ fn create_client_data_json(env: &Env, challenge: &BytesN<32>) -> Bytes {
 }
 
 // Helper to create mock WebAuthn authenticator data
-fn create_authenticator_data(env: &Env) -> Bytes {
+pub(crate) fn create_authenticator_data(env: &Env) -> Bytes {
     // Minimal authenticator data (37 bytes minimum)
     // RP ID hash (32 bytes) + flags (1 byte) + counter (4 bytes)
     let mut auth_data = [0u8; 37];
@@ -167,9 +169,6 @@ fn get_secure_key_for_signer(signer_index: usize) -> SecureKeyStorage {
 
 /// Events from the last invocation as (contract, topics, data).
 fn event_tuples(env: &Env) -> std::vec::Vec<(Address, Vec<Val>, Val)> {
-    use soroban_sdk::xdr::{ContractEventBody, ScAddress};
-    use soroban_sdk::TryFromVal;
-
     env.events()
         .all()
         .events()

@@ -3,13 +3,14 @@ extern crate std;
 
 use core::sync::atomic::{AtomicU64, Ordering};
 
-use p256::ecdsa::{signature::Signer, Signature, SigningKey};
+use p256::ecdsa::{signature::hazmat::PrehashSigner, Signature, SigningKey};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use soroban_sdk::auth::{Context, ContractContext};
-use soroban_sdk::testutils::{Address as _, Logs};
-use soroban_sdk::{log, vec, Address, Bytes, BytesN, Env, IntoVal, Symbol, Val, Vec};
+use soroban_sdk::testutils::Address as _;
+use soroban_sdk::{vec, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
 
 use crate::errors::Error;
+use crate::test_auth::{create_authenticator_data, create_client_data_json};
 use crate::{AuthController, AuthControllerClient, SignedMessage};
 
 static SEED: AtomicU64 = AtomicU64::new(1);
@@ -35,17 +36,22 @@ fn signer_public_key(e: &Env, signing_key: &SigningKey) -> BytesN<65> {
 }
 
 fn get_signature_bytes(e: &Env, signature: &Signature) -> BytesN<64> {
-    BytesN::from_array(e, signature.to_bytes().as_slice().try_into().unwrap())
+    BytesN::from_array(e, &signature.to_bytes().into())
 }
 
 fn sign(e: &Env, signing_key: &SigningKey, payload: &BytesN<32>) -> Val {
-    let signature: Signature = signing_key.sign(payload.to_array().as_slice());
+    let client_data_json = create_client_data_json(e, payload);
+    let authenticator_data = create_authenticator_data(e);
+    let mut message = authenticator_data.clone();
+    message.extend_from_array(&e.crypto().sha256(&client_data_json).to_array());
+    let digest = e.crypto().sha256(&message).to_array();
+    let signature: Signature = signing_key.sign_prehash(&digest).unwrap();
     SignedMessage {
         device_id: BytesN::from_array(e, &[0; 32]),
-        authenticator_data: Bytes::new(e),
-        client_data_json: Bytes::new(e),
+        authenticator_data,
+        client_data_json,
         public_key: signer_public_key(e, signing_key),
-        signature: get_signature_bytes(e, &signature),
+        signature: get_signature_bytes(e, &signature.normalize_s().unwrap_or(signature)),
     }
     .into_val(e)
 }
@@ -129,17 +135,7 @@ fn test_default_threshold_not_met() {
         ],
     );
 
-    match invocation {
-        Ok(()) => log!(&env, "Log message: Success"),
-        Err(inner_error) => match inner_error {
-            Ok(e) => log!(&env, "Inner error: {:?}", e), // E variant
-            Err(_) => log!(&env, "Invocation failed: {:?}", "invoke err"), // InvokeError variant
-        },
-    }
-
-    env.logs().print();
-
-    // assert!(invocation.is_ok());
+    assert_eq!(invocation, Err(Ok(Error::DefaultThresholdNotMet)));
 }
 
 #[test]
@@ -170,17 +166,7 @@ fn test_default_threshold_met_but_wrong_signer() {
         ],
     );
 
-    match invocation {
-        Ok(()) => log!(&env, "Log message: Success"),
-        Err(inner_error) => match inner_error {
-            Ok(e) => log!(&env, "Inner error: {:?}", e), // E variant
-            Err(_) => log!(&env, "Invocation failed: {:?}", "invoke err"), // InvokeError variant
-        },
-    }
-
-    env.logs().print();
-
-    // assert!(invocation.is_ok());
+    assert_eq!(invocation, Err(Ok(Error::UnknownSigner)));
 }
 
 #[test]
@@ -211,17 +197,7 @@ fn test_default_threshold_met() {
         ],
     );
 
-    match invocation {
-        Ok(()) => log!(&env, "Log message: Success"),
-        Err(inner_error) => match inner_error {
-            Ok(e) => log!(&env, "Inner error: {:?}", e), // E variant
-            Err(_) => log!(&env, "Invocation failed: {:?}", "invoke err"), // InvokeError variant
-        },
-    }
-
-    env.logs().print();
-
-    // assert!(invocation.is_ok());
+    assert_eq!(invocation, Ok(()));
 }
 
 #[test]
