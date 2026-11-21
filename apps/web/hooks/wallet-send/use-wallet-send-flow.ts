@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useWalletSendKit } from '~/hooks/wallet-send/use-wallet-send-kit'
 import { getWalletTransferConfig } from '~/lib/config/wallet-transfer.config'
 import { mapWalletSendError } from '~/lib/wallet-send/errors'
+import { WalletSendHorizonError } from '~/lib/wallet-send/horizon/accounts'
 import type { ValidatedWalletSendPayment, WalletSendFormInput } from '~/lib/wallet-send/types'
 import { validateWalletSendForm } from '~/lib/wallet-send/validation'
 
@@ -78,6 +79,16 @@ export const useWalletSendFlow = (sourceAddress: string | null) => {
 			})
 			setStep('result')
 		} catch (error) {
+			if (error instanceof WalletSendHorizonError) {
+				setResult({
+					status: 'error',
+					message: error.message,
+					code: error.code,
+				})
+				setStep('result')
+				return
+			}
+
 			const mapped = mapWalletSendError(error)
 			setResult({
 				status: 'error',
