@@ -101,26 +101,47 @@ export function createPricesGetHandler(options: CreatePricesGetHandlerOptions) {
 	} = options
 
 	const cache = new Map<string, CachedQuoteEntry>()
-	const inFlight = new Map<string, Promise<PulseQuoteResult>>()
+	const inFlight = new Map<string, Promise<PulseQuoteSuccess | null>>()
 
 	async function fetchQuoteCoalesced(
 		cacheKey: string,
 		network: PulseQuoteNetwork,
 		asset: PulseQuoteAsset,
-	): Promise<PulseQuoteResult> {
+	): Promise<PulseQuoteSuccess | null> {
 		const pending = inFlight.get(cacheKey)
 		if (pending) {
 			return pending
 		}
 
 		// Defer reader invocation via Promise.resolve().then(...) so `inFlight.set`
-		// completes before `readQuote` runs; a synchronous throw cannot outrun map
-		// insertion and leave a permanently settled entry in `inFlight`.
-		const promise: Promise<PulseQuoteResult> = Promise.resolve()
+		// completes before `readQuote` runs, and update `cache` before `.finally()`
+		// deletes `inFlight` so there is no gap between in-flight completion and cache fill.
+		const promise: Promise<PulseQuoteSuccess | null> = Promise.resolve()
 			.then(() => readQuote({ network, asset }))
 			.catch((err): PulseQuoteResult => {
 				logger.warn('[PricesRoute] Reflector quote read failed, failing closed:', err)
 				return { status: 'missing' }
+			})
+			.then((result): PulseQuoteSuccess | null => {
+				if (!isValidPulseQuote(result)) {
+					cache.delete(cacheKey)
+					return null
+				}
+
+				const quote: PulseQuoteSuccess = {
+					price: result.price,
+					decimals: result.decimals,
+					timestamp: result.timestamp,
+					source: result.source,
+					feedContractId: result.feedContractId,
+				}
+
+				cache.set(cacheKey, {
+					quote,
+					expiresAt: now() + cacheTtlMs,
+				})
+
+				return quote
 			})
 			.finally(() => {
 				if (inFlight.get(cacheKey) === promise) {
@@ -170,10 +191,9 @@ export function createPricesGetHandler(options: CreatePricesGetHandlerOptions) {
 			})
 		}
 
-		const result = await fetchQuoteCoalesced(cacheKey, network, asset)
+		const quote = await fetchQuoteCoalesced(cacheKey, network, asset)
 
-		if (!isValidPulseQuote(result)) {
-			cache.delete(cacheKey)
+		if (!quote) {
 			return NextResponse.json(
 				{ status: 'unavailable' },
 				{
@@ -182,19 +202,6 @@ export function createPricesGetHandler(options: CreatePricesGetHandlerOptions) {
 				},
 			)
 		}
-
-		const quote: PulseQuoteSuccess = {
-			price: result.price,
-			decimals: result.decimals,
-			timestamp: result.timestamp,
-			source: result.source,
-			feedContractId: result.feedContractId,
-		}
-
-		cache.set(cacheKey, {
-			quote,
-			expiresAt: now() + cacheTtlMs,
-		})
 
 		return NextResponse.json(quote, {
 			status: 200,
