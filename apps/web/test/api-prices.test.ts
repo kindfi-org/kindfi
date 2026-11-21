@@ -163,6 +163,30 @@ describe('GET /api/prices handler', () => {
 		expect(res.headers.get('Cache-Control')).toBe('no-store')
 	})
 
+	test('recovers on retry after a synchronous throw from readPulseQuote', async () => {
+		let callCount = 0
+		const readQuote = mock((_params: ReadPulseQuoteParams): Promise<PulseQuoteResult> => {
+			callCount += 1
+			if (callCount === 1) {
+				throw new Error('Synchronous client initialization error')
+			}
+			return Promise.resolve(FRESH_XLM_QUOTE)
+		})
+		const handler = createPricesGetHandler({
+			readQuote,
+			getNetwork: () => 'testnet',
+		})
+
+		const first = await handler(makeRequest('asset=XLM'))
+		const second = await handler(makeRequest('asset=XLM'))
+
+		expect(first.status).toBe(503)
+		expect(await first.json()).toEqual({ status: 'unavailable' })
+		expect(second.status).toBe(200)
+		expect(await second.json()).toEqual(FRESH_XLM_QUOTE)
+		expect(readQuote).toHaveBeenCalledTimes(2)
+	})
+
 	test('fails closed with 503 if the oracle returns a zero price', async () => {
 		const readQuote = mock(
 			async (): Promise<PulseQuoteResult> => ({
@@ -228,12 +252,16 @@ describe('GET /api/prices handler', () => {
 
 	test('coalesces a burst of concurrent requests into a single client call', async () => {
 		let resolveQuote!: (value: PulseQuoteResult) => void
-		const readQuote = mock(
-			() =>
-				new Promise<PulseQuoteResult>((resolve) => {
-					resolveQuote = resolve
-				}),
-		)
+		let markStarted!: () => void
+		const started = new Promise<void>((resolve) => {
+			markStarted = resolve
+		})
+		const readQuote = mock(() => {
+			markStarted()
+			return new Promise<PulseQuoteResult>((resolve) => {
+				resolveQuote = resolve
+			})
+		})
 		const handler = createPricesGetHandler({
 			readQuote,
 			getNetwork: () => 'testnet',
@@ -246,6 +274,7 @@ describe('GET /api/prices handler', () => {
 			handler(makeRequest('asset=XLM')),
 		]
 
+		await started
 		resolveQuote(FRESH_XLM_QUOTE)
 		const responses = await Promise.all(requests)
 

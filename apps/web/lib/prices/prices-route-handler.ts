@@ -113,16 +113,20 @@ export function createPricesGetHandler(options: CreatePricesGetHandlerOptions) {
 			return pending
 		}
 
-		const promise = (async (): Promise<PulseQuoteResult> => {
-			try {
-				return await readQuote({ network, asset })
-			} catch (err) {
+		// Defer reader invocation via Promise.resolve().then(...) so `inFlight.set`
+		// completes before `readQuote` runs; a synchronous throw cannot outrun map
+		// insertion and leave a permanently settled entry in `inFlight`.
+		const promise: Promise<PulseQuoteResult> = Promise.resolve()
+			.then(() => readQuote({ network, asset }))
+			.catch((err): PulseQuoteResult => {
 				logger.warn('[PricesRoute] Reflector quote read failed, failing closed:', err)
 				return { status: 'missing' }
-			} finally {
-				inFlight.delete(cacheKey)
-			}
-		})()
+			})
+			.finally(() => {
+				if (inFlight.get(cacheKey) === promise) {
+					inFlight.delete(cacheKey)
+				}
+			})
 
 		inFlight.set(cacheKey, promise)
 		return promise
