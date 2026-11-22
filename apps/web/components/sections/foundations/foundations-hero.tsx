@@ -38,16 +38,13 @@ export function FoundationsHero({ sortSlug }: FoundationsHeroProps) {
 		[foundations],
 	)
 
-	const formattedRaised = useMemo(
-		() =>
-			new Intl.NumberFormat('en-US', {
-				style: 'currency',
-				currency: 'USD',
-				notation: 'compact',
-				maximumFractionDigits: 1,
-			}).format(totalRaised),
-		[totalRaised],
-	)
+	const formattedRaised = useMemo(() => {
+		const compactAmount = new Intl.NumberFormat('en-US', {
+			notation: 'compact',
+			maximumFractionDigits: 1,
+		}).format(totalRaised)
+		return `${compactAmount} USDC`
+	}, [totalRaised])
 
 	return (
 		<section

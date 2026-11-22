@@ -2,6 +2,7 @@ const MAX_FRACTION_DIGITS = 20
 
 export type FormatCurrencyOptions = {
 	currency?: string
+	code?: string
 	locale?: string
 	loadingPlaceholder?: string
 	minimumFractionDigits?: number
@@ -71,6 +72,21 @@ export const formatCurrencyAmount = (
 		options?.minimumFractionDigits,
 		options?.maximumFractionDigits,
 	)
+
+	const code = options?.code?.trim()
+	const currency = options?.currency?.trim()
+
+	// If code is explicitly provided or currency is a non-ISO token like USDC/XLM
+	const tokenCode = code || (currency && !/^[A-Za-z]{3}$/.test(currency) ? currency : undefined)
+
+	if (tokenCode && tokenCode.toUpperCase() !== 'USD') {
+		const formattedNumber = new Intl.NumberFormat(options?.locale ?? 'en-US', {
+			style: 'decimal',
+			minimumFractionDigits,
+			maximumFractionDigits,
+		}).format(numericAmount)
+		return `${formattedNumber} ${tokenCode.toUpperCase()}`
+	}
 
 	try {
 		return new Intl.NumberFormat(options?.locale ?? 'en-US', {

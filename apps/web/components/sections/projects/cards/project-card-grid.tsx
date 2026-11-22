@@ -20,6 +20,7 @@ import {
 	resolveProjectThumbnailImageProps,
 } from '~/lib/projects/project-thumbnail-loading'
 import type { Project } from '~/lib/types/project'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 interface ProjectCardGridProps {
 	project: Project
@@ -138,11 +139,10 @@ export function ProjectCardGrid({
 					<div className="grid grid-cols-3 gap-2 mb-3 tabular-nums">
 						<div className="text-center">
 							<p className="font-bold">
-								{new Intl.NumberFormat(undefined, {
-									style: 'currency',
-									currency: 'USD',
+								{formatCurrencyAmount(project.goal, {
+									code: 'USDC',
 									maximumFractionDigits: 0,
-								}).format(project.goal)}
+								})}
 							</p>
 							<p className="text-xs text-gray-500">{t('projects.goal')}</p>
 						</div>
@@ -152,11 +152,10 @@ export function ProjectCardGrid({
 						</div>
 						<div className="text-center">
 							<p className="font-bold">
-								{new Intl.NumberFormat(undefined, {
-									style: 'currency',
-									currency: 'USD',
+								{formatCurrencyAmount(project.minInvestment, {
+									code: 'USDC',
 									maximumFractionDigits: 0,
-								}).format(project.minInvestment)}
+								})}
 							</p>
 							<p className="text-xs text-gray-500">{t('projects.minDonation')}</p>
 						</div>

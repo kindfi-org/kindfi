@@ -4,6 +4,7 @@
 import { motion } from 'framer-motion'
 import { progressBarAnimation } from '~/lib/constants/animations'
 import { cn } from '~/lib/utils'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 interface ReleasedProgressBarProps {
 	/** Cumulative amount released via milestones with `released` status. Null while loading. */
@@ -12,12 +13,6 @@ interface ReleasedProgressBarProps {
 	progressPercentage: number | null
 	className?: string
 }
-
-const releasedFormatter = new Intl.NumberFormat(undefined, {
-	style: 'currency',
-	currency: 'USD',
-	maximumFractionDigits: 0,
-})
 
 /**
  * Second progress bar showing funds already released from escrow to
@@ -53,7 +48,12 @@ export function ReleasedProgressBar({
 			</div>
 
 			<div className="flex justify-between mt-1 text-sm text-gray-500 tabular-nums">
-				<span>{isLoading ? '…' : releasedFormatter.format(releasedAmount)} released</span>
+				<span>
+					{isLoading
+						? '…'
+						: formatCurrencyAmount(releasedAmount, { code: 'USDC', maximumFractionDigits: 0 })}{' '}
+					released
+				</span>
 				<span>{isLoading ? '…' : `${barPercent}%`}</span>
 			</div>
 		</div>

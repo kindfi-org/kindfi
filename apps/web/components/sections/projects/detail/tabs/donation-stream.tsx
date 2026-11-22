@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { Clock, Heart } from 'lucide-react'
+import { ReflectorQuote } from '~/components/shared/reflector-quote'
 import { useDonationStream } from '~/hooks/projects/use-donation-stream'
 import { cn } from '~/lib/utils'
 
@@ -20,11 +21,12 @@ const formatDonationTime = (donatedAt: string): string => {
 	})
 }
 
-const formatDonationAmount = (amount: number): string => {
-	return `$${amount.toLocaleString(undefined, {
+const formatDonationAmount = (amount: number, asset = 'USDC'): string => {
+	const code = asset?.toUpperCase() === 'XLM' ? 'XLM' : 'USDC'
+	return `${amount.toLocaleString(undefined, {
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 2,
-	})}`
+	})} ${code}`
 }
 
 export function DonationStream({ projectSlug, variant = 'embedded' }: DonationStreamProps) {
@@ -92,9 +94,14 @@ export function DonationStream({ projectSlug, variant = 'embedded' }: DonationSt
 								<span className="truncate text-sm font-medium text-gray-800">New donation</span>
 							</div>
 							<div className="flex shrink-0 items-center gap-3">
-								<span className="font-semibold text-sm text-emerald-700 tabular-nums">
-									{formatDonationAmount(donation.amount)}
-								</span>
+								<div className="flex flex-col items-end gap-0.5">
+									<span className="font-semibold text-sm text-emerald-700 tabular-nums">
+										{formatDonationAmount(donation.amount, donation.asset)}
+									</span>
+									{donation.asset?.toUpperCase() === 'XLM' ? (
+										<ReflectorQuote amount={donation.amount} asset="XLM" />
+									) : null}
+								</div>
 								<span className="flex items-center gap-1 text-xs text-muted-foreground tabular-nums">
 									<Clock className="h-3 w-3" aria-hidden="true" />
 									<time dateTime={donation.donatedAt}>

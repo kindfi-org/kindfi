@@ -15,6 +15,7 @@ import { useProjectReleasedDisplay } from '~/hooks/projects/use-project-released
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
 import type { Project } from '~/lib/types/project'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 interface ProjectCardListProps {
 	project: Project
@@ -118,11 +119,10 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 						<div className="grid grid-cols-3 gap-1 sm:gap-2 tabular-nums">
 							<div className="text-center">
 								<p className="text-xs font-bold sm:text-sm">
-									{new Intl.NumberFormat(undefined, {
-										style: 'currency',
-										currency: 'USD',
+									{formatCurrencyAmount(project.goal, {
+										code: 'USDC',
 										maximumFractionDigits: 0,
-									}).format(project.goal)}
+									})}
 								</p>
 								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.goal')}</p>
 							</div>
@@ -132,11 +132,10 @@ export function ProjectCardList({ project }: ProjectCardListProps) {
 							</div>
 							<div className="text-center">
 								<p className="text-xs font-bold sm:text-sm">
-									{new Intl.NumberFormat(undefined, {
-										style: 'currency',
-										currency: 'USD',
+									{formatCurrencyAmount(project.minInvestment, {
+										code: 'USDC',
 										maximumFractionDigits: 0,
-									}).format(project.minInvestment)}
+									})}
 								</p>
 								<p className="text-[10px] text-gray-500 sm:text-xs">{t('projects.minDonation')}</p>
 							</div>

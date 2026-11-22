@@ -3,6 +3,7 @@ import type { TypedSupabaseClient } from '@packages/lib/types'
 export interface DonationStreamItem {
 	id: string
 	amount: number
+	asset?: string
 	donatedAt: string
 }
 
@@ -36,6 +37,7 @@ export async function getProjectDonationStream(
 	return (data ?? []).map((row) => ({
 		id: row.id,
 		amount: Number(row.amount ?? 0),
+		asset: (row as { asset?: string }).asset ?? 'USDC',
 		donatedAt: row.created_at ?? new Date().toISOString(),
 	}))
 }

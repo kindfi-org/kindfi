@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useMemo } from 'react'
 import { useI18n } from '~/lib/i18n'
 import { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 export function useFoundationDetail(slug: string) {
 	const { language } = useI18n()
@@ -30,13 +31,12 @@ export function useFoundationDetail(slug: string) {
 	const formattedDonations = useMemo(
 		() =>
 			foundation
-				? new Intl.NumberFormat('en-US', {
-						style: 'currency',
-						currency: 'USD',
+				? formatCurrencyAmount(foundation.totalDonationsReceived, {
+						code: 'USDC',
 						minimumFractionDigits: 0,
 						maximumFractionDigits: 0,
-					}).format(foundation.totalDonationsReceived)
-				: '$0',
+					})
+				: '0 USDC',
 		[foundation],
 	)
 
