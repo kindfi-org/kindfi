@@ -3,10 +3,13 @@
  *
  * Read-only view of the gamification contracts (Quest, Referral, Reputation,
  * Streak, NFT). Every read goes through Stellar RPC simulation
- * (`simulateTransaction`) or `getLedgerEntries` semantics: recent contract
- * state only, roughly the last 7 days of history. Payment history older than
- * the RPC window belongs to the KindFi indexer, never to a `getEvents` loop
- * in the web app — see `chain-data.md` next to this file.
+ * (`simulateTransaction`) or `getLedgerEntries`, which reads current live
+ * state — an entry does not become unreadable just because it was last
+ * updated more than seven days ago. `getEvents`, by contrast, has a
+ * configurable retention window, and a `startLedger` older than the oldest
+ * retained ledger returns an error, not an empty page. Payment history older
+ * than the RPC window belongs to the KindFi indexer, never to a `getEvents`
+ * loop in the web app — see `chain-data.md` next to this file.
  *
  * A read never substitutes a zero for a value the contract does not have.
  * Each read returns a typed {@link ContractReadResult}:
@@ -16,7 +19,12 @@
  *   (for example `get_quest` returned `Option::None`, or the simulation
  *   carried no return value). The UI already has to handle this case.
  * - `error` — the RPC call itself failed. Callers must not treat this as
- *   "no value": a failed read is not proof the value is missing.
+ *   "no value": a failed read is not proof the value is missing. This
+ *   distinct `error` state is deliberate (see `chain-data.md`): issue
+ *   #1135 step 2 asked for `not_found` on RPC failure, but returning
+ *   `not_found` would let write paths treat an RPC outage as a confirmed
+ *   absence — quest sync, for example, could then create a duplicate
+ *   definition for a quest that already exists.
  *
  * Writes live in `gamification-writes.ts`. The two modules share one RPC
  * client, built once by `GamificationContractService` in
@@ -56,6 +64,17 @@ export type ContractReadResult<T> =
 	| { status: 'not_found' }
 	| { status: 'error'; error: string }
 
+/**
+ * Outcome of scanning for the highest existing quest id.
+ *
+ * Like {@link ContractReadResult}, but an `error` also carries the highest
+ * id confirmed before the read failed, so legacy numeric callers can keep
+ * reporting the quests they already know exist instead of resetting to 0.
+ */
+export type MaxQuestIdResult =
+	| { status: 'found'; value: number }
+	| { status: 'error'; error: string; lastConfirmedId: number }
+
 /** On-chain quest definition, as returned by `get_quest`. */
 export interface QuestDefinition {
 	quest_id: number
@@ -92,13 +111,21 @@ export class GamificationContractReads {
 	/**
 	 * Simulate a read-only contract call and return its raw return value.
 	 * Nothing here submits a transaction.
+	 *
+	 * `buildArgs` runs inside the try block: an invalid argument (a bad
+	 * account address, a negative u32) throws while encoding, and that is a
+	 * typed `error` result — not a rejected promise. The old facade caught
+	 * those exceptions and returned its declared failure values; this module
+	 * must do the same.
 	 */
 	private async simulateViewCall(
 		contractAddress: string,
 		functionName: string,
-		args: xdr.ScVal[],
+		buildArgs: () => xdr.ScVal[],
 	): Promise<ViewCallResult> {
 		try {
+			const args = buildArgs()
+
 			const account = await this.client.server
 				.getAccount(this.client.recorderKeypair.publicKey())
 				.then((res) => new Account(res.accountId(), res.sequenceNumber()))
@@ -234,7 +261,7 @@ export class GamificationContractReads {
 		questContractAddress: string,
 		questId: number,
 	): Promise<ContractReadResult<QuestDefinition>> {
-		const call = await this.simulateViewCall(questContractAddress, 'get_quest', [
+		const call = await this.simulateViewCall(questContractAddress, 'get_quest', () => [
 			nativeToScVal(questId, { type: 'u32' }),
 		])
 		if (call.status === 'error') {
@@ -246,10 +273,10 @@ export class GamificationContractReads {
 	/**
 	 * Read-only check: true when `get_quest` returns a definition for questId.
 	 *
-	 * An RPC failure also yields false here, matching the previous behaviour:
-	 * the quest sync service treats "not present" conservatively and the
-	 * follow-up create attempt surfaces the real failure. New code that
-	 * needs to tell "missing" apart from "RPC failed" should use `getQuest`.
+	 * Legacy boolean kept for compatibility: an RPC failure also yields false
+	 * here. New code that needs to tell "missing" apart from "RPC failed"
+	 * must use `getQuest` — quest sync does, so a failed presence check is
+	 * a retryable failure and never creates a duplicate definition.
 	 */
 	async questExistsOnChain(questContractAddress: string, questId: number): Promise<boolean> {
 		const result = await this.getQuest(questContractAddress, questId)
@@ -265,16 +292,18 @@ export class GamificationContractReads {
 	/**
 	 * Highest on-chain quest_id that currently exists.
 	 *
-	 * Returns `not_found` only when the read itself cannot run; a contract
-	 * with no quests is `{ status: 'found', value: 0 }` — a count of existing
-	 * quests, not a missing score. An RPC error is an `error`, never 0.
+	 * A contract with no quests is `{ status: 'found', value: 0 }` — a count
+	 * of existing quests, not a missing score. An RPC error is an `error`,
+	 * never 0: the error carries `lastConfirmedId`, the highest id confirmed
+	 * before the read failed, so callers that already know some quests exist
+	 * do not report the contract as empty.
 	 */
-	async getMaxQuestId(questContractAddress: string): Promise<ContractReadResult<number>> {
+	async getMaxQuestId(questContractAddress: string): Promise<MaxQuestIdResult> {
 		let maxId = 0
 		for (;;) {
 			const result = await this.getQuest(questContractAddress, maxId + 1)
 			if (result.status === 'error') {
-				return result
+				return { status: 'error', error: result.error, lastConfirmedId: maxId }
 			}
 			if (result.status === 'not_found') {
 				return { status: 'found', value: maxId }
@@ -292,9 +321,11 @@ export class GamificationContractReads {
 		referralContractAddress: string,
 		referrerAddress: string,
 	): Promise<ContractReadResult<ReferrerStatistics>> {
-		const call = await this.simulateViewCall(referralContractAddress, 'get_referrer_statistics', [
-			nativeToScVal(Address.fromString(referrerAddress), { type: 'address' }),
-		])
+		const call = await this.simulateViewCall(
+			referralContractAddress,
+			'get_referrer_statistics',
+			() => [nativeToScVal(Address.fromString(referrerAddress), { type: 'address' })],
+		)
 		if (call.status === 'error') {
 			return call
 		}
@@ -313,7 +344,7 @@ export class GamificationContractReads {
 		accountAddress: string,
 		role: string,
 	): Promise<ContractReadResult<boolean>> {
-		const call = await this.simulateViewCall(contractAddress, 'has_role', [
+		const call = await this.simulateViewCall(contractAddress, 'has_role', () => [
 			nativeToScVal(Address.fromString(accountAddress), { type: 'address' }),
 			nativeToScVal(role, { type: 'symbol' }),
 		])

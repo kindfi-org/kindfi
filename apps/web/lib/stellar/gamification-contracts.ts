@@ -24,16 +24,21 @@ import { Keypair } from '@stellar/stellar-sdk'
 import * as SorobanRpc from '@stellar/stellar-sdk/rpc'
 import { logger } from '@/lib/logger'
 import { GamificationContractReads, type GamificationRpcClient } from './gamification-reads'
-import { GamificationContractWrites, type GamificationTxResult } from './gamification-writes'
+import {
+	GamificationContractWrites,
+	type GamificationTxResult,
+	type NftMetadataInput,
+} from './gamification-writes'
 
 export type {
 	ContractReadResult,
 	GamificationRpcClient,
+	MaxQuestIdResult,
 	QuestDefinition,
 	ReferrerStatistics,
 } from './gamification-reads'
 export { GamificationContractReads } from './gamification-reads'
-export type { GamificationTxResult } from './gamification-writes'
+export type { GamificationTxResult, NftMetadataInput } from './gamification-writes'
 export { GamificationContractWrites } from './gamification-writes'
 
 export class GamificationContractService {
@@ -85,22 +90,19 @@ export class GamificationContractService {
 	/**
 	 * Highest on-chain quest_id that currently exists (0 when the contract has no quests).
 	 *
-	 * Legacy numeric shape: an RPC failure is indistinguishable from "no
-	 * quests" here and yields 0, as before. New code should use
-	 * `service.reads.getMaxQuestId`, which returns a typed
-	 * `ContractReadResult<number>` instead.
+	 * Legacy numeric shape: an RPC failure yields the last confirmed quest id
+	 * (0 when nothing was confirmed), never a reset to 0 after known quests.
+	 * New code should use `service.reads.getMaxQuestId`, which returns a
+	 * typed result instead.
 	 */
 	async getMaxQuestIdOnChain(questContractAddress: string): Promise<number> {
 		const result = await this.reads.getMaxQuestId(questContractAddress)
 		if (result.status === 'error') {
 			logger.warn(
-				'[GamificationContractService] getMaxQuestIdOnChain treating RPC error as 0:',
+				'[GamificationContractService] getMaxQuestIdOnChain treating RPC error as last confirmed id:',
 				result.error,
 			)
-			return 0
-		}
-		if (result.status === 'not_found') {
-			return 0
+			return result.lastConfirmedId
 		}
 		return result.value
 	}
@@ -230,18 +232,7 @@ export class GamificationContractService {
 		nftContractAddress: string,
 		params: {
 			toAddress: string
-			metadata: {
-				name: string
-				description: string
-				imageUri: string
-				externalUrl: string
-				attributes: Array<{
-					trait_type: string
-					value: string
-					display_type?: string
-					max_value?: string
-				}>
-			}
+			metadata: NftMetadataInput
 		},
 	): Promise<GamificationTxResult<{ tokenId?: number }>> {
 		return this.writes.mintNFT(nftContractAddress, params)
@@ -257,18 +248,7 @@ export class GamificationContractService {
 		nftContractAddress: string,
 		params: {
 			tokenId: number
-			metadata: {
-				name: string
-				description: string
-				imageUri: string
-				externalUrl: string
-				attributes: Array<{
-					trait_type: string
-					value: string
-					display_type?: string
-					max_value?: string
-				}>
-			}
+			metadata: NftMetadataInput
 		},
 	): Promise<GamificationTxResult> {
 		return this.writes.updateNFTMetadata(nftContractAddress, params)

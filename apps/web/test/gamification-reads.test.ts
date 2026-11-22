@@ -8,7 +8,7 @@ import {
 const CONTRACT = StrKey.encodeContract(Keypair.random().rawPublicKey())
 const REFERRER = Keypair.random().publicKey()
 
-function questMapScVal(questId: number) {
+function questMapScVal(questId: number): xdr.ScVal {
 	return xdr.ScVal.scvMap([
 		new xdr.ScMapEntry({
 			key: nativeToScVal('quest_id', { type: 'symbol' }),
@@ -45,7 +45,7 @@ function questMapScVal(questId: number) {
 	])
 }
 
-function referrerStatsMapScVal() {
+function referrerStatsMapScVal(): xdr.ScVal {
 	return xdr.ScVal.scvMap([
 		new xdr.ScMapEntry({
 			key: nativeToScVal('total_referrals', { type: 'symbol' }),
@@ -62,7 +62,9 @@ function referrerStatsMapScVal() {
 	])
 }
 
-function makeReads(simulateTransaction: (tx: unknown) => Promise<unknown>) {
+function makeReads(
+	simulateTransaction: (tx: unknown) => Promise<unknown>,
+): GamificationContractReads {
 	const keypair = Keypair.random()
 	const server = {
 		getAccount: async () => ({
@@ -183,7 +185,34 @@ describe('gamification reads — typed missing values', () => {
 		expect(await reads.getMaxQuestId(CONTRACT)).toEqual({
 			status: 'error',
 			error: 'RPC down',
+			lastConfirmedId: 0,
 		})
+	})
+
+	test('getMaxQuestId keeps the last confirmed id when a later lookup fails', async () => {
+		let calls = 0
+		const reads = makeReads(async () => {
+			calls++
+			if (calls === 1) return { result: { retval: questMapScVal(1) } }
+			throw new Error('RPC down')
+		})
+		expect(await reads.getMaxQuestId(CONTRACT)).toEqual({
+			status: 'error',
+			error: 'RPC down',
+			lastConfirmedId: 1,
+		})
+	})
+
+	test('getQuest returns error (not a throw) when the quest id cannot be encoded', async () => {
+		const reads = makeReads(async () => ({ result: {} }))
+		const result = await reads.getQuest(CONTRACT, -1)
+		expect(result.status).toBe('error')
+	})
+
+	test('getReferrerStatistics returns error (not a throw) for an invalid address', async () => {
+		const reads = makeReads(async () => ({ result: {} }))
+		const result = await reads.getReferrerStatistics(CONTRACT, 'not-an-address')
+		expect(result.status).toBe('error')
 	})
 
 	test('getMaxQuestId counts existing quests and stops at the first missing id', async () => {
@@ -212,10 +241,14 @@ describe('gamification reads — typed missing values', () => {
 
 describe('GamificationContractService facade', () => {
 	test('keeps the legacy constructor and exposes reads/writes', async () => {
-		process.env.SOROBAN_PRIVATE_KEY = Keypair.random().secret()
-		process.env.STELLAR_RPC_URL = 'http://127.0.0.1:9'
 		const { GamificationContractService } = await import('../lib/stellar/gamification-contracts')
-		const service = new GamificationContractService()
+		// RPC configuration stays local to this test: pass it to the
+		// constructor instead of overwriting process.env.
+		const service = new GamificationContractService(
+			'http://127.0.0.1:9',
+			'Test SDF Network ; September 2015',
+			Keypair.random().secret(),
+		)
 		expect(service.reads).toBeDefined()
 		expect(service.writes).toBeDefined()
 		// Legacy numeric shape: an unreachable RPC still yields 0, as before.

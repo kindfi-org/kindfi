@@ -60,36 +60,34 @@ interface CreateQuestParams {
 	expiresAt: number // Unix timestamp, 0 for no expiration
 }
 
+/**
+ * NFT metadata input, shared by the facade (`gamification-contracts.ts`)
+ * and the direct writes API below. Defined once so an added field is
+ * available through both entrypoints without editing parallel shapes.
+ */
+export interface NftAttributeInput {
+	trait_type: string
+	value: string
+	display_type?: string
+	max_value?: string
+}
+
+export interface NftMetadataInput {
+	name: string
+	description: string
+	imageUri: string
+	externalUrl: string
+	attributes: NftAttributeInput[]
+}
+
 interface MintNFTParams {
 	toAddress: string // Recipient's Stellar address
-	metadata: {
-		name: string
-		description: string
-		imageUri: string
-		externalUrl: string
-		attributes: Array<{
-			trait_type: string
-			value: string
-			display_type?: string
-			max_value?: string
-		}>
-	}
+	metadata: NftMetadataInput
 }
 
 interface UpdateNFTMetadataParams {
 	tokenId: number
-	metadata: {
-		name: string
-		description: string
-		imageUri: string
-		externalUrl: string
-		attributes: Array<{
-			trait_type: string
-			value: string
-			display_type?: string
-			max_value?: string
-		}>
-	}
+	metadata: NftMetadataInput
 }
 
 interface RecordReputationEventParams {
@@ -119,6 +117,8 @@ interface SubmitContractCallOptions {
 type SubmitContractCallResult = GamificationTxResult<{
 	simulation?: Api.SimulateTransactionSuccessResponse
 	sendStatus?: Api.SendTransactionResponse['status']
+	/** Return value of the confirmed transaction, when confirmation was awaited. */
+	returnValue?: xdr.ScVal
 }>
 
 /**
@@ -153,12 +153,15 @@ export class GamificationContractWrites {
 		hash: string,
 		maxAttempts = 30,
 		intervalMs = 2000,
-	): Promise<{ success: boolean; error?: string }> {
+	): Promise<{ success: boolean; error?: string; returnValue?: xdr.ScVal }> {
 		for (let attempt = 0; attempt < maxAttempts; attempt++) {
 			const tx = await this.client.server.getTransaction(hash)
 
 			if (tx.status === Api.GetTransactionStatus.SUCCESS) {
-				return { success: true }
+				// A confirmed Soroban invocation carries its return value
+				// (parsed from resultMetaXdr by the SDK) — callers that need
+				// the confirmed result must use this, not the simulation.
+				return { success: true, returnValue: tx.returnValue }
 			}
 
 			if (tx.status === Api.GetTransactionStatus.FAILED) {
@@ -177,9 +180,13 @@ export class GamificationContractWrites {
 	 * Shared submit path for every gamification write: build the contract
 	 * invocation, simulate it, assemble, sign, and send via RPC.
 	 *
-	 * `DUPLICATE` and `TRY_AGAIN_LATER` are treated as submitted, matching
-	 * the previous per-method behaviour: the hash is returned and the caller
-	 * can confirm inclusion with `getTransaction`.
+	 * `DUPLICATE` is treated as submitted, matching the previous per-method
+	 * behaviour: the hash is returned and the caller can confirm inclusion
+	 * with `getTransaction`. `TRY_AGAIN_LATER` is different — the
+	 * transaction was rejected, not enqueued — so the same signed transaction
+	 * is resent up to 3 times with backoff, and a distinguishable failure
+	 * (with the hash) is returned when the retries are exhausted. A hash
+	 * alone is never proof of acceptance.
 	 */
 	private async submitContractCall(
 		options: SubmitContractCallOptions,
@@ -217,7 +224,33 @@ export class GamificationContractWrites {
 			const assembledTx = assembleTransaction(transaction, simulation).build()
 			assembledTx.sign(signer)
 
-			const result = await this.client.server.sendTransaction(assembledTx)
+			// TRY_AGAIN_LATER means the transaction was not enqueued: resend
+			// the same signed transaction, bounded, with backoff.
+			const maxSendAttempts = 3
+			let result = await this.client.server.sendTransaction(assembledTx)
+			let sendAttempts = 1
+			while (result.status === 'TRY_AGAIN_LATER' && sendAttempts < maxSendAttempts) {
+				logger.warn(
+					`[GamificationContractService] sendTransaction TRY_AGAIN_LATER, retrying (${sendAttempts}/${maxSendAttempts - 1})...`,
+				)
+				await new Promise((resolve) => setTimeout(resolve, sendAttempts * 1000))
+				result = await this.client.server.sendTransaction(assembledTx)
+				sendAttempts++
+			}
+
+			if (result.status === 'TRY_AGAIN_LATER') {
+				logger.error(
+					'[GamificationContractService] Transaction rejected with TRY_AGAIN_LATER after retries:',
+					result,
+				)
+				return {
+					success: false,
+					txHash: result.hash,
+					error: 'Transaction rejected with TRY_AGAIN_LATER after retries; not enqueued',
+					simulation,
+					sendStatus: result.status,
+				}
+			}
 
 			if (result.status === 'ERROR') {
 				logger.error('[GamificationContractService] Transaction failed:', result)
@@ -227,6 +260,7 @@ export class GamificationContractWrites {
 				}
 			}
 
+			let returnValue: xdr.ScVal | undefined
 			if (waitForConfirmation) {
 				const confirmation = await this.waitForSubmittedTransaction(result.hash)
 				if (!confirmation.success) {
@@ -238,6 +272,7 @@ export class GamificationContractWrites {
 						sendStatus: result.status,
 					}
 				}
+				returnValue = confirmation.returnValue
 			}
 
 			return {
@@ -245,6 +280,7 @@ export class GamificationContractWrites {
 				txHash: result.hash,
 				simulation,
 				sendStatus: result.status,
+				returnValue,
 			}
 		} catch (error) {
 			logger.error('[GamificationContractService] Error submitting contract call:', error)
@@ -260,7 +296,11 @@ export class GamificationContractWrites {
 		simulation: Api.SimulateTransactionSuccessResponse | undefined,
 		method: string,
 	): number | undefined {
-		const retval = simulation?.result?.retval
+		return this.parseU32FromScVal(simulation?.result?.retval, method)
+	}
+
+	/** Parse a u32 return value from a confirmed transaction's return value, if present. */
+	private parseU32FromScVal(retval: xdr.ScVal | undefined, method: string): number | undefined {
 		if (!retval) return undefined
 		try {
 			const native = scValToNative(retval)
@@ -308,7 +348,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				// Wait for transaction to be included in ledger
@@ -360,7 +400,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				// Parse reward points from simulation result (record_donation returns u32)
@@ -389,6 +429,12 @@ export class GamificationContractWrites {
 	/**
 	 * Create a referral relationship on-chain.
 	 * Signature: create_referral(caller: Address, referrer: Address, referred: Address)
+	 *
+	 * Waits for confirmation: callers (e.g. `applyReferralCode`) run a
+	 * dependent call (`mark_onboarded`) right after this one, and that call
+	 * fails when the referral is still only submitted, not yet on-chain.
+	 * On a confirmation failure the hash is kept so the caller can reconcile
+	 * the existing referral instead of submitting a second creation.
 	 */
 	async createReferral(
 		referralContractAddress: string,
@@ -415,10 +461,11 @@ export class GamificationContractWrites {
 					functionName: 'create_referral',
 					args,
 					signer: this.client.recorderKeypair,
+					waitForConfirmation: true,
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				return { success: true, txHash: result.txHash }
@@ -461,7 +508,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				// Parse reward points from simulation result
@@ -515,7 +562,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				// Transaction submitted successfully
@@ -573,9 +620,13 @@ export class GamificationContractWrites {
 					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
-				// Parse quest ID from simulation result
-				// The create_quest function returns the quest_id (u32)
-				const questId = this.parseU32Return(result.simulation, 'createQuest')
+				// Decode the quest ID from the CONFIRMED transaction's return
+				// value, not the simulation: if another authorized transaction
+				// creates the predicted id first, this transaction creates
+				// the next id instead. When the confirmed return value is
+				// unavailable, leave questId unset rather than substituting
+				// the simulation result.
+				const questId = this.parseU32FromScVal(result.returnValue, 'createQuest')
 
 				return {
 					success: true,
@@ -602,12 +653,7 @@ export class GamificationContractWrites {
 	 * The Soroban contracttype `NFTAttribute` has fields:
 	 *   trait_type: String, value: String, display_type: Option<String>, max_value: Option<String>
 	 */
-	private buildNFTAttributeScVal(attr: {
-		trait_type: string
-		value: string
-		display_type?: string
-		max_value?: string
-	}) {
+	private buildNFTAttributeScVal(attr: NftAttributeInput): xdr.ScVal {
 		const fields = [
 			new xdr.ScMapEntry({
 				key: nativeToScVal('display_type', { type: 'symbol' }),
@@ -645,7 +691,7 @@ export class GamificationContractWrites {
 	 *
 	 * Fields must be in alphabetical order for contracttype map encoding.
 	 */
-	private buildMetadataArg(metadata: MintNFTParams['metadata']) {
+	private buildMetadataArg(metadata: NftMetadataInput): xdr.ScVal {
 		const attrVec = metadata.attributes.map((a) => this.buildNFTAttributeScVal(a))
 
 		const fields = [
@@ -706,7 +752,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				// Parse token ID from simulation result (returns u32)
@@ -755,7 +801,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				return { success: true, txHash: result.txHash }
@@ -772,6 +818,12 @@ export class GamificationContractWrites {
 	/**
 	 * Grant a role on a contract using the admin keypair.
 	 * Uses the same SDK transaction flow that works for Quest updates.
+	 *
+	 * Success is reported only when the transaction is confirmed with
+	 * status SUCCESS. A FAILED transaction, a confirmation timeout, or an
+	 * unknown outcome is a failure — the hash is kept so the caller can
+	 * report it. (Previously the manual poll returned success when the
+	 * first lookup was FAILED or every lookup was NOT_FOUND.)
 	 */
 	async grantRole(
 		contractAddress: string,
@@ -796,32 +848,11 @@ export class GamificationContractWrites {
 					functionName: 'grant_role',
 					args,
 					signer: adminKeypair,
+					waitForConfirmation: true,
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
-				}
-
-				// Wait for confirmation
-				if (result.sendStatus === 'PENDING') {
-					const confirmed = await this.client.server.getTransaction(result.txHash ?? '')
-					if (confirmed.status === 'NOT_FOUND') {
-						// Poll a few times
-						for (let i = 0; i < 10; i++) {
-							await new Promise((r) => setTimeout(r, 2000))
-							const check = await this.client.server.getTransaction(result.txHash ?? '')
-							if (check.status === 'SUCCESS') {
-								return { success: true, txHash: result.txHash }
-							}
-							if (check.status === 'FAILED') {
-								return {
-									success: false,
-									error: 'Transaction failed on-chain',
-									txHash: result.txHash,
-								}
-							}
-						}
-					}
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				return { success: true, txHash: result.txHash }
@@ -875,7 +906,7 @@ export class GamificationContractWrites {
 				})
 
 				if (!result.success) {
-					return { success: false, error: result.error }
+					return { success: false, txHash: result.txHash, error: result.error }
 				}
 
 				const totalPoints = this.parseU32Return(result.simulation, 'recordReputationEvent')

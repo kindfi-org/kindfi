@@ -140,11 +140,16 @@ async function main() {
 		process.exit(1)
 	}
 
-	const maxOnChainBefore = await getHighestQuestIdOnChain(
+	const maxBefore = await getHighestQuestIdOnChain(
 		service,
 		contractAddress,
 		quests[quests.length - 1].quest_id,
 	)
+	if (!maxBefore.success) {
+		console.error(`Failed to read on-chain quests: ${maxBefore.error}`)
+		process.exit(1)
+	}
+	const maxOnChainBefore = maxBefore.maxId
 	console.log(`On-chain quests before sync: ${maxOnChainBefore}\n`)
 
 	if (!(await ensureAdminRole(service, contractAddress))) {
@@ -164,11 +169,16 @@ async function main() {
 		process.exit(1)
 	}
 
-	const maxOnChainAfter = await getHighestQuestIdOnChain(
+	const maxAfter = await getHighestQuestIdOnChain(
 		service,
 		contractAddress,
 		quests[quests.length - 1].quest_id,
 	)
+	if (!maxAfter.success) {
+		console.error(`Failed to read on-chain quests after sync: ${maxAfter.error}`)
+		process.exit(1)
+	}
+	const maxOnChainAfter = maxAfter.maxId
 	let created = 0
 	let skipped = 0
 
