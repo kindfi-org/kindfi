@@ -1,38 +1,38 @@
 {
-	"author": "kindfi-org",
-	"dependencies": {
-		"@subql/common": "latest",
-		"@subql/types-core": "latest",
-		"@subql/types-stellar": "latest",
-		"@stellar/stellar-sdk": "^14.4.3",
-		"tslib": "latest"
-	},
-	"description": "SubQL Indexer to process all userbase in the kindfi platform blockchain activity and contributions, to push it to the off-chain data for his cosumption.",
-	"devDependencies": {
-		"@subql/cli": "latest",
-		"@subql/testing": "latest",
-		"@subql/types": "latest",
-		"dotenv": "latest",
-		"typescript": "^5.2.2"
-	},
-	"files": [
-		"dist",
-		"schema.graphql",
-		"project.yaml"
-	],
-	"homepage": "https://github.com/subquery/stellar-subql-starter",
-	"license": "MIT",
-	"main": "dist/index.js",
-	"name": "@kindfi/indexer",
-	"repository": "github:subquery/stellar-subql-starter",
-	"scripts": {
-		"build": "subql codegen && subql build",
-		"build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build",
-		"codegen": "subql codegen",
-		"dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
-		"prepack": "rm -rf dist && npm run build",
-		"start:docker": "docker-compose pull && docker-compose up --remove-orphans",
-		"test": "subql build && subql-node-stellar test"
-	},
-	"version": "0.0.1"
+  "author": "kindfi-org",
+  "dependencies": {
+    "@subql/common": "latest",
+    "@subql/types-core": "latest",
+    "@subql/types-stellar": "latest",
+    "@stellar/stellar-sdk": "^14.4.3",
+    "tslib": "latest"
+  },
+  "description": "SubQL Indexer to process all userbase in the kindfi platform blockchain activity and contributions, to push it to the off-chain data for his cosumption.",
+  "devDependencies": {
+    "@subql/cli": "latest",
+    "@subql/testing": "latest",
+    "@subql/types": "latest",
+    "dotenv": "latest",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist",
+    "schema.graphql",
+    "project.yaml"
+  ],
+  "homepage": "https://github.com/subquery/stellar-subql-starter",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "name": "@kindfi/indexer",
+  "repository": "github:subquery/stellar-subql-starter",
+  "scripts": {
+    "build": "node init && subql codegen && subql build",
+    "build:develop": "node init && NODE_ENV=develop subql codegen && NODE_ENV=develop subql build",
+    "codegen": "subql codegen",
+    "dev": "node init && subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
+    "prepack": "rm -rf dist && npm run build",
+    "start:docker": "node init && docker-compose pull && docker-compose up --remove-orphans",
+    "test": "subql build && subql-node-stellar test"
+  },
+  "version": "0.0.1"
 }

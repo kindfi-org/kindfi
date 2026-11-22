@@ -12,6 +12,7 @@ import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
+import { getStellarNetworkEndpoints } from '~/lib/config/stellar-network-endpoints'
 import { faucetSchema } from '~/lib/schemas/stellar.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -24,9 +25,10 @@ import { validateRequest } from '~/lib/utils/validation'
 export async function POST(req: NextRequest) {
 	try {
 		const config = appEnvConfig('web')
+		const endpoints = getStellarNetworkEndpoints()
 
 		// Security check: Only allow on testnet
-		if (!config.stellar.networkPassphrase.includes('Test') && config.env.appEnv !== 'development') {
+		if (endpoints.networkPassphrase !== 'Test SDF Network ; September 2015' && config.env.appEnv !== 'development') {
 			return NextResponse.json(
 				{
 					error: 'Faucet only available on testnet',
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
 		const fundingKeypair = Keypair.fromSecret(config.stellar.fundingAccount)
 
 		// Get funding account details from Horizon
-		const horizonUrl = config.stellar.horizonUrl
+		const horizonUrl = endpoints.horizonUrl
 		const horizonResponse = await fetch(`${horizonUrl}/accounts/${fundingKeypair.publicKey()}`)
 
 		if (!horizonResponse.ok) {
@@ -62,7 +64,8 @@ export async function POST(req: NextRequest) {
 
 		if (isContractAddress) {
 			result = await fundContractViaSAC(
-				config,
+				endpoints.rpcUrl,
+				endpoints.networkPassphrase,
 				address,
 				fundAmount,
 				fundingKeypair,
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
 				fundAmount,
 				fundingKeypair,
 				fundingAccountData,
-				config.stellar.networkPassphrase,
+				endpoints.networkPassphrase,
 			)
 		}
 
@@ -104,17 +107,18 @@ export async function POST(req: NextRequest) {
  * Fund a contract address using Native XLM SAC transfer
  */
 async function fundContractViaSAC(
-	config: ReturnType<typeof appEnvConfig>,
+	rpcUrl: string,
+	networkPassphrase: string,
 	contractAddress: string,
 	amount: number,
 	fundingKeypair: Keypair,
 	fundingAccountData: { account_id: string; sequence: string },
 ): Promise<{ hash: string }> {
-	const server = new Server(config.stellar.rpcUrl)
+	const server = new Server(rpcUrl)
 
 	// Get Native XLM SAC contract address
 	const nativeAsset = Asset.native()
-	const xlmSacAddress = nativeAsset.contractId(config.stellar.networkPassphrase)
+	const xlmSacAddress = nativeAsset.contractId(networkPassphrase)
 	const xlmSacContract = new Contract(xlmSacAddress)
 
 	// Build SAC transfer transaction
@@ -130,7 +134,7 @@ async function fundContractViaSAC(
 		},
 		{
 			fee: '100000',
-			networkPassphrase: config.stellar.networkPassphrase,
+			networkPassphrase,
 		},
 	)
 		.addOperation(
@@ -165,9 +169,6 @@ async function fundContractViaSAC(
 		logger.error('❌ Submit error:', submitResult)
 		throw new Error(`SAC transfer submission failed: ${submitResult.status}`)
 	}
-
-	// Return immediately with the transaction hash
-	// The network will process it asynchronously
 
 	return { hash: submitResult.hash }
 }

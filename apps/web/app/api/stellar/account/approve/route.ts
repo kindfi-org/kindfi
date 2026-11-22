@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 		const { accountAddress } = validation.data
 
 		const config = appEnvConfig('web')
-		// KYC server URL - use environment variable or default to localhost
+		// KYC server URL - resolved from environment configuration
 		const kycServerUrl = config.externalApis.kyc.baseUrl
 
 		// Call KYC server's create-passkey-account endpoint

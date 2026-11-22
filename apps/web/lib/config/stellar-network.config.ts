@@ -5,6 +5,10 @@ export const STELLAR_TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015'
 
 export type ClientStellarNetworkId = 'mainnet' | 'testnet'
 
+export const STELLAR_TESTNET_RPC_URL = 'https://soroban-testnet.stellar.org'
+export const STELLAR_TESTNET_HORIZON_URL = 'https://horizon-testnet.stellar.org'
+export const STELLAR_MAINNET_HORIZON_URL = 'https://horizon.stellar.org'
+
 /**
  * Client-side Stellar network for wallet signing.
  * Defaults to the Trustless Work network (`NEXT_PUBLIC_TRUSTLESS_WORK_NETWORK`).

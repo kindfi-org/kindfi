@@ -13,6 +13,7 @@
 
 import { supabase } from '@packages/lib/supabase'
 import * as SorobanRpc from '@stellar/stellar-sdk/rpc'
+import { getStellarNetworkConfig } from '../lib/stellar/network-config'
 import {
 	ensureAllQuestDefinitionsOnChain,
 	getAdminKeypair,
@@ -88,9 +89,8 @@ async function ensureAdminRole(
 async function main() {
 	console.log('=== Sync Quest Definitions to On-Chain ===\n')
 
-	const networkPassphrase =
-		process.env.STELLAR_NETWORK_PASSPHRASE || process.env.NETWORK_PASSPHRASE || 'unknown'
-	console.log(`Network: ${networkPassphrase}\n`)
+	const networkConfig = getStellarNetworkConfig()
+	console.log(`Network: ${networkConfig.networkPassphrase}\n`)
 
 	const contractAddress = resolveQuestContractAddress()
 	if (!contractAddress) {
@@ -128,8 +128,7 @@ async function main() {
 	// Use admin account for RPC reads/writes so mainnet sync works even when SOROBAN_PRIVATE_KEY is testnet-only
 	const service = new GamificationContractService(undefined, undefined, adminKeypair.secret())
 
-	const rpc = process.env.STELLAR_RPC_URL || process.env.RPC_URL || 'https://mainnet.sorobanrpc.com'
-	const server = new SorobanRpc.Server(rpc, { allowHttp: true })
+	const server = new SorobanRpc.Server(networkConfig.rpcUrl, { allowHttp: true })
 
 	if (!(await verifyAccountOnNetwork(server, adminKeypair.publicKey(), 'Admin account'))) {
 		if (isMainnetNetwork()) {

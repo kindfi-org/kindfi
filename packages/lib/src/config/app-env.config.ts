@@ -58,8 +58,8 @@ export function transformEnv(): AppEnvInterface {
 			appEnv: data.NEXT_PUBLIC_APP_ENV || 'development',
 		},
 		stellar: {
-			networkUrl: data.STELLAR_NETWORK_URL || 'https://horizon-futurenet.stellar.org',
-			networkPassphrase: data.NETWORK_PASSPHRASE || 'Test SDF Future Network ; October 2022',
+			networkUrl: data.STELLAR_NETWORK_URL || 'https://horizon-testnet.stellar.org',
+			networkPassphrase: data.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
 			factoryContractId:
 				data.FACTORY_CONTRACT_ID || 'CCZWIOWKT4WGJQHWZFF7ARCQJFVWRXPOKG4WGY6DOZ72OHZEMKXAEGRO',
 			controllerContractId:
@@ -67,8 +67,8 @@ export function transformEnv(): AppEnvInterface {
 			accountSecp256r1ContractWasm:
 				data.ACCOUNT_SECP256R1_CONTRACT_WASM ||
 				'23d8e1fbdb0bb903815feb7d07b675db98b5376feedab056aab61910d41e80c1',
-			rpcUrl: data.RPC_URL || 'https://rpc-futurenet.stellar.org',
-			horizonUrl: data.HORIZON_URL || 'https://horizon-futurenet.stellar.org',
+			rpcUrl: data.RPC_URL || 'https://soroban-testnet.stellar.org',
+			horizonUrl: data.HORIZON_URL || 'https://horizon-testnet.stellar.org',
 			fundingAccount: data.STELLAR_FUNDING_SECRET_KEY || 'SB...4756',
 			signatureVerification: {
 				maxAttempts: Number(data.STELLAR_SIGNATURE_MAX_ATTEMPTS || 5),
