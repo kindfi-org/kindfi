@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
 	calculateFundingProgressPercent,
+	formatProjectFundingAmount,
 	resolveDisplayRaisedAmount,
 } from '~/lib/utils/projects/project-funding'
 
@@ -62,5 +63,16 @@ describe('calculateFundingProgressPercent', () => {
 	test('returns null when raised is loading or goal is invalid', () => {
 		expect(calculateFundingProgressPercent(null, 200)).toBeNull()
 		expect(calculateFundingProgressPercent(50, 0)).toBeNull()
+	})
+})
+
+describe('formatProjectFundingAmount', () => {
+	test('formats project funding amount with USDC label by default', () => {
+		expect(formatProjectFundingAmount(120, { hasEscrow: true })).toBe('120.00 USDC')
+		expect(formatProjectFundingAmount(120, { hasEscrow: false })).toBe('120 USDC')
+	})
+
+	test('returns placeholder for null amount', () => {
+		expect(formatProjectFundingAmount(null)).toBe('…')
 	})
 })

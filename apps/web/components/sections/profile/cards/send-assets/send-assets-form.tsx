@@ -11,6 +11,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/base/select'
+import { ReflectorQuote } from '~/components/shared/reflector-quote'
 import { useI18n } from '~/lib/i18n'
 import type { WalletSendFormInput } from '~/lib/wallet-send/types'
 
@@ -56,20 +57,25 @@ export const SendAssetsForm = ({
 							<SelectItem value="USDC">{t('profile.sendAssetsAssetUsdc')}</SelectItem>
 						</SelectContent>
 					</Select>
-					<p className="text-xs text-muted-foreground">
+					<div className="text-xs text-muted-foreground">
 						{isLoadingBalances ? (
 							<span className="inline-flex items-center gap-1">
 								<Loader2 className="size-3 animate-spin" />
 								{t('profile.sendAssetsBalanceLoading')}
 							</span>
 						) : (
-							<>
-								{t('profile.sendAssetsAvailableBalance')}:{' '}
-								{formInput.asset === 'XLM' ? (xlmBalance ?? '0') : (usdcBalance ?? '0')}{' '}
-								{formInput.asset}
-							</>
+							<div className="flex flex-col gap-0.5">
+								<span>
+									{t('profile.sendAssetsAvailableBalance')}:{' '}
+									{formInput.asset === 'XLM' ? (xlmBalance ?? '0') : (usdcBalance ?? '0')}{' '}
+									{formInput.asset}
+								</span>
+								{formInput.asset === 'XLM' ? (
+									<ReflectorQuote amount={xlmBalance} asset="XLM" />
+								) : null}
+							</div>
 						)}
-					</p>
+					</div>
 				</div>
 
 				<div className="space-y-2">

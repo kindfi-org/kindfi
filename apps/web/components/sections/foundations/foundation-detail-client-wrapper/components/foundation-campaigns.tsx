@@ -5,6 +5,7 @@ import { ArrowRight, Megaphone, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useI18n } from '~/lib/i18n'
 import type { getFoundationBySlug } from '~/lib/queries/foundations/get-foundation-by-slug'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 type Foundation = NonNullable<Awaited<ReturnType<typeof getFoundationBySlug>>>
 type CampaignWithSlug = NonNullable<Foundation['campaigns']>[number] & {
@@ -16,13 +17,12 @@ interface FoundationCampaignsProps {
 	shouldReduceMotion: boolean | null
 }
 
-const formatUsd = (amount: number) =>
-	new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
+const formatAmount = (amount: number) =>
+	formatCurrencyAmount(amount, {
+		code: 'USDC',
 		minimumFractionDigits: 0,
 		maximumFractionDigits: 0,
-	}).format(amount)
+	})
 
 export function FoundationCampaigns({ campaigns, shouldReduceMotion }: FoundationCampaignsProps) {
 	const { t } = useI18n()
@@ -102,11 +102,11 @@ export function FoundationCampaigns({ campaigns, shouldReduceMotion }: Foundatio
 													{t('foundations.raised')}
 												</p>
 												<p className="text-base font-bold tabular-nums text-slate-900">
-													{formatUsd(campaign.raised)}
+													{formatAmount(campaign.raised)}
 												</p>
 											</div>
 											<p className="text-sm tabular-nums text-slate-500">
-												{t('foundations.ofGoal').replace('{goal}', formatUsd(campaign.goal))}
+												{t('foundations.ofGoal').replace('{goal}', formatAmount(campaign.goal))}
 											</p>
 										</div>
 

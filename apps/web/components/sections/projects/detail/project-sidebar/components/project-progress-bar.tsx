@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { progressBarAnimation } from '~/lib/constants/animations'
+import { formatCurrencyAmount } from '~/lib/utils/format-currency'
 
 interface ProjectProgressBarProps {
 	progressPercentage: number
@@ -37,11 +38,10 @@ export function ProjectProgressBar({
 
 			<div className="flex justify-between mb-3 text-sm text-gray-500 tabular-nums">
 				<span>
-					{new Intl.NumberFormat(undefined, {
-						style: 'currency',
-						currency: 'USD',
+					{formatCurrencyAmount(onChainRaised ?? projectRaised, {
+						code: 'USDC',
 						maximumFractionDigits: 0,
-					}).format(onChainRaised ?? projectRaised)}{' '}
+					})}{' '}
 					raised
 					{isFetchingBalance ? ' (Updating…)' : ''}
 				</span>

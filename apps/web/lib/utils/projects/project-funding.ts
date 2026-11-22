@@ -69,6 +69,7 @@ export function formatProjectFundingAmount(
 	amount: number | null,
 	options?: {
 		hasEscrow?: boolean
+		code?: string
 		loadingPlaceholder?: string
 		maximumFractionDigits?: number
 		minimumFractionDigits?: number
@@ -80,8 +81,10 @@ export function formatProjectFundingAmount(
 
 	const hasEscrow = options?.hasEscrow ?? false
 	const defaultFractionDigits = hasEscrow ? 2 : 0
+	const code = options?.code ?? 'USDC'
 
 	return formatCurrencyAmount(coerceNumericAmount(amount), {
+		code,
 		loadingPlaceholder: options?.loadingPlaceholder,
 		minimumFractionDigits: options?.minimumFractionDigits ?? defaultFractionDigits,
 		maximumFractionDigits: options?.maximumFractionDigits ?? defaultFractionDigits,

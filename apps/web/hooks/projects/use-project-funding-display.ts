@@ -66,10 +66,11 @@ export function useProjectFundingDisplay({
 
 	const formatCurrency = (
 		amount: number,
-		options?: { maximumFractionDigits?: number; minimumFractionDigits?: number },
+		options?: { maximumFractionDigits?: number; minimumFractionDigits?: number; code?: string },
 	) =>
 		formatProjectFundingAmount(amount, {
 			hasEscrow,
+			code: options?.code ?? 'USDC',
 			maximumFractionDigits: options?.maximumFractionDigits,
 			minimumFractionDigits: options?.minimumFractionDigits,
 		})

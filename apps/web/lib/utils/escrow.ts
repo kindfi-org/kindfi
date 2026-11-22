@@ -1,3 +1,5 @@
+// Note: Escrow release uses the on-chain USDC balance, not an oracle.
+
 /**
  * Generates words from a title for use in escrow identifiers.
  * Similar to slug generation, extracts key words from the title.
