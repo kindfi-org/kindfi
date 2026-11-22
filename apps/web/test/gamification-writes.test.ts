@@ -104,6 +104,21 @@ describe('gamification writes — submit helper', () => {
 		expect(result.txHash).toBe('aabbccdd')
 	})
 
+	test('createReferral keeps the hash when the confirmation lookup throws', async () => {
+		const writes = makeWrites({
+			getTx: async () => {
+				throw new Error('RPC down')
+			},
+		})
+		const result = await writes.createReferral(CONTRACT, {
+			referrerAddress: USER,
+			referredAddress: Keypair.random().publicKey(),
+		})
+		expect(result.success).toBe(false)
+		expect(result.error).toContain('RPC down')
+		expect(result.txHash).toBe('aabbccdd')
+	})
+
 	test('createQuest returns the confirmed quest id, not the simulated one', async () => {
 		const writes = makeWrites({
 			simulate: async () => mockSimulation(nativeToScVal(7, { type: 'u32' })),

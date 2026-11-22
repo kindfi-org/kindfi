@@ -192,6 +192,11 @@ export class GamificationContractWrites {
 		options: SubmitContractCallOptions,
 	): Promise<SubmitContractCallResult> {
 		const { contractAddress, functionName, args, signer, waitForConfirmation } = options
+		// Hash of the transaction once RPC has accepted it. Kept outside
+		// the try so the catch can return it: a failure after submission
+		// (for example a confirmation lookup that throws) must still let
+		// callers reconcile a transaction the network may have accepted.
+		let submittedTxHash: string | undefined
 		try {
 			const sourceAccount = await this.client.server
 				.getAccount(signer.publicKey())
@@ -260,6 +265,11 @@ export class GamificationContractWrites {
 				}
 			}
 
+			// The transaction was accepted (PENDING/DUPLICATE): from here
+			// on, any failure — including a confirmation lookup that
+			// throws — must keep the hash for reconciliation.
+			submittedTxHash = result.hash
+
 			let returnValue: xdr.ScVal | undefined
 			if (waitForConfirmation) {
 				const confirmation = await this.waitForSubmittedTransaction(result.hash)
@@ -286,6 +296,7 @@ export class GamificationContractWrites {
 			logger.error('[GamificationContractService] Error submitting contract call:', error)
 			return {
 				success: false,
+				...(submittedTxHash ? { txHash: submittedTxHash } : {}),
 				error: error instanceof Error ? error.message : 'Unknown error',
 			}
 		}

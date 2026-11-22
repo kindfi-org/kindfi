@@ -6,6 +6,8 @@ import {
 	type QuestDefinitionRow,
 } from '../lib/services/quest-chain-sync.service'
 import type { GamificationContractService } from '../lib/stellar/gamification-contracts'
+import type { ContractReadResult, QuestDefinition } from '../lib/stellar/gamification-reads'
+import type { GamificationTxResult } from '../lib/stellar/gamification-writes'
 
 const CONTRACT = StrKey.encodeContract(Keypair.random().rawPublicKey())
 const ADMIN = Keypair.random()
@@ -23,7 +25,7 @@ function questRow(questId: number): QuestDefinitionRow {
 	} as unknown as QuestDefinitionRow
 }
 
-function questDef(questId: number) {
+function questDef(questId: number): QuestDefinition {
 	return {
 		quest_id: questId,
 		quest_type: 4,
@@ -40,18 +42,33 @@ function questDef(questId: number) {
  * Fake contract service: getQuest answers from a mutable set of existing
  * ids (plus an error set), createQuest adds the next sequential id.
  */
-function makeFakeService() {
+function makeFakeService(): {
+	service: GamificationContractService
+	existing: Set<number>
+	errorIds: Set<number>
+	created: number[]
+} {
 	const existing = new Set<number>()
 	const errorIds = new Set<number>()
 	const created: number[] = []
-	const reads = {
-		getQuest: async (_contractAddress: string, questId: number) => {
+	// Typed against the production `getQuest` contract, so a fake response
+	// that drifts from `ContractReadResult<QuestDefinition>` fails here
+	// instead of silently passing the sync code a wrong shape.
+	const reads: Pick<GamificationContractService['reads'], 'getQuest'> = {
+		getQuest: async (
+			_contractAddress: string,
+			questId: number,
+		): Promise<ContractReadResult<QuestDefinition>> => {
 			if (errorIds.has(questId)) return { status: 'error', error: 'RPC down' }
 			if (existing.has(questId)) return { status: 'found', value: questDef(questId) }
 			return { status: 'not_found' }
 		},
 	}
-	const createQuest = async (_contractAddress: string, _params: unknown, _admin: Keypair) => {
+	const createQuest = async (
+		_contractAddress: string,
+		_params: unknown,
+		_admin: Keypair,
+	): Promise<GamificationTxResult<{ questId?: number }>> => {
 		const nextId = existing.size === 0 ? 1 : Math.max(...existing) + 1
 		existing.add(nextId)
 		created.push(nextId)
