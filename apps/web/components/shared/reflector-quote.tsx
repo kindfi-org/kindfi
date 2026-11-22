@@ -27,21 +27,30 @@ export function ReflectorQuote({ amount, asset = 'XLM', className }: ReflectorQu
 		maximumFractionDigits: 2,
 	})
 
-	const quoteDate = new Date(quote.timestamp)
+	const quoteTimeMs =
+		typeof quote.timestamp === 'number'
+			? quote.timestamp < 1e11
+				? quote.timestamp * 1000
+				: quote.timestamp
+			: Date.parse(String(quote.timestamp))
+
+	const quoteDate = new Date(quoteTimeMs)
 	const isValidDate = !Number.isNaN(quoteDate.getTime())
 	const formattedTime = isValidDate
 		? quoteDate.toLocaleTimeString(undefined, {
 				hour: 'numeric',
 				minute: '2-digit',
 			})
-		: quote.timestamp
+		: String(quote.timestamp)
+
+	const isoTimestamp = isValidDate ? quoteDate.toISOString() : String(quote.timestamp)
 
 	return (
 		<span className={cn('inline-flex items-center gap-1 text-xs text-muted-foreground', className)}>
 			<span>About ${formattedFiat} USD · Reflector Pulse</span>
 			{isValidDate ? (
 				<span className="opacity-75">
-					(as of <time dateTime={quote.timestamp}>{formattedTime}</time>)
+					(as of <time dateTime={isoTimestamp}>{formattedTime}</time>)
 				</span>
 			) : null}
 		</span>

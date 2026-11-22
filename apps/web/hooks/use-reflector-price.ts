@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 export interface ReflectorPriceQuote {
 	asset: string
 	price: number
-	timestamp: string
+	timestamp: string | number
 }
 
 export function useReflectorPrice(asset = 'XLM') {
