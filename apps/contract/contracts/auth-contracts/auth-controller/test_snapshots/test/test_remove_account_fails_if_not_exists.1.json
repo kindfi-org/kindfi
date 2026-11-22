@@ -1,0 +1,90 @@
+{
+	"generators": {
+		"address": 3,
+		"nonce": 0,
+		"mux_id": 0
+	},
+	"auth": [[], [], []],
+	"ledger": {
+		"protocol_version": 28,
+		"sequence_number": 0,
+		"timestamp": 0,
+		"network_id": "0000000000000000000000000000000000000000000000000000000000000000",
+		"base_reserve": 0,
+		"min_persistent_entry_ttl": 4096,
+		"min_temp_entry_ttl": 16,
+		"max_entry_ttl": 6312000,
+		"ledger_entries": [
+			{
+				"entry": {
+					"last_modified_ledger_seq": 0,
+					"data": {
+						"contract_data": {
+							"ext": "v0",
+							"contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+							"key": "ledger_key_contract_instance",
+							"durability": "persistent",
+							"val": {
+								"contract_instance": {
+									"executable": {
+										"wasm": "a41146d7d116b29faf18d228425fa97194e16df1d4f3e5d4f51c58ca557fcc6d"
+									},
+									"storage": [
+										{
+											"key": {
+												"vec": [
+													{
+														"symbol": "DefaultThreshold"
+													}
+												]
+											},
+											"val": {
+												"u32": 2
+											}
+										},
+										{
+											"key": {
+												"vec": [
+													{
+														"symbol": "Signers"
+													}
+												]
+											},
+											"val": {
+												"vec": [
+													{
+														"bytes": "04860450b7b381584a29db0b424887ea5111e2517433d5b1c0eb06be58fa860013509ec5adc1a94a5afa39da0941e7f97d46d9ab5a5cdb605751668f9d2b5cbbc6"
+													},
+													{
+														"bytes": "04ebc2604aaecfe9c1a4175e6cd26618da9f810e10587d5bb1d6957d78249a770ce5c43b65baeab931914c4a335d10b1c4e8fe314076aa7f94c95b06b097592179"
+													}
+												]
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"ext": "v0"
+				},
+				"live_until": 4095
+			},
+			{
+				"entry": {
+					"last_modified_ledger_seq": 0,
+					"data": {
+						"contract_code": {
+							"ext": "v0",
+							"hash": "a41146d7d116b29faf18d228425fa97194e16df1d4f3e5d4f51c58ca557fcc6d",
+							"code": "746573745f636f6e74726163745f666f725f636f6e74726163745f69645f4341414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414144324b4d"
+						}
+					},
+					"ext": "v0"
+				},
+				"live_until": 4095
+			}
+		]
+	},
+	"events": []
+}
