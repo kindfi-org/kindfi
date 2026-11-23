@@ -25,7 +25,7 @@ const buildInvokeContract = (functionName: string): string => {
 	const source = Keypair.random()
 	const account = new Account(source.publicKey(), '1')
 	const contractAddress = xdr.ScAddress.scAddressTypeContract(
-		Array.from(new Uint8Array(32).fill(7)) as unknown as xdr.ContractId,
+		new xdr.ContractId(new Uint8Array(32).fill(7)),
 	)
 	const invoke = Operation.invokeHostFunction({
 		func: xdr.HostFunction.hostFunctionTypeInvokeContract(
@@ -49,7 +49,7 @@ const buildSignedFeeBump = (functionName: string): string => {
 	const source = Keypair.random()
 	const account = new Account(source.publicKey(), '1')
 	const contractAddress = xdr.ScAddress.scAddressTypeContract(
-		Array.from(new Uint8Array(32).fill(7)) as unknown as xdr.ContractId,
+		new xdr.ContractId(new Uint8Array(32).fill(7)),
 	)
 	const invoke = Operation.invokeHostFunction({
 		func: xdr.HostFunction.hostFunctionTypeInvokeContract(

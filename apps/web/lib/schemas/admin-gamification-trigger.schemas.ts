@@ -1,9 +1,10 @@
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 
 const stellarAddressSchema = z
 	.string()
 	.min(1, 'Stellar address is required')
-	.regex(/^[GC][A-Z0-9]{55}$/, 'Must be a valid Stellar G- or C-address')
+	.refine(isClassicAccountAddress, 'Must be a valid classic Stellar account (G-address)')
 
 const nftMetadataSchema = z.object({
 	name: z.string().min(1).max(200),

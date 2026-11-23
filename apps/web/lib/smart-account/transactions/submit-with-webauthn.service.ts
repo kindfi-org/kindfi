@@ -12,7 +12,6 @@ import type {
 } from '@packages/lib/smart-account'
 import { Keypair, type Transaction, TransactionBuilder, xdr } from '@stellar/stellar-sdk'
 import { type Api, Server } from '@stellar/stellar-sdk/rpc'
-import isEqual from 'lodash/isEqual'
 import { logger } from '@/lib/logger'
 
 export const submitSmartAccountTransferWithWebAuthn = async (
@@ -64,20 +63,29 @@ export const submitSmartAccountTransferWithWebAuthn = async (
 		const { signatureScVal: signatureScValRaw } = signatureResult
 		const signatureScVal = xdr.ScVal.fromXDR(signatureScValRaw.toXDR())
 
-		for (const authEntry of authEntries) {
-			const isSameCredentialMapping = isEqual(
-				{ ...authEntry.credentials().switch() },
-				{ ...xdr.SorobanCredentialsType.sorobanCredentialsAddress() },
-			)
-			if (isSameCredentialMapping) {
-				const addressCredentials = authEntry.credentials().address()
+		for (const [index, authEntry] of authEntries.entries()) {
+			const credentials = authEntry.credentials
+			if (
+				credentials.type === 'sorobanCredentialsAddress' ||
+				credentials.type === 'sorobanCredentialsAddressV2'
+			) {
+				const addressCredentials =
+					credentials.type === 'sorobanCredentialsAddress'
+						? credentials.address
+						: credentials.addressV2
 				const newCredentials = new xdr.SorobanAddressCredentials({
-					address: addressCredentials.address(),
-					nonce: addressCredentials.nonce(),
-					signatureExpirationLedger: addressCredentials.signatureExpirationLedger(),
+					address: addressCredentials.address,
+					nonce: addressCredentials.nonce,
+					signatureExpirationLedger: addressCredentials.signatureExpirationLedger,
 					signature: signatureScVal,
 				})
-				authEntry.credentials(xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials))
+				authEntries[index] = new xdr.SorobanAuthorizationEntry({
+					credentials:
+						credentials.type === 'sorobanCredentialsAddress'
+							? xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials)
+							: xdr.SorobanCredentials.sorobanCredentialsAddressV2(newCredentials),
+					rootInvocation: authEntry.rootInvocation,
+				})
 				break
 			}
 		}

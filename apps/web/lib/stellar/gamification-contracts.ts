@@ -16,8 +16,7 @@ import {
 	TransactionBuilder,
 	xdr,
 } from '@stellar/stellar-sdk'
-import * as SorobanRpc from '@stellar/stellar-sdk/rpc'
-import { Api, assembleTransaction } from '@stellar/stellar-sdk/rpc'
+import { Api, assembleTransaction, Server } from '@stellar/stellar-sdk/rpc'
 import { logger } from '@/lib/logger'
 
 interface RecordStreakDonationParams {
@@ -119,7 +118,7 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 export class GamificationContractService {
-	private server: SorobanRpc.Server
+	private server: Server
 	private networkPassphrase: string
 	private recorderKeypair: Keypair
 	/** Max fee in stroops — mainnet inclusion often rejects low fees (txInsufficientFee). */
@@ -144,7 +143,7 @@ export class GamificationContractService {
 			throw new Error('Stellar RPC URL is required')
 		}
 
-		this.server = new SorobanRpc.Server(rpc, { allowHttp: true })
+		this.server = new Server(rpc, { allowHttp: true })
 		this.networkPassphrase = passphrase
 		this.recorderKeypair = Keypair.fromSecret(secretKey)
 	}
@@ -570,7 +569,7 @@ export class GamificationContractService {
 			}
 
 			// Option::None is scvVoid; Option::Some(QuestDefinition) is the struct map
-			if (retval.switch().name === 'scvVoid') {
+			if (retval.type === 'scvVoid') {
 				return false
 			}
 
