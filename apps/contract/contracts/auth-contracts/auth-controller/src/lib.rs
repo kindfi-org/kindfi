@@ -1,9 +1,8 @@
 #![no_std]
 use core::cmp::min;
 use soroban_sdk::{
-    auth::{Context},
-    contract, contractimpl, contracttype,
-    panic_with_error, Address, BytesN, Bytes, Env, FromVal, IntoVal, Val, Vec,
+    auth::Context, contract, contractimpl, contracttype, panic_with_error, Address, Bytes, BytesN,
+    Env, FromVal, IntoVal, Val, Vec,
 };
 
 mod base64_url;
@@ -31,13 +30,14 @@ pub struct SignedMessage {
     pub authenticator_data: Bytes,
     pub client_data_json: Bytes,
     pub public_key: BytesN<65>, // secp256r1 public key
-    pub signature: BytesN<64>, // secp256r1 signature
+    pub signature: BytesN<64>,  // secp256r1 signature
 }
 
 /// Enum to represent different keys used in storage for the contract.
 #[contracttype]
 #[derive(Clone)]
 enum DataKey {
+    Admin,
     DefaultThreshold,
     Signers,
     Account(Address),
@@ -51,6 +51,11 @@ pub struct AuthController;
 
 #[contractimpl]
 impl AuthController {
+    pub fn __constructor(env: Env, admin: Address) {
+        admin.require_auth();
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    }
+
     pub fn init(env: Env, signers: Vec<BytesN<65>>, default_threshold: u32) {
         if env
             .storage()
@@ -183,17 +188,9 @@ impl AuthController {
     }
 
     pub fn add_factory(env: Env, factory: Address, context: Vec<Address>) {
-        // ? Skipping auth check to allow initial factory registration during deployment.
-        // ? Smart contracts (factories) don't have traditional signing keys - they use
-        // ? WebAuthn credentials from the deploying account. The factory itself will
-        // ? enforce security by requiring WebAuthn signatures when deploying new accounts.
-        // ? Once deployed, factory operations are controlled by the account's WebAuthn devices.
-        // ? - Auth removed for deployment compatibility. 
-        // ! As it is now, anyone can deploy the factory and create accounts.
-        // ! Until we have a set of admin accounts to deploy, we then re-apply this auth guard
-        // @AndlerRL
-        // env.current_contract_address().require_auth();
-        
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
         for ctx in context.iter() {
             if env
                 .storage()
@@ -212,15 +209,9 @@ impl AuthController {
     }
 
     pub fn remove_factory(env: Env, factory: Address, context: Vec<Address>) {
-        // ? Skipping auth check for factory removal to allow administrative operations
-        // ? without requiring smart contract authentication. Factory removal is an
-        // ? administrative operation that should be controlled at the deployment level.
-        // ? - Auth removed for deployment compatibility. 
-        // ! As it is now, anyone can deploy the factory and create accounts.
-        // ! Until we have a set of admin accounts to deploy, we then re-apply this auth guard
-        // @AndlerRL
-        // env.current_contract_address().require_auth();
-        
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        admin.require_auth();
+
         for ctx in context.iter() {
             if !env
                 .storage()
@@ -347,7 +338,7 @@ impl AuthController {
 
             // ? WebAuthn signature payload Formula: SHA256(authenticator_data || SHA256(client_data_json))
             let mut payload = Bytes::new(&env);
-            let client_data_hash = env.crypto().sha256(&signed_message.client_data_json);        
+            let client_data_hash = env.crypto().sha256(&signed_message.client_data_json);
             payload.append(&signed_message.authenticator_data);
             payload.extend_from_array(&client_data_hash.to_array());
             let payload = env.crypto().sha256(&payload);
@@ -363,7 +354,8 @@ impl AuthController {
             let client_data_buffer = signed_message.client_data_json.to_buffer::<1024>();
             let client_data_json = client_data_buffer.as_slice();
             let (client_data, _): (ClientDataJson, _) =
-                serde_json_core::de::from_slice(client_data_json).map_err(|_| Error::JsonParseError)?;
+                serde_json_core::de::from_slice(client_data_json)
+                    .map_err(|_| Error::JsonParseError)?;
 
             let mut expected_challenge = [b'_'; CHALLENGE_LENGTH];
             base64_url::encode(&mut expected_challenge, &signature_payload.to_array());
@@ -392,7 +384,7 @@ impl AuthController {
             match ctx {
                 Context::Contract(contract_ctx) => {
                     let contract_addr = &contract_ctx.contract;
-                    
+
                     let is_account = env
                         .storage()
                         .instance()

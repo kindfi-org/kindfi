@@ -1,5 +1,14 @@
 # AuthController Test Suite Documentation
 
+## Factory authorization deployment note
+
+`add_factory` and `remove_factory` now require the admin address supplied to the
+Soroban constructor. The existing testnet contract was deployed before this
+constructor requirement and has no contract-upgrade mechanism in this repository;
+its existing instance therefore retains the open factory functions. Deploy a new
+instance with the intended admin and migrate integrations to it. This change does
+not call for a mainnet upgrade.
+
 The AuthController contract is a core component of the KindFi authentication system, providing robust multi-signature authentication and account management functionality. This document provides a comprehensive guide to the test suite for the AuthController.
 
 ## Table of Contents
