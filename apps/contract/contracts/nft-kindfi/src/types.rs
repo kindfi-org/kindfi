@@ -1,9 +1,9 @@
 use soroban_sdk::{contracttype, String, Vec};
 
-/// NFT attribute following SEP-0050 JSON schema.
+/// KindFi on-chain NFT attribute inspired by the draft SEP-0050 JSON schema.
 /// Represents a single trait/property of the NFT.
 ///
-/// Compatible with the "Non-Fungible Metadata JSON Schema" defined in SEP-0050:
+/// A metadata server must convert numeric strings for the draft JSON schema:
 /// ```json
 /// {
 ///   "display_type": "string",
@@ -27,7 +27,8 @@ pub struct NFTAttribute {
 
 /// Custom metadata structure for KindFi NFTs.
 /// Stores on-chain metadata per token for the reputation and incentivization system.
-/// Follows SEP-0050 "Non-Fungible Metadata JSON Schema".
+/// This is not the draft SEP-0050 JSON representation: `image_uri` maps to
+/// `image`, and numeric attribute strings require conversion by the metadata server.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NFTMetadata {
@@ -39,7 +40,7 @@ pub struct NFTMetadata {
     pub image_uri: String,
     /// External URL for more information (ej., collection's own site)
     pub external_url: String,
-    /// Array of attributes that describe the asset (SEP-0050 compliant)
+    /// Array of KindFi attributes that describe the asset
     pub attributes: Vec<NFTAttribute>,
 }
 
