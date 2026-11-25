@@ -1,3 +1,4 @@
+// Classic payments and trustlines stay on Horizon; contract calls use RPC.
 import { Horizon } from '@stellar/stellar-sdk'
 import type { WalletTransferConfig } from '~/lib/config/wallet-transfer.config'
 

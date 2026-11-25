@@ -121,18 +121,29 @@ async function createPlaceholderQuestOnChain(
 	)
 }
 
+/**
+ * Highest on-chain quest_id up to `upToId` that currently exists.
+ *
+ * An RPC failure is a failure, not "no quests": the result object carries
+ * the error so callers never treat an outage as an empty contract and
+ * create a duplicate definition for a quest that already exists.
+ */
 export async function getHighestQuestIdOnChain(
 	contractService: GamificationContractService,
 	contractAddress: string,
 	upToId: number,
-): Promise<number> {
+): Promise<{ success: true; maxId: number } | { success: false; error: string }> {
 	let maxId = 0
 	for (let id = 1; id <= upToId; id++) {
-		if (await contractService.questExistsOnChain(contractAddress, id)) {
+		const result = await contractService.reads.getQuest(contractAddress, id)
+		if (result.status === 'error') {
+			return { success: false, error: result.error }
+		}
+		if (result.status === 'found') {
 			maxId = id
 		}
 	}
-	return maxId
+	return { success: true, maxId }
 }
 
 /**
@@ -141,6 +152,10 @@ export async function getHighestQuestIdOnChain(
  * The Quest contract assigns sequential IDs via an internal counter. When DB and
  * chain drift (e.g. quests 4–6 exist in DB but only 1–3 on-chain), this fills
  * gaps by creating missing definitions (or placeholders) until the target ID exists.
+ *
+ * Presence is checked with the typed `reads.getQuest`: only an explicit
+ * `not_found` authorises a create. An `error` is a retryable failure — the
+ * sync stops instead of creating a quest that may already exist.
  */
 export async function ensureQuestDefinitionOnChain(
 	contractService: GamificationContractService,
@@ -149,16 +164,33 @@ export async function ensureQuestDefinitionOnChain(
 	adminKeypair: Keypair,
 	dbQuestsById?: Map<number, QuestDefinitionRow>,
 ): Promise<{ success: boolean; error?: string }> {
-	const exists = await contractService.questExistsOnChain(contractAddress, questDefinition.quest_id)
-	if (exists) return { success: true }
+	const target = await contractService.reads.getQuest(contractAddress, questDefinition.quest_id)
+	if (target.status === 'error') {
+		return {
+			success: false,
+			error: `Could not verify quest ${questDefinition.quest_id} on-chain: ${target.error}`,
+		}
+	}
+	if (target.status === 'found') return { success: true }
 
 	const targetId = questDefinition.quest_id
-	let maxOnChain = await getHighestQuestIdOnChain(contractService, contractAddress, targetId)
+	const highest = await getHighestQuestIdOnChain(contractService, contractAddress, targetId)
+	if (!highest.success) {
+		return { success: false, error: highest.error }
+	}
+	let maxOnChain = highest.maxId
 
 	while (maxOnChain < targetId) {
 		const nextId = maxOnChain + 1
 
-		if (await contractService.questExistsOnChain(contractAddress, nextId)) {
+		const next = await contractService.reads.getQuest(contractAddress, nextId)
+		if (next.status === 'error') {
+			return {
+				success: false,
+				error: `Could not verify quest ${nextId} on-chain: ${next.error}`,
+			}
+		}
+		if (next.status === 'found') {
 			maxOnChain = nextId
 			continue
 		}
@@ -182,9 +214,19 @@ export async function ensureQuestDefinitionOnChain(
 			}
 		}
 
-		const updatedMax = await getHighestQuestIdOnChain(contractService, contractAddress, targetId)
-		if (updatedMax <= maxOnChain) {
-			if (await contractService.questExistsOnChain(contractAddress, nextId)) {
+		const updated = await getHighestQuestIdOnChain(contractService, contractAddress, targetId)
+		if (!updated.success) {
+			return { success: false, error: updated.error }
+		}
+		if (updated.maxId <= maxOnChain) {
+			const recheck = await contractService.reads.getQuest(contractAddress, nextId)
+			if (recheck.status === 'error') {
+				return {
+					success: false,
+					error: `Could not verify quest ${nextId} on-chain: ${recheck.error}`,
+				}
+			}
+			if (recheck.status === 'found') {
 				maxOnChain = nextId
 				continue
 			}
@@ -195,14 +237,20 @@ export async function ensureQuestDefinitionOnChain(
 			}
 		}
 
-		maxOnChain = updatedMax
+		maxOnChain = updated.maxId
 	}
 
-	const targetExists = await contractService.questExistsOnChain(
+	const targetExists = await contractService.reads.getQuest(
 		contractAddress,
 		questDefinition.quest_id,
 	)
-	if (!targetExists) {
+	if (targetExists.status === 'error') {
+		return {
+			success: false,
+			error: `Could not verify quest ${questDefinition.quest_id} on-chain: ${targetExists.error}`,
+		}
+	}
+	if (targetExists.status !== 'found') {
 		return {
 			success: false,
 			error: `Quest ${questDefinition.quest_id} still missing on-chain after sync`,

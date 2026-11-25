@@ -6,7 +6,7 @@ publish = false
 
 [lib]
 doctest = false
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 soroban-sdk = { workspace = true }

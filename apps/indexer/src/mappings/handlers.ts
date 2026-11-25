@@ -2,8 +2,8 @@ import { Address, type Horizon, type xdr } from '@stellar/stellar-sdk'
 import type { SorobanEvent, StellarEffect, StellarOperation } from '@subql/types-stellar'
 import { Account, Credit, Debit, Payment, Transfer } from '../types'
 
-type AccountCredited = any
-type AccountDebited = any
+type AccountCredited = Extract<Horizon.ServerApi.EffectRecord, { type: 'account_credited' }>
+type AccountDebited = Extract<Horizon.ServerApi.EffectRecord, { type: 'account_debited' }>
 
 export async function handleOperation(
 	op: StellarOperation<Horizon.HorizonApi.PaymentOperationResponse>,

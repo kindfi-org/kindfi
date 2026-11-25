@@ -2,6 +2,17 @@
 
 [SubQuery](https://subquery.network) is a fast, flexible, and reliable open-source data indexer that provides you with custom APIs for your web3 project across all of our supported networks. To learn about how to get started with SubQuery, [visit our docs](https://academy.subquery.network).
 
+## Data boundary
+
+- Horizon operations and effects are ingested here for history.
+- RPC handles recent contract simulation and submission in the web app.
+- RPC event history covers about 7 days on most methods.
+- Don't add a second event poller in the Next.js app for the same payments.
+
+## Dependency pins
+
+Dependencies are pinned (no `latest`) so clean installs are reproducible. `@subql/types-stellar` and `@subql/node-stellar` currently require `@stellar/stellar-sdk` `^14.4.3`, so this package stays on SDK 14.x until SubQuery publishes a release that supports a newer major. Don't add a second SDK copy to work around it.
+
 ## Start
 
 First, install SubQuery CLI globally on your terminal by using NPM `npm install -g @subql/cli`

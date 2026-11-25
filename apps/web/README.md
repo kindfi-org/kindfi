@@ -417,6 +417,20 @@ bun start
 
 Ensure all production environment variables are set in your deployment platform (Vercel, etc.).
 
+### Stellar discovery metadata
+
+Edit [`docs/stellar/stellar.toml`](../../docs/stellar/stellar.toml) as the source
+of truth. The production domain owner will serve it at
+`https://<domain>/.well-known/stellar.toml`, on the same host as `ORG_URL`,
+with `Access-Control-Allow-Origin: *`.
+
+<!-- Issuer constants: apps/web/lib/constants/escrow.ts -->
+The manifest records the default mainnet and testnet USDC issuers from
+[`lib/constants/escrow.ts`](./lib/constants/escrow.ts). The
+`${NEXT_PUBLIC_USDC_CONTRACT_ADDRESS}` placeholder documents the
+deployment-specific override in a comment. See the
+[Stellar standards map](../../docs/stellar/standards.md) for the related SEPs.
+
 ## 📚 Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
