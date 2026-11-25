@@ -1,4 +1,8 @@
 import { logger } from '~/lib/logger'
+import {
+	WalletSendHorizonError,
+	type WalletSendHorizonErrorCode,
+} from '~/lib/wallet-send/horizon/accounts'
 
 export type WalletSendErrorCode =
 	| 'wallet_disconnected'
@@ -22,10 +26,54 @@ export type WalletSendUserError = {
 	message: string
 }
 
+const mapHorizonErrorCodeToWalletErrorCode = (
+	code: WalletSendHorizonErrorCode,
+): WalletSendErrorCode => {
+	switch (code) {
+		case 'account_not_found':
+		case 'op_no_destination':
+			return 'destination_not_found'
+		case 'op_no_trust':
+		case 'op_line_full':
+		case 'op_src_no_trust':
+		case 'op_not_authorized':
+		case 'op_src_not_authorized':
+			return 'trustline_issue'
+		case 'tx_insufficient_fee':
+		case 'tx_insufficient_balance':
+		case 'op_low_reserve':
+			return 'insufficient_xlm'
+		case 'op_underfunded':
+			return 'insufficient_asset'
+		case 'tx_bad_seq':
+			return 'bad_sequence'
+		case 'tx_bad_auth':
+			return 'network_mismatch'
+		case 'tx_too_early':
+		case 'tx_too_late':
+			return 'expired'
+		case 'network_error':
+		case 'unknown':
+			return 'submission_failed'
+	}
+}
+
 const includesAny = (value: string, needles: string[]): boolean =>
 	needles.some((needle) => value.includes(needle))
 
 export const mapWalletSendError = (error: unknown): WalletSendUserError => {
+	if (error instanceof WalletSendHorizonError) {
+		logger.error('Wallet send Horizon error:', error, {
+			code: error.code,
+			rawCode: error.rawCode,
+			resultCodes: error.resultCodes,
+		})
+		return {
+			code: mapHorizonErrorCodeToWalletErrorCode(error.code),
+			message: error.message,
+		}
+	}
+
 	const rawMessage = error instanceof Error ? error.message : String(error)
 	const message = rawMessage.toLowerCase()
 
