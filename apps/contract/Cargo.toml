@@ -43,11 +43,12 @@ categories = ["no-std", "wasm"]
 version = "0.1.0"
 
 [workspace.dependencies]
-soroban-sdk = "23.4.0"
-stellar-access = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
-stellar-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
-stellar-tokens = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
-stellar-contract-utils = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.6.0" }
+# Interim pin: no OpenZeppelin stellar-contracts release supports soroban-sdk 29 yet (#1127).
+soroban-sdk = "28.0.0"
+stellar-access = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.8.0" }
+stellar-macros = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.8.0" }
+stellar-tokens = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.8.0" }
+stellar-contract-utils = { git = "https://github.com/OpenZeppelin/stellar-contracts", tag = "v0.8.0" }
 
 
 [profile.release]

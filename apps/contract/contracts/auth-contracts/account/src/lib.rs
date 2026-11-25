@@ -5,6 +5,9 @@ use soroban_sdk::{
     crypto::Hash,
     panic_with_error, symbol_short, Address, Bytes, BytesN, Env, Symbol, Vec,
 };
+#[cfg(test)]
+use soroban_sdk::log;
+
 mod base64_url;
 mod errors;
 pub mod events;

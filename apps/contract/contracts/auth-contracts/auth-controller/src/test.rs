@@ -1,44 +1,57 @@
 #![cfg(test)]
 extern crate std;
 
-use ed25519_dalek::{Signature, Signer, SigningKey, PUBLIC_KEY_LENGTH, SIGNATURE_LENGTH};
-use rand::rngs::OsRng;
-use rand::RngCore;
+use core::sync::atomic::{AtomicU64, Ordering};
+
+use p256::ecdsa::{signature::hazmat::PrehashSigner, Signature, SigningKey};
+use rand::{rngs::StdRng, RngCore, SeedableRng};
 use soroban_sdk::auth::{Context, ContractContext};
-use soroban_sdk::testutils::{Address as _, Logs};
-use soroban_sdk::{log, vec, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
+use soroban_sdk::testutils::Address as _;
+use soroban_sdk::{vec, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
 
 use crate::errors::Error;
+use crate::test_auth::{create_authenticator_data, create_client_data_json};
 use crate::{AuthController, AuthControllerClient, SignedMessage};
 
+static SEED: AtomicU64 = AtomicU64::new(1);
+
+fn rng() -> StdRng {
+    StdRng::seed_from_u64(SEED.fetch_add(1, Ordering::Relaxed))
+}
+
 fn generate_keypair() -> SigningKey {
-    let mut csprng = OsRng;
-    SigningKey::generate(&mut csprng)
+    SigningKey::random(&mut rng())
 }
 
 fn gen_random_bytes<const N: usize>(env: &Env) -> BytesN<N> {
-    let mut rng = OsRng;
     let mut random_bytes = [0u8; N];
-    rng.try_fill_bytes(&mut random_bytes)
-        .expect("unable to fill bytes");
+    rng().fill_bytes(&mut random_bytes);
 
     BytesN::from_array(env, &random_bytes)
 }
 
 fn signer_public_key(e: &Env, signing_key: &SigningKey) -> BytesN<65> {
-    let verifying_key_bytes: [u8; PUBLIC_KEY_LENGTH] = signing_key.verifying_key().to_bytes();
-    BytesN::from_array(e, &verifying_key_bytes)
+    let point = signing_key.verifying_key().to_encoded_point(false);
+    BytesN::from_array(e, point.as_bytes().try_into().unwrap())
 }
 
 fn get_signature_bytes(e: &Env, signature: &Signature) -> BytesN<64> {
-    let signature_bytes: [u8; SIGNATURE_LENGTH] = signature.to_bytes();
-    BytesN::from_array(e, &signature_bytes)
+    BytesN::from_array(e, &signature.to_bytes().into())
 }
 
-fn sign(e: &Env, signing_key: &SigningKey, payload: &BytesN<65>) -> Val {
+fn sign(e: &Env, signing_key: &SigningKey, payload: &BytesN<32>) -> Val {
+    let client_data_json = create_client_data_json(e, payload);
+    let authenticator_data = create_authenticator_data(e);
+    let mut message = authenticator_data.clone();
+    message.extend_from_array(&e.crypto().sha256(&client_data_json).to_array());
+    let digest = e.crypto().sha256(&message).to_array();
+    let signature: Signature = signing_key.sign_prehash(&digest).unwrap();
     SignedMessage {
+        device_id: BytesN::from_array(e, &[0; 32]),
+        authenticator_data,
+        client_data_json,
         public_key: signer_public_key(e, signing_key),
-        signature: get_signature_bytes(e, &signing_key.sign(payload.to_array().as_slice())),
+        signature: get_signature_bytes(e, &signature.normalize_s().unwrap_or(signature)),
     }
     .into_val(e)
 }
@@ -62,7 +75,9 @@ impl Controller {
         let client = AuthControllerClient::new(&env, &controller_address);
         let mut signers = [generate_keypair(), generate_keypair()];
 
-        if signers[0].verifying_key().as_bytes() > signers[1].verifying_key().as_bytes() {
+        if signer_public_key(&env, &signers[0]).to_array()
+            > signer_public_key(&env, &signers[1]).to_array()
+        {
             signers.swap(0, 1);
         }
 
@@ -120,17 +135,7 @@ fn test_default_threshold_not_met() {
         ],
     );
 
-    match invocation {
-        Ok(()) => log!(&env, "Log message: Success"),
-        Err(inner_error) => match inner_error {
-            Ok(e) => log!(&env, "Inner error: {:?}", e), // E variant
-            Err(_) => log!(&env, "Invocation failed: {:?}", "invoke err"), // InvokeError variant
-        },
-    }
-
-    env.logs().print();
-
-    // assert!(invocation.is_ok());
+    assert_eq!(invocation, Err(Ok(Error::DefaultThresholdNotMet)));
 }
 
 #[test]
@@ -161,17 +166,7 @@ fn test_default_threshold_met_but_wrong_signer() {
         ],
     );
 
-    match invocation {
-        Ok(()) => log!(&env, "Log message: Success"),
-        Err(inner_error) => match inner_error {
-            Ok(e) => log!(&env, "Inner error: {:?}", e), // E variant
-            Err(_) => log!(&env, "Invocation failed: {:?}", "invoke err"), // InvokeError variant
-        },
-    }
-
-    env.logs().print();
-
-    // assert!(invocation.is_ok());
+    assert_eq!(invocation, Err(Ok(Error::UnknownSigner)));
 }
 
 #[test]
@@ -202,17 +197,7 @@ fn test_default_threshold_met() {
         ],
     );
 
-    match invocation {
-        Ok(()) => log!(&env, "Log message: Success"),
-        Err(inner_error) => match inner_error {
-            Ok(e) => log!(&env, "Inner error: {:?}", e), // E variant
-            Err(_) => log!(&env, "Invocation failed: {:?}", "invoke err"), // InvokeError variant
-        },
-    }
-
-    env.logs().print();
-
-    // assert!(invocation.is_ok());
+    assert_eq!(invocation, Ok(()));
 }
 
 #[test]
