@@ -6,6 +6,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import type { NftTier } from '~/lib/governance/types'
 import { getVoteWeight } from '~/lib/governance/vote-weight'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { castVoteSchema } from '~/lib/schemas/governance.schemas'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -21,6 +22,14 @@ async function voteHandler(req: NextRequest) {
 		const [session, body] = await Promise.all([getServerSession(nextAuthOption), req.json()])
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const onboardingFailure = await requireOnboardingCompleteForAction(session.user.id)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
+				{ status: 403 },
+			)
 		}
 
 		const validation = validateRequest(castVoteSchema, body)

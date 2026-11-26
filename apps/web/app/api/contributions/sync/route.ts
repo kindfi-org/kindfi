@@ -4,10 +4,11 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { syncContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
-	checkFundraisingGoalNotReached,
 	createContributionWithProjectUpdate,
+	validateContributionAllowed,
 } from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -20,6 +21,14 @@ export async function POST(req: NextRequest) {
 		const [session, body] = await Promise.all([getServerSession(nextAuthOption), req.json()])
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const onboardingFailure = await requireOnboardingCompleteForAction(session.user.id)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
+				{ status: 403 },
+			)
 		}
 
 		const validation = validateRequest(syncContributionSchema, body)
@@ -61,8 +70,8 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'Project ID is required' }, { status: 400 })
 		}
 
-		const [goalCheck, { data: existingContribution }] = await Promise.all([
-			checkFundraisingGoalNotReached(projectId, contractId),
+		const [contributionCheck, { data: existingContribution }] = await Promise.all([
+			validateContributionAllowed(projectId, contractId),
 			supabase
 				.from('contributions')
 				.select('id')
@@ -71,8 +80,8 @@ export async function POST(req: NextRequest) {
 				.eq('amount', Number(amount))
 				.single(),
 		])
-		if (!goalCheck.allowed) {
-			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
+		if (!contributionCheck.allowed) {
+			return NextResponse.json({ error: contributionCheck.error }, { status: 403 })
 		}
 
 		if (existingContribution) {

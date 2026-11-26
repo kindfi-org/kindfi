@@ -20,6 +20,8 @@ async function triggerContract(payload: AdminGamificationTriggerInput): Promise<
 export function useAdminGamificationTriggerForm(address: string | null) {
 	const [activeModule, setActiveModule] = useState<string>('streak')
 	const [lastResult, setLastResult] = useState<TriggerResponse | null>(null)
+	// Payload staged for explicit confirmation before anything is submitted.
+	const [pendingPayload, setPendingPayload] = useState<AdminGamificationTriggerInput | null>(null)
 
 	const [period, setPeriod] = useState<'weekly' | 'monthly'>('weekly')
 	const [referralAction, setReferralAction] = useState<
@@ -41,6 +43,7 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 	const mutation = useMutation({
 		mutationFn: triggerContract,
 		onSuccess: (data) => {
+			setPendingPayload(null)
 			setLastResult(data)
 			if (data.success) {
 				toast.success('On-chain trigger submitted', {
@@ -55,6 +58,7 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 			}
 		},
 		onError: (error) => {
+			setPendingPayload(null)
 			const message = error instanceof Error ? error.message : 'Request failed'
 			setLastResult({ success: false, error: message })
 			toast.error('Request failed', { description: message })
@@ -67,6 +71,8 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 		return connectedAddress
 	}
 
+	// Stages the payload for confirmation instead of submitting directly —
+	// contract calls only fire after an explicit confirm.
 	const handleSubmit = (
 		payload: AdminGamificationTriggerInput,
 		connectedAddress: string | null,
@@ -81,8 +87,7 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 				toast.error('Enter a target Stellar G-address or connect a wallet')
 				return
 			}
-			setLastResult(null)
-			mutation.mutate({ ...payload, userAddress: targetAddress })
+			setPendingPayload({ ...payload, userAddress: targetAddress })
 			return
 		}
 
@@ -91,8 +96,18 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 			return
 		}
 
+		setPendingPayload(payload)
+	}
+
+	const confirmPending = () => {
+		if (!pendingPayload || mutation.isPending) return
 		setLastResult(null)
-		mutation.mutate(payload)
+		mutation.mutate(pendingPayload)
+	}
+
+	const cancelPending = () => {
+		if (mutation.isPending) return
+		setPendingPayload(null)
 	}
 
 	const canSubmitWithAddress = (connectedAddress: string | null) =>
@@ -107,6 +122,9 @@ export function useAdminGamificationTriggerForm(address: string | null) {
 		canSubmit,
 		isPending: mutation.isPending,
 		handleSubmit,
+		pendingPayload,
+		confirmPending,
+		cancelPending,
 
 		period,
 		setPeriod,

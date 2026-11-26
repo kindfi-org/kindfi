@@ -70,6 +70,11 @@ export const projects = {
 		fundingProgress: 'Progreso de financiamiento',
 		shareTitle: 'Compartir este proyecto',
 		shareHint: 'Comparte en redes sociales o copia el enlace para apps de mensajería y más.',
+		errorTitle: 'No pudimos cargar este proyecto',
+		errorDescription:
+			'Algo salió mal al cargar el proyecto. Revisa tu conexión e inténtalo de nuevo.',
+		errorRetry: 'Reintentar',
+		errorRetrying: 'Reintentando...',
 	},
 	manage: {
 		dashboardTitle: 'Panel',

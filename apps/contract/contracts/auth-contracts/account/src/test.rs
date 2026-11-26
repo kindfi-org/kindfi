@@ -3,8 +3,7 @@
 extern crate std;
 
 use p256::ecdsa::{signature::Signer, Signature as P256Signature, SigningKey, VerifyingKey};
-use rand::rngs::OsRng;
-use rand::RngCore;
+use p256::elliptic_curve::rand_core::{OsRng, RngCore};
 use soroban_sdk::{log, symbol_short};
 
 // use soroban_sdk::auth::{Context, ContractContext};
@@ -167,7 +166,7 @@ fn test_remove_device() {
 }
 
 #[test]
-#[should_panic(expected = "#209")]
+#[should_panic(expected = "#206")]
 fn test_remove_device_fails_if_only_one_device() {
     let Account {
         client,
@@ -197,5 +196,5 @@ fn test_add_recovery_address() {
 
     client.add_recovery_address(&recovery);
 
-    assert_eq!(env.events().all().len(), 1);
+    assert_eq!(env.events().all().events().len(), 1);
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { Gem, Heart, Medal, Star, Trophy, Users } from 'lucide-react'
+import { useId } from 'react'
 import { Card, CardContent } from '~/components/base/card'
 import type { AchievementCardProps } from '~/lib/types'
 import { cn } from '~/lib/utils'
@@ -22,19 +23,29 @@ export function AchievementCard({
 	progressPercentage,
 	onClick,
 }: AchievementCardProps & { onClick: () => void }) {
+	const titleId = useId()
+	const descriptionId = useId()
+	const isLocked = status === 'locked'
 	const Icon = icons[icon]
 	const clampedProgress = Math.max(0, Math.min(100, progressPercentage ?? 0))
 
 	return (
 		<Card
-			onClick={onClick}
 			className={cn(
-				'transition-all h-full cursor-pointer',
+				'relative transition-all h-full',
 				status === 'completed' && 'bg-primary/5 hover:bg-primary/10',
 				status === 'in-progress' && 'bg-blue-50 hover:bg-blue-100',
 				status === 'locked' && 'bg-muted/50 opacity-60 cursor-not-allowed',
 			)}
 		>
+			<button
+				type="button"
+				aria-labelledby={titleId}
+				aria-describedby={descriptionId}
+				disabled={isLocked}
+				onClick={isLocked ? undefined : onClick}
+				className="absolute inset-0 z-10 rounded-lg cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+			/>
 			<CardContent className="flex flex-col items-center justify-center h-full px-4 py-3">
 				<div
 					className={cn(
@@ -46,8 +57,11 @@ export function AchievementCard({
 				>
 					<Icon className="w-6 h-6 font-extrabold" />
 				</div>
-				<h3 className="text-md font-normal text-center">{title}</h3>
+				<h3 id={titleId} className="text-md font-normal text-center">
+					{title}
+				</h3>
 				<p
+					id={descriptionId}
 					className={cn(
 						'text-sm mt-1',
 						status === 'completed' && 'text-primary',

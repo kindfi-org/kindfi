@@ -40,6 +40,8 @@ export function transformEnv(): AppEnvInterface {
 				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ENABLE_ESCROW_FEATURE === 'true',
 			enableSmartAccountCreation: data.NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION === 'true', // Must stay false on Mainnet production
 			enablePollarOnboarding: data.NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING === 'true',
+			enableAdminOpsDashboard:
+				data.NODE_ENV === 'development' || data.NEXT_PUBLIC_ADMIN_OPS_DASHBOARD === 'true',
 		},
 		vapid: {
 			email: data.VAPID_EMAIL || '',
@@ -153,6 +155,7 @@ function createAppConfigSchema<T extends keyof typeof appRequirements>(appName: 
 			enableEscrowFeature: z.boolean(),
 			enableSmartAccountCreation: z.boolean(),
 			enablePollarOnboarding: z.boolean(),
+			enableAdminOpsDashboard: z.boolean(),
 		}),
 		vapid: z.object({
 			email: z.string(),
@@ -418,6 +421,7 @@ export const baseEnvSchema = z.object({
 	NEXT_PUBLIC_ENABLE_ESCROW_FEATURE: z.enum(['true', 'false']).optional(),
 	NEXT_PUBLIC_ENABLE_SMART_ACCOUNT_CREATION: z.enum(['true', 'false']).optional(),
 	NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING: z.enum(['true', 'false']).optional(),
+	NEXT_PUBLIC_ADMIN_OPS_DASHBOARD: z.enum(['true', 'false']).optional(),
 	NEXT_PUBLIC_POLLAR_PUBLISHABLE_KEY: z.string().optional(),
 	POLLAR_SECRET_KEY: z.string().optional(),
 	POLLAR_API_BASE_URL: z.string().url('Invalid Pollar API base URL format').optional(),
@@ -536,6 +540,7 @@ export const appRequirements = {
 			'STELLAR_SIGNATURE_MAX_ATTEMPTS',
 			'STELLAR_SIGNATURE_WINDOW_MS',
 			'NEXT_PUBLIC_ENABLE_POLLAR_ONBOARDING',
+			'NEXT_PUBLIC_ADMIN_OPS_DASHBOARD',
 			'NEXT_PUBLIC_POLLAR_PUBLISHABLE_KEY',
 			'POLLAR_SECRET_KEY',
 			'POLLAR_API_BASE_URL',

@@ -34,7 +34,7 @@ pub fn mint_with_metadata(e: &Env, to: &Address, nft_metadata: &NFTMetadata) -> 
     let token_id = increment_token_counter(e);
 
     // Mint using OpenZeppelin Base implementation
-    Base::mint(e, to, token_id);
+    Base::mint_with_id(e, to, token_id);
 
     // Store custom metadata
     metadata::set_metadata(e, token_id, nft_metadata);

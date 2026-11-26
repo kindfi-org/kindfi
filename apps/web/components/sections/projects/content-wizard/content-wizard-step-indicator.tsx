@@ -4,7 +4,6 @@ import { Check } from 'lucide-react'
 import type { StepValidation } from '~/components/sections/projects/content-wizard/hooks/use-content-wizard-validation'
 import { useI18n } from '~/lib/i18n/context'
 import type { SupportedLocale } from '~/lib/schemas/locale.schemas'
-import { getOppositeLocale } from '~/lib/schemas/locale.schemas'
 import type { ContentWizardStep } from '~/lib/types/project/content-wizard.types'
 import { cn } from '~/lib/utils'
 
@@ -14,10 +13,7 @@ type StepGroup = {
 	steps: { id: ContentWizardStep; label: string }[]
 }
 
-const getStepGroups = (sourceLocale: SupportedLocale, t: (key: string) => string): StepGroup[] => {
-	const opposite = getOppositeLocale(sourceLocale)
-	const oppositeLabel = opposite === 'en' ? 'English' : 'Spanish'
-
+const getStepGroups = (_sourceLocale: SupportedLocale, t: (key: string) => string): StepGroup[] => {
 	return [
 		{
 			id: 'primary',
@@ -27,15 +23,6 @@ const getStepGroups = (sourceLocale: SupportedLocale, t: (key: string) => string
 				{ id: 'basics-primary', label: t('projects.manage.contentWizard.stepBasics') },
 				{ id: 'story-primary', label: t('projects.manage.contentWizard.stepStory') },
 				{ id: 'highlights-primary', label: t('projects.manage.contentWizard.stepHighlights') },
-			],
-		},
-		{
-			id: 'translation',
-			label: `${t('projects.manage.contentWizard.phaseTranslation')} (${oppositeLabel})`,
-			steps: [
-				{ id: 'basics-translation', label: t('projects.manage.contentWizard.stepBasics') },
-				{ id: 'story-translation', label: t('projects.manage.contentWizard.stepStory') },
-				{ id: 'highlights-translation', label: t('projects.manage.contentWizard.stepHighlights') },
 			],
 		},
 		{

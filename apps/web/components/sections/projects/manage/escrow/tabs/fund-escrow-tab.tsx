@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/com
 import { Input } from '~/components/base/input'
 import { Label } from '~/components/base/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
@@ -35,24 +37,29 @@ export function FundEscrowTab({
 	onSuccess,
 }: FundEscrowTabProps) {
 	const { fundEscrow, sendTransaction } = useEscrow()
-	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction } = useTrustlessSigner()
+	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction, address } = useTrustlessSigner()
+	const { networkId } = useStellarNetworkConfig()
 	const [fundAmount, setFundAmount] = useState<number | ''>('')
 	const [isProcessing, setIsProcessing] = useState(false)
+	const [confirmFundOpen, setConfirmFundOpen] = useState(false)
 
-	const handleFundEscrow = async () => {
+	const requestFundEscrow = () => {
 		if (!fundAmount || Number(fundAmount) <= 0) {
 			toast.error('Enter a valid amount greater than zero')
 			return
 		}
-
-		const amount = Number(fundAmount)
-
-		if (amount > 1_000_000) {
+		if (Number(fundAmount) > 1_000_000) {
 			toast.error('Amount too large', {
 				description: 'Enter an amount less than $1,000,000',
 			})
 			return
 		}
+		setConfirmFundOpen(true)
+	}
+
+	const handleFundEscrow = async () => {
+		setConfirmFundOpen(false)
+		const amount = Number(fundAmount)
 
 		try {
 			setIsProcessing(true)
@@ -215,7 +222,7 @@ export function FundEscrowTab({
 
 						<Button
 							type="button"
-							onClick={handleFundEscrow}
+							onClick={requestFundEscrow}
 							disabled={!fundAmount || Number(fundAmount) <= 0 || isProcessing}
 							className="w-full"
 							size="lg"
@@ -241,6 +248,23 @@ export function FundEscrowTab({
 						/>
 					</TabsContent>
 				</Tabs>
+
+				<ConfirmActionDialog
+					open={confirmFundOpen}
+					onOpenChange={setConfirmFundOpen}
+					title="Fund escrow"
+					description="Your connected wallet will be asked to sign a funding transaction for this escrow contract."
+					summary={[
+						{ label: 'Amount', value: `$${Number(fundAmount || 0).toLocaleString('en-US')} USDC` },
+						{ label: 'Escrow contract', value: `${escrowContractAddress.slice(0, 10)}…` },
+						{ label: 'Escrow type', value: escrowType },
+					]}
+					blockchain={{ networkId, signerAddress: address }}
+					confirmLabel="Sign & fund"
+					pendingLabel="Funding…"
+					isPending={isProcessing}
+					onConfirm={() => void handleFundEscrow()}
+				/>
 			</CardContent>
 		</Card>
 	)

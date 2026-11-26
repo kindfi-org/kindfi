@@ -9,8 +9,16 @@ import { logger } from '@/lib/logger'
 import { useEscrow } from '~/hooks/contexts/use-escrow.context'
 import { useTrustlessSigner } from '~/hooks/escrow/use-trustless-signer'
 import { useAuth } from '~/hooks/use-auth'
+import { useKycRequiredGate } from '~/hooks/use-kyc-required-gate'
 import { zodResolver } from '~/lib/form/zod-resolver'
 import { trackOnboardingPath } from '~/lib/pollar/analytics'
+import {
+	CAMPAIGN_COMPLETE_DONATION_MESSAGE,
+	isProjectAcceptingDonations,
+	isProjectCampaignComplete,
+	PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE,
+	type ProjectStatus,
+} from '~/lib/projects/project-status'
 import { fundEscrowViaTrustlessProxy } from '~/lib/services/trustless-fund-escrow.client'
 import type { ProjectDetail } from '~/lib/types/project/project-detail.types'
 import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
@@ -39,6 +47,7 @@ export function useProjectSidebarFormSubmit({
 	const { ensureTrustlessSigner, signAndSubmitTrustlessTransaction, isPollarSigner } =
 		useTrustlessSigner()
 	const { user } = useAuth()
+	const kycGate = useKycRequiredGate(user?.id ?? '')
 
 	const hasEscrow = Boolean(project.escrowContractAddress)
 
@@ -77,7 +86,22 @@ export function useProjectSidebarFormSubmit({
 			return
 		}
 
+		const projectStatus = (project.status ?? 'draft') as ProjectStatus
+		if (!isProjectAcceptingDonations(projectStatus)) {
+			const isComplete = isProjectCampaignComplete(projectStatus)
+			toast.error(isComplete ? 'Campaign complete' : 'Donations unavailable', {
+				description: isComplete
+					? CAMPAIGN_COMPLETE_DONATION_MESSAGE
+					: PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE,
+				icon: <CircleAlert className="text-destructive" />,
+			})
+			return
+		}
+
 		try {
+			const allowed = await kycGate.preflight('donate', { amount: data.investmentAmount })
+			if (!allowed) return
+
 			const signer = await ensureTrustlessSigner()
 			if (data.investmentAmount > 1_000_000) {
 				toast.error('Amount too large', {
@@ -238,5 +262,5 @@ export function useProjectSidebarFormSubmit({
 		}
 	}
 
-	return { form, onSubmit }
+	return { form, onSubmit, kycGate }
 }

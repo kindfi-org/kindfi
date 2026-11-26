@@ -1,11 +1,10 @@
 import type { GetEscrowsFromIndexerResponse } from '@trustless-work/escrow'
 import { logger } from '@/lib/logger'
 import {
-	getTrustlessWorkApiBaseUrl,
-	getTrustlessWorkApiKey,
 	getTrustlessWorkNetwork,
 	getTrustlessWorkUpstreamApiBaseUrl,
 } from '~/lib/config/trustless-work.config'
+import { getTrustlessWorkApiConfig } from '~/lib/services/trustless-work-api.config'
 import {
 	mapMultiReleaseV2EscrowToIndexer,
 	mapSingleReleaseV2EscrowToIndexer,
@@ -138,8 +137,7 @@ export async function getEscrowByContractIdFromIndexer(
 	contractId: string,
 	options?: { validateOnChain?: boolean },
 ): Promise<EscrowIndexerFetchResult> {
-	const apiKey = getTrustlessWorkApiKey()
-	const baseUrl = getTrustlessWorkApiBaseUrl()
+	const { apiKey, baseUrl } = getTrustlessWorkApiConfig()
 	const validateOnChain = options?.validateOnChain ?? true
 
 	if (!contractId) {
@@ -223,8 +221,7 @@ export async function ensureEscrowIndexedForContract(
 }
 
 export async function updateIndexerFromTxHash(txHash: string): Promise<EscrowIndexerFetchResult> {
-	const apiKey = getTrustlessWorkApiKey()
-	const baseUrl = getTrustlessWorkApiBaseUrl()
+	const { apiKey, baseUrl } = getTrustlessWorkApiConfig()
 
 	if (!apiKey) {
 		return { ok: false, error: 'Trustless Work API key is not configured on the server' }

@@ -1,9 +1,8 @@
 // import { createHash } from 'node:crypto'
 
 import { createHash } from 'node:crypto'
-import { xdr } from '@stellar/stellar-sdk'
+import { buildAuthorizationEntryPreimage, xdr } from '@stellar/stellar-sdk'
 import type { Api } from '@stellar/stellar-sdk/rpc'
-import isEqual from 'lodash/isEqual'
 
 const P256_ORDER = Buffer.from(
 	'ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551',
@@ -104,35 +103,27 @@ export function deriveSignaturePayload({
 		return null
 	}
 	const authEntry = authEntries[0]
-	// ? Since both are Sets, they aren't necessary equal by passing the entire Set, we need to make a copy to compare them properly
-	const isSameCredentialMapping = isEqual(
-		{ ...authEntry.credentials().switch() },
-		{ ...xdr.SorobanCredentialsType.sorobanCredentialsAddress() },
-	)
-	if (!isSameCredentialMapping) {
+	const credentials = authEntry.credentials
+	if (
+		credentials.type !== 'sorobanCredentialsAddress' &&
+		credentials.type !== 'sorobanCredentialsAddressV2'
+	) {
 		return null
 	}
 
-	const addressCredentials = authEntry.credentials().address()
-	const nonce = addressCredentials.nonce()
-	const signatureExpirationLedger = addressCredentials.signatureExpirationLedger()
-	const rootInvocation = authEntry.rootInvocation()
-
-	const networkIdHash = createHash('sha256').update(networkPassphrase, 'utf8').digest()
-
-	const sorobanAuthPreimage = new xdr.HashIdPreimageSorobanAuthorization({
-		networkId: networkIdHash,
-		nonce,
+	const addressCredentials =
+		credentials.type === 'sorobanCredentialsAddress' ? credentials.address : credentials.addressV2
+	const signatureExpirationLedger = addressCredentials.signatureExpirationLedger
+	const preimage = buildAuthorizationEntryPreimage(
+		authEntry,
 		signatureExpirationLedger,
-		invocation: rootInvocation,
-	})
-
-	const preimage = xdr.HashIdPreimage.envelopeTypeSorobanAuthorization(sorobanAuthPreimage)
+		networkPassphrase,
+	)
 	const payloadHex = createHash('sha256').update(preimage.toXDR()).digest('hex')
 
 	return {
 		payloadHex,
-		nonce: nonce.toString(),
+		nonce: addressCredentials.nonce.toString(),
 		signatureExpirationLedger: signatureExpirationLedger.toString(),
 	}
 }

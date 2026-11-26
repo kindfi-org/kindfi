@@ -6,11 +6,9 @@ import { getAuthenticatedSession } from '~/lib/auth/server-action-auth'
 import { AppError } from '~/lib/error'
 import { getEtherfuseConfig } from '~/lib/etherfuse/get-etherfuse-config'
 import { resolveEtherfuseOrderContext } from '~/lib/etherfuse/resolve-order-context'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
-import {
-	etherfuseDepositRequestSchema,
-	etherfuseDepositResponseSchema,
-} from '~/lib/schemas/etherfuse.schemas'
+import { etherfuseDepositRequestSchema } from '~/lib/schemas/etherfuse.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import { generateUniqueId } from '~/lib/utils/id'
 import { validateRequest } from '~/lib/utils/validation'
@@ -58,6 +56,14 @@ async function onRampHandler(req: NextRequest) {
 			})
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 		}
+
+		const kycDecision = await requireKycAuthorization({
+			userId: session.user.id,
+			action: 'use_on_ramp',
+			amount: Number(amount),
+			asset: targetAsset,
+		})
+		if (!kycDecision.ok) return kycDecision.response
 
 		if (!etherfuseCustomerId || !etherfuseBankAccountId) {
 			return NextResponse.json(

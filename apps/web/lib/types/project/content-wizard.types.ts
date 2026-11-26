@@ -12,9 +12,6 @@ export type ContentWizardStep =
 	| 'basics-primary'
 	| 'story-primary'
 	| 'highlights-primary'
-	| 'basics-translation'
-	| 'story-translation'
-	| 'highlights-translation'
 	| 'media'
 	| 'location'
 	| 'review'
@@ -24,9 +21,6 @@ export const CONTENT_WIZARD_STEPS: ContentWizardStep[] = [
 	'basics-primary',
 	'story-primary',
 	'highlights-primary',
-	'basics-translation',
-	'story-translation',
-	'highlights-translation',
 	'media',
 	'location',
 	'review',

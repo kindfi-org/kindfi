@@ -3,9 +3,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { logger } from '@/lib/logger'
+import type { CanonicalKycStatus } from '~/lib/kyc/types'
 
 interface KYCStatus {
-	status: 'pending' | 'approved' | 'rejected' | 'verified' | null
+	status: CanonicalKycStatus | 'verified' | null
 	isLoading: boolean
 	error: string | null
 }
@@ -31,7 +32,8 @@ const fetchKycStatus = async (): Promise<KycStatusData> => {
 	}
 
 	const result = await response.json()
-	return { status: result.status || null }
+	const canonical = typeof result.canonicalStatus === 'string' ? result.canonicalStatus : null
+	return { status: canonical || result.status || null }
 }
 
 type UseDiditKYCOptions = {

@@ -8,7 +8,7 @@ import { Badge } from '~/components/base/badge'
 import { Button } from '~/components/base/button'
 import { Card, CardContent } from '~/components/base/card'
 import { Progress } from '~/components/base/progress'
-import { formatEscrowAmount, truncateAddress } from '~/lib/utils/escrow/milestone-utils'
+import { formatEscrowAmount } from '~/lib/utils/escrow/milestone-utils'
 import { getStellarExplorerUrl } from '~/lib/utils/escrow/stellar-explorer'
 
 interface EscrowStatsBarProps {

@@ -12,7 +12,7 @@
  */
 
 import { supabase } from '@packages/lib/supabase'
-import * as SorobanRpc from '@stellar/stellar-sdk/rpc'
+import { Server } from '@stellar/stellar-sdk/rpc'
 import {
 	ensureAllQuestDefinitionsOnChain,
 	getAdminKeypair,
@@ -23,7 +23,7 @@ import {
 import { GamificationContractService } from '../lib/stellar/gamification-contracts'
 
 async function verifyAccountOnNetwork(
-	server: SorobanRpc.Server,
+	server: Server,
 	address: string,
 	label: string,
 ): Promise<boolean> {
@@ -129,7 +129,7 @@ async function main() {
 	const service = new GamificationContractService(undefined, undefined, adminKeypair.secret())
 
 	const rpc = process.env.STELLAR_RPC_URL || process.env.RPC_URL || 'https://mainnet.sorobanrpc.com'
-	const server = new SorobanRpc.Server(rpc, { allowHttp: true })
+	const server = new Server(rpc, { allowHttp: true })
 
 	if (!(await verifyAccountOnNetwork(server, adminKeypair.publicKey(), 'Admin account'))) {
 		if (isMainnetNetwork()) {
@@ -140,11 +140,16 @@ async function main() {
 		process.exit(1)
 	}
 
-	const maxOnChainBefore = await getHighestQuestIdOnChain(
+	const maxBefore = await getHighestQuestIdOnChain(
 		service,
 		contractAddress,
 		quests[quests.length - 1].quest_id,
 	)
+	if (!maxBefore.success) {
+		console.error(`Failed to read on-chain quests: ${maxBefore.error}`)
+		process.exit(1)
+	}
+	const maxOnChainBefore = maxBefore.maxId
 	console.log(`On-chain quests before sync: ${maxOnChainBefore}\n`)
 
 	if (!(await ensureAdminRole(service, contractAddress))) {
@@ -164,11 +169,16 @@ async function main() {
 		process.exit(1)
 	}
 
-	const maxOnChainAfter = await getHighestQuestIdOnChain(
+	const maxAfter = await getHighestQuestIdOnChain(
 		service,
 		contractAddress,
 		quests[quests.length - 1].quest_id,
 	)
+	if (!maxAfter.success) {
+		console.error(`Failed to read on-chain quests after sync: ${maxAfter.error}`)
+		process.exit(1)
+	}
+	const maxOnChainAfter = maxAfter.maxId
 	let created = 0
 	let skipped = 0
 

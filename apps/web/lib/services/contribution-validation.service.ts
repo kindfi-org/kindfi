@@ -1,5 +1,12 @@
 import { supabase } from '@packages/lib/supabase'
 import { logger } from '@/lib/logger'
+import {
+	CAMPAIGN_COMPLETE_DONATION_MESSAGE,
+	isProjectAcceptingDonations,
+	isProjectCampaignComplete,
+	PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE,
+	type ProjectStatus,
+} from '~/lib/projects/project-status'
 import { getEscrowBalance } from '~/lib/services/escrow-balance.service'
 import { resolveDisplayRaisedAmount } from '~/lib/utils/projects/project-funding'
 
@@ -16,23 +23,48 @@ export type CheckDuplicateContributionResult =
 	| { duplicate: true; contributionId: string }
 	| { duplicate: false }
 
-export type FundraisingGoalCheckResult = { allowed: true } | { allowed: false; error: string }
+export type ContributionAllowedResult = { allowed: true } | { allowed: false; error: string }
 
-export async function checkFundraisingGoalNotReached(
+export type FundraisingGoalCheckResult = ContributionAllowedResult
+
+export type FundEscrowProxyValidationResult =
+	| { ok: true }
+	| { ok: false; error: string; status: 400 | 403 | 500 }
+
+const GOAL_REACHED_ERROR =
+	'This project has reached its fundraising goal and is no longer accepting donations.'
+
+const getStatusRejectionMessage = (status: ProjectStatus): string => {
+	if (isProjectCampaignComplete(status)) {
+		return CAMPAIGN_COMPLETE_DONATION_MESSAGE
+	}
+
+	return PROJECT_NOT_ACCEPTING_DONATIONS_MESSAGE
+}
+
+export async function validateContributionAllowed(
 	projectId: string,
 	contractId?: string,
-): Promise<FundraisingGoalCheckResult> {
+): Promise<ContributionAllowedResult> {
 	const { data: project, error: projectError } = await supabase
 		.from('projects')
-		.select('target_amount, current_amount')
+		.select('status, target_amount, current_amount')
 		.eq('id', projectId)
 		.single()
 
 	if (projectError || !project) {
-		logger.error('Failed to load project for fundraising goal check:', projectError)
+		logger.error('Failed to load project for contribution validation:', projectError)
 		return {
 			allowed: false,
 			error: 'Failed to verify project fundraising status',
+		}
+	}
+
+	const status = (project.status ?? 'draft') as ProjectStatus
+	if (!isProjectAcceptingDonations(status)) {
+		return {
+			allowed: false,
+			error: getStatusRejectionMessage(status),
 		}
 	}
 
@@ -66,11 +98,60 @@ export async function checkFundraisingGoalNotReached(
 	if (effectiveRaised >= targetAmount) {
 		return {
 			allowed: false,
-			error: 'This project has reached its fundraising goal and is no longer accepting donations.',
+			error: GOAL_REACHED_ERROR,
 		}
 	}
 
 	return { allowed: true }
+}
+
+export function isFundEscrowProxyPath(path: string, method: string): boolean {
+	return method === 'POST' && path.startsWith('escrow/') && path.endsWith('/fund-escrow')
+}
+
+export function readContractIdFromFundEscrowBody(body: string | undefined): string | null {
+	if (!body) return null
+
+	try {
+		const parsed = JSON.parse(body) as { contractId?: unknown }
+		return typeof parsed.contractId === 'string' && parsed.contractId.trim().length > 0
+			? parsed.contractId.trim()
+			: null
+	} catch {
+		return null
+	}
+}
+
+export async function validateFundEscrowProxyRequest(
+	body: string | undefined,
+): Promise<FundEscrowProxyValidationResult> {
+	const contractId = readContractIdFromFundEscrowBody(body)
+	if (!contractId) {
+		return { ok: false, error: 'contractId is required', status: 400 }
+	}
+
+	const projectResolution = await resolveProjectId({ contractId })
+	if (!projectResolution.success) {
+		return { ok: false, error: projectResolution.error, status: projectResolution.status }
+	}
+
+	if (!projectResolution.projectId) {
+		return { ok: false, error: 'Project not found for escrow contract', status: 400 }
+	}
+
+	const validation = await validateContributionAllowed(projectResolution.projectId, contractId)
+	if (!validation.allowed) {
+		return { ok: false, error: validation.error, status: 403 }
+	}
+
+	return { ok: true }
+}
+
+export async function checkFundraisingGoalNotReached(
+	projectId: string,
+	contractId?: string,
+): Promise<FundraisingGoalCheckResult> {
+	return validateContributionAllowed(projectId, contractId)
 }
 
 export async function resolveProjectId(

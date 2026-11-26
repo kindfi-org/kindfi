@@ -26,26 +26,31 @@ CREATE TABLE public.kyc_reviews (
 | `status`             | Enum        | KYC status: `pending`, `approved`, `rejected`, `verified` |
 | `verification_level` | Enum        | Verification level: `basic`, `enhanced`                   |
 | `reviewer_id`        | UUID        | Admin reviewer (nullable, defaults to current user)       |
-| `notes`              | TEXT        | JSON string containing Didit session metadata             |
+| `notes`              | TEXT        | Legacy JSON. New Didit sessions are stored on `kyc.didit_sessions`. |
 | `created_at`         | TIMESTAMPTZ | Record creation timestamp                                 |
 | `updated_at`         | TIMESTAMPTZ | Last update timestamp                                     |
 
-### Notes Field Structure
+### Dedicated Didit session store
 
-The `notes` field stores JSON data with the following structure:
+Lookup and webhook processing use `kyc.didit_sessions`, not `notes`. See
+migration `20260825000000_kyc_didit_enforcement_infrastructure.sql`.
 
-```typescript
-{
-  diditSessionId: string
-  diditSessionToken?: string
-  diditStatus: string
-  callbackReceived?: string  // ISO timestamp
-  lastUpdated?: string       // ISO timestamp
-  lastChecked?: string       // ISO timestamp
-  webhookEvent?: string
-  decision?: object
-}
-```
+| Table | Purpose |
+| ----- | ------- |
+| `kyc.didit_sessions` | One row per Didit `session_id`, canonical status, last provider event |
+| `kyc.webhook_events` | Idempotency by `event_id`; delayed events are stored even when skipped |
+| `kyc.status_history` | Append-only Didit → canonical status transitions |
+| `kyc.authorization_events` | Privacy-conscious monitor/enforced audit (no documents or decision payloads) |
+
+`kyc_reviews.status` remains the user-facing enum (`pending` / `approved` /
+`rejected` / `verified`). Canonical `approved` (including Didit `Verified`) is
+stored as `approved`.
+
+### Notes Field (legacy)
+
+Historical rows may still contain JSON in `notes`. The application no longer
+searches this field to locate sessions. A one-time backfill copies
+`diditSessionId` into `kyc.didit_sessions`.
 
 ## Row Level Security (RLS) Policies
 

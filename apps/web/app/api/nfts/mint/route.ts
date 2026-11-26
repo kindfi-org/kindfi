@@ -5,6 +5,7 @@ import { nextAuthOption } from '~/lib/auth/auth-options'
 import { authorizeUserOverride } from '~/lib/auth/authorize-user-override'
 import { Logger } from '~/lib/logger'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { mintNftSchema } from '~/lib/schemas/nft.schemas'
 import { AuditLogger } from '~/lib/services/audit-logger'
 import {
@@ -137,6 +138,14 @@ async function mintHandler(req: NextRequest) {
 		const session = await getServerSession(nextAuthOption)
 		if (!session?.user?.id) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		}
+
+		const onboardingFailure = await requireOnboardingCompleteForAction(session.user.id)
+		if (onboardingFailure) {
+			return NextResponse.json(
+				{ error: onboardingFailure.code, message: onboardingFailure.error },
+				{ status: 403 },
+			)
 		}
 
 		const body = await req.json()

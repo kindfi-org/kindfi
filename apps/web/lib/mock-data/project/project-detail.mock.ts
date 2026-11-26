@@ -5,6 +5,7 @@ export const projectDetail: ProjectDetail = {
 	id: '1',
 	title: 'Empowering Education',
 	slug: 'empowering-education',
+	status: 'active',
 	description:
 		'Support education programs for children in low-income areas. Together, we can bridge the education gap and create opportunities for all children regardless of their background.',
 	pitch: {

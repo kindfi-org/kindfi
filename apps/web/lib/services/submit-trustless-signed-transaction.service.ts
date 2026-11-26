@@ -17,8 +17,7 @@ const toTrustlessWorkNetwork = (networkId: ClientStellarNetworkId): TrustlessWor
 	networkId === 'mainnet' ? 'mainnet' : 'development'
 
 const getTransactionResultCode = (errorResult: xdr.TransactionResult): string => {
-	const result = errorResult.result()
-	const resultType = result.switch().name
+	const resultType = errorResult.result.type
 
 	switch (resultType) {
 		case 'txBadAuth':

@@ -7,6 +7,7 @@ import type {
 	SingleReleaseMilestone,
 } from '@trustless-work/escrow'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { patchMilestoneAtIndex } from '~/lib/utils/escrow/milestone-utils'
 import type { EscrowApiVersion } from '~/lib/utils/escrow/resolve-escrow-api-version'
@@ -73,7 +74,7 @@ export function useEscrowData({
 	)
 
 	const fetchEscrowData = useCallback(
-		async (options?: { silent?: boolean }) => {
+		async (options?: { validateOnChain?: boolean; silent?: boolean }) => {
 			if (!escrowContractAddress) return
 
 			const silent = options?.silent ?? false
@@ -84,10 +85,11 @@ export function useEscrowData({
 					setError(null)
 				}
 
-				const response = await fetch(
-					`/api/escrow/by-contract-id?contractId=${encodeURIComponent(escrowContractAddress)}`,
-					{ cache: 'no-store' },
-				)
+				const params = new URLSearchParams({
+					contractId: escrowContractAddress,
+					validateOnChain: String(options?.validateOnChain ?? false),
+				})
+				const response = await fetch(`/api/escrow/by-contract-id?${params}`, { cache: 'no-store' })
 
 				if (!response.ok) {
 					const payload = (await response.json().catch(() => null)) as { error?: string } | null
@@ -102,6 +104,7 @@ export function useEscrowData({
 				const errorMessage = err instanceof Error ? err.message : 'Failed to load escrow data'
 				if (!silent) {
 					setError(errorMessage)
+					toast.error(errorMessage)
 					setEscrowData(null)
 					setEscrowApiVersion(undefined)
 				}
@@ -116,7 +119,7 @@ export function useEscrowData({
 
 	const refetchAfterTransaction = useCallback(async () => {
 		await new Promise((resolve) => setTimeout(resolve, POST_TRANSACTION_REFETCH_DELAY_MS))
-		await fetchEscrowData({ silent: true })
+		await fetchEscrowData({ validateOnChain: true, silent: true })
 	}, [fetchEscrowData])
 
 	const patchMilestone = useCallback(

@@ -1,5 +1,6 @@
 import type { Tables } from '@services/supabase'
 import type { ReactNode } from 'react'
+import type { ProjectStatus } from '~/lib/projects/project-status'
 
 export interface Tag {
 	id: string
@@ -14,6 +15,7 @@ export interface Project {
 	description: string | null
 	image: string | null
 	createdAt: string | null
+	status: ProjectStatus
 	category: Tables<'categories'> | null
 	goal: number
 	raised: number

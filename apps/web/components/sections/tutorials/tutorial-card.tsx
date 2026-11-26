@@ -63,13 +63,13 @@ export const TutorialCard = memo(function TutorialCard({
 							</span>
 						</summary>
 						<ol className="space-y-2.5 border-t border-slate-200/80 px-4 py-4" aria-label={title}>
-							{steps.map((step, stepIndex) => (
-								<li key={`${id}-step-${stepIndex}`} className="flex gap-3">
+							{steps.map((step, stepNumber) => (
+								<li key={`${id}:${step}`} className="flex gap-3">
 									<span
 										className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-semibold text-emerald-800"
 										aria-hidden="true"
 									>
-										{stepIndex + 1}
+										{stepNumber + 1}
 									</span>
 									<span className="text-sm leading-relaxed text-slate-700">{step}</span>
 								</li>

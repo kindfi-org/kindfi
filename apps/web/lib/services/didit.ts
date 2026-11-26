@@ -1,6 +1,7 @@
 // lib/services/didit.ts
 
 import * as crypto from 'node:crypto'
+import { toCanonicalKycStatus, toKycDbStatus } from '~/lib/kyc/status'
 
 const DIDIT_API_BASE_URL = 'https://verification.didit.me'
 
@@ -251,16 +252,11 @@ export function verifyDiditWebhookSignature(
 
 export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'verified'
 
-export const mapDiditStatusToKYC = (diditStatus: string): KYCStatus => {
-	switch (diditStatus) {
-		case 'Approved':
-			return 'approved'
-		case 'Declined':
-			return 'rejected'
-		case 'In Progress':
-		case 'In Review':
-			return 'pending'
-		default:
-			return 'pending'
-	}
-}
+/**
+ * Maps a Didit status onto the existing `kyc_status_enum` for persistence.
+ * Canonical `approved` and Didit `Verified` both store as `approved`.
+ */
+export const mapDiditStatusToKYC = (diditStatus: string): KYCStatus =>
+	toKycDbStatus(toCanonicalKycStatus(diditStatus))
+
+export { toCanonicalKycStatus }

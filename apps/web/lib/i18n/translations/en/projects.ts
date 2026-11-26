@@ -70,6 +70,11 @@ export const projects = {
 		fundingProgress: 'Funding progress',
 		shareTitle: 'Share this project',
 		shareHint: 'Share on social media or copy the link for messaging apps and more.',
+		errorTitle: "We couldn't load this project",
+		errorDescription:
+			'Something went wrong while loading the project. Check your connection and try again.',
+		errorRetry: 'Try again',
+		errorRetrying: 'Retrying...',
 	},
 	manage: {
 		dashboardTitle: 'Dashboard',

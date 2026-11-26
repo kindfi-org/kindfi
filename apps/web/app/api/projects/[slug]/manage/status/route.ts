@@ -5,11 +5,13 @@ import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { authorizeProjectManage, getProjectIdBySlug } from '~/lib/api/authorize-project-manage'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
 import {
 	isAllowedStatusTransition,
 	PROJECT_STATUS_LABELS,
 	type ProjectStatus,
 } from '~/lib/projects/project-status'
+import { recordAdminAudit } from '~/lib/services/admin-audit'
 
 // Local Zod 4 enum — do not reuse @services/supabase projectStatusSchema (Zod 3).
 const updateStatusBodySchema = z.object({
@@ -48,7 +50,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 
 		const { data: project, error: fetchError } = await supabaseServiceRole
 			.from('projects')
-			.select('id, status')
+			.select('id, status, title, kindler_id')
 			.eq('id', projectId)
 			.single()
 
@@ -75,6 +77,19 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 			)
 		}
 
+		// The transition is validated first: KYC authorization is only meaningful for a
+		// change the caller may actually make, so an invalid transition must be answered
+		// before any KYC work happens.
+		if (!auth.access.isPlatformAdmin && nextStatus === 'review') {
+			const kycDecision = await requireKycAuthorization({
+				userId,
+				action: 'submit_campaign',
+			})
+			if (!kycDecision.ok) {
+				return kycDecision.response
+			}
+		}
+
 		const { data: updated, error: updateError } = await supabaseServiceRole
 			.from('projects')
 			.update({ status: nextStatus })
@@ -85,6 +100,63 @@ export async function PATCH(request: Request, context: { params: Promise<{ slug:
 		if (updateError || !updated) {
 			logger.error(updateError)
 			return NextResponse.json({ error: 'Failed to update project status' }, { status: 500 })
+		}
+
+		// Campaign status changes made by platform admins are auditable.
+		if (auth.access.isPlatformAdmin) {
+			await recordAdminAudit({
+				operation: 'admin_project_status_changed',
+				resourceType: 'project',
+				resourceId: projectId,
+				actorId: userId,
+				status: 'success',
+				previousState: currentStatus,
+				newState: nextStatus,
+			})
+		}
+
+		// Non-blocking notifications based on new status
+		if (nextStatus === 'review') {
+			// Notify all admins that a campaign needs review
+			const { data: creatorProfile } = await supabaseServiceRole
+				.from('profiles')
+				.select('display_name, full_name')
+				.eq('id', project.kindler_id)
+				.single()
+			const creatorName = creatorProfile?.display_name ?? creatorProfile?.full_name ?? undefined
+
+			import('~/lib/email/notifications/send-project-review-notification')
+				.then(({ sendProjectReviewRequestNotification }) =>
+					sendProjectReviewRequestNotification({
+						projectTitle: project.title,
+						projectSlug: slug,
+						creatorName,
+					}),
+				)
+				.catch((err) => logger.error('[Status PATCH] Admin review notification error:', err))
+		} else if (nextStatus === 'active') {
+			// Notify creator of approval and notify followers
+			import('~/lib/email/notifications/send-new-project-emails')
+				.then(({ sendProjectActivatedEmails }) =>
+					sendProjectActivatedEmails({
+						projectTitle: project.title,
+						projectSlug: slug,
+						creatorId: project.kindler_id,
+					}),
+				)
+				.catch((err) => logger.error('[Status PATCH] Activation notification error:', err))
+		} else if (nextStatus === 'rejected') {
+			// Notify creator of rejection
+			import('~/lib/email/notification-helpers')
+				.then(({ createInAppNotification }) =>
+					createInAppNotification({
+						userId: project.kindler_id,
+						title: 'Campaign rejected',
+						body: `Your campaign "${project.title}" was not approved. Please review feedback from the admin team and resubmit.`,
+						type: 'warning',
+					}),
+				)
+				.catch((err) => logger.error('[Status PATCH] Rejection notification error:', err))
 		}
 
 		return NextResponse.json({

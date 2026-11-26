@@ -90,9 +90,9 @@ export function CategoryTicker({
 
 					{isLoading ? (
 						<div className="flex items-center gap-3 overflow-hidden px-4 sm:px-6">
-							{Array.from({ length: 8 }).map((_, index) => (
+							{['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'].map((skeletonId) => (
 								<div
-									key={index}
+									key={skeletonId}
 									className="h-9 w-32 shrink-0 animate-pulse rounded-full bg-emerald-50"
 								/>
 							))}
@@ -159,16 +159,16 @@ function TickerTrack({
 			className="flex shrink-0 items-center gap-3 px-4 sm:gap-4 sm:px-6"
 			aria-hidden={ariaHidden || undefined}
 		>
-			{categories.map((category, index) => {
+			{categories.map((category, position) => {
 				const slug = category.slug ?? ''
 				const selected = selectedCategories.includes(slug)
 
 				return (
 					<div
-						key={`${category.id}-${index}`}
+						key={ariaHidden ? `dup-${category.id}` : category.id}
 						className="flex shrink-0 items-center gap-3 sm:gap-4"
 					>
-						{index > 0 ? (
+						{position > 0 ? (
 							<Heart
 								className="h-3 w-3 shrink-0 fill-emerald-200/80 text-emerald-200/80"
 								aria-hidden="true"

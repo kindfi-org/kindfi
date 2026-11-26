@@ -3,16 +3,18 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { logger } from '@/lib/logger'
 import { nextAuthOption } from '~/lib/auth/auth-options'
+import { evaluateCountryRiskAuthorization } from '~/lib/compliance/authorization-service'
+import { requireKycAuthorization } from '~/lib/kyc/denial'
 import { withRateLimit } from '~/lib/middleware/rate-limit'
 import { canAccessDevelopmentOnlyProject } from '~/lib/queries/projects/development-only-access'
 import { createContributionSchema } from '~/lib/schemas/contribution.schemas'
 import {
 	checkDuplicateContribution,
-	checkFundraisingGoalNotReached,
 	createContributionWithProjectUpdate,
 	resolveProjectId,
 	sendContributionNotifications,
 	triggerGamificationUpdates,
+	validateContributionAllowed,
 } from '~/lib/services/contribution-service'
 import { validateRequest } from '~/lib/utils/validation'
 
@@ -48,6 +50,31 @@ async function createContributionHandler(req: NextRequest) {
 			)
 		}
 
+		const countryRiskDecision = await evaluateCountryRiskAuthorization({
+			userId: session.user.id,
+			action: 'donate',
+			amount: numericAmount,
+		})
+		if (!countryRiskDecision.allowed) {
+			return NextResponse.json(
+				{
+					error:
+						'This donation is currently unavailable for your account. Please complete verification, wait for manual review, or contact support.',
+					requiredAction: countryRiskDecision.requiredAction,
+				},
+				{ status: 403 },
+			)
+		}
+
+		const kycDecision = await requireKycAuthorization({
+			userId: session.user.id,
+			action: 'donate',
+			amount: numericAmount,
+		})
+		if (!kycDecision.ok) {
+			return kycDecision.response
+		}
+
 		const projectResolution = await resolveProjectId({ contractId, projectId })
 		if (!projectResolution.success) {
 			return NextResponse.json(
@@ -66,16 +93,16 @@ async function createContributionHandler(req: NextRequest) {
 			return NextResponse.json({ error: 'Project not found' }, { status: 404 })
 		}
 
-		const [goalCheck, duplicateCheck] = await Promise.all([
-			checkFundraisingGoalNotReached(finalProjectId, contractId),
+		const [contributionCheck, duplicateCheck] = await Promise.all([
+			validateContributionAllowed(finalProjectId, contractId),
 			checkDuplicateContribution({
 				transactionHash,
 				projectId: finalProjectId,
 				contributorId: session.user.id,
 			}),
 		])
-		if (!goalCheck.allowed) {
-			return NextResponse.json({ error: goalCheck.error }, { status: 403 })
+		if (!contributionCheck.allowed) {
+			return NextResponse.json({ error: contributionCheck.error }, { status: 403 })
 		}
 
 		if (duplicateCheck.duplicate) {

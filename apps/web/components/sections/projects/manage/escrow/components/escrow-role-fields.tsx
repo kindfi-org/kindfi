@@ -1,5 +1,6 @@
 'use client'
 
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { Link2, Send, Shield, Users, Wallet } from 'lucide-react'
 import { useId } from 'react'
 import { Button } from '~/components/base/button'
@@ -7,7 +8,6 @@ import { Input } from '~/components/base/input'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { usePollarSigner } from '~/hooks/pollar/use-pollar-signer'
-import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import { useEscrowForm } from '../context/escrow-form-context'
 import type { EscrowFormData } from '../types'
 
@@ -72,7 +72,7 @@ export function EscrowRoleFields() {
 	const { address } = useWallet()
 	const { pollarAddress, isPollarReady } = usePollarSigner()
 	const effectiveAddress = isPollarReady && pollarAddress ? pollarAddress : address
-	const canFillFromWallet = isExternalStellarWalletAddress(effectiveAddress)
+	const canFillFromWallet = isClassicAccountAddress(effectiveAddress)
 
 	const approverId = useId()
 	const spId = useId()

@@ -150,6 +150,7 @@ export function ProjectPitchForm({
 												value={field.value}
 												onChange={field.onChange}
 												error={form.formState.errors.story?.message}
+												projectSlug={projectSlug}
 											/>
 										</FormControl>
 										<FormDescription>
@@ -205,6 +206,7 @@ export function ProjectPitchForm({
 													value={field.value ?? ''}
 													onChange={field.onChange}
 													error={form.formState.errors.translation?.story?.message}
+													projectSlug={projectSlug}
 												/>
 											</FormControl>
 											<FormDescription>

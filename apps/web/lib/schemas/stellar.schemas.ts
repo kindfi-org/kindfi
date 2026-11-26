@@ -1,11 +1,19 @@
 import {
+	isClassicAccountAddress,
+	isContractAddress,
 	isSmartAccountPlaceholder,
 	isValidStellarWalletAddress,
 } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 
 export const faucetSchema = z.object({
-	address: z.string().min(1, 'Address is required'),
+	address: z
+		.string()
+		.min(1, 'Address is required')
+		.refine(
+			(address) => isClassicAccountAddress(address) || isContractAddress(address),
+			'Must be a valid Stellar account or contract address',
+		),
 	amount: z.coerce.number().min(0.01).max(100),
 })
 

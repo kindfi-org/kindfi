@@ -21,6 +21,8 @@ import {
 	SelectValue,
 } from '~/components/base/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/base/tabs'
+import { ConfirmActionDialog } from '~/components/sections/admin/shared/confirm-action-dialog'
+import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { useEffectiveWalletAddress } from '~/hooks/wallet/use-effective-wallet-address'
 import { MODULES, REPUTATION_EVENTS } from './admin-gamification-triggers/constants'
@@ -185,6 +187,7 @@ export function AdminGamificationTriggers() {
 		disconnectKit,
 	} = useEffectiveWalletAddress()
 	const form = useAdminGamificationTriggerForm(address)
+	const { networkId } = useStellarNetworkConfig()
 
 	return (
 		<div className="space-y-4">
@@ -553,6 +556,28 @@ export function AdminGamificationTriggers() {
 					<TriggerResultBanner result={form.lastResult} />
 				</CardContent>
 			</Card>
+
+			<ConfirmActionDialog
+				open={form.pendingPayload !== null}
+				onOpenChange={(open) => {
+					if (!open) form.cancelPending()
+				}}
+				title="Trigger gamification contract"
+				description="This invokes a production smart-contract method signed by the platform service account."
+				summary={
+					form.pendingPayload
+						? [
+								{ label: 'Module', value: form.pendingPayload.module },
+								{ label: 'Action', value: form.pendingPayload.action },
+							]
+						: undefined
+				}
+				blockchain={{ networkId, signerLabel: 'Platform service account (server-side)' }}
+				confirmLabel="Trigger contract"
+				pendingLabel="Submitting…"
+				isPending={form.isPending}
+				onConfirm={form.confirmPending}
+			/>
 		</div>
 	)
 }

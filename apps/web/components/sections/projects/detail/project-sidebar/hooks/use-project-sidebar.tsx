@@ -23,6 +23,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	const {
 		escrowData,
 		hasEscrow,
+		isCampaignComplete,
+		isAcceptingDonations,
 		isDonationReady,
 		isEscrowDataLoading,
 		onChainRaised,
@@ -35,7 +37,7 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		resolveEscrowTypeForFunding,
 	} = useProjectSidebarEscrowState(project)
 
-	const { form, onSubmit } = useProjectSidebarFormSubmit({
+	const { form, onSubmit, kycGate } = useProjectSidebarFormSubmit({
 		project,
 		isGoalReached,
 		escrowData,
@@ -126,6 +128,8 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 	return {
 		form,
 		hasEscrow,
+		isCampaignComplete,
+		isAcceptingDonations,
 		isGoalReached,
 		isDonationReady,
 		isEscrowDataLoading,
@@ -144,6 +148,7 @@ export function useProjectSidebar(project: ProjectDetail, projectSlug: string) {
 		connect,
 		disconnect,
 		onSubmit,
+		kycGate,
 		handleToggleFollow,
 		shareUrl,
 	}

@@ -4,6 +4,7 @@ import { ContentWizardWrapper } from '~/components/sections/projects/content-wiz
 import { getBasicProjectInfoBySlug } from '~/lib/queries/projects/get-basic-project-info-by-slug'
 import { getProjectHighlights } from '~/lib/queries/projects/get-project-highlights'
 import { getProjectPitchDataBySlug } from '~/lib/queries/projects/get-project-pitch-data-by-slug'
+import { prefetchContentWizardData } from '~/lib/queries/projects/prefetch-content-wizard-data'
 import { prefetchManagedProjectQuery } from '~/lib/supabase/prefetch-managed-project-query'
 
 export default async function ProjectContentWizardPage({
@@ -14,32 +15,29 @@ export default async function ProjectContentWizardPage({
 	const { slug } = await params
 	const queryClient = new QueryClient()
 
-	const basicInfo = await getBasicProjectInfoBySlug(supabaseServiceRole, slug, {
-		localize: false,
+	await prefetchContentWizardData({
+		getBasicInfo: () =>
+			getBasicProjectInfoBySlug(supabaseServiceRole, slug, {
+				localize: false,
+			}),
+		cacheBasicInfo: (basicInfo) => {
+			queryClient.setQueryData(['supabase', 'basic-project-info', slug], basicInfo)
+		},
+		prefetchPitch: () =>
+			prefetchManagedProjectQuery(
+				queryClient,
+				'project-pitch',
+				(client) => getProjectPitchDataBySlug(client, slug, { localize: false }),
+				[slug],
+			),
+		prefetchHighlights: () =>
+			prefetchManagedProjectQuery(
+				queryClient,
+				'project-highlights',
+				(client) => getProjectHighlights(client, slug, { localize: false }),
+				[slug],
+			),
 	})
-
-	await prefetchManagedProjectQuery(
-		queryClient,
-		'basic-project-info',
-		(client) => getBasicProjectInfoBySlug(client, slug, { localize: false }),
-		[slug],
-	)
-
-	if (basicInfo?.id) {
-		await prefetchManagedProjectQuery(
-			queryClient,
-			'project-pitch',
-			(client) => getProjectPitchDataBySlug(client, slug, { localize: false }),
-			[slug],
-		)
-	}
-
-	await prefetchManagedProjectQuery(
-		queryClient,
-		'project-highlights',
-		(client) => getProjectHighlights(client, slug, { localize: false }),
-		[slug],
-	)
 
 	const dehydratedState = dehydrate(queryClient)
 

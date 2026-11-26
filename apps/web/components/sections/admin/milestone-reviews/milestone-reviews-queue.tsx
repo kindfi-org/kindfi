@@ -1,6 +1,8 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { IoOpenOutline } from 'react-icons/io5'
 import { toast } from 'sonner'
@@ -25,6 +27,7 @@ import {
 import type { AdminMilestoneReviewRequest } from '~/lib/types/milestone-review-request'
 import { cn } from '~/lib/utils'
 import { AdminSectionHeader } from '../admin-section-header'
+import { ConfirmActionDialog } from '../shared/confirm-action-dialog'
 
 const FILTER_TABS: { value: AdminReviewFilter; label: string }[] = [
 	{ value: 'pending', label: 'Pending' },
@@ -143,10 +146,42 @@ const ReviewQueueItem = ({
 	)
 }
 
+const FILTER_VALUES: AdminReviewFilter[] = ['pending', 'approved', 'rejected', 'all']
+
 export const MilestoneReviewsQueue = () => {
-	const [filter, setFilter] = useState<AdminReviewFilter>('pending')
+	const router = useRouter()
+	const searchParams = useSearchParams()
+	const queryClient = useQueryClient()
+
+	// The status filter lives in the URL so filtered queues can be
+	// bookmarked and linked from the action center.
+	const statusParam = searchParams.get('status')
+	const filter: AdminReviewFilter = FILTER_VALUES.includes(statusParam as AdminReviewFilter)
+		? (statusParam as AdminReviewFilter)
+		: 'pending'
+	const setFilter = (next: AdminReviewFilter) => {
+		const params = new URLSearchParams(searchParams.toString())
+		if (next === 'pending') {
+			params.delete('status')
+		} else {
+			params.set('status', next)
+		}
+		const query = params.toString()
+		router.replace(query ? `?${query}` : '/admin/milestone-reviews', { scroll: false })
+	}
+
 	const { data: requests = [], isLoading, error } = useAdminMilestoneReviews(filter)
 	const updateRequest = useUpdateMilestoneReviewRequest()
+
+	const invalidateAdminCounts = () => {
+		void queryClient.invalidateQueries({ queryKey: ['admin', 'nav-counts'] })
+		void queryClient.invalidateQueries({ queryKey: ['admin', 'action-queue'] })
+	}
+
+	const [approveDialog, setApproveDialog] = useState<{
+		open: boolean
+		request: AdminMilestoneReviewRequest | null
+	}>({ open: false, request: null })
 
 	const [rejectDialog, setRejectDialog] = useState<{
 		open: boolean
@@ -154,11 +189,17 @@ export const MilestoneReviewsQueue = () => {
 		notes: string
 	}>({ open: false, request: null, notes: '' })
 
-	const handleApprove = (request: AdminMilestoneReviewRequest) => {
+	const handleApproveConfirm = () => {
+		if (!approveDialog.request) return
+
 		updateRequest.mutate(
-			{ id: request.id, status: 'approved' },
+			{ id: approveDialog.request.id, status: 'approved' },
 			{
-				onSuccess: () => toast.success('Milestone review approved'),
+				onSuccess: () => {
+					toast.success('Milestone review approved')
+					setApproveDialog({ open: false, request: null })
+					invalidateAdminCounts()
+				},
 				onError: (err: Error) => toast.error(err.message),
 			},
 		)
@@ -177,6 +218,7 @@ export const MilestoneReviewsQueue = () => {
 				onSuccess: () => {
 					toast.success('Milestone review rejected')
 					setRejectDialog({ open: false, request: null, notes: '' })
+					invalidateAdminCounts()
 				},
 				onError: (err: Error) => toast.error(err.message),
 			},
@@ -233,12 +275,41 @@ export const MilestoneReviewsQueue = () => {
 					<ReviewQueueItem
 						key={request.id}
 						request={request}
-						onApprove={handleApprove}
+						onApprove={(item) => setApproveDialog({ open: true, request: item })}
 						onReject={(item) => setRejectDialog({ open: true, request: item, notes: '' })}
 						isUpdating={updateRequest.isPending}
 					/>
 				))}
 			</div>
+
+			<ConfirmActionDialog
+				open={approveDialog.open}
+				onOpenChange={(open) =>
+					setApproveDialog((current) => ({ open, request: open ? current.request : null }))
+				}
+				title="Approve milestone review"
+				description="The owner will be notified. The on-chain release still happens separately in Escrow ops."
+				summary={
+					approveDialog.request
+						? [
+								{ label: 'Project', value: approveDialog.request.projectTitle },
+								{
+									label: 'Release',
+									value: `Release ${approveDialog.request.milestoneIndex + 1}${
+										approveDialog.request.milestoneTitle
+											? `: ${approveDialog.request.milestoneTitle}`
+											: ''
+									}`,
+								},
+								{ label: 'Status change', value: 'pending → approved' },
+							]
+						: undefined
+				}
+				confirmLabel="Approve review"
+				pendingLabel="Approving…"
+				isPending={updateRequest.isPending}
+				onConfirm={handleApproveConfirm}
+			/>
 
 			<Dialog
 				open={rejectDialog.open}

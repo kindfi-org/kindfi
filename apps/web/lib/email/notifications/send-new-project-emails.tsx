@@ -8,7 +8,49 @@ import {
 } from '../notification-helpers'
 import { NewProjectEmail } from '../templates/new-project-email'
 
-export async function sendNewProjectEmails({
+/**
+ * Notifies the creator that their project has been submitted for admin review.
+ * Does NOT notify followers — that happens only when an admin activates the project.
+ */
+export async function sendProjectSubmittedForReviewEmail({
+	projectTitle,
+	projectSlug,
+	creatorId,
+}: {
+	projectTitle: string
+	projectSlug: string
+	creatorId: string
+}) {
+	const creator = await getUserEmailAndName(creatorId)
+	if (creator.email) {
+		await sendEmail({
+			to: creator.email,
+			subject: `Your project "${projectTitle}" is under review`,
+			react: (
+				<NewProjectEmail
+					recipientName={creator.displayName || 'there'}
+					projectTitle={projectTitle}
+					projectSlug={projectSlug}
+					appUrl={appUrl}
+					isCreator
+					isUnderReview
+				/>
+			),
+		})
+	}
+	await createInAppNotification({
+		userId: creatorId,
+		title: 'Project submitted for review',
+		body: `Your project "${projectTitle}" has been submitted and is awaiting admin review.`,
+		type: 'success',
+	})
+}
+
+/**
+ * Notifies followers of a creator when their project becomes active.
+ * Call this only after an admin activates the campaign.
+ */
+export async function sendProjectActivatedEmails({
 	projectTitle,
 	projectSlug,
 	creatorId,
@@ -19,18 +61,19 @@ export async function sendNewProjectEmails({
 	creatorId: string
 	creatorName?: string
 }) {
-	// 1. Email + in-app to project creator
 	const creator = await getUserEmailAndName(creatorId)
+	const creatorDisplayName = creatorName ?? creator.displayName
+
+	// Notify creator that their campaign is now live
 	if (creator.email) {
 		await sendEmail({
 			to: creator.email,
-			subject: `Your project "${projectTitle}" is live on KindFi`,
+			subject: `Your campaign "${projectTitle}" is now live on KindFi`,
 			react: (
 				<NewProjectEmail
 					recipientName={creator.displayName || 'there'}
 					projectTitle={projectTitle}
 					projectSlug={projectSlug}
-					creatorName={creatorName}
 					appUrl={appUrl}
 					isCreator
 				/>
@@ -39,13 +82,11 @@ export async function sendNewProjectEmails({
 	}
 	await createInAppNotification({
 		userId: creatorId,
-		title: 'Project created',
-		body: `Your project "${projectTitle}" has been created. Complete your setup within 7 days.`,
+		title: 'Campaign approved',
+		body: `Your campaign "${projectTitle}" has been approved and is now live.`,
 		type: 'success',
 	})
 
-	// 2. Email to followers of the creator (supporters who want new project alerts)
-	const creatorDisplayName = creatorName ?? creator.displayName
 	const { data: followers } = await supabaseServiceRole
 		.from('user_follows')
 		.select('follower_id')
@@ -81,4 +122,23 @@ export async function sendNewProjectEmails({
 			})
 		}
 	}
+}
+
+/**
+ * @deprecated Use sendProjectSubmittedForReviewEmail instead.
+ * Kept for backwards-compatibility with existing callers.
+ */
+export async function sendNewProjectEmails({
+	projectTitle,
+	projectSlug,
+	creatorId,
+	creatorName,
+}: {
+	projectTitle: string
+	projectSlug: string
+	creatorId: string
+	creatorName?: string
+}) {
+	await sendProjectSubmittedForReviewEmail({ projectTitle, projectSlug, creatorId })
+	await sendProjectActivatedEmails({ projectTitle, projectSlug, creatorId, creatorName })
 }

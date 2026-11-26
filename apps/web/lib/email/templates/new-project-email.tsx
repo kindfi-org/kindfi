@@ -18,6 +18,7 @@ interface NewProjectEmailProps {
 	creatorName?: string
 	appUrl: string
 	isCreator?: boolean
+	isUnderReview?: boolean
 }
 
 export function NewProjectEmail({
@@ -27,29 +28,47 @@ export function NewProjectEmail({
 	creatorName,
 	appUrl,
 	isCreator = false,
+	isUnderReview = false,
 }: NewProjectEmailProps) {
 	const projectUrl = `${appUrl}/projects/${projectSlug}`
+
+	const previewText = isUnderReview
+		? `Your project "${projectTitle}" is under review`
+		: isCreator
+			? `Your project "${projectTitle}" is live on KindFi`
+			: `New project "${projectTitle}" needs your support on KindFi`
 
 	return (
 		<Html lang="en">
 			<Head />
-			<Preview>
-				{isCreator
-					? `Your project "${projectTitle}" is live on KindFi`
-					: `New project "${projectTitle}" needs your support on KindFi`}
-			</Preview>
+			<Preview>{previewText}</Preview>
 			<Tailwind>
 				<Body className="bg-gray-50 text-gray-900">
 					<Container className="mx-auto my-8 w-full max-w-[560px]">
 						<Section className="bg-white rounded-2xl p-8 shadow">
 							<Text className="text-2xl font-semibold mb-1">
-								{isCreator ? '🎉 Your project is live!' : '🌟 New project in need'}
+								{isUnderReview
+									? 'Your campaign is under review'
+									: isCreator
+										? 'Your project is live!'
+										: 'New project in need'}
 							</Text>
 							<Text className="text-sm text-gray-500 mb-4">KindFi</Text>
 
 							<Text className="text-base leading-6 mb-3">Hi {recipientName},</Text>
 
-							{isCreator ? (
+							{isUnderReview ? (
+								<>
+									<Text className="text-base leading-6 mb-3">
+										Your campaign <strong>{projectTitle}</strong> has been submitted and is now
+										awaiting review by the KindFi admin team.
+									</Text>
+									<Text className="text-base leading-6 mb-4">
+										We will notify you once a decision has been made. In the meantime, you can
+										continue editing your campaign from your dashboard.
+									</Text>
+								</>
+							) : isCreator ? (
 								<>
 									<Text className="text-base leading-6 mb-3">
 										Your project <strong>{projectTitle}</strong> has been successfully created on
@@ -76,7 +95,11 @@ export function NewProjectEmail({
 								href={projectUrl}
 								className="bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg"
 							>
-								{isCreator ? 'Complete project setup' : 'View project'}
+								{isUnderReview
+									? 'View your campaign'
+									: isCreator
+										? 'Complete project setup'
+										: 'View project'}
 							</Button>
 
 							<Hr className="my-6 border-gray-200" />

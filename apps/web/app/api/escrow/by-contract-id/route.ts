@@ -13,7 +13,8 @@ const getClientIp = (request: Request): string =>
 	request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous'
 
 export async function GET(request: Request) {
-	const contractId = new URL(request.url).searchParams.get('contractId')?.trim()
+	const { searchParams } = new URL(request.url)
+	const contractId = searchParams.get('contractId')?.trim()
 
 	if (!contractId) {
 		return NextResponse.json({ error: 'contractId is required' }, { status: 400 })
@@ -27,7 +28,9 @@ export async function GET(request: Request) {
 		)
 	}
 
-	const result = await getEscrowByContractIdFromIndexer(contractId, { validateOnChain: true })
+	const result = await getEscrowByContractIdFromIndexer(contractId, {
+		validateOnChain: searchParams.get('validateOnChain') !== 'false',
+	})
 
 	if (!result.ok) {
 		return NextResponse.json({ error: result.error }, { status: 404 })

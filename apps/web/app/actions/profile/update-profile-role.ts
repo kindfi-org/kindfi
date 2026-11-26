@@ -64,6 +64,14 @@ export async function updateProfileRoleAction(input: {
 		return { success: false, error: 'Admin roles cannot be changed through this action' }
 	}
 
+	if (existingProfile.role !== 'pending' && existingProfile.role !== null) {
+		return {
+			success: false,
+			error:
+				'Your role has already been set and cannot be changed here. Role changes are not currently supported.',
+		}
+	}
+
 	const { error: updateError } = await supabaseServiceRole
 		.from('profiles')
 		.update({

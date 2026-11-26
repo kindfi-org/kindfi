@@ -13,14 +13,14 @@ const CANDIDATE_NETWORKS: { id: ClientStellarNetworkId; passphrase: string }[] =
 
 const signatureVerifies = (envelope: {
 	source: string
-	hash: () => Buffer
+	hash: () => Uint8Array
 	signatures: Transaction['signatures']
 }): boolean => {
 	if (envelope.signatures.length === 0) return false
 
 	const keypair = Keypair.fromPublicKey(envelope.source)
 	return envelope.signatures.some((signature) =>
-		keypair.verify(envelope.hash(), signature.signature()),
+		keypair.verify(envelope.hash(), signature.signature),
 	)
 }
 

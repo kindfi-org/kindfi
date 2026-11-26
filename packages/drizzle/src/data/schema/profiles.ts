@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+	boolean,
 	char,
 	foreignKey,
 	index,
@@ -59,6 +60,16 @@ export const profiles = pgTable(
 			withTimezone: true,
 			mode: 'string',
 		}),
+		onboardingStep: text('onboarding_step').default('role').notNull(),
+		onboardingCompletedAt: timestamp('onboarding_completed_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
+		productTourCompletedAt: timestamp('product_tour_completed_at', {
+			withTimezone: true,
+			mode: 'string',
+		}),
+		onboardingVersion: integer('onboarding_version').default(1).notNull(),
 	},
 	(table) => [
 		index('idx_profiles_creator_entity_type').using(

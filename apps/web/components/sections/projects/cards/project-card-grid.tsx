@@ -14,15 +14,27 @@ import { useProjectFundingDisplay } from '~/hooks/projects/use-project-funding-d
 import { useProjectReleasedDisplay } from '~/hooks/projects/use-project-released-display'
 import { cardHover, progressBarAnimation } from '~/lib/constants/animations'
 import { useI18n } from '~/lib/i18n'
+import {
+	DEFAULT_PROJECT_THUMBNAIL_LOADING,
+	type ProjectThumbnailLoading,
+	resolveProjectThumbnailImageProps,
+} from '~/lib/projects/project-thumbnail-loading'
 import type { Project } from '~/lib/types/project'
 
 interface ProjectCardGridProps {
 	project: Project
-	/** Pass index from parent to set priority loading for first 6 cards (above-fold). */
-	index?: number
+	/**
+	 * Loading policy for the thumbnail, decided by the page. Omit it to keep the
+	 * image lazy, which never preloads.
+	 */
+	thumbnailLoading?: ProjectThumbnailLoading
 }
 
-export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
+export function ProjectCardGrid({
+	project,
+	thumbnailLoading = DEFAULT_PROJECT_THUMBNAIL_LOADING,
+}: ProjectCardGridProps) {
+	const thumbnailImageProps = resolveProjectThumbnailImageProps(thumbnailLoading)
 	const { t } = useI18n()
 	const { displayRaised, progressPercent, formatCurrency } = useProjectFundingDisplay({
 		escrowContractAddress: project.escrowContractAddress,
@@ -60,8 +72,7 @@ export function ProjectCardGrid({ project, index = 0 }: ProjectCardGridProps) {
 						fill
 						className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
 						sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-						priority={index < 6}
-						loading={index >= 6 ? 'lazy' : undefined}
+						{...thumbnailImageProps}
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 					<div className="absolute top-3 left-3 right-3 flex max-w-full flex-wrap items-center gap-1.5 drop-shadow">

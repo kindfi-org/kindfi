@@ -11,6 +11,7 @@ import {
 	Heading2,
 	Heading3,
 	Heading4,
+	ImageIcon,
 	Italic,
 	Link as LinkIcon,
 	List,
@@ -18,7 +19,8 @@ import {
 	Redo,
 	Undo,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '~/components/base/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/base/tooltip'
 import { cn } from '~/lib/utils'
@@ -27,12 +29,16 @@ import { LinkDialog } from './link-dialog'
 // Returns the count of visible characters by collapsing whitespace and trimming the text
 const visibleCharCount = (text: string) => Array.from(text.replace(/\s+/g, ' ').trim()).length
 
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
+
 interface RichTextEditorProps {
 	value: string
 	onChange: (value: string) => void
 	placeholder?: string
 	className?: string
 	error?: string
+	projectSlug?: string
 }
 
 export function RichTextEditor({
@@ -41,12 +47,15 @@ export function RichTextEditor({
 	placeholder = 'Start writing your story...',
 	className,
 	error,
+	projectSlug,
 }: RichTextEditorProps) {
 	const [linkDialogOpen, setLinkDialogOpen] = useState(false)
 	const [linkDialogData, setLinkDialogData] = useState({
 		initialUrl: '',
 		selectedText: '',
 	})
+	const [isUploading, setIsUploading] = useState(false)
+	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	const editor = useEditor({
 		extensions: [
@@ -78,7 +87,12 @@ export function RichTextEditor({
 					class: 'text-blue-500 hover:text-blue-700 underline',
 				},
 			}),
-			Image,
+			Image.configure({
+				allowBase64: false,
+				HTMLAttributes: {
+					class: 'max-w-full rounded-lg my-2',
+				},
+			}),
 			Placeholder.configure({
 				placeholder,
 				emptyEditorClass:
@@ -95,6 +109,46 @@ export function RichTextEditor({
 		},
 		immediatelyRender: false,
 	})
+
+	const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (!file) return
+		// Reset so the same file can be re-uploaded
+		e.target.value = ''
+
+		if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+			toast.error('Invalid file type. Please upload a JPEG, PNG, WebP, or GIF.')
+			return
+		}
+		if (file.size > MAX_IMAGE_SIZE) {
+			toast.error('Image must be smaller than 5 MB.')
+			return
+		}
+
+		setIsUploading(true)
+		try {
+			const formData = new FormData()
+			formData.append('image', file)
+
+			const response = await fetch(`/api/projects/${projectSlug}/story-image`, {
+				method: 'POST',
+				body: formData,
+			})
+
+			if (!response.ok) {
+				const data = await response.json().catch(() => ({}))
+				toast.error((data as { error?: string }).error ?? 'Image upload failed.')
+				return
+			}
+
+			const { url } = await response.json()
+			editor?.chain().focus().setImage({ src: url, alt: '' }).run()
+		} catch {
+			toast.error('Image upload failed. Please try again.')
+		} finally {
+			setIsUploading(false)
+		}
+	}
 
 	const formatButtons = [
 		{
@@ -197,6 +251,25 @@ export function RichTextEditor({
 							<TooltipContent>{label}</TooltipContent>
 						</Tooltip>
 					))}
+
+					{projectSlug && (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									type="button"
+									variant="ghost"
+									size="sm"
+									className="h-8 w-8 p-0"
+									onClick={() => fileInputRef.current?.click()}
+									disabled={isUploading || !editor}
+									aria-label="Insert image"
+								>
+									<ImageIcon className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>{isUploading ? 'Uploading…' : 'Insert image'}</TooltipContent>
+						</Tooltip>
+					)}
 				</div>
 
 				<div className="min-h-[200px]">
@@ -221,6 +294,15 @@ export function RichTextEditor({
 					selectedText={linkDialogData.selectedText}
 				/>
 			)}
+
+			<input
+				ref={fileInputRef}
+				type="file"
+				accept="image/jpeg,image/png,image/webp,image/gif"
+				className="hidden"
+				onChange={handleImageFileChange}
+				tabIndex={-1}
+			/>
 		</TooltipProvider>
 	)
 }

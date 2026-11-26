@@ -9,6 +9,7 @@ import {
 	validateInput,
 } from '~/lib/auth/server-action-auth'
 import { Logger } from '~/lib/logger'
+import { requireOnboardingCompleteForAction } from '~/lib/onboarding/guard'
 import { createFoundationInputSchema } from '~/lib/schemas/server-actions.schemas'
 
 const logger = new Logger()
@@ -33,6 +34,11 @@ export async function createFoundation(
 	} catch (error) {
 		const failure = toServerActionFailure(error, 'Unauthorized')
 		return { success: false, error: failure.error }
+	}
+
+	const onboardingFailure = await requireOnboardingCompleteForAction(session.user.id)
+	if (onboardingFailure) {
+		return { success: false, error: onboardingFailure.error }
 	}
 
 	let validated: ReturnType<typeof createFoundationInputSchema.parse>

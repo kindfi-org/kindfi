@@ -172,7 +172,7 @@ export function MilestonesTab({
 					<TooltipProvider delayDuration={200}>
 						{milestones.map((milestone, index) => (
 							<MilestoneListItem
-								key={index}
+								key={`${milestone.description ?? 'milestone'}-${index}`}
 								milestone={milestone}
 								index={index}
 								isSelected={selectedMilestoneIndex === String(index)}

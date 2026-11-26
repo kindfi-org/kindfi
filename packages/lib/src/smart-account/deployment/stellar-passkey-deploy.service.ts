@@ -75,7 +75,7 @@ export class StellarPasskeyService {
 			// Use provided salt or generate from credential
 			const salt = params.salt
 				? Buffer.from(params.salt, 'hex')
-				: hash(Buffer.from(params.credentialId, 'base64'))
+				: Buffer.from(hash(Buffer.from(params.credentialId, 'base64')))
 
 			// Process public key to uncompressed secp256r1 format using shared utility
 			// The publicKey parameter should be COSE format from WebAuthn
@@ -460,15 +460,16 @@ export async function queryContractDevices(
 			const devicesScVal = simulation.result.retval
 
 			// The result is a Vec, parse it
-			if (devicesScVal.switch().name === 'scvVec' && devicesScVal.vec()) {
+			if (devicesScVal.type === 'scvVec' && devicesScVal.vec) {
 				const devices = []
-				for (const deviceScVal of devicesScVal.vec() || []) {
+				for (const deviceScVal of devicesScVal.vec) {
 					// Each device is a struct with device_id and public_key
-					if (deviceScVal.switch().name === 'scvMap' && deviceScVal.map()) {
+					if (deviceScVal.type === 'scvMap' && deviceScVal.map) {
 						const deviceMap: Record<string, Buffer> = {}
-						for (const entry of deviceScVal.map() || []) {
-							const key = entry.key().sym().toString()
-							const valBytes = entry.val().bytes()
+						for (const entry of deviceScVal.map) {
+							if (entry.key.type !== 'scvSymbol' || entry.val.type !== 'scvBytes') continue
+							const key = entry.key.sym.toString()
+							const valBytes = entry.val.bytes.toBytes()
 							if (valBytes) {
 								deviceMap[key] = Buffer.from(valBytes)
 							}

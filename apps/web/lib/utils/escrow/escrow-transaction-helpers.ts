@@ -16,6 +16,7 @@ import {
 	KINDFI_PLATFORM_FEE_PERCENT,
 } from '~/lib/utils/escrow/platform-fee'
 import { getTrustlessWorkApiErrorMessage } from '~/lib/utils/escrow/trustless-work-api-error'
+import { assertClassicEscrowPayloadAddresses } from '~/lib/utils/escrow/validate-escrow-addresses'
 
 export interface TransactionHelperParams {
 	formData: EscrowFormData
@@ -55,6 +56,8 @@ export const deployAndSign = async ({
 	signAndSubmitTransaction?: TransactionHelperParams['signAndSubmitTransaction']
 	sendTransaction: TransactionHelperParams['sendTransaction']
 }): Promise<Record<string, unknown>> => {
+	assertClassicEscrowPayloadAddresses(payload)
+
 	let deployResponse: EscrowRequestResponse
 	try {
 		deployResponse = await deployEscrow(payload, type)
