@@ -363,6 +363,15 @@ server/client boundary violation. The fixture is isolated from the real app
 build; its passing result does not mask or substitute for the separate
 `bun run build` result.
 
+## Temporary maintenance mode
+
+Production deployments with Vercel system variables enabled show the maintenance notice on the
+homepage and direct app links. The notice returns HTTP 503 and instructs caches to skip storage.
+API routes and the notification worker continue to serve requests.
+
+Set the server-only `MAINTENANCE_MODE=true` to enable the notice in a local or preview environment.
+To restore the app, set `MAINTENANCE_MODE=false` in the Vercel Production environment and redeploy.
+
 ## 🎨 Design System
 
 ### Styling

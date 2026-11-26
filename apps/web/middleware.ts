@@ -1,9 +1,10 @@
 import { updateSession } from '@packages/lib/supabase-server'
-import { NextResponse } from 'next/server'
+import { type NextFetchEvent, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { type NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 import { logger } from '@/lib/logger'
 import { ensureCsrfTokenCookie } from '~/app/actions/csrf'
+import { getMaintenanceResponse } from '~/lib/middleware/maintenance'
 
 // * Infer the type of the first parameter of updateSession
 type ExpectedRequestType = Parameters<typeof updateSession>[0]
@@ -32,7 +33,7 @@ function isProtectedPath(pathname: string) {
 const AUTH_PAGES = ['/sign-in', '/sign-up', '/reset-password', '/reset-account']
 // const AUTH_PAGES: string[] = []
 
-export default withAuth(
+const authMiddleware = withAuth(
 	async function middleware(req: NextRequestWithAuth) {
 		try {
 			const { pathname } = req.nextUrl
@@ -91,6 +92,10 @@ export default withAuth(
 		},
 	},
 )
+
+export default function middleware(request: NextRequestWithAuth, event: NextFetchEvent) {
+	return getMaintenanceResponse(request) ?? authMiddleware(request, event)
+}
 
 export const config = {
 	matcher: [
