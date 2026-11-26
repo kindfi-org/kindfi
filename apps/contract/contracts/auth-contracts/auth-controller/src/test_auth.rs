@@ -10,11 +10,12 @@ use p256::ecdsa::{
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use soroban_sdk::{
     auth::{Context, ContractContext},
-    symbol_short, Bytes,
-    testutils::{Address as _, Events},
+    symbol_short,
+    testutils::{Address as _, Events, MockAuth, MockAuthInvoke},
     vec,
     xdr::{ContractEventBody, ScAddress},
-    Address, BytesN, Env, IntoVal, TryFromVal, TryIntoVal, Val, Vec,
+    Address, Bytes, BytesN, Env, IntoVal,
+    String as SorobanString, TryFromVal, TryIntoVal, Val, Vec,
 };
 
 use crate::{
@@ -93,15 +94,15 @@ pub(crate) fn create_client_data_json(env: &Env, challenge: &BytesN<32>) -> Byte
     // Base64Url encode the challenge (43 characters for 32 bytes)
     let mut challenge_b64 = [0u8; 43];
     base64_url::encode(&mut challenge_b64, &challenge.to_array());
-    
+
     let challenge_str = std::str::from_utf8(&challenge_b64).unwrap();
-    
+
     // Create minimal client data JSON
     let json = format!(
         r#"{{"type":"webauthn.get","challenge":"{}","origin":"https://kindfi.org"}}"#,
         challenge_str
     );
-    
+
     Bytes::from_slice(env, json.as_bytes())
 }
 
@@ -111,7 +112,7 @@ pub(crate) fn create_authenticator_data(env: &Env) -> Bytes {
     // RP ID hash (32 bytes) + flags (1 byte) + counter (4 bytes)
     let mut auth_data = [0u8; 37];
     auth_data[32] = 0x05; // User present + User verified flags
-    
+
     Bytes::from_slice(env, &auth_data)
 }
 
@@ -123,18 +124,18 @@ pub fn create_signed_message(
 ) -> SignedMessage {
     let public_key = secure_key.get_public_key(env);
     let device_id = secure_key.get_device_id(env);
-    
+
     // Create WebAuthn components
     let client_data_json = create_client_data_json(env, payload);
     let authenticator_data = create_authenticator_data(env);
-    
+
     // Calculate WebAuthn signature payload: SHA256(authenticator_data || SHA256(client_data_json))
     let client_data_hash = env.crypto().sha256(&client_data_json);
     let mut signature_payload = Bytes::new(env);
     signature_payload.append(&authenticator_data);
     signature_payload.extend_from_array(&client_data_hash.to_array());
     let hashed_payload = env.crypto().sha256(&signature_payload);
-    
+
     // Sign with secp256r1
     let signature_bytes = secure_key.sign_secp256r1(&hashed_payload.to_array());
     let signature = BytesN::from_array(env, &signature_bytes);
@@ -191,7 +192,11 @@ fn event_tuples(env: &Env) -> std::vec::Vec<(Address, Vec<Val>, Val)> {
 
 // Helper functions for test setup
 fn create_auth_client(env: &Env) -> AuthControllerClient {
-    let contract_address = env.register(AuthController, ());
+    let admin = Address::generate(env);
+    // Constructor authorization is mocked only while creating the test contract.
+    env.mock_all_auths();
+    let contract_address = env.register(AuthController, (&admin,));
+    env.set_auths(&[]);
     AuthControllerClient::new(env, &contract_address)
 }
 
@@ -227,8 +232,8 @@ fn create_account_client<'a>(
 
     // Register and initialize the account contract with the auth controller address
     let contract_address = env.register(
-        AccountContract, 
-        (&device_id, &public_key, &auth_client.address, &native_token)
+        AccountContract,
+        (&device_id, &public_key, &auth_client.address, &native_token),
     );
     AccountContractClient::new(env, &contract_address)
 }
@@ -329,13 +334,8 @@ fn test_controller_auth_default_threshold_unmet() {
     // Call __check_auth directly
     let contract_id = auth_client.address.clone();
     env.as_contract(&contract_id, || {
-        AuthController::__check_auth(
-            env.clone(),
-            payload,
-            signed_messages,
-            auth_context,
-        )
-        .unwrap(); // Should panic with DefaultThresholdNotMet
+        AuthController::__check_auth(env.clone(), payload, signed_messages, auth_context).unwrap();
+        // Should panic with DefaultThresholdNotMet
     });
 }
 
@@ -357,9 +357,9 @@ fn test_controller_auth_duplicate_signature() {
     let secure_key = get_secure_key_for_signer(0);
     let signed_message = create_signed_message(&env, &secure_key, &payload);
     let signed_messages = vec![
-        &env, 
+        &env,
         signed_message.clone().into_val(&env),
-        signed_message.into_val(&env)
+        signed_message.into_val(&env),
     ]; // Duplicate signature
     let auth_context = vec![&env];
 
@@ -391,9 +391,9 @@ fn test_controller_auth_invalid_contract() {
     let signed_message_1 = create_signed_message(&env, &secure_key_1, &payload);
     let signed_message_2 = create_signed_message(&env, &secure_key_2, &payload);
     let signed_messages = vec![
-        &env, 
+        &env,
         signed_message_1.into_val(&env),
-        signed_message_2.into_val(&env)
+        signed_message_2.into_val(&env),
     ];
 
     // Create an unauthorized contract context
@@ -437,9 +437,9 @@ fn test_controller_auth_unknown_signer() {
 
     // Create signed messages vector and auth context
     let signed_messages = vec![
-        &env, 
+        &env,
         signed_message_1.into_val(&env),
-        signed_message_999.into_val(&env)
+        signed_message_999.into_val(&env),
     ];
     let auth_context = vec![&env];
 
@@ -470,9 +470,9 @@ fn test_controller_auth_verification_success() {
     let signed_message_1 = create_signed_message(&env, &secure_key_1, &payload);
     let signed_message_2 = create_signed_message(&env, &secure_key_2, &payload);
     let signed_messages = vec![
-        &env, 
+        &env,
         signed_message_1.into_val(&env),
-        signed_message_2.into_val(&env)
+        signed_message_2.into_val(&env),
     ];
     let auth_context = vec![&env];
 
@@ -684,20 +684,66 @@ fn test_set_default_threshold_invalid() {
 #[test]
 fn test_add_factory() {
     let env = Env::default();
-    let auth_client = create_auth_client(&env);
+    let admin = Address::generate(&env);
+    env.mock_all_auths();
+    let contract_address = env.register(AuthController, (&admin,));
+    env.set_auths(&[]);
+    let auth_client = AuthControllerClient::new(&env, &contract_address);
 
     // Initialize with a valid configuration
     let signers = generate_signers(&env, 2);
     let default_threshold = 1;
     auth_client.init(&signers, &default_threshold);
 
-    // Authorize contract to add factory
-    env.mock_all_auths();
-
     // Add a factory
     let factory = Address::generate(&env);
     let context = vec![&env, Address::generate(&env)];
+    auth_client
+        .mock_auths(&[MockAuth {
+            address: &admin,
+            invoke: &MockAuthInvoke {
+                contract: &contract_address,
+                fn_name: "add_factory",
+                args: (&factory, &context).into_val(&env),
+                sub_invokes: &[],
+            },
+        }])
+        .add_factory(&factory, &context);
+}
+
+#[test]
+#[should_panic]
+fn test_add_factory_requires_admin_auth() {
+    let env = Env::default();
+    let auth_client = create_auth_client(&env);
+    let factory = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
     auth_client.add_factory(&factory, &context);
+}
+
+#[test]
+#[should_panic]
+fn test_add_factory_rejects_non_admin() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    env.mock_all_auths();
+    let contract_address = env.register(AuthController, (&admin,));
+    env.set_auths(&[]);
+    let auth_client = AuthControllerClient::new(&env, &contract_address);
+    let factory = Address::generate(&env);
+    let context = vec![&env, Address::generate(&env)];
+    let caller = Address::generate(&env);
+    auth_client
+        .mock_auths(&[MockAuth {
+            address: &caller,
+            invoke: &MockAuthInvoke {
+                contract: &contract_address,
+                fn_name: "add_factory",
+                args: (&factory, &context).into_val(&env),
+                sub_invokes: &[],
+            },
+        }])
+        .add_factory(&factory, &context);
 }
 
 #[test]
@@ -863,11 +909,11 @@ fn test_remove_account_not_found() {
 fn test_factory_deploy_account() {
     let env = Env::default();
     env.cost_estimate().budget().reset_unlimited();
-    
+
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let factory_client = create_factory_client(&env, &auth_client);
 
     env.mock_all_auths();
@@ -878,10 +924,10 @@ fn test_factory_deploy_account() {
     let public_key = secure_key.get_secp_public_key(&env);
 
     let account_address = factory_client.deploy(&salt, &device_id, &public_key);
-    
+
     // Verify the account was deployed
     assert!(account_address != Address::generate(&env));
-    
+
     // Verify the account has devices
     let account_client = AccountContractClient::new(&env, &account_address);
     let devices = account_client.get_devices();
@@ -891,11 +937,11 @@ fn test_factory_deploy_account() {
 #[test]
 fn test_factory_deploy_multiple_accounts() {
     let env = Env::default();
-    
+
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let factory_client = create_factory_client(&env, &auth_client);
 
     // Mock authorization and WASM deployment
@@ -955,7 +1001,7 @@ fn test_integration_auth_controller_with_factory() {
     let accounts = auth_client.get_accounts(&vec![&env, account_address.clone()]);
     assert_eq!(accounts.len(), 1);
     assert_eq!(accounts.get_unchecked(0), account_address);
-    
+
     // 7. Verify the account can be authenticated
     let account_client = AccountContractClient::new(&env, &account_address);
     assert_eq!(account_client.get_auth(), auth_client.address);
@@ -968,7 +1014,7 @@ fn test_account_add_device() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1002,7 +1048,7 @@ fn test_account_add_device_already_exists() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1023,7 +1069,7 @@ fn test_account_remove_device() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1057,7 +1103,7 @@ fn test_account_remove_device_not_found() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1075,7 +1121,7 @@ fn test_account_remove_device_last_one() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1095,7 +1141,7 @@ fn test_account_add_recovery_address() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1118,7 +1164,7 @@ fn test_account_add_recovery_address_already_set() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1140,7 +1186,7 @@ fn test_account_update_recovery_address() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1164,7 +1210,7 @@ fn test_account_recover_account() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1633,7 +1679,7 @@ fn test_account_add_device_event() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1680,7 +1726,7 @@ fn test_account_remove_device_event() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1733,7 +1779,7 @@ fn test_account_add_recovery_address_event() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1779,7 +1825,7 @@ fn test_account_update_recovery_address_event() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1829,7 +1875,7 @@ fn test_account_recovered_event() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let account_client = create_account_client(&env, &auth_client);
 
     // Mock authorization
@@ -1879,7 +1925,7 @@ fn test_account_factory_deploy_event() {
     let auth_client = create_auth_client(&env);
     let signers = generate_signers(&env, 2);
     auth_client.init(&signers, &1);
-    
+
     let factory_client = create_factory_client(&env, &auth_client);
 
     // Mock authorization
