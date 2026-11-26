@@ -33,7 +33,7 @@ function fakeRow(index: number) {
 		min_investment: 10,
 		percentage_complete: 0,
 		kinder_count: 0,
-		status: 'active',
+		status: 'active' as const,
 		development_only: false,
 		source_locale: 'en',
 		category: null,
@@ -69,6 +69,7 @@ function simulatePage(
 		minInvestment: row.min_investment,
 		tags: [],
 		category: null,
+		status: row.status,
 		developmentOnly: false,
 	}))
 

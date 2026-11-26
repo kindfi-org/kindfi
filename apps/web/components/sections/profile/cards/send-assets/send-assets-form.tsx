@@ -36,6 +36,7 @@ export const SendAssetsForm = ({
 	isLoadingBalances,
 }: SendAssetsFormProps) => {
 	const { t } = useI18n()
+	const { memo } = formInput
 
 	return (
 		<div className="space-y-5">
@@ -98,9 +99,9 @@ export const SendAssetsForm = ({
 				<div className="space-y-2">
 					<Label htmlFor="send-memo-type">{t('profile.sendAssetsMemoTypeLabel')}</Label>
 					<Select
-						value={formInput.memo.type}
+						value={memo.type}
 						onValueChange={(value) => {
-							if (value === 'none') {
+							if (value !== 'text' && value !== 'id') {
 								onChange({ ...formInput, memo: { type: 'none' } })
 								return
 							}
@@ -108,8 +109,8 @@ export const SendAssetsForm = ({
 							onChange({
 								...formInput,
 								memo: {
-									type: value as 'text' | 'id',
-									value: formInput.memo.type === value ? formInput.memo.value : '',
+									type: value,
+									value: memo.type === value ? memo.value : '',
 								},
 							})
 						}}
@@ -125,16 +126,16 @@ export const SendAssetsForm = ({
 					</Select>
 				</div>
 
-				{formInput.memo.type !== 'none' ? (
+				{memo.type !== 'none' ? (
 					<div className="space-y-2">
 						<Label htmlFor="send-memo-value">{t('profile.sendAssetsMemoValueLabel')}</Label>
 						<Input
 							id="send-memo-value"
-							value={formInput.memo.value}
+							value={memo.value}
 							onChange={(event) =>
 								onChange({
 									...formInput,
-									memo: { type: formInput.memo.type, value: event.target.value },
+									memo: { type: memo.type, value: event.target.value },
 								})
 							}
 						/>

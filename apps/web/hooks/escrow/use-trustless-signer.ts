@@ -21,9 +21,26 @@ export function useTrustlessSigner() {
 	const wallet = useWallet()
 	const { networkId, networkPassphrase } = useStellarNetworkConfig()
 	const { t } = useI18n()
-	const { isPollarReady, pollarAddress, signAndSubmitTrustless } = usePollarSigner()
+	const { isPollarReady, isPollarUser, pollarAddress, signAndSubmitTrustless } = usePollarSigner()
+
+	const assertPollarReady = (): void => {
+		if (!isPollarUser) {
+			return
+		}
+
+		if (!isPollarReady || !pollarAddress) {
+			throw new Error(
+				'Pollar wallet session is not ready. Refresh the page, sign in again, and wait for your wallet to finish loading before deploying escrow.',
+			)
+		}
+	}
 
 	const ensureTrustlessSigner = async (): Promise<string> => {
+		if (isPollarUser) {
+			assertPollarReady()
+			return pollarAddress as string
+		}
+
 		if (isPollarReady && pollarAddress) {
 			return pollarAddress
 		}
@@ -47,6 +64,10 @@ export function useTrustlessSigner() {
 		unsignedXdr: string,
 		requiredSigner?: string,
 	): Promise<string> => {
+		if (isPollarUser) {
+			assertPollarReady()
+		}
+
 		if (isPollarReady) {
 			const result = await signAndSubmitTrustless(unsignedXdr)
 			if (!result.alreadySubmitted) {
@@ -75,6 +96,10 @@ export function useTrustlessSigner() {
 		unsignedXdr: string,
 		requiredSigner?: string,
 	): Promise<TrustlessSubmitResult> => {
+		if (isPollarUser) {
+			assertPollarReady()
+		}
+
 		if (isPollarReady) {
 			if (requiredSigner && pollarAddress) {
 				assertTrustlessSignerMatches(pollarAddress, requiredSigner, 'platform')
@@ -114,6 +139,7 @@ export function useTrustlessSigner() {
 		signAndSendTrustless,
 		isTrustlessReady: isPollarReady || isClassicAccountAddress(wallet.address),
 		isPollarSigner: isPollarReady,
+		isPollarUser,
 		pollarAddress,
 	}
 }

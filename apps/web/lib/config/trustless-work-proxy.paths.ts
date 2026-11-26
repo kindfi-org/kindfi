@@ -1,4 +1,4 @@
-const ALLOWED_PATH_PREFIXES = ['deployer/', 'escrow/', 'helper/', 'indexer/'] as const
+const ALLOWED_PATH_PREFIXES = ['deployer/', 'escrow/', 'helper/', 'indexer/', 'stellar/'] as const
 
 /** Read-only helper routes used on public project pages (no session required). */
 export const TRUSTLESS_WORK_PUBLIC_GET_PATHS = new Set([

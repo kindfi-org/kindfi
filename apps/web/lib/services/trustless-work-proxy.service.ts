@@ -6,6 +6,7 @@ import { RateLimiter } from '~/lib/auth/rate-limiter'
 import {
 	getTrustlessWorkApiBaseUrl,
 	getTrustlessWorkApiKey,
+	getTrustlessWorkUpstreamApiBaseUrl,
 } from '~/lib/config/trustless-work.config'
 import {
 	isAllowedTrustlessWorkPath,
@@ -208,7 +209,7 @@ export async function proxyTrustlessWorkRequest(
 		userId = session.user.id
 	}
 
-	const upstreamUrl = new URL(`${getTrustlessWorkApiBaseUrl()}/${path}`)
+	const upstreamUrl = new URL(`${getTrustlessWorkUpstreamApiBaseUrl(path)}/${path}`)
 	upstreamUrl.search = new URL(request.url).search
 
 	const headers: Record<string, string> = {

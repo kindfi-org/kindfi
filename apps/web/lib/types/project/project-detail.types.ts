@@ -16,6 +16,8 @@ export interface ProjectDetail extends Project {
 	escrowContractAddress?: string
 	/** Optional escrow type for this project's escrow */
 	escrowType?: EscrowType
+	/** Trustless Work API version for on-chain escrow operations */
+	escrowApiVersion?: 'v1' | 'v2'
 	/** Foundation this campaign is associated with, if any */
 	foundation?: { id: string; name: string; slug: string }
 }

@@ -102,7 +102,7 @@ export const deployAndSign = async ({
 			sendResult = await sendTransaction(signedXdr)
 		}
 	} catch (error) {
-		const msg = error instanceof Error ? error.message : 'Failed to send transaction'
+		const msg = getTrustlessWorkApiErrorMessage(error, 'Failed to send transaction')
 		toast.error('Failed to send transaction', { description: msg })
 		throw new Error(msg)
 	}
@@ -185,6 +185,7 @@ export const extractContractData = (
 export const saveAndRedirect = async ({
 	contractId,
 	escrowData,
+	deployTxHash,
 	formData,
 	effectiveEngagementId,
 	projectId,
@@ -193,6 +194,7 @@ export const saveAndRedirect = async ({
 }: {
 	contractId: string | undefined
 	escrowData: ExtractedContractData['escrowData']
+	deployTxHash?: string
 	formData: EscrowFormData
 	effectiveEngagementId: string
 	projectId: string
@@ -261,6 +263,7 @@ export const saveAndRedirect = async ({
 		contractId,
 		engagementId: effectiveEngagementId,
 		escrowData: serializableEscrowData,
+		deployTxHash,
 	})
 
 	if (!saveResult.success) {
@@ -352,9 +355,15 @@ export const handleSingleRelease = async ({
 	})
 
 	const { contractId, escrowData } = extractContractData(responseAny)
+	const deployTxHash =
+		typeof responseAny.txHash === 'string' && responseAny.txHash.trim().length > 0
+			? responseAny.txHash.trim()
+			: undefined
+
 	await saveAndRedirect({
 		contractId,
 		escrowData,
+		deployTxHash,
 		formData,
 		effectiveEngagementId,
 		projectId,
@@ -439,9 +448,15 @@ export const handleMultiRelease = async ({
 	})
 
 	const { contractId, escrowData } = extractContractData(responseAny)
+	const deployTxHash =
+		typeof responseAny.txHash === 'string' && responseAny.txHash.trim().length > 0
+			? responseAny.txHash.trim()
+			: undefined
+
 	await saveAndRedirect({
 		contractId,
 		escrowData,
+		deployTxHash,
 		formData,
 		effectiveEngagementId,
 		projectId,

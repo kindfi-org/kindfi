@@ -9,6 +9,7 @@ import {
 } from '~/lib/services/content-translation'
 import type { ProjectTranslationContent } from '~/lib/services/content-translation/types'
 import type { SocialLinks } from '~/lib/types/project/project-detail.types'
+import { readEscrowApiVersionFromMetadata } from '~/lib/utils/escrow/resolve-escrow-api-version'
 import { readEscrowTypeFromMetadata } from '~/lib/utils/escrow/resolve-escrow-type'
 
 export type GetBasicProjectInfoOptions = LocalizeOptions & {
@@ -100,6 +101,7 @@ export async function getBasicProjectInfoBySlug(
 	// Fetch the actual contract_id from escrow_contracts table
 	let escrowContractAddress: string | undefined
 	let escrowType: EscrowType | undefined
+	let escrowApiVersion: 'v1' | 'v2' | undefined
 
 	if (escrowId) {
 		const { data: escrowContract } = await client
@@ -110,6 +112,7 @@ export async function getBasicProjectInfoBySlug(
 
 		escrowContractAddress = escrowContract?.contract_id
 		escrowType = readEscrowTypeFromMetadata(escrowContract?.metadata)
+		escrowApiVersion = readEscrowApiVersionFromMetadata(escrowContract?.metadata)
 	}
 
 	// Fetch foundation when project is assigned to one
@@ -174,6 +177,7 @@ export async function getBasicProjectInfoBySlug(
 		tags: project.project_tag_relationships?.map((r) => r.tag) ?? [],
 		escrowContractAddress,
 		escrowType,
+		escrowApiVersion,
 		foundation,
 	}
 }

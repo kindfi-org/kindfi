@@ -2,6 +2,7 @@ import type { WalletSendAssetCode } from '~/lib/wallet-send/types'
 
 const XLM_MAX_DECIMALS = 7
 const USDC_MAX_DECIMALS = 7
+const STROOPS_PER_UNIT = BigInt(10_000_000)
 
 export type AmountValidationResult = { ok: true; amount: string } | { ok: false; error: string }
 
@@ -60,8 +61,8 @@ export const addDecimalAmounts = (left: string, right: string): string => {
 	}
 
 	const total = toStroops(left) + toStroops(right)
-	const whole = total / 10_000_000n
-	const fraction = (total % 10_000_000n).toString().padStart(7, '0').replace(/0+$/, '')
+	const whole = total / STROOPS_PER_UNIT
+	const fraction = (total % STROOPS_PER_UNIT).toString().padStart(7, '0').replace(/0+$/, '')
 	return fraction ? `${whole}.${fraction}` : whole.toString()
 }
 
@@ -73,8 +74,8 @@ export const subtractDecimalAmounts = (left: string, right: string): string => {
 	}
 
 	const total = toStroops(left) - toStroops(right)
-	if (total <= 0n) return '0'
-	const whole = total / 10_000_000n
-	const fraction = (total % 10_000_000n).toString().padStart(7, '0').replace(/0+$/, '')
+	if (total <= BigInt(0)) return '0'
+	const whole = total / STROOPS_PER_UNIT
+	const fraction = (total % STROOPS_PER_UNIT).toString().padStart(7, '0').replace(/0+$/, '')
 	return fraction ? `${whole}.${fraction}` : whole.toString()
 }

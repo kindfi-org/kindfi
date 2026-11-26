@@ -14,7 +14,6 @@ import type { Project } from '~/lib/types/project'
 import { calculateReleasedAmount } from '~/lib/utils/projects/milestone-funding'
 
 export type ProjectListItem = Project & {
-	status?: string
 	developmentOnly: boolean
 }
 
@@ -191,7 +190,7 @@ export async function getAllProjects(
 				investors: project.kinder_count,
 				minInvestment: project.min_investment,
 				createdAt: project.created_at,
-				status: (project as { status?: string }).status,
+				status: project.status,
 				developmentOnly: Boolean((project as { development_only?: boolean }).development_only),
 				category: project.category,
 				tags: project.project_tag_relationships.map((r) => r.tag),
