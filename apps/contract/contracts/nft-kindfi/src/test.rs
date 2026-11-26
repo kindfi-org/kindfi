@@ -3,8 +3,8 @@ extern crate std;
 
 use soroban_sdk::{
     symbol_short,
-    testutils::Address as _,
-    Address, Env, String,
+    testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation, Events as _},
+    Address, Env, IntoVal, String, Symbol, Val,
 };
 
 use crate::types::{NFTAttribute, NFTMetadata};
@@ -30,11 +30,7 @@ impl TestEnv {
         let contract_id = env.register(KindfiNFT, (&admin, name, symbol, base_uri));
         let client = KindfiNFTClient::new(&env, &contract_id);
 
-        TestEnv {
-            env,
-            admin,
-            client,
-        }
+        TestEnv { env, admin, client }
     }
 
     fn create_metadata(&self, name: &str) -> NFTMetadata {
@@ -85,7 +81,10 @@ impl TestEnv {
 fn test_constructor_sets_metadata() {
     let test = TestEnv::new();
 
-    assert_eq!(test.client.name(), String::from_str(&test.env, "KindFi NFT"));
+    assert_eq!(
+        test.client.name(),
+        String::from_str(&test.env, "KindFi NFT")
+    );
     assert_eq!(test.client.symbol(), String::from_str(&test.env, "KFNFT"));
 }
 
@@ -121,7 +120,24 @@ fn test_mint_with_metadata() {
     test.grant_minter_role(&minter);
 
     let metadata = test.create_metadata("KindFi NFT #0");
-    let token_id = test.client.mint_with_metadata(&minter, &recipient, &metadata);
+    let token_id = test
+        .client
+        .mint_with_metadata(&minter, &recipient, &metadata);
+
+    assert_eq!(
+        test.env.auths(),
+        std::vec![(
+            minter.clone(),
+            AuthorizedInvocation {
+                function: AuthorizedFunction::Contract((
+                    test.client.address.clone(),
+                    Symbol::new(&test.env, "mint_with_metadata"),
+                    (&minter, &recipient, &metadata).into_val(&test.env)
+                )),
+                sub_invocations: std::vec![],
+            }
+        )]
+    );
 
     assert_eq!(token_id, 0);
     assert_eq!(test.client.owner_of(&token_id), recipient);
@@ -141,9 +157,15 @@ fn test_mint_sequential_token_ids() {
     let metadata2 = test.create_metadata("KindFi NFT #1");
     let metadata3 = test.create_metadata("KindFi NFT #2");
 
-    let token_id_0 = test.client.mint_with_metadata(&minter, &recipient, &metadata1);
-    let token_id_1 = test.client.mint_with_metadata(&minter, &recipient, &metadata2);
-    let token_id_2 = test.client.mint_with_metadata(&minter, &recipient, &metadata3);
+    let token_id_0 = test
+        .client
+        .mint_with_metadata(&minter, &recipient, &metadata1);
+    let token_id_1 = test
+        .client
+        .mint_with_metadata(&minter, &recipient, &metadata2);
+    let token_id_2 = test
+        .client
+        .mint_with_metadata(&minter, &recipient, &metadata3);
 
     assert_eq!(token_id_0, 0);
     assert_eq!(token_id_1, 1);
@@ -161,7 +183,9 @@ fn test_mint_stores_metadata() {
     test.grant_minter_role(&minter);
 
     let metadata = test.create_metadata("Special NFT");
-    let token_id = test.client.mint_with_metadata(&minter, &recipient, &metadata);
+    let token_id = test
+        .client
+        .mint_with_metadata(&minter, &recipient, &metadata);
 
     let stored_metadata = test.client.get_metadata(&token_id);
     assert!(stored_metadata.is_some());
@@ -233,6 +257,50 @@ fn test_update_metadata() {
     test.client
         .update_metadata(&metadata_manager, &token_id, &updated_metadata);
 
+    assert_eq!(
+        test.env.auths(),
+        std::vec![(
+            metadata_manager.clone(),
+            AuthorizedInvocation {
+                function: AuthorizedFunction::Contract((
+                    test.client.address.clone(),
+                    Symbol::new(&test.env, "update_metadata"),
+                    (&metadata_manager, token_id, &updated_metadata).into_val(&test.env)
+                )),
+                sub_invocations: std::vec![],
+            }
+        )]
+    );
+
+    // Assert literal wire topics and payloads, so renaming an event breaks this test.
+    let payload: soroban_sdk::Map<Symbol, Val> = soroban_sdk::map![
+        &test.env,
+        (
+            symbol_short!("metadata"),
+            updated_metadata.clone().into_val(&test.env)
+        ),
+    ];
+    assert_eq!(
+        test.env.events().all(),
+        soroban_sdk::vec![
+            &test.env,
+            (
+                test.client.address.clone(),
+                (Symbol::new(&test.env, "metadata_set_event_data"), token_id).into_val(&test.env),
+                <_ as IntoVal<Env, Val>>::into_val(&payload, &test.env)
+            ),
+            (
+                test.client.address.clone(),
+                (
+                    Symbol::new(&test.env, "metadata_updated_event_data"),
+                    token_id
+                )
+                    .into_val(&test.env),
+                <_ as IntoVal<Env, Val>>::into_val(&payload, &test.env)
+            ),
+        ]
+    );
+
     // Verify metadata was updated
     let stored = test.client.get_metadata(&token_id).unwrap();
     assert_eq!(stored.name, String::from_str(&test.env, "Updated Name"));
@@ -251,6 +319,86 @@ fn test_get_metadata_nonexistent_token() {
     assert!(metadata.is_none());
 }
 
+#[test]
+fn test_update_metadata_without_role_fails() {
+    let test = TestEnv::new();
+    let minter = Address::generate(&test.env);
+    let owner = Address::generate(&test.env);
+    let burner = Address::generate(&test.env);
+    let stranger = Address::generate(&test.env);
+    test.grant_minter_role(&minter);
+    test.grant_burner_role(&burner);
+    let original = test.create_metadata("Original");
+    let token_id = test.client.mint_with_metadata(&minter, &owner, &original);
+    let replacement = test.create_metadata("Unauthorized replacement");
+
+    // Neither ownership, admin status nor an unrelated role grants metadata access.
+    for caller in [&owner, &test.admin, &minter, &burner, &stranger] {
+        assert_eq!(
+            test.client
+                .try_update_metadata(caller, &token_id, &replacement),
+            Err(Ok(soroban_sdk::Error::from_contract_error(
+                crate::errors::Error::Unauthorized as u32
+            )))
+        );
+        assert_eq!(test.client.get_metadata(&token_id), Some(original.clone()));
+    }
+}
+
+#[test]
+fn test_revoked_metadata_manager_cannot_update() {
+    let test = TestEnv::new();
+    let manager = Address::generate(&test.env);
+    test.grant_minter_role(&test.admin);
+    test.grant_metadata_manager_role(&manager);
+    let original = test.create_metadata("Original");
+    let token_id = test
+        .client
+        .mint_with_metadata(&test.admin, &manager, &original);
+    test.client
+        .revoke_role(&manager, &test.client.metadata_manager_role(), &test.admin);
+    assert_eq!(
+        test.client
+            .try_update_metadata(&manager, &token_id, &test.create_metadata("Rejected")),
+        Err(Ok(soroban_sdk::Error::from_contract_error(
+            crate::errors::Error::Unauthorized as u32
+        )))
+    );
+    assert_eq!(test.client.get_metadata(&token_id), Some(original));
+}
+
+#[test]
+fn test_minter_requires_authorization() {
+    let test = TestEnv::new();
+    let minter = Address::generate(&test.env);
+    test.grant_minter_role(&minter);
+    test.env.mock_auths(&[]);
+    assert!(test
+        .client
+        .try_mint_with_metadata(&minter, &minter, &test.create_metadata("Rejected"))
+        .is_err());
+    assert_eq!(test.client.total_supply(), 0);
+    assert_eq!(test.client.balance(&minter), 0);
+}
+
+#[test]
+fn test_metadata_manager_requires_authorization() {
+    let test = TestEnv::new();
+    let manager = Address::generate(&test.env);
+    test.grant_minter_role(&test.admin);
+    test.grant_metadata_manager_role(&manager);
+    let original = test.create_metadata("Original");
+    let token_id = test
+        .client
+        .mint_with_metadata(&test.admin, &manager, &original);
+    test.env.mock_auths(&[]);
+    assert!(test
+        .client
+        .try_update_metadata(&manager, &token_id, &test.create_metadata("Rejected"))
+        .is_err());
+    assert_eq!(test.client.get_metadata(&token_id), Some(original));
+}
+
 // ============================================================================
 // Burn Tests
 // ============================================================================
@@ -266,9 +414,7 @@ fn test_burn_nft() {
 
     // Mint NFT to burner
     let metadata = test.create_metadata("Burnable NFT");
-    let token_id = test
-        .client
-        .mint_with_metadata(&minter, &burner, &metadata);
+    let token_id = test.client.mint_with_metadata(&minter, &burner, &metadata);
 
     assert_eq!(test.client.balance(&burner), 1);
 
@@ -477,9 +623,7 @@ fn test_multiple_roles() {
     // User can now mint and burn
     let recipient = Address::generate(&test.env);
     let metadata = test.create_metadata("NFT");
-    let token_id = test
-        .client
-        .mint_with_metadata(&user, &recipient, &metadata);
+    let token_id = test.client.mint_with_metadata(&user, &recipient, &metadata);
 
     // Transfer to user so they can burn it
     test.client.transfer(&recipient, &user, &token_id);
