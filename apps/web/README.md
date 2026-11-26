@@ -324,6 +324,8 @@ with Bun 1.3.14. The check uses only build-time placeholders:
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://build-smoke.invalid` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `build-smoke-placeholder-anon-key` |
+| `SUPABASE_SERVICE_ROLE_KEY` | `build-smoke-placeholder-service-role-key` |
+| `SUPABASE_DB_URL` | `postgresql://build-smoke:build-smoke@build-smoke.invalid:5432/postgres` |
 | `NEXT_PUBLIC_KYC_API_BASE_URL` | `https://build-smoke.invalid` |
 | `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` |
 | `NEXTAUTH_URL` | `http://localhost:3000` |
@@ -343,6 +345,8 @@ bun install
 cd apps/web
 $env:NEXT_PUBLIC_SUPABASE_URL = "https://build-smoke.invalid"
 $env:NEXT_PUBLIC_SUPABASE_ANON_KEY = "build-smoke-placeholder-anon-key"
+$env:SUPABASE_SERVICE_ROLE_KEY = "build-smoke-placeholder-service-role-key"
+$env:SUPABASE_DB_URL = "postgresql://build-smoke:build-smoke@build-smoke.invalid:5432/postgres"
 $env:NEXT_PUBLIC_KYC_API_BASE_URL = "https://build-smoke.invalid"
 $env:NEXT_PUBLIC_APP_URL = "http://localhost:3000"
 $env:NEXTAUTH_URL = "http://localhost:3000"
