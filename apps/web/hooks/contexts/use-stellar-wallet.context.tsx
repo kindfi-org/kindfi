@@ -1,5 +1,6 @@
 'use client'
 
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { useSession } from 'next-auth/react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
@@ -7,7 +8,6 @@ import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.contex
 import { getStellarWalletTheme } from '~/lib/config/stellar-wallet-theme'
 import {
 	getTrustlessSignerError,
-	isExternalStellarWalletAddress,
 	TRUSTLESS_WORK_SMART_ACCOUNT_BLOCKER,
 } from '~/lib/utils/escrow/trustless-signer'
 import {
@@ -78,11 +78,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 	const [address, setAddress] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
 		const stored = safeLocalStorageGet('stellar_wallet_address')
-		if (stored && !isExternalStellarWalletAddress(stored)) {
+		if (stored && !isClassicAccountAddress(stored)) {
 			safeLocalStorageRemove('stellar_wallet_address')
 			safeLocalStorageRemove('stellar_wallet_name')
 		}
-		return isExternalStellarWalletAddress(stored) ? stored : null
+		return isClassicAccountAddress(stored) ? stored : null
 	})
 	const [walletName, setWalletName] = useState<string | null>(() => {
 		if (typeof window === 'undefined') return null
@@ -136,7 +136,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 				if (storedAddress) {
 					StellarWalletsKit.getAddress()
 						.then(({ address: fetchedAddress }: { address: string }) => {
-							if (fetchedAddress && !isExternalStellarWalletAddress(fetchedAddress)) {
+							if (fetchedAddress && !isClassicAccountAddress(fetchedAddress)) {
 								setAddress(null)
 								setWalletName(null)
 								safeLocalStorageRemove('stellar_wallet_address')
@@ -164,7 +164,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 					KitEventType.STATE_UPDATED,
 					(event: { payload: { address?: string; networkPassphrase: string } }) => {
 						if (event.payload.address) {
-							if (!isExternalStellarWalletAddress(event.payload.address)) {
+							if (!isClassicAccountAddress(event.payload.address)) {
 								setAddress(null)
 								safeLocalStorageRemove('stellar_wallet_address')
 								return
@@ -257,7 +257,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 			const { address: newAddress } = await StellarWalletsKit.authModal()
 			if (newAddress) {
 				// @smart-account-integration-point — Trustless Work requires G-address signing
-				if (!isExternalStellarWalletAddress(newAddress)) {
+				if (!isClassicAccountAddress(newAddress)) {
 					throw new Error(TRUSTLESS_WORK_SMART_ACCOUNT_BLOCKER)
 				}
 				setAddress(newAddress)

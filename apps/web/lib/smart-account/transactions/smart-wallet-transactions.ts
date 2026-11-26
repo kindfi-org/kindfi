@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer'
 import { appEnvConfig } from '@packages/lib/config'
 import type { WebAuthnSignatureData } from '@packages/lib/stellar'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { isClassicAccountAddress, isContractAddress } from '@packages/lib/utils/wallet-address'
 import {
 	Account,
 	Address,
@@ -128,11 +129,11 @@ export class SmartWalletTransactionService {
 
 		// Convert arguments to ScVal format
 		const scArgs = args.map((arg) => {
-			if (typeof arg === 'string' && arg.startsWith('G')) {
+			if (typeof arg === 'string' && isClassicAccountAddress(arg)) {
 				// Stellar address
 				return nativeToScVal(Address.fromString(arg), { type: 'address' })
 			}
-			if (typeof arg === 'string' && arg.startsWith('C')) {
+			if (typeof arg === 'string' && isContractAddress(arg)) {
 				// Contract address
 				return nativeToScVal(Address.fromString(arg), { type: 'address' })
 			}

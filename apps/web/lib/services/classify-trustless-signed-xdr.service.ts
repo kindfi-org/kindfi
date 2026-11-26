@@ -11,20 +11,18 @@ const DONATE_FUNCTIONS = new Set(['fundEscrow', 'donate'])
 const unwrapEnvelopeTransaction = (
 	envelope: xdr.TransactionEnvelope,
 ): xdr.Transaction | xdr.TransactionV0 | null => {
-	const switchName = envelope.switch().name
-
-	if (switchName === 'envelopeTypeTx') {
-		return envelope.v1().tx()
+	if (envelope.type === 'envelopeTypeTx') {
+		return envelope.v1.tx
 	}
 
-	if (switchName === 'envelopeTypeTxV0') {
-		return envelope.v0().tx()
+	if (envelope.type === 'envelopeTypeTxV0') {
+		return envelope.v0.tx
 	}
 
-	if (switchName === 'envelopeTypeTxFeeBump') {
-		const innerEnvelope = envelope.feeBump().tx().innerTx()
-		if (innerEnvelope.switch().name === 'envelopeTypeTx') {
-			return innerEnvelope.v1().tx()
+	if (envelope.type === 'envelopeTypeTxFeeBump') {
+		const innerEnvelope = envelope.feeBump.tx.innerTx
+		if (innerEnvelope.type === 'envelopeTypeTx') {
+			return innerEnvelope.v1.tx
 		}
 	}
 
@@ -44,17 +42,17 @@ const classifyInvokeContract = (functionName: string): KycFinancialAction | null
 }
 
 const classifyOperation = (op: xdr.Operation): KycFinancialAction | null => {
-	const body = op.body()
-	const switchName = body.switch().name
+	const body = op.body
+	const switchName = body.type
 
 	if (switchName === 'invokeHostFunction') {
-		const hostFunction = body.invokeHostFunctionOp().hostFunction()
+		const hostFunction = body.invokeHostFunctionOp.hostFunction
 
-		if (hostFunction.switch() !== xdr.HostFunctionType.hostFunctionTypeInvokeContract()) {
+		if (hostFunction.type !== 'hostFunctionTypeInvokeContract') {
 			return 'send_assets'
 		}
 
-		const functionName = hostFunction.invokeContract().functionName().toString()
+		const functionName = hostFunction.invokeContract.functionName.toString()
 		return classifyInvokeContract(functionName) ?? 'send_assets'
 	}
 
@@ -83,11 +81,11 @@ const classifyOperation = (op: xdr.Operation): KycFinancialAction | null => {
  */
 export const classifySignedXdrAction = (signedXdr: string): KycFinancialAction => {
 	try {
-		const envelope = xdr.TransactionEnvelope.fromXDR(signedXdr, 'base64')
+		const envelope = xdr.TransactionEnvelope.fromXdr(signedXdr, 'base64')
 		const transaction = unwrapEnvelopeTransaction(envelope)
 		if (!transaction) return 'send_assets'
 
-		for (const op of transaction.operations()) {
+		for (const op of transaction.operations) {
 			const action = classifyOperation(op)
 			if (action) return action
 		}

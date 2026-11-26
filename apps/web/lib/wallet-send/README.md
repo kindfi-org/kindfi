@@ -4,7 +4,7 @@ Profile **Send assets** uses classic Stellar `Operation.payment` for **XLM** and
 
 ## Scope
 
-- G-address and muxed M-address destinations
+- Classic G-address destinations
 - Optional text (28-byte) or ID memos
 - Pollar custodial signing via `signAndSubmitTx` on verified unsigned XDR
 - Stellar Wallets Kit signing + Horizon submission
@@ -23,7 +23,7 @@ Use `getWalletTransferConfig()` from `~/lib/config/wallet-transfer.config`. It a
 
 ## Manual QA checklist
 
-- Pollar user: send XLM + USDC to G and M destinations with/without memo
+- Pollar user: send XLM + USDC to G-address destinations with/without memo
 - Wallet Kit user: same flows on matching network
 - Reject C-address destination
 - Reject USDC send when destination lacks authorized trustline / limit

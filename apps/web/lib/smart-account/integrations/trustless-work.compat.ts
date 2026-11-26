@@ -1,6 +1,7 @@
 import {
+	isClassicAccountAddress,
+	isContractAddress,
 	isExternalStellarWalletAddress,
-	isSmartAccountContractAddress,
 	STELLAR_C_ADDRESS_REGEX,
 	STELLAR_G_ADDRESS_REGEX,
 } from '@packages/lib/utils/wallet-address'
@@ -24,7 +25,7 @@ export const TRUSTLESS_WORK_INVALID_ADDRESS_HINT =
 export { STELLAR_C_ADDRESS_REGEX, STELLAR_G_ADDRESS_REGEX }
 
 export const isSmartAccountAddress = (address: string | null | undefined): boolean =>
-	Boolean(address && STELLAR_C_ADDRESS_REGEX.test(address))
+	isContractAddress(address)
 
 export const isExternalStellarWalletAddressCompat = isExternalStellarWalletAddress
 
@@ -37,11 +38,11 @@ export const getTrustlessSignerError = (address: string | null | undefined): str
 		return TRUSTLESS_WORK_CONNECT_WALLET_HINT
 	}
 
-	if (isSmartAccountContractAddress(address)) {
+	if (isContractAddress(address)) {
 		return TRUSTLESS_WORK_SMART_ACCOUNT_BLOCKER
 	}
 
-	if (!isExternalStellarWalletAddress(address)) {
+	if (!isClassicAccountAddress(address)) {
 		return TRUSTLESS_WORK_INVALID_ADDRESS_HINT
 	}
 

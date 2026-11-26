@@ -131,7 +131,7 @@ apps/web/
 ### Prerequisites
 
 - **Bun** >= 1.3.14
-- **Node.js** >= 20
+- **Node.js** >= 22.12.0
 - **Supabase** account (for database)
 - **Stellar** testnet/mainnet access
 - **Didit** account (for KYC verification) - [Sign up for free](https://didit.me/)
@@ -416,6 +416,20 @@ bun start
 ### Environment Variables
 
 Ensure all production environment variables are set in your deployment platform (Vercel, etc.).
+
+### Stellar discovery metadata
+
+Edit [`docs/stellar/stellar.toml`](../../docs/stellar/stellar.toml) as the source
+of truth. The production domain owner will serve it at
+`https://<domain>/.well-known/stellar.toml`, on the same host as `ORG_URL`,
+with `Access-Control-Allow-Origin: *`.
+
+<!-- Issuer constants: apps/web/lib/constants/escrow.ts -->
+The manifest records the default mainnet and testnet USDC issuers from
+[`lib/constants/escrow.ts`](./lib/constants/escrow.ts). The
+`${NEXT_PUBLIC_USDC_CONTRACT_ADDRESS}` placeholder documents the
+deployment-specific override in a comment. See the
+[Stellar standards map](../../docs/stellar/standards.md) for the related SEPs.
 
 ## 📚 Learn More
 

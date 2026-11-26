@@ -1,15 +1,13 @@
 'use client'
 
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { toast } from 'sonner'
 import { useStellarNetworkConfig } from '~/hooks/contexts/stellar-network.context'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import type { TrustlessSubmitResult } from '~/hooks/pollar/use-pollar-signer'
 import { usePollarSigner } from '~/hooks/pollar/use-pollar-signer'
 import { useI18n } from '~/lib/i18n'
-import {
-	getTrustlessSignerError,
-	isExternalStellarWalletAddress,
-} from '~/lib/utils/escrow/trustless-signer'
+import { getTrustlessSignerError } from '~/lib/utils/escrow/trustless-signer'
 import {
 	assertSignedTrustlessTransaction,
 	assertTrustlessSignerMatches,
@@ -114,7 +112,7 @@ export function useTrustlessSigner() {
 		signTrustlessTransaction,
 		signAndSubmitTrustlessTransaction,
 		signAndSendTrustless,
-		isTrustlessReady: isPollarReady || isExternalStellarWalletAddress(wallet.address),
+		isTrustlessReady: isPollarReady || isClassicAccountAddress(wallet.address),
 		isPollarSigner: isPollarReady,
 		pollarAddress,
 	}

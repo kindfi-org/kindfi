@@ -1,3 +1,4 @@
+import { isClassicAccountAddress, isContractAddress } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 import { KINDFI_PLATFORM_FEE_PERCENT } from '~/lib/utils/escrow/platform-fee'
 
@@ -62,11 +63,19 @@ export const createSessionInputSchema = z.object({
 const stellarAddressSchema = z
 	.string()
 	.min(1, 'Address is required')
-	.regex(/^G[A-Z2-7]{55}$/, 'Invalid Stellar address')
+	.refine(isClassicAccountAddress, 'Escrow roles must use a classic Stellar account (G-address).')
+
+const payoutAddressSchema = z
+	.string()
+	.min(1, 'Payout address is required')
+	.refine(
+		isClassicAccountAddress,
+		'The payout address must be a classic Stellar account (G-address).',
+	)
 
 const escrowMilestoneSchema = z.object({
 	amount: z.number().positive('Milestone amount must be positive'),
-	receiver: stellarAddressSchema,
+	receiver: payoutAddressSchema,
 })
 
 const escrowDataSchema = z
@@ -84,7 +93,7 @@ const escrowDataSchema = z
 		platformFee: z.literal(KINDFI_PLATFORM_FEE_PERCENT),
 		milestones: z.array(escrowMilestoneSchema).optional(),
 		amount: z.number().positive().optional(),
-		receiver: stellarAddressSchema.optional(),
+		receiver: payoutAddressSchema.optional(),
 		receiverMemo: z.number().int().optional(),
 	})
 	.refine(
@@ -118,7 +127,7 @@ export const saveEscrowContractInputSchema = z.object({
 const stellarContractIdSchema = z
 	.string()
 	.min(1, 'Contract ID is required')
-	.regex(/^C[A-Z2-7]{55}$/, 'Invalid Stellar contract ID')
+	.refine(isContractAddress, 'Invalid Stellar contract ID')
 
 export const syncEscrowToDatabaseInputSchema = z.object({
 	projectId: z.string().uuid('Invalid projectId'),

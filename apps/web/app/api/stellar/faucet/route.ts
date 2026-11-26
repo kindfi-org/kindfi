@@ -1,4 +1,5 @@
 import { appEnvConfig } from '@packages/lib/config'
+import { isContractAddress } from '@packages/lib/utils/wallet-address'
 import {
 	Address,
 	Asset,
@@ -56,11 +57,11 @@ export async function POST(req: NextRequest) {
 		const fundingAccountData = await horizonResponse.json()
 
 		// Determine if this is a contract address (C...) or regular account (G...)
-		const isContractAddress = address.startsWith('C')
+		const fundingContract = isContractAddress(address)
 
 		let result: { hash: string }
 
-		if (isContractAddress) {
+		if (fundingContract) {
 			result = await fundContractViaSAC(
 				config,
 				address,

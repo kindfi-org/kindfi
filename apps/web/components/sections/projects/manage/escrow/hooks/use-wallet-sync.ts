@@ -1,7 +1,7 @@
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { useEffect } from 'react'
 import { useWallet } from '~/hooks/contexts/use-stellar-wallet.context'
 import { usePollarSigner } from '~/hooks/pollar/use-pollar-signer'
-import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import { useEscrowForm } from '../context/escrow-form-context'
 
 /**
@@ -32,7 +32,7 @@ export function useWalletSync() {
 
 	// Sync external wallet (G-address) into empty role fields
 	useEffect(() => {
-		if (!isExternalStellarWalletAddress(effectiveAddress)) return
+		if (!isClassicAccountAddress(effectiveAddress)) return
 		if (!formData.approver.trim()) setField('approver', effectiveAddress)
 		if (!formData.serviceProvider.trim()) setField('serviceProvider', effectiveAddress)
 		if (!formData.releaseSigner.trim()) setField('releaseSigner', effectiveAddress)
@@ -57,7 +57,7 @@ export function useWalletSync() {
 
 	useEffect(() => {
 		if (
-			!isExternalStellarWalletAddress(effectiveAddress) ||
+			!isClassicAccountAddress(effectiveAddress) ||
 			formData.selectedEscrowType !== 'multi-release'
 		)
 			return

@@ -1,13 +1,13 @@
 # KindFi NFT Contract
 
-A non-fungible token (NFT) contract for the KindFi platform's reputation and incentivization system. Built on OpenZeppelin Stellar Contracts v0.6.0 for Soroban.
+A non-fungible token (NFT) contract for the KindFi platform's reputation and incentivization system. Built on OpenZeppelin Stellar Contracts **v0.8.0**, using the workspace's **soroban-sdk 28.0.0** dependency.
 
 ## Key Features
 
 - **Sequential IDs**: Minting with sequential token IDs starting from 0
 - **On-chain metadata**: Custom metadata stored directly on the blockchain
 - **Role-based access control**: Separate roles for minting, burning, and metadata management
-- **Standard NFT functionality**: Transfers, approvals, balance queries
+- **OpenZeppelin NFT functionality**: Transfers, approvals, balance queries
 - **Automatic TTL extension**: Persistent storage with automatic TTL management (30 days)
 
 ## Architecture
@@ -107,7 +107,48 @@ fn metadata_manager_role(e: &Env) -> Symbol
 
 Returns the metadata_manager role symbol (helper for long role names).
 
-### Standard NFT Functions (NonFungibleToken)
+### OpenZeppelin interface and SEP-0050
+
+Checked on **2026-11-25**: [SEP-0050](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0050.md)
+is **Draft, version 0.1.0**. KindFi follows the pinned OpenZeppelin interface;
+it does not claim compliance with the draft SEP. The comparison uses the
+[v0.8.0 trait](https://github.com/OpenZeppelin/stellar-contracts/blob/v0.8.0/packages/tokens/src/non_fungible/mod.rs)
+and [NFT access-control example](https://github.com/OpenZeppelin/stellar-contracts/blob/v0.8.0/examples/nft-access-control/src/contract.rs).
+Raven was unavailable (HTTP 401), so the SEP was checked directly in Stellar's official source.
+
+| Function | Provided by OZ v0.8.0? | Required by SEP-0050 draft? | SEP status on 2026-11-25 |
+|----------|-----------------------|---------------------------|--------------------------|
+| `balance` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `owner_of` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `transfer` | Yes; KindFi also extends instance TTL | Yes | Draft |
+| `transfer_from` | Yes; KindFi also extends instance TTL | Yes | Draft |
+| `approve` | Yes; KindFi also extends instance TTL | Yes | Draft |
+| `approve_for_all` | Yes; KindFi also extends instance TTL | Yes | Draft |
+| `get_approved` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `is_approved_for_all` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `name` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `symbol` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `token_uri` | Yes, `NonFungibleToken` / `Base` | Yes | Draft |
+| `burn`, `burn_from` | Yes, optional `NonFungibleBurnable`; KindFi adds role checks and metadata cleanup | No | Draft |
+| `mint_with_metadata` | KindFi entry point using `Base::mint_with_id` | No prescribed mint entry point | Draft |
+| `get_metadata`, `update_metadata` | KindFi custom on-chain metadata | No | Draft |
+| `total_supply`, `metadata_manager_role`, access-control functions | KindFi helpers / OZ access control | No | Draft |
+
+The eleven core function signatures match the draft with `u32` token IDs and
+balances. All existing explicit trait methods compile on v0.8.0; no additional
+required methods or stubs were needed. The OZ example uses
+`Compose<(Base,)>` with generated trait methods; KindFi retains the supported
+`Base` type and explicit forwarding methods to preserve its TTL extensions.
+This is not a claim of full event or metadata compliance: the draft's
+inline `approve` event description differs from its dedicated Events section,
+and OZ uses typed event payloads. Consumers should follow the pinned OZ source.
+KindFi's `NFTMetadata` is an on-chain struct, not the JSON returned by `token_uri`:
+it uses `image_uri` instead of `image`, and stores attribute `value` and optional
+`max_value` as strings. A metadata server must map those fields and numeric values
+to the draft JSON schema. `token_uri` uses the collection base URI and token ID;
+updating custom on-chain metadata does not change that URI.
+
+### NFT Functions (NonFungibleToken)
 
 | Function | Description |
 |----------|-------------|
@@ -175,8 +216,8 @@ pub struct NFTMetadata {
     pub image_uri: String,
     /// External URL for more information
     pub external_url: String,
-    /// List of attribute strings (e.g., "level:gold", "badge:early_supporter")
-    pub attributes: Vec<String>,
+    /// Structured on-chain attributes (see src/types.rs)
+    pub attributes: Vec<NFTAttribute>,
 }
 ```
 
@@ -193,6 +234,13 @@ pub enum StorageKey {
 ```
 
 ## Events
+
+This re-validation preserves the custom event definitions and topic ordering.
+`update_metadata` emits `MetadataSetEventData` followed by
+`MetadataUpdatedEventData`. Each has its generated snake-case name as the first
+topic (`metadata_set_event_data` / `metadata_updated_event_data`), followed by
+`token_id`; the data map contains `metadata`. Indexers should consume these
+existing shapes. No topic rename or event migration is introduced here.
 
 ### MintedEventData
 
@@ -266,7 +314,10 @@ stellar-tokens = { workspace = true }    # OpenZeppelin NFT base implementation
 
 ```rust
 use soroban_sdk::{symbol_short, vec, Address, Env, String};
-use nft_kindfi::{KindfiNFT, NFTMetadata};
+// In the contract crate; external consumers should use a generated client.
+use crate::{KindfiNFT, types::{NFTAttribute, NFTMetadata}};
+use stellar_access::access_control::AccessControl;
+use stellar_tokens::non_fungible::{NonFungibleToken, burnable::NonFungibleBurnable};
 
 // 1. Initialize contract
 KindfiNFT::__constructor(
@@ -292,8 +343,12 @@ let metadata = NFTMetadata {
     external_url: String::from_str(&env, "https://kindfi.org/badges/early"),
     attributes: vec![
         &env,
-        String::from_str(&env, "tier:gold"),
-        String::from_str(&env, "year:2024")
+        NFTAttribute {
+            trait_type: String::from_str(&env, "tier"),
+            value: String::from_str(&env, "gold"),
+            display_type: None,
+            max_value: None,
+        }
     ],
 };
 
@@ -317,25 +372,31 @@ let new_metadata = NFTMetadata {
     external_url: String::from_str(&env, "https://kindfi.org/badges/early-v2"),
     attributes: vec![
         &env,
-        String::from_str(&env, "tier:platinum"),
-        String::from_str(&env, "year:2024"),
-        String::from_str(&env, "upgraded:true")
+        NFTAttribute {
+            trait_type: String::from_str(&env, "tier"),
+            value: String::from_str(&env, "platinum"),
+            display_type: None,
+            max_value: None,
+        }
     ],
 };
 
 KindfiNFT::update_metadata(&env, manager, token_id, new_metadata);
 
 // 9. Burn NFT (requires burner role)
-KindfiNFT::grant_role(&env, burner_address, symbol_short!("burner"), admin);
-KindfiNFT::burn(&env, owner, token_id);
+KindfiNFT::grant_role(&env, new_owner.clone(), symbol_short!("burner"), admin);
+KindfiNFT::burn(&env, new_owner, token_id);
 ```
 
 ## Building
 
 ```bash
 cd apps/contract
-cargo build --target wasm32-unknown-unknown --release -p nft-kindfi
+stellar contract build --package nft-kindfi
 ```
+
+Use Stellar CLI v25.2.0 or later and the `wasm32v1-none` target. SDK 28 requires
+the CLI's Wasm post-processing; native tests still use Cargo.
 
 ## Testing
 

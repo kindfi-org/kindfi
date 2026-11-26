@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { StrKey } from '@stellar/stellar-sdk'
 import {
 	compareDecimalAmounts,
 	subtractDecimalAmounts,
@@ -17,8 +18,15 @@ describe('validatePaymentDestination', () => {
 	})
 
 	test('rejects C-address destinations', () => {
-		const result = validatePaymentDestination('CEScrow12345678901234567890123456789012', SOURCE)
-		expect(result.ok).toBe(false)
+		const contract = StrKey.encodeContract(new Uint8Array(32).fill(7))
+		expect(validatePaymentDestination(contract, SOURCE)).toEqual({
+			ok: false,
+			error: 'The payout address must be a classic Stellar account (G-address).',
+		})
+	})
+
+	test('rejects a truncated G-address', () => {
+		expect(validatePaymentDestination(DESTINATION.slice(0, -1), SOURCE).ok).toBe(false)
 	})
 
 	test('rejects self-send', () => {
