@@ -1,13 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 
 // Common validators
 const uuidValidator = z.string().uuid('Must be a valid UUID')
 const addressValidator = z
 	.string()
-	.regex(/^G[A-Z2-7]{55}$|^0x[a-fA-F0-9]{40}$/, 'Must be a valid Stellar or EVM address')
+	.refine(
+		(value) => isClassicAccountAddress(value) || /^0x[a-fA-F0-9]{40}$/.test(value),
+		'Must be a valid classic Stellar account or EVM address',
+	)
 const nonEmptyString = z.string().min(1, 'This field is required')
-const signerValidator = z.string().min(1, 'Signer is required')
+const signerValidator = z
+	.string()
+	.min(1, 'Signer is required')
+	.refine(
+		(value) => isClassicAccountAddress(value) || /^0x[a-fA-F0-9]{40}$/.test(value),
+		'Signer must be a classic Stellar account (G-address) or EVM address',
+	)
 
 // Monetary amount validator for non-negative numeric strings
 const nonNegativeNumericString = z

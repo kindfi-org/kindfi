@@ -1,9 +1,8 @@
 import { appEnvConfig } from '@packages/lib/config'
 import type { AppEnvInterface } from '@packages/lib/types'
+import { Horizon, Keypair } from '@stellar/stellar-sdk'
 import { type ClassValue, clsx } from 'clsx'
 import { redirect } from 'next/navigation'
-import Server from 'stellar-sdk'
-import Keypair from 'stellar-sdk'
 import { twMerge } from 'tailwind-merge'
 
 /**
@@ -43,9 +42,10 @@ export function buildProjectsCategoryUrl(categorySlug: string): string {
  */
 export async function getAccountSequence(secretKey: string): Promise<number> {
 	const appConfig: AppEnvInterface = appEnvConfig('web')
-	const server = new Server(appConfig.stellar.networkUrl)
+	// Classic account sequences come from the configured Horizon server.
+	const server = new Horizon.Server(appConfig.stellar.networkUrl)
 	const account = await server.loadAccount(Keypair.fromSecret(secretKey).publicKey())
-	return account.sequenceNumber
+	return Number(account.sequenceNumber())
 }
 
 export function getAvatarFallback(name: string | undefined): string {

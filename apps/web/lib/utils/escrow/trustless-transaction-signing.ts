@@ -22,7 +22,7 @@ export const getTxBadAuthMessage = (networkId?: 'mainnet' | 'testnet'): string =
 
 type SignableTransactionEnvelope = {
 	source: string
-	hash: () => Buffer
+	hash: () => Uint8Array
 	signatures: Transaction['signatures']
 }
 
@@ -62,7 +62,7 @@ const signatureMatchesSource = (
 
 	const keypair = Keypair.fromPublicKey(expectedSource)
 	return envelope.signatures.some((signature) =>
-		keypair.verify(envelope.hash(), signature.signature()),
+		keypair.verify(envelope.hash(), signature.signature),
 	)
 }
 

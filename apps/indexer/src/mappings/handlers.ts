@@ -85,7 +85,7 @@ export async function handleEvent(event: SorobanEvent): Promise<void> {
 		contract: event.contractId?.contractId().toString() ?? '',
 		fromId: fromAccount.id,
 		toId: toAccount.id,
-		value: BigInt(event.value.u64()?.toBigInt() ?? 0),
+		value: event.value.type === 'scvU64' ? event.value.u64 : BigInt(0),
 	})
 
 	if (event.ledger) {
@@ -108,11 +108,6 @@ async function checkAndGetAccount(id: string, ledgerSequence: number): Promise<A
 	return account
 }
 
-// scValToNative not works, temp solution
 function decodeAddress(scVal: xdr.ScVal): string {
-	try {
-		return Address.account(Buffer.from(scVal.address().accountId().ed25519() as any)).toString()
-	} catch (_e) {
-		return Address.contract(Buffer.from(scVal.address().contractId() as any)).toString()
-	}
+	return Address.fromScVal(scVal).toString()
 }

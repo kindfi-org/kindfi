@@ -1,3 +1,4 @@
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import {
 	type ClientStellarNetworkId,
 	getClientStellarNetworkId,
@@ -6,8 +7,6 @@ import {
 	STELLAR_TESTNET_PASSPHRASE,
 } from '~/lib/config/stellar-network.config'
 import { getDefaultUsdcContractAddress } from '~/lib/constants/escrow'
-
-const USDC_ISSUER_G_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/
 
 export const WALLET_TRANSFER_HORIZON_URLS: Record<ClientStellarNetworkId, string> = {
 	mainnet: 'https://horizon.stellar.org',
@@ -53,7 +52,7 @@ export const getWalletTransferConfig = (): WalletTransferConfigResult => {
 		return { ok: false, error: 'USDC issuer is not configured for the active network.' }
 	}
 
-	if (!USDC_ISSUER_G_ADDRESS_REGEX.test(usdcIssuer)) {
+	if (!isClassicAccountAddress(usdcIssuer)) {
 		return {
 			ok: false,
 			error: 'USDC issuer must be a valid Stellar G-address for classic payments.',

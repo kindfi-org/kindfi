@@ -12,7 +12,7 @@
  */
 
 import { supabase } from '@packages/lib/supabase'
-import * as SorobanRpc from '@stellar/stellar-sdk/rpc'
+import { Server } from '@stellar/stellar-sdk/rpc'
 import {
 	ensureAllQuestDefinitionsOnChain,
 	getAdminKeypair,
@@ -23,7 +23,7 @@ import {
 import { GamificationContractService } from '../lib/stellar/gamification-contracts'
 
 async function verifyAccountOnNetwork(
-	server: SorobanRpc.Server,
+	server: Server,
 	address: string,
 	label: string,
 ): Promise<boolean> {
@@ -129,7 +129,7 @@ async function main() {
 	const service = new GamificationContractService(undefined, undefined, adminKeypair.secret())
 
 	const rpc = process.env.STELLAR_RPC_URL || process.env.RPC_URL || 'https://mainnet.sorobanrpc.com'
-	const server = new SorobanRpc.Server(rpc, { allowHttp: true })
+	const server = new Server(rpc, { allowHttp: true })
 
 	if (!(await verifyAccountOnNetwork(server, adminKeypair.publicKey(), 'Admin account'))) {
 		if (isMainnetNetwork()) {

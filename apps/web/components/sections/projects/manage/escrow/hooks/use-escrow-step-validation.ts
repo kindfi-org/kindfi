@@ -1,5 +1,5 @@
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { useMemo } from 'react'
-import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import type { EscrowFormData } from '../types'
 
 export type EscrowWizardStep = 'type' | 'details' | 'roles' | 'milestones' | 'review'
@@ -47,7 +47,7 @@ export type StepValidation = {
 	issues: string[]
 }
 
-const isValidAddress = (value: string) => isExternalStellarWalletAddress(value.trim())
+const isValidAddress = (value: string) => isClassicAccountAddress(value.trim())
 
 function validateDetails(formData: EscrowFormData, projectId: string): string[] {
 	const issues: string[] = []
@@ -77,11 +77,12 @@ function validateRoles(formData: EscrowFormData): string[] {
 	]
 
 	for (const [label, value] of roleChecks) {
-		if (!isValidAddress(value)) issues.push(`Enter a valid G-address for ${label}.`)
+		if (!isValidAddress(value))
+			issues.push(`${label} must be a classic Stellar account (G-address).`)
 	}
 
 	if (formData.selectedEscrowType === 'single-release' && !isValidAddress(formData.receiver)) {
-		issues.push('Enter a valid G-address for Receiver.')
+		issues.push('The payout address must be a classic Stellar account (G-address).')
 	}
 
 	return issues
@@ -111,7 +112,9 @@ function validateMilestones(formData: EscrowFormData): string[] {
 			}
 
 			if (!isValidAddress(milestone.receiver)) {
-				issues.push(`Release ${index + 1} needs a valid receiver G-address.`)
+				issues.push(
+					`Release ${index + 1} payout address must be a classic Stellar account (G-address).`,
+				)
 			}
 		}
 	}

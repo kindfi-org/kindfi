@@ -1,4 +1,4 @@
-import { STELLAR_G_ADDRESS_REGEX } from '@packages/lib/utils/wallet-address'
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { z } from 'zod'
 
 export const updateSlugSchema = z.object({
@@ -21,6 +21,6 @@ export const followActionSchema = z.object({
 export const linkExternalWalletSchema = z.object({
 	address: z
 		.string()
-		.regex(STELLAR_G_ADDRESS_REGEX, 'Must be a valid external Stellar wallet address (G-address)')
+		.refine(isClassicAccountAddress, 'Must be a valid classic Stellar account (G-address)')
 		.nullable(),
 })

@@ -104,26 +104,32 @@ export async function buildTransaction(
 	) {
 		const simAuthEntry = simulation.result.auth[0]
 
+		const credentials = simAuthEntry.credentials
 		if (
-			simAuthEntry.credentials().switch() === xdr.SorobanCredentialsType.sorobanCredentialsAddress()
+			credentials.type === 'sorobanCredentialsAddress' ||
+			credentials.type === 'sorobanCredentialsAddressV2'
 		) {
-			const addressCredentials = simAuthEntry.credentials().address()
+			const addressCredentials =
+				credentials.type === 'sorobanCredentialsAddress'
+					? credentials.address
+					: credentials.addressV2
 
 			const newCredentials = new xdr.SorobanAddressCredentials({
-				address: addressCredentials.address(),
-				nonce: addressCredentials.nonce(),
+				address: addressCredentials.address,
+				nonce: addressCredentials.nonce,
 				signatureExpirationLedger: signatureExpirationLedger,
-				signature: addressCredentials.signature(),
+				signature: addressCredentials.signature,
 			})
 
 			const newAuthEntry = new xdr.SorobanAuthorizationEntry({
-				credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials),
-				rootInvocation: simAuthEntry.rootInvocation(),
+				credentials:
+					credentials.type === 'sorobanCredentialsAddress'
+						? xdr.SorobanCredentials.sorobanCredentialsAddress(newCredentials)
+						: xdr.SorobanCredentials.sorobanCredentialsAddressV2(newCredentials),
+				rootInvocation: simAuthEntry.rootInvocation,
 			})
 
 			simulation.result.auth[0] = newAuthEntry
-
-			const _verifyCredentials = simulation.result.auth[0].credentials().address()
 		}
 	}
 
@@ -154,12 +160,15 @@ export async function buildTransaction(
 		if (checkAuthEntries.length > 0) {
 			const checkAuthEntry = checkAuthEntries[0]
 			if (
-				checkAuthEntry.credentials().switch() ===
-				xdr.SorobanCredentialsType.sorobanCredentialsAddress()
+				checkAuthEntry.credentials.type === 'sorobanCredentialsAddress' ||
+				checkAuthEntry.credentials.type === 'sorobanCredentialsAddressV2'
 			) {
-				const checkCredentials = checkAuthEntry.credentials().address()
+				const checkCredentials =
+					checkAuthEntry.credentials.type === 'sorobanCredentialsAddress'
+						? checkAuthEntry.credentials.address
+						: checkAuthEntry.credentials.addressV2
 				if (
-					checkCredentials.signatureExpirationLedger().toString() !==
+					checkCredentials.signatureExpirationLedger.toString() !==
 					signatureExpirationLedger.toString()
 				) {
 					logger.error('❌ CRITICAL: XDR bytes do NOT contain correct expiration!')
@@ -173,6 +182,6 @@ export async function buildTransaction(
 	return {
 		transactionXDR,
 		challenge,
-		hash: txHash.toString('hex'),
+		hash: Buffer.from(txHash).toString('hex'),
 	}
 }

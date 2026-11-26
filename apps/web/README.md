@@ -131,7 +131,7 @@ apps/web/
 ### Prerequisites
 
 - **Bun** >= 1.3.14
-- **Node.js** >= 20
+- **Node.js** >= 22.12.0
 - **Supabase** account (for database)
 - **Stellar** testnet/mainnet access
 - **Didit** account (for KYC verification) - [Sign up for free](https://didit.me/)

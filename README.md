@@ -156,7 +156,7 @@ If you have questions about contributing, feel free to:
 ### Prerequisites
 
 - **Bun** >= 1.3.14 (see [package.json](./package.json) for exact version)
-- **Node.js** >= 20 (for some tooling)
+- **Node.js** >= 22.12.0 (for the Stellar SDK and some tooling)
 - **Rust** (for smart contract development)
 
 ### Setup

@@ -1,8 +1,8 @@
+import { isClassicAccountAddress } from '@packages/lib/utils/wallet-address'
 import { useMemo } from 'react'
-import { isExternalStellarWalletAddress } from '~/lib/utils/escrow/trustless-signer'
 import type { EscrowFormData } from '../types'
 
-const isValidTrustlessRoleAddress = (value: string) => isExternalStellarWalletAddress(value.trim())
+const isValidTrustlessRoleAddress = (value: string) => isClassicAccountAddress(value.trim())
 
 export function useEscrowValidation(formData: EscrowFormData, projectId: string): boolean {
 	return useMemo(() => {
